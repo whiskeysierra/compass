@@ -2,17 +2,17 @@
 
 [![Map of the World](docs/map-of-the-world.jpg)](http://pixabay.com/en/map-of-the-world-compass-antique-429784/)
 
-[![Build Status](https://img.shields.io/travis/whiskeysierra/compass.svg)](https://travis-ci.org/whiskeysierra/compass)
-[![Coverage Status](https://img.shields.io/coveralls/whiskeysierra/compass.svg)](https://coveralls.io/r/whiskeysierra/compass)
-[![Release](https://img.shields.io/github/release/whiskeysierra/compass.svg)](https://github.com/whiskeysierra/compass/releases)
-[![Maven Central](https://img.shields.io/maven-central/v/org.whiskeysierra/compass-parent.svg)](https://maven-badges.herokuapp.com/maven-central/org.whiskeysierra/compass-parent)
+[![Build Status](https://img.shields.io/travis/zalando/compass.svg)](https://travis-ci.org/zalando/compass)
+[![Coverage Status](https://img.shields.io/coveralls/zalando/compass.svg)](https://coveralls.io/r/zalando/compass)
+[![Release](https://img.shields.io/github/release/zalando/compass.svg)](https://github.com/zalando/compass/releases)
+[![Maven Central](https://img.shields.io/maven-central/v/org.zalando/compass-parent.svg)](https://maven-badges.herokuapp.com/maven-central/org.zalando/compass-parent)
 
 
 ## Dependency
 
 ```xml
 <dependency>
-    <groupId>org.whiskeysierra</groupId>
+    <groupId>org.zalando</groupId>
     <artifactId>compass-client</artifactId>
     <version>${compass.version}</version>
 </dependency>
@@ -20,7 +20,7 @@
 
 ## License
 
-Copyright [2015] whiskeysierra
+Copyright © 2015 Zalando SE
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
