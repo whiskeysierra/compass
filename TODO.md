@@ -1,0 +1,36 @@
+# TODO
+
+- technical vs. functional?
+- Spring concept
+    - interoperability with
+        - @Value
+        - PropertySource
+        - Spring Cloud Config Server
+    - can it be done in a library?
+- client side *plugins*
+    - DimensionSelector
+        - <T> Node<T> select(String key, Map<String, Node<T>> values)
+        - @FunctionalInterface
+     - DimensionProvider
+        - String get()?
+        - @FunctionalInterface
+    - special contexts, i.e. not easily comparable with ==
+    - compass-plugin-time
+        - since/until (names to be choosen by clients)
+        - or pre-defined by the plugin + hosted page, e.g.:
+            - zalando.github.io/compass/since
+            - zalando.github.io/compass/until
+        - since: 2015-01-01T00:00:00Z
+        - until: 2015-04-01T00:00:00+01:00
+    - compass-plugin-version
+        - zalando.github.io/compass/version
+        - version range(-set)
+        - [1.0,2.0)
+    - compass-plugin-pattern
+        - zalando.github.io/compass/pattern
+        - patterns: regex, wildcard, ...
+        - *-test@example.org
+- server side *plugins* for validation?
+    - overlapping time ranges
+    - overlapping version ranges
+    - invalid patterns
