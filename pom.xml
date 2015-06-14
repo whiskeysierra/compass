@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.zalando</groupId>
@@ -35,7 +34,8 @@
         <module>compass-api</module>
         <module>compass-client</module>
         <module>compass-server</module>
-    </modules>
+    <module>jackson-datatype-compass</module>
+  </modules>
 
     <build>
         <plugins>
@@ -53,9 +53,9 @@
                 </executions>
                 <configuration>
                     <licenseName>apache_v2</licenseName>
-                    <processStartTag>&#8291;&#8203;</processStartTag>
-                    <processEndTag>&#8203;&#8291;</processEndTag>
-                    <sectionDelimiter>&#8291;&#8291;</sectionDelimiter>
+                    <processStartTag>⁣​</processStartTag>
+                    <processEndTag>​⁣</processEndTag>
+                    <sectionDelimiter>⁣⁣</sectionDelimiter>
                     <excludes>
                         <exclude>**/*.json</exclude>
                     </excludes>
@@ -142,6 +142,11 @@
             <dependency>
                 <groupId>org.zalando</groupId>
                 <artifactId>compass-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.zalando</groupId>
+                <artifactId>jackson-datatype-compass</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

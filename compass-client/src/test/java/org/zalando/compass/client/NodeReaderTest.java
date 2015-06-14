@@ -28,11 +28,11 @@ import com.google.common.io.Resources;
 import org.hamcrest.Matcher;
 import org.junit.Test;
 import org.zalando.compass.api.Node;
+import org.zalando.compass.jackson.CompassModule;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
-import java.net.URI;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.contains;
@@ -47,6 +47,7 @@ public final class NodeReaderTest {
     private final NodeReader unit = new NodeReader(mapper);
 
     public NodeReaderTest() {
+        mapper.registerModule(new CompassModule());
         mapper.registerModule(new Jdk8Module());
         mapper.registerModule(new ParameterNamesModule());
         mapper.registerModule(new GuavaModule());
@@ -59,7 +60,7 @@ public final class NodeReaderTest {
             
             assertThat(node, is(notNullValue()));
             assertThat(node.getDimension(), isPresent());
-            assertThat(node.getDimension().get(), is(URI.create("http://docs.aws.amazon.com/regions")));
+            assertThat(node.getDimension().get().getId(), is("http://docs.aws.amazon.com/regions"));
             assertThat(node.getValues().keySet(), contains("eu-west-1", "eu-central-1"));
             assertThat(node.getValue(), isAbsent());
 

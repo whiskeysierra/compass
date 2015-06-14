@@ -1,4 +1,3 @@
-@ParametersAreNullableByDefault
 package org.zalando.compass.api;
 
 /*
@@ -21,4 +20,16 @@ package org.zalando.compass.api;
  * ​⁣
  */
 
-import javax.annotation.ParametersAreNullableByDefault;
+import org.junit.Test;
+
+import static org.hamcrest.Matchers.hasToString;
+import static org.junit.Assert.assertThat;
+
+public final class DimensionTest {
+
+    @Test
+    public void toStringShouldBeId() {
+        assertThat(new Dimension("foo"), hasToString("foo"));
+    }
+    
+}

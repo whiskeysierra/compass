@@ -20,31 +20,31 @@ package org.zalando.compass.api;
  * ​⁣
  */
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
-import java.net.URI;
-import java.util.Objects;
 import java.util.Optional;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static java.lang.String.format;
 
-@Immutable // TODO well, it really depends on the value of T
+@Immutable
 public final class Node<T> {
 
-    private final Optional<URI> dimension;
+    private final Optional<Dimension> dimension;
     private final ImmutableMap<String, Node<T>> values;
     private final Optional<T> value;
 
-    public Node(Optional<URI> dimension, @Nullable ImmutableMap<String, Node<T>> values, Optional<T> value) {
-        this.dimension = Objects.requireNonNull(dimension, "Dimension");
-        // an unfortunate leak of implementation details, since jackson can't deserialize null as an empty map
+    private Node(Optional<Dimension> dimension, @Nullable ImmutableMap<String, Node<T>> values, Optional<T> value) {
+        this.dimension = firstNonNull(dimension, Optional.<Dimension>empty());
         this.values = firstNonNull(values, ImmutableMap.<String, Node<T>>of());
-        this.value = Objects.requireNonNull(value, "Value");
+        this.value = firstNonNull(value, Optional.<T>empty());
     }
 
-    public Optional<URI> getDimension() {
+    public Optional<Dimension> getDimension() {
         return dimension;
     }
 
@@ -54,6 +54,46 @@ public final class Node<T> {
 
     public Optional<T> getValue() {
         return value;
+    }
+    
+    private boolean isBranch() {
+        return dimension.isPresent() && !values.isEmpty();
+    }
+    
+    private boolean isLeaf() {
+        return value.isPresent();
+    }
+
+    @Override
+    public String toString() {
+        if (isBranch() && isLeaf()) {
+            return format("{%s:{%s}, default:%s}", dimension.get(),
+                    Joiner.on(", ").withKeyValueSeparator(":").join(values), value.get());
+        } else if (isBranch()) {
+            return format("{%s:{%s}}", dimension.get(),
+                    Joiner.on(", ").withKeyValueSeparator(":").join(values));
+        } else if (isLeaf()) {
+            return value.get().toString();
+        } else {
+            return "foo";
+        }
+    }
+    
+    public static <T> Node<T> valueOf(@Nonnull T value) {
+        return new Node<>(null, null, Optional.of(value));
+    }
+    
+    public static <T> Node<T> valueOf(@Nonnull Optional<T> value) {
+        return new Node<>(null, null, value);
+    }
+    
+    public static <T> Node<T> of(@Nonnull Dimension dimension, @Nonnull ImmutableMap<String, Node<T>> values) {
+        return new Node<>(Optional.of(dimension), values, Optional.empty());
+    }
+    
+    public static <T> Node<T> of(@Nonnull Dimension dimension, @Nonnull ImmutableMap<String, Node<T>> values,
+            @Nonnull T value) {
+        return new Node<>(Optional.of(dimension), values, Optional.of(value));
     }
 
 }

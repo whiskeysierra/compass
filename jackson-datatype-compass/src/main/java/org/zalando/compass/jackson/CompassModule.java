@@ -1,9 +1,8 @@
-@ParametersAreNullableByDefault
-package org.zalando.compass.api;
+package org.zalando.compass.jackson;
 
 /*
  * ⁣​
- * Compass API
+ * jackson-datatype-compass
  * ⁣⁣
  * Copyright (C) 2015 Zalando SE
  * ⁣⁣
@@ -21,4 +20,14 @@ package org.zalando.compass.api;
  * ​⁣
  */
 
-import javax.annotation.ParametersAreNullableByDefault;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import org.zalando.compass.api.Dimension;
+
+public final class CompassModule extends SimpleModule {
+
+    @Override
+    public void setupModule(SetupContext context) {
+        context.setMixInAnnotations(Dimension.class, DimensionMixin.class);
+    }
+
+}
