@@ -79,16 +79,15 @@ definitions:
           # TODO how to represent "null" keys? or default cases
           $ref: '#/definitions/Node'
         example:
-          eu-west-1:
-            dimension: https://docs.example.org/availability-zone
-            values:
-              eu-west-1a:
-                value: "209.131.41.48"
-              eu-west-1b:
-                value: "217.146.191.18"
-              eu-west-1c:
-                value: "216.39.58.78"
-            value: false
+          dimension: https://docs.example.org/availability-zone
+          values:
+            eu-west-1a:
+              value: "209.131.41.48"
+            eu-west-1b:
+              value: "217.146.191.18"
+            eu-west-1c:
+              value: "216.39.58.78"
+          value: false
       value:
         example: true
     # well, at least either (dimension, values) or value needs to be present 

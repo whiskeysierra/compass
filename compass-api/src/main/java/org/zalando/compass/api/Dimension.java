@@ -20,45 +20,11 @@ package org.zalando.compass.api;
  * ​⁣
  */
 
-import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
-import java.net.URI;
-import java.util.Objects;
 
 @Immutable
-public final class Dimension {
+public interface Dimension {
 
-    private final String id;
-
-    // TODO static factory
-    public Dimension(@Nonnull String id) {
-        this.id = Objects.requireNonNull(id, "Id");
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-
-    @Override
-    public boolean equals(Object that) {
-        if (this == that) {
-            return true;
-        } else if (that instanceof Dimension) {
-            final Dimension other = (Dimension) that;
-            return Objects.equals(id, other.id);
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    public String toString() {
-        return id;
-    }
+    String getId();
 
 }

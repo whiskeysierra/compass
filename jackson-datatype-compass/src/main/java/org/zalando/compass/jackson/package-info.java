@@ -1,8 +1,9 @@
+@ParametersAreNonnullByDefault
 package org.zalando.compass.jackson;
 
 /*
  * ⁣​
- * jackson-datatype-compass
+ * Compass API
  * ⁣⁣
  * Copyright (C) 2015 Zalando SE
  * ⁣⁣
@@ -20,11 +21,4 @@ package org.zalando.compass.jackson;
  * ​⁣
  */
 
-import com.fasterxml.jackson.annotation.JsonValue;
-
-interface DimensionMixin {
-
-    @JsonValue
-    String getId();
-
-}
+import javax.annotation.ParametersAreNonnullByDefault;

@@ -1,4 +1,4 @@
-@ParametersAreNullableByDefault
+@ParametersAreNonnullByDefault
 package org.zalando.compass.api;
 
 /*
@@ -21,4 +21,4 @@ package org.zalando.compass.api;
  * ​⁣
  */
 
-import javax.annotation.ParametersAreNullableByDefault;
+import javax.annotation.ParametersAreNonnullByDefault;

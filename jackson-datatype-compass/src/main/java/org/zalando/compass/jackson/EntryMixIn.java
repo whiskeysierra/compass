@@ -20,16 +20,10 @@ package org.zalando.compass.jackson;
  * ​⁣
  */
 
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.zalando.compass.api.Dimension;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.zalando.compass.api.Entry;
 
-public final class CompassModule extends SimpleModule {
-
-    @Override
-    public void setupModule(final SetupContext context) {
-        context.setMixInAnnotations(Dimension.class, DimensionMixIn.class);
-        context.setMixInAnnotations(Entry.class, EntryMixIn.class);
-    }
+@JsonDeserialize(as = DefaultEntry.class)
+interface EntryMixIn<T> extends Entry<T> {
 
 }

@@ -1,8 +1,8 @@
-package org.zalando.compass.api;
+package org.zalando.compass.jackson;
 
 /*
  * ⁣​
- * Compass API
+ * jackson-datatype-compass
  * ⁣⁣
  * Copyright (C) 2015 Zalando SE
  * ⁣⁣
@@ -20,16 +20,10 @@ package org.zalando.compass.api;
  * ​⁣
  */
 
-import org.junit.Test;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.zalando.compass.api.Dimension;
 
-import static org.hamcrest.Matchers.hasToString;
-import static org.junit.Assert.assertThat;
+@JsonDeserialize(as = DefaultDimension.class)
+interface DimensionMixIn extends Dimension {
 
-public final class DimensionTest {
-
-    @Test
-    public void toStringShouldBeId() {
-        assertThat(new Dimension("foo"), hasToString("foo"));
-    }
-    
 }
