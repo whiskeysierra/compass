@@ -7,9 +7,11 @@ import org.junit.Test;
 import org.zalando.compass.api.Entry;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 
 import static com.google.common.io.Resources.getResource;
+import static org.hamcrest.Matchers.comparesEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 
@@ -21,27 +23,28 @@ public final class CompassModuleTest {
     
     @Test
     public void shouldDeserializeFlatTree() throws IOException {
-        final List<Entry> entries = mapper.readValue(getResource("flat.json"), listOfEntries());
+        final List<Entry<BigDecimal>> entries = mapper.readValue(getResource("flat.json"), listOfEntries());
 
         assertThat(entries, hasSize(1));
+        assertThat(entries.get(0).getValue(), comparesEqualTo(new BigDecimal("0.19")));
     }
 
     @Test
     public void shouldDeserializeOneDimensionalTree() throws IOException {
-        final List<Entry> entries = mapper.readValue(getResource("one-dimensional.json"), listOfEntries());
+        final List<Entry<BigDecimal>> entries = mapper.readValue(getResource("one-dimensional.json"), listOfEntries());
 
         assertThat(entries, hasSize(2));
     }
 
     @Test
     public void shouldDeserializeMultiDimensionalTree() throws IOException {
-        final List<Entry> entries = mapper.readValue(getResource("multi-dimensional.json"), listOfEntries());
+        final List<Entry<BigDecimal>> entries = mapper.readValue(getResource("multi-dimensional.json"), listOfEntries());
 
         assertThat(entries, hasSize(17));
     }
 
-    private TypeReference<List<Entry>> listOfEntries() {
-        return new TypeReference<List<Entry>>() {
+    private TypeReference<List<Entry<BigDecimal>>> listOfEntries() {
+        return new TypeReference<List<Entry<BigDecimal>>>() {
         };
     }
     
