@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.zalando</groupId>
@@ -14,7 +15,7 @@
     </organization>
 
     <inceptionYear>2015</inceptionYear>
-    
+
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -32,10 +33,11 @@
 
     <modules>
         <module>compass-api</module>
+        <module>compass-core</module>
         <module>compass-client</module>
         <module>compass-server</module>
-    <module>jackson-datatype-compass</module>
-  </modules>
+        <module>compass-spi</module>
+    </modules>
 
     <build>
         <plugins>

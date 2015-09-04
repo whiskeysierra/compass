@@ -1,67 +1,83 @@
 # TODO
 
+- architecture
+    - API is RESTful
+    - default implementations for server and client
+        - Spring
+        - Java 8
+    - fat client
+    - server and client share sorting/filtering algorithm (as a library?)
+    - plugins
+        - to be shared by server and client
+        - jar files
+        - service loader vs. spring dependency context
+        - e.g. new dimension
+        - differentiate between dimension definition and implementation (e.g. host pattern vs. pattern impl)
+        - or server side plugin, e.g. OAuth 2.0
+
 - algorithm
-    1. look up key
-    2. dimension present?
-    3. yes
-        - find current value for dimension, e.g. "now"
-        - select *best* match (depends on dimension)
-        - best match found? (falls back to default key "", if present)
-        - yes
-            - decend into it and repeat at item 2.
-        - no
-            - is "value" present?
-                - yes
-                    - return it
-                - no
-                    - bubble up and let upper level handle it
-    4. no
-        - return "value" (which should be present)
+    - list of entries is order by specificity
+    - linear search
+    - first match -> return
+    - no match -> throw
+    - TODO what if a dimension is not provided by the caller?
         
-- should dimension+values and value be mutually exclusive?
-    - that would require to always have a default key for to have a default value
-    - but would make the tree look consistent all the time
-    - i.e. a node is either a branch or a leaf, but never both
-
-- structure
-    - default value
-    - unspecified dimension value, e.g. ""
-
+- no requirements towards:
+    - existing dimensions: nothing special, everything defined by the user
+    - names of dimensions: URIs, simple strings, ...
+    - values: json
+    - to summarize: everything goes
+    
+- history
+    - require comment for every change
+    - persist every change (including old value)
+    - /*/history in API 
+    
+- OAuth plugin
+        
 - technical vs. functional?
+    - do we need the difference?
 - Spring concept
     - interoperability with
         - @Value
         - PropertySource
         - Spring Cloud Config Server
     - can it be done in a library?
-- client side *plugins*
+    - refresh?
+- client
+    - *static* vs. dynamic dimension values
+        - e.g. static could be AWS region or application id (probably available as an environment variable)
+        - e.g. dynamic could be application specific data, like country code
+- plugins
     - DimensionSelector
         - <T> Node<T> select(String key, Map<String, Node<T>> values)
         - @FunctionalInterface
      - DimensionProvider
         - String get()?
         - @FunctionalInterface
-    - custom Node implementation, e.g. sorted map for optimized lookup
-    - custom dimension
     - SPI, via ServiceLoader?
-    - special contexts, i.e. not easily comparable with ==
-        - version range
-        - date: before and after
-    - compass-plugin-time
-        - before/after (names to be choosen by clients)
+    - compass-dimension-time
         - https://github.com/zalando/compass/wiki/after
         - https://github.com/zalando/compass/wiki/before
-        - before: 2015-01-01T00:00:00Z
-        - after: 2015-04-01T00:00:00+01:00
-    - compass-plugin-version
-        - zalando.github.io/compass/version
+        - comparison on isBefore/isAfter
+        - ISO 8601
+        - e.g. `2015-09-03T08:25:37+02:00`
+    - compass-dimension-version
+        - https://github.com/zalando/compass/wiki/version
         - version range(-set)
-        - [1.0,2.0)
-    - compass-plugin-pattern
-        - zalando.github.io/compass/pattern
+        - comparison on contains
+        - semantic versioning
+        - severus (needs to be finished/polished/documented/...)
+        - e.g. `[1.0,2.0)`
+    - compass-dimension-pattern
+        - https://github.com/zalando/compass/wiki/pattern
         - patterns: regex, wildcard, ...
-        - *-test@example.org
-- server side *plugins* for validation?
-    - overlapping time ranges
-    - overlapping version ranges
-    - invalid patterns
+        - e.g. `*-test@example.org`
+    - dimension values should not *overlap*, how can this be verified?
+        - maybe every custom dimension implementation needs to implement:
+            - name of the dimension
+            - *match* operation between dimension value and actual value
+            - *overlap* operation between different dimension values
+        - validation in general?
+            - e.g. invalid patterns?
+- encryption?!
