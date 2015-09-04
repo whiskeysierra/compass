@@ -38,9 +38,10 @@ paths:
             items:
               $ref: '#/definitions/Dimension'
     put:
-      # TODO description: used to sort dimension
       description: |
-        Changes global priority of all dimensions at once.
+        Dimensions have one strict global ordering, i.e. every dimension is comparable to any other.
+        To change the priority one needs to update all dimensions with an explicit ordering. Clients are free to use this for any kind of specific operation
+        on top, e.g. swapping two dimensions, rotating or moving one dimension up or down the list.
       consumes:
         - application/x.compass.dimension-priorities+json
       produces:
@@ -60,11 +61,12 @@ paths:
             type: array
             items:
               type: object
-              title: DimensionRef
+              title: DimensionReference
               properties:
                 id:
                   type: string
-              required: [id]
+              required:
+                - id
         # TODO missing response codes
         412:
           description: Precondition Failed
@@ -118,8 +120,26 @@ paths:
   /keys/{key-id-pattern}/values:
     # TODO filter by dimension (for every operation)
     get:
+      parameters:
+        - name: key-id-pattern
+          description: |
+            Wildcard key pattern, any asterisk will be used to match any substring, including the empty string. Wildcards can be used to fetch keys based on
+            a common prefix (`billing.*`), suffix (`*.active`), both (`billing.*.active`) or infix (`*.job.*`). Wildcards can also be used for partial
+            namespaces, e.g. `billing.*Job.active` will match `billing.ReportJob.active` and `billing.SalaryJob.active`.
+
+            A special value is a single asterisk `*`, which will return all keys. This is the preferred way for *fat* client to bulk-fetch the whole
+            configuration usually asynchronously to reduce roundtrips and response latency.
+          type: string
+          in: path
+          example: billing.*
       responses:
         200:
+          headers:
+            ETag:
+              type: string
+            Last-Modified:
+              type: string
+              format: http-date
           description: Values found
           schema:
             type: object
@@ -135,6 +155,8 @@ paths:
         201:
           descripition: Values created
     patch:
+      consumes:
+        - application/x.compass.entry-patch+json
       responses:
         200:
           description: Values updated # TODO may include partial update, create or deletion
