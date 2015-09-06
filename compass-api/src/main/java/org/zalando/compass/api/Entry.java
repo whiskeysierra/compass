@@ -8,7 +8,7 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public interface Entry<T> {
 
-    ImmutableMap<Dimension, String> getDimensions();
+    ImmutableMap<DimensionId, String> getDimensions();
 
     @Nonnull
     T getValue();

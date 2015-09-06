@@ -107,7 +107,7 @@
                         <goals>
                             <goal>check</goal>
                         </goals>
-                        <!--
+                        <!-- TODO enable
                         <configuration>
                             <rules>
                                 <rule>
@@ -144,6 +144,16 @@
             <dependency>
                 <groupId>org.zalando</groupId>
                 <artifactId>compass-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.zalando</groupId>
+                <artifactId>compass-spi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.zalando</groupId>
+                <artifactId>compass-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

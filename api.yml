@@ -1,8 +1,7 @@
 swagger: '2.0'
 info:
-  title: Compass API
-  description: Configuration operations
-  # TODO summary?!
+  title: Compass
+  description: 'Configuration Management API'
   version: "0.1.0"
   contact:
     name: Pennybags
@@ -24,9 +23,12 @@ paths:
       produces:
         - application/x.compass.dimensions+json
         - application/problem+json
+      parameters:
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
       responses:
         200:
-          description: Dimensions found
+          description: OK
           headers:
             ETag:
               type: string
@@ -37,6 +39,22 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Dimension'
+        301:
+          description: Moved Permanently
+        304:
+          description: Not Modified
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/Not-Found'
+        406:
+          $ref: '#/responses/Not-Acceptable'
+        500:
+          $ref: '#/responses/Internal-Server-Error'
+        503:
+          $ref: '#/responses/Service-Unavailable'
     put:
       description: |
         Dimensions have one strict global ordering, i.e. every dimension is comparable to any other.
@@ -47,16 +65,10 @@ paths:
       produces:
         - application/problem+json
       parameters:
-        - name: If-Match
-          type: string
-          in: header
-        - name: If-Unmodified-Since
-          type: string
-          format: http-date
-          in: header
-      responses:
-        200:
-          description: Dimensions updated
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+        - name: dimensions
+          in: body
           schema:
             type: array
             items:
@@ -67,71 +79,289 @@ paths:
                   type: string
               required:
                 - id
-        # TODO missing response codes
+      responses:
+        200:
+          description: OK
+        301:
+          description: Moved Permanently
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/Not-Found'
+        406:
+          $ref: '#/responses/Not-Acceptable'
         412:
-          description: Precondition Failed
+          $ref: '#/responses/Precondition-Failed'
+        415:
+          $ref: '#/responses/Unsupported-Media-Type'
+        422:
+          $ref: '#/responses/Unprocessable-Entity'
         428:
-          description: Precondition Required
+          $ref: '#/responses/Precondition-Required'
+        500:
+          $ref: '#/responses/Internal-Server-Error'
+        503:
+          $ref: '#/responses/Service-Unavailable'
   /dimensions/{dimension-id}:
     get:
+      produces:
+        - application/x.compass.dimension+json
+      parameters:
+        - $ref: '#/parameters/Dimension-Id'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
       responses:
         200:
-          description: Dimension found
+          description: OK
+          headers:
+            ETag:
+              type: string
+            Last-Modified:
+              type: string
+              format: http-date
           schema:
             $ref: '#/definitions/Dimension'
+        301:
+          description: Moved Permanently
+        304:
+          description: Not Modified
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/Not-Found'
+        406:
+          $ref: '#/responses/Not-Acceptable'
+        500:
+          $ref: '#/responses/Internal-Server-Error'
+        503:
+          $ref: '#/responses/Service-Unavailable'
     put:
-      # TODO ETag support?
+      consumes:
+        - application/x.compass.dimension+json
+      produces:
+        - application/x.compass.dimension+json
+      parameters:
+        - $ref: '#/parameters/Dimension-Id'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+        - $ref: '#/parameters/If-None-Match'
       responses:
         200:
-          description: Dimension updated
+          description: OK
+          schema:
+            $ref: '#/definitions/Dimension'
         201:
-          description: Dimension created
+          description: Created
+          headers:
+            Content-Location:
+              type: string
+              format: uri
+          schema:
+            $ref: '#/definitions/Dimension'
+        301:
+          description: Moved Permanently
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/Not-Found'
+        406:
+          $ref: '#/responses/Not-Acceptable'
+        412:
+          $ref: '#/responses/Precondition-Failed'
+        415:
+          $ref: '#/responses/Unsupported-Media-Type'
+        422:
+          $ref: '#/responses/Unprocessable-Entity'
+        428:
+          $ref: '#/responses/Precondition-Required'
+        500:
+          $ref: '#/responses/Internal-Server-Error'
+        503:
+          $ref: '#/responses/Service-Unavailable'
     delete:
+      parameters:
+        - $ref: '#/parameters/Dimension-Id'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
       responses:
         204:
-          description: Dimension deleted
-          # TODO requires that this dimension is not used anywhere
-          # TODO this may require DELETE /keys/*/values?foo (Note: no value = any value)
+          description: No Content
+        301:
+          description: Moved Permanently
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/Not-Found'
+        412:
+          $ref: '#/responses/Precondition-Failed'
+        422:
+          $ref: '#/responses/Unprocessable-Entity'
+        428:
+          $ref: '#/responses/Precondition-Required'
+        500:
+          $ref: '#/responses/Internal-Server-Error'
+        503:
+          $ref: '#/responses/Service-Unavailable'
   /keys:
     get:
+      produces:
+        - application/x.compass.keys+json
+      parameters:
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
       responses:
         200:
-          description: Keys
+          description: OK
+          headers:
+            ETag:
+              type: string
+            Last-Modified:
+              type: string
+              format: http-date
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Key'
+        301:
+          description: Moved Permanently
+        304:
+          description: Not Modified
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/Not-Found'
+        406:
+          $ref: '#/responses/Not-Acceptable'
+        500:
+          $ref: '#/responses/Internal-Server-Error'
+        503:
+          $ref: '#/responses/Service-Unavailable'
   /keys/{key-id}:
     get:
+      produces:
+        - application/x.compass.key+json
+      parameters:
+        - $ref: '#/parameters/Key-Id'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
       responses:
         200:
-          # TODO ETag
-          # TODO Accept-Patch
-          descripition: Key found
+          description: OK
+          headers:
+            ETag:
+              type: string
+            Last-Modified:
+              type: string
+              format: http-date
           schema:
             $ref: '#/definitions/Key'
+        301:
+          description: Moved Permanently
+        304:
+          description: Not Modified
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/Not-Found'
+        406:
+          $ref: '#/responses/Not-Acceptable'
+        500:
+          $ref: '#/responses/Internal-Server-Error'
+        503:
+          $ref: '#/responses/Service-Unavailable'
     put:
+      consumes:
+        - application/x.compass.key+json
+      produces:
+        - application/x.compass.key+json
+      parameters:
+        - $ref: '#/parameters/Key-Id'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+        - $ref: '#/parameters/If-None-Match'
       responses:
         200:
-          description: Key updated
+          description: OK
+          schema:
+            $ref: '#/definitions/Key'
         201:
-          description: Key created
+          description: Created
+          headers:
+            Content-Location:
+              type: string
+              format: uri
+          schema:
+            $ref: '#/definitions/Key'
+        301:
+          description: Moved Permanently
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/Not-Found'
+        406:
+          $ref: '#/responses/Not-Acceptable'
+        412:
+          $ref: '#/responses/Precondition-Failed'
+        415:
+          $ref: '#/responses/Unsupported-Media-Type'
+        422:
+          $ref: '#/responses/Unprocessable-Entity'
+        428:
+          $ref: '#/responses/Precondition-Required'
+        500:
+          $ref: '#/responses/Internal-Server-Error'
+        503:
+          $ref: '#/responses/Service-Unavailable'
     delete:
+      description: Deletes this key and **all** (!) of its values.
+      parameters:
+        - $ref: '#/parameters/Key-Id'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
       responses:
         204:
-          description: Key deleted
-          # TODO define that this includes all values!!!
-  /keys/{key-id-pattern}/values:
+          description: No Content
+        301:
+          description: Moved Permanently
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/Not-Found'
+        412:
+          $ref: '#/responses/Precondition-Failed'
+        422:
+          $ref: '#/responses/Unprocessable-Entity'
+        428:
+          $ref: '#/responses/Precondition-Required'
+        500:
+          $ref: '#/responses/Internal-Server-Error'
+        503:
+          $ref: '#/responses/Service-Unavailable'
+  /keys/{key-pattern}/values:
     # TODO filter by dimension (for every operation)
     get:
+      produces:
+        - application/x.compass.values+json
       parameters:
-        - name: key-id-pattern
-          description: |
-            Wildcard key pattern, any asterisk will be used to match any substring, including the empty string. Wildcards can be used to fetch keys based on
-            a common prefix (`billing.*`), suffix (`*.active`), both (`billing.*.active`) or infix (`*.job.*`). Wildcards can also be used for partial
-            namespaces, e.g. `billing.*Job.active` will match `billing.ReportJob.active` and `billing.SalaryJob.active`.
-
-            A special value is a single asterisk `*`, which will return all keys. This is the preferred way for *fat* client to bulk-fetch the whole
-            configuration usually asynchronously to reduce roundtrips and response latency.
-          type: string
-          in: path
-          example: billing.*
+        - $ref: '#/parameters/Key-Pattern'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
       responses:
         200:
           headers:
@@ -140,30 +370,184 @@ paths:
             Last-Modified:
               type: string
               format: http-date
+            Accept-Patch:
+              type: string
+              format: media-type
           description: Values found
           schema:
-            type: object
-            additionalProperties:
-              # keys are key identifiers
-              type: array
-              items:
-                $ref: '#/definitions/Entry'
+            $ref: '#/definitions/Values'
+        301:
+          description: Moved Permanently
+        304:
+          description: Not Modified
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/Not-Found'
+        406:
+          $ref: '#/responses/Not-Acceptable'
+        500:
+          $ref: '#/responses/Internal-Server-Error'
+        503:
+          $ref: '#/responses/Service-Unavailable'
     post:
+      parameters:
+        - $ref: '#/parameters/Key-Pattern'
       responses:
         200:
-          description: Values updated # TODO may include partial update + create
+          description: OK
+          schema:
+            $ref: '#/definitions/Values'
         201:
-          descripition: Values created
-    patch:
-      consumes:
-        - application/x.compass.entry-patch+json
-      responses:
-        200:
-          description: Values updated # TODO may include partial update, create or deletion
+          description: Created
+          schema:
+            $ref: '#/definitions/Values'
+        301:
+          description: Moved Permanently
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/Not-Found'
+        406:
+          $ref: '#/responses/Not-Acceptable'
+        412:
+          $ref: '#/responses/Precondition-Failed'
+        415:
+          $ref: '#/responses/Unsupported-Media-Type'
+        422:
+          $ref: '#/responses/Unprocessable-Entity'
+        428:
+          $ref: '#/responses/Precondition-Required'
+        500:
+          $ref: '#/responses/Internal-Server-Error'
+        503:
+          $ref: '#/responses/Service-Unavailable'
     delete:
+      parameters:
+        - $ref: '#/parameters/Key-Pattern'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+        # TODO dynamic filter queries
       responses:
         204:
-          description: Values deleted
+          description: No Content
+        301:
+          description: Moved Permanently
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/Not-Found'
+        412:
+          $ref: '#/responses/Precondition-Failed'
+        422:
+          $ref: '#/responses/Unprocessable-Entity'
+        428:
+          $ref: '#/responses/Precondition-Required'
+        500:
+          $ref: '#/responses/Internal-Server-Error'
+        503:
+          $ref: '#/responses/Service-Unavailable'
+  /keys/*/values:
+    # TODO does it make sense to allow this for the key-pattern variant?
+    patch:
+      consumes:
+        - application/x.compass.values-patch+json
+      responses:
+        200:
+          description: OK
+        # TODO missing response codes
+parameters:
+  Dimension-Id:
+    name: dimension-id
+    in: path
+    type: string
+    required: true
+  Key-Id:
+    name: key-id
+    in: path
+    type: string
+    required: true
+  Key-Pattern:
+    name: key-pattern
+    in: path
+    type: string
+    description: |
+      Wildcard key pattern, any asterisk will be used to match any substring, including the empty string. Wildcards can be used to fetch keys based on
+      a common prefix (`billing.*`), suffix (`*.active`), both (`billing.*.active`) or infix (`*.job.*`). Wildcards can also be used for partial
+      namespaces, e.g. `billing.*Job.active` will match `billing.ReportJob.active` and `billing.SalaryJob.active`.
+
+      A special value is a single asterisk `*`, which will return all keys. This is the preferred way for *fat* client to bulk-fetch the whole
+      configuration usually asynchronously to reduce roundtrips and response latency.
+    required: true
+  If-None-Match:
+    name: If-None-Match
+    in: header
+    type: string
+  If-Modified-Since:
+    name: If-Modified-Since
+    in: header
+    type: string
+    format: http-date
+  If-Match:
+    name: If-Match
+    in: header
+    type: string
+  If-Unmodified-Since:
+    name: If-Unmodified-Since
+    in: header
+    type: string
+    format: http-date
+responses:
+  Unauthorized:
+    description: Unauthorized
+    schema:
+      $ref: '#/definitions/Problem'
+  Forbidden:
+    description: Forbidden
+    schema:
+      $ref: '#/definitions/Problem'
+  Not-Found:
+    description: Not Found
+    schema:
+      $ref: '#/definitions/Problem'
+  Not-Acceptable:
+    description: Not Acceptable
+    schema:
+      $ref: '#/definitions/Problem'
+  Precondition-Failed:
+    description: Precondition Failed
+    schema:
+      $ref: '#/definitions/Problem'
+  Unsupported-Media-Type:
+    description: Unsupported Media Type
+    schema:
+      $ref: '#/definitions/Problem'
+  Unprocessable-Entity:
+    description: Unprocessable Entity
+    schema:
+      $ref: '#/definitions/Problem'
+  Precondition-Required:
+    description: Precondition Required
+    schema:
+      $ref: '#/definitions/Problem'
+  Internal-Server-Error:
+    description: Internal Server Error
+    schema:
+      $ref: '#/definitions/Problem'
+  Service-Unavailable:
+    description: Service Unavailable
+    headers:
+      Retry-After:
+        type: integer
+        format: int32
+    schema:
+      $ref: '#/definitions/Problem'
 definitions:
   Problem:
     type: object
@@ -177,8 +561,9 @@ definitions:
         example: http://httpstatus.es/503
       title:
         type: string
-        description: A short, human-readable summary of the problem type. It SHOULD NOT
-        change from occurrence to occurrence of the problem, except for purposes of localisation.
+        description: |
+          A short, human-readable summary of the problem type. It SHOULD NOT
+          change from occurrence to occurrence of the problem, except for purposes of localisation.
         example: Service Unavailable
       status:
         type: integer
@@ -207,7 +592,19 @@ definitions:
       id:
         type: string
         description: The unique identifier for this dimension. It can be namespaced.
-        example: country-code
+        # TODO pattern? ^[a-z0-9-]+$
+        example: country
+      type:
+        type: string
+        description: |
+          Identifies the underlying dimension type. Most of the time this will be *identity*, which matches based on
+          value identity. Another common one is *pattern* which support regex matches.
+        enum:
+          - identity
+          - pattern
+          - temporal-after
+          - temporal-before
+        example: identity
       name:
         type: string
         description: The human readable version of this dimension's identifier. Usually this will be used for display reasons.
@@ -217,7 +614,7 @@ definitions:
         description: |
           A description of this key that should define what the dimension is about and what possible values it can have.
           Alternatively this can be a URL to an accessible web page.
-        example: ISO 3166-1 alpha-2 country code
+        example: ISO 3166-1 alpha-2 country code, see https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements
     required:
       - id
       - name
@@ -228,7 +625,7 @@ definitions:
       id:
         type: string
         description: The unique identifier for this key. It can be namespaced.
-        pattern: ^([a-z0-9-]*\.)*[a-z0-9-]*$
+        pattern: ^([a-z0-9-]*\.)*[a-z0-9-]+$ # TODO is that even allowed here?
         example: tax-rate
       name:
         type: string
@@ -236,12 +633,37 @@ definitions:
         example: Tax Rate
       description:
         type: string
-        description: A description of this key that should define what the key is about. Alternatively this can be a URL to an accessible web page.
+        description: |
+          A description of this key that should define what the key is about. Alternatively this can be a 
+          URL to an accessible web page.
         example: Tax rate as a factor in the range [0,1].
     required:
       - id
       - name
       - description
+  Values:
+    type: object
+    additionalProperties:
+      # keys are key identifiers
+      type: array
+      items:
+        $ref: '#/definitions/Entry'
+    example:
+      tax-rate:
+        - dimensions:
+            country: DE
+          value: 0.19
+        - dimensions:
+            country: DE
+            postal-code: 27498
+          value: 0
+      refund.url:
+        - dimensions:
+            region: eu-west-1
+          value: http://example.co.uk/refunds
+        - dimensions:
+            region: eu-central-1
+          value: http://example.de/refunds
   Entry:
     properties:
       dimensions:
@@ -251,6 +673,12 @@ definitions:
           type: string
           example: DE
       value:
-        type: object # TODO any!
+        type: object # TODO any
         example: 0.19
-
+    required:
+      - value
+    example:
+      dimensions:
+        country: DE
+        after: 2017-01-01T00:00:00
+      value: 0.2

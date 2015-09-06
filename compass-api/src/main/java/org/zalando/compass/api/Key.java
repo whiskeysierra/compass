@@ -23,11 +23,9 @@ package org.zalando.compass.api;
 import javax.annotation.concurrent.Immutable;
 
 @Immutable
-public interface Dimension {
+public interface Key {
     
-    DimensionId getId();
-    
-    String getType();
+    KeyId getId();
     
     String getName();
     

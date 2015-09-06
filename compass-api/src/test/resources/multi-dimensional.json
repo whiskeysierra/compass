@@ -1,106 +1,106 @@
 [
   {
     "dimensions": {
-      "https://example.org/country": "AT"
+      "country": "AT"
     },
     "value": 0.2
   },
   {
     "dimensions": {
-      "https://example.org/country": "BE"
+      "country": "BE"
     },
     "value": 0.21
   },
   {
     "dimensions": {
-      "https://example.org/country": "CH"
+      "country": "CH"
     },
     "value": 0.08
   },
   {
     "dimensions": {
-      "https://example.org/country": "DE",
-      "https://example.org/postal-code": "27498"
+      "country": "DE",
+      "postal-code": "27498"
     },
     "value": 0
   },
   {
     "dimensions": {
-      "https://example.org/country": "DE",
-      "https://github.com/zalando/compass/wiki/after": "2017-01-01T00:00:00"
+      "country": "DE",
+      "after": "2017-01-01T00:00:00"
     },
     "value": 0.2
   },
   {
     "dimensions": {
-      "https://example.org/country": "DE"
+      "country": "DE"
     },
     "value": 0.19
   },
   {
     "dimensions": {
-      "https://example.org/country": "DK"
+      "country": "DK"
     },
     "value": 0.25
   },
   {
     "dimensions": {
-      "https://example.org/country": "ES"
+      "country": "ES"
     },
     "value": 0.21
   },
   {
     "dimensions": {
-      "https://example.org/country": "FI"
+      "country": "FI"
     },
     "value": 0.24
   },
   {
     "dimensions": {
-      "https://example.org/country": "FR"
+      "country": "FR"
     },
     "value": 0.2
   },
   {
     "dimensions": {
-      "https://example.org/country": "GB"
+      "country": "GB"
     },
     "value": 0.2
   },
   {
     "dimensions": {
-      "https://example.org/country": "IT"
+      "country": "IT"
     },
     "value": 0.2
   },
   {
     "dimensions": {
-      "https://example.org/country": "LU",
-      "https://github.com/zalando/compass/wiki/after": "2015-05-01T00:00:00"
+      "country": "LU",
+      "after": "2015-05-01T00:00:00"
     },
     "value": 0.17
   },
   {
     "dimensions": {
-      "https://example.org/country": "LU"
+      "country": "LU"
     },
     "value": 0.15
   },
   {
     "dimensions": {
-      "https://example.org/country": "NO"
+      "country": "NO"
     },
     "value": 0.25
   },
   {
     "dimensions": {
-      "https://example.org/country": "PL"
+      "country": "PL"
     },
     "value": 0.23
   },
   {
     "dimensions": {
-      "https://example.org/country": "SE"
+      "country": "SE"
     },
     "value": 0.25
   }
