@@ -1,8 +1,8 @@
-package org.zalando.compass.api;
+package org.zalando.compass.core;
 
 /*
  * ⁣​
- * Compass API
+ * Compass Core
  * ⁣⁣
  * Copyright (C) 2015 Zalando SE
  * ⁣⁣
@@ -20,9 +20,22 @@ package org.zalando.compass.api;
  * ​⁣
  */
 
-import javax.annotation.concurrent.Immutable;
+import com.google.common.collect.ForwardingListMultimap;
+import com.google.common.collect.ListMultimap;
+import org.zalando.compass.api.Entry;
+import org.zalando.compass.api.Values;
 
-@Immutable
-public interface DimensionId {
+final class DefaultValues extends ForwardingListMultimap<String, Entry<?>> implements Values {
+
+    private final ListMultimap<String, Entry<?>> entries;
+
+    DefaultValues(ListMultimap<String, Entry<?>> entries) {
+        this.entries = entries;
+    }
+
+    @Override
+    protected ListMultimap<String, Entry<?>> delegate() {
+        return entries;
+    }
 
 }

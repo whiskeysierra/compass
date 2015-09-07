@@ -1,8 +1,8 @@
-package org.zalando.compass.api;
+package org.zalando.compass.spi;
 
 /*
  * ⁣​
- * Compass API
+ * Compass SPI
  * ⁣⁣
  * Copyright (C) 2015 Zalando SE
  * ⁣⁣
@@ -20,14 +20,25 @@ package org.zalando.compass.api;
  * ​⁣
  */
 
-import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Map;
 
-public interface Entry<T> {
+import static com.google.common.base.Preconditions.checkArgument;
 
-    Map<String, String> getDimensions();
+final class ServiceLoaderOperators implements Operators {
 
-    @Nonnull
-    T getValue();
+    private final Map<String, Operator> operators;
+
+    ServiceLoaderOperators(Map<String, Operator> operators) {
+        this.operators = operators;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> Operator<T> get(String name) throws IllegalArgumentException {
+        @Nullable final Operator operator = operators.get(name);
+        checkArgument(operator != null, "No operator named '%s'", name);
+        return operator;
+    }
 
 }

@@ -1,8 +1,8 @@
-package org.zalando.compass.api;
+package org.zalando.compass.spi;
 
 /*
  * ⁣​
- * Compass API
+ * Compass SPI
  * ⁣⁣
  * Copyright (C) 2015 Zalando SE
  * ⁣⁣
@@ -20,14 +20,23 @@ package org.zalando.compass.api;
  * ​⁣
  */
 
-import javax.annotation.Nonnull;
-import java.util.Map;
+import java.time.OffsetDateTime;
 
-public interface Entry<T> {
+final class DateTimeLessThanOperator implements ComparableOperator<OffsetDateTime> {
 
-    Map<String, String> getDimensions();
+    @Override
+    public String getName() {
+        return "date-time/less-than";
+    }
 
-    @Nonnull
-    T getValue();
+    @Override
+    public OffsetDateTime parse(String value) throws IllegalArgumentException {
+        return OffsetDateTime.parse(value);
+    }
+
+    @Override
+    public boolean test(int value) {
+        return value < 0;
+    }
 
 }

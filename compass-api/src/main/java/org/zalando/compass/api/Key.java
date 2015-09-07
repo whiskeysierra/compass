@@ -25,7 +25,7 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public interface Key {
     
-    KeyId getId();
+    String getId();
     
     String getName();
     

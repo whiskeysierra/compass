@@ -1,8 +1,8 @@
-package org.zalando.compass.api;
+package org.zalando.compass.spi;
 
 /*
  * ⁣​
- * Compass API
+ * Compass SPI
  * ⁣⁣
  * Copyright (C) 2015 Zalando SE
  * ⁣⁣
@@ -20,14 +20,11 @@ package org.zalando.compass.api;
  * ​⁣
  */
 
-import javax.annotation.Nonnull;
-import java.util.Map;
+public interface ComparableOperator<T extends Comparable<T>> extends Operator<T> {
 
-public interface Entry<T> {
-
-    Map<String, String> getDimensions();
-
-    @Nonnull
-    T getValue();
+    @Override
+    default int compare(final T left, final T right) {
+        return left.compareTo(right);
+    }
 
 }

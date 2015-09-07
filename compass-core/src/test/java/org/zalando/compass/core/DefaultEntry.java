@@ -1,8 +1,8 @@
-package org.zalando.compass.api;
+package org.zalando.compass.core;
 
 /*
  * ⁣​
- * Compass API
+ * Compass Core
  * ⁣⁣
  * Copyright (C) 2015 Zalando SE
  * ⁣⁣
@@ -20,14 +20,30 @@ package org.zalando.compass.api;
  * ​⁣
  */
 
+import org.zalando.compass.api.Entry;
+
 import javax.annotation.Nonnull;
 import java.util.Map;
 
-public interface Entry<T> {
+final class DefaultEntry<T> implements Entry<T> {
 
-    Map<String, String> getDimensions();
+    private final Map<String, String> dimensions;
+    private final T value;
+
+    DefaultEntry(Map<String, String> dimensions, T value) {
+        this.dimensions = dimensions;
+        this.value = value;
+    }
+
+    @Override
+    public Map<String, String> getDimensions() {
+        return dimensions;
+    }
 
     @Nonnull
-    T getValue();
+    @Override
+    public T getValue() {
+        return value;
+    }
 
 }

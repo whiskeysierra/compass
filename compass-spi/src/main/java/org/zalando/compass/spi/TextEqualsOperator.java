@@ -1,8 +1,8 @@
-package org.zalando.compass.api;
+package org.zalando.compass.spi;
 
 /*
  * ⁣​
- * Compass API
+ * Compass SPI
  * ⁣⁣
  * Copyright (C) 2015 Zalando SE
  * ⁣⁣
@@ -20,14 +20,21 @@ package org.zalando.compass.api;
  * ​⁣
  */
 
-import javax.annotation.Nonnull;
-import java.util.Map;
+final class TextEqualsOperator implements ComparableOperator<String> {
 
-public interface Entry<T> {
+    @Override
+    public String getName() {
+        return "text/equals";
+    }
 
-    Map<String, String> getDimensions();
+    @Override
+    public String parse(String value) throws IllegalArgumentException {
+        return value;
+    }
 
-    @Nonnull
-    T getValue();
+    @Override
+    public boolean test(int value) {
+        return value == 0;
+    }
 
 }

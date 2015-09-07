@@ -1,8 +1,8 @@
-package org.zalando.compass.api;
+package org.zalando.compass.spi;
 
 /*
  * ⁣​
- * Compass API
+ * Compass SPI
  * ⁣⁣
  * Copyright (C) 2015 Zalando SE
  * ⁣⁣
@@ -20,9 +20,19 @@ package org.zalando.compass.api;
  * ​⁣
  */
 
-import javax.annotation.concurrent.Immutable;
+import java.util.Comparator;
+import java.util.List;
+import java.util.function.IntPredicate;
+import java.util.function.Predicate;
 
-@Immutable
-public interface KeyId {
+public interface Operator<T> extends Comparator<T>, IntPredicate {
+
+    String getName();
+    
+    T parse(String value) throws IllegalArgumentException;
+
+    default void validate(final List<T> values) throws IllegalStateException {
+        
+    }
 
 }

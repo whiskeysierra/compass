@@ -20,17 +20,14 @@ package org.zalando.compass.api;
  * ​⁣
  */
 
-import javax.annotation.concurrent.Immutable;
-
-@Immutable
 public interface Dimension {
-    
-    DimensionId getId();
-    
+
+    String getId();
+
     String getOperator();
-    
+
     String getName();
-    
+
     String getDescription();
 
 }
