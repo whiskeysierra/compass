@@ -17,6 +17,8 @@
 
 - algorithm
     - list of entries is order by specificity
+        - dimensions are ordered by priority
+        - same dimensions are ordered depending on the rules of that dimension
     - linear search
     - first match -> return
     - no match -> throw
@@ -46,9 +48,11 @@
         - https://github.com/zalando/compass/wiki/after
         - https://github.com/zalando/compass/wiki/before
         - comparison on isBefore/isAfter
+        - strictly before/after? i.e. *OrEquals
         - ISO 8601
         - e.g. `2015-09-03T08:25:37+02:00`
     - compass-dimension-version
+        # TODO is this even remotely useful?
         - https://github.com/zalando/compass/wiki/version
         - version range(-set)
         - comparison on contains
@@ -58,7 +62,12 @@
     - compass-dimension-pattern
         - https://github.com/zalando/compass/wiki/pattern
         - patterns: regex, wildcard, ...
+        - wildcard -> quote for regex
         - e.g. `*-test@example.org`
+    - compass-dimension-locale
+        - hierarchical
+        - de_DE_utf8 > de_DE > de
+        - what about different notation? e.g. de-de or de-DE? (isn't there an RFC about this?)
     - dimension values should not *overlap*, how can this be verified?
         - maybe every custom dimension implementation needs to implement:
             - name of the dimension

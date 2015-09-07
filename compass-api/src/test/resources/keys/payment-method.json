@@ -1,0 +1,5 @@
+{
+  "id": "PaymentMethod.requiresPreCharge",
+  "name": "Payment method requires pre-charge",
+  "description": "Classifies payment methods that are pre-charge, e.g. PayPal."
+}

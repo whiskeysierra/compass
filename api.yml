@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   title: Compass
-  description: 'Configuration Management API'
+  description: Configuration Management API
   version: "0.1.0"
   contact:
     name: Pennybags
@@ -12,11 +12,15 @@ schemes:
 tags:
   - name: dimension
     description: Dimension resources
-  - name: config
-    description: Config resources
+  - name: key
+    description: Key resources
+  - name: value
+    description: Value resources
 paths:
   /dimensions:
     get:
+      tags: [dimension]
+      summary: List all dimensions
       description: |
         Retrieves the complete list of all dimensions currently defined. This is usually used for display purposes.
         Dimensions are sorted by priority in descending order.
@@ -40,15 +44,13 @@ paths:
             items:
               $ref: '#/definitions/Dimension'
         301:
-          description: Moved Permanently
+          $ref: '#/responses/Moved-Permanently'
         304:
           description: Not Modified
         401:
           $ref: '#/responses/Unauthorized'
         403:
           $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/Not-Found'
         406:
           $ref: '#/responses/Not-Acceptable'
         500:
@@ -56,6 +58,8 @@ paths:
         503:
           $ref: '#/responses/Service-Unavailable'
     put:
+      tags: [dimension]
+      summary: Re-order all dimensions
       description: |
         Dimensions have one strict global ordering, i.e. every dimension is comparable to any other.
         To change the priority one needs to update all dimensions with an explicit ordering. Clients are free to use this for any kind of specific operation
@@ -63,6 +67,7 @@ paths:
       consumes:
         - application/x.compass.dimension-priorities+json
       produces:
+        - application/x.compass.dimensions+json
         - application/problem+json
       parameters:
         - $ref: '#/parameters/If-Match'
@@ -82,14 +87,25 @@ paths:
       responses:
         200:
           description: OK
+          headers:
+            ETag:
+              type: string
+            Last-Modified:
+              type: string
+              format: http-date
+            Content-Location:
+              type: string
+              format: uri
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Dimension'
         301:
-          description: Moved Permanently
+          $ref: '#/responses/Moved-Permanently'
         401:
           $ref: '#/responses/Unauthorized'
         403:
           $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/Not-Found'
         406:
           $ref: '#/responses/Not-Acceptable'
         412:
@@ -106,6 +122,8 @@ paths:
           $ref: '#/responses/Service-Unavailable'
   /dimensions/{dimension-id}:
     get:
+      tags: [dimension]
+      summary: View a dimension
       produces:
         - application/x.compass.dimension+json
       parameters:
@@ -124,7 +142,7 @@ paths:
           schema:
             $ref: '#/definitions/Dimension'
         301:
-          description: Moved Permanently
+          $ref: '#/responses/Moved-Permanently'
         304:
           description: Not Modified
         401:
@@ -140,6 +158,9 @@ paths:
         503:
           $ref: '#/responses/Service-Unavailable'
     put:
+      tags: [dimension]
+      summary: Create or update a dimension
+      description: Creating a new dimension will put it at the end of the priority list, i.e. it will have the lowest priority.
       consumes:
         - application/x.compass.dimension+json
       produces:
@@ -152,6 +173,10 @@ paths:
       responses:
         200:
           description: OK
+          headers:
+            Content-Location:
+              type: string
+              format: uri
           schema:
             $ref: '#/definitions/Dimension'
         201:
@@ -163,13 +188,11 @@ paths:
           schema:
             $ref: '#/definitions/Dimension'
         301:
-          description: Moved Permanently
+          $ref: '#/responses/Moved-Permanently'
         401:
           $ref: '#/responses/Unauthorized'
         403:
           $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/Not-Found'
         406:
           $ref: '#/responses/Not-Acceptable'
         412:
@@ -185,6 +208,9 @@ paths:
         503:
           $ref: '#/responses/Service-Unavailable'
     delete:
+      tags: [dimension]
+      summary: Delete a dimension
+      description: This requires that the dimension is not used by *any* key.
       parameters:
         - $ref: '#/parameters/Dimension-Id'
         - $ref: '#/parameters/If-Match'
@@ -193,7 +219,7 @@ paths:
         204:
           description: No Content
         301:
-          description: Moved Permanently
+          $ref: '#/responses/Moved-Permanently'
         401:
           $ref: '#/responses/Unauthorized'
         403:
@@ -212,6 +238,8 @@ paths:
           $ref: '#/responses/Service-Unavailable'
   /keys:
     get:
+      tags: [key]
+      summary: List all keys
       produces:
         - application/x.compass.keys+json
       parameters:
@@ -231,15 +259,13 @@ paths:
             items:
               $ref: '#/definitions/Key'
         301:
-          description: Moved Permanently
+          $ref: '#/responses/Moved-Permanently'
         304:
           description: Not Modified
         401:
           $ref: '#/responses/Unauthorized'
         403:
           $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/Not-Found'
         406:
           $ref: '#/responses/Not-Acceptable'
         500:
@@ -248,6 +274,8 @@ paths:
           $ref: '#/responses/Service-Unavailable'
   /keys/{key-id}:
     get:
+      tags: [key]
+      summary: View a key
       produces:
         - application/x.compass.key+json
       parameters:
@@ -266,7 +294,7 @@ paths:
           schema:
             $ref: '#/definitions/Key'
         301:
-          description: Moved Permanently
+          $ref: '#/responses/Moved-Permanently'
         304:
           description: Not Modified
         401:
@@ -282,6 +310,8 @@ paths:
         503:
           $ref: '#/responses/Service-Unavailable'
     put:
+      tags: [key]
+      summary: Create or update a key
       consumes:
         - application/x.compass.key+json
       produces:
@@ -294,6 +324,10 @@ paths:
       responses:
         200:
           description: OK
+          headers:
+            Content-Location:
+              type: string
+              format: uri
           schema:
             $ref: '#/definitions/Key'
         201:
@@ -305,7 +339,121 @@ paths:
           schema:
             $ref: '#/definitions/Key'
         301:
-          description: Moved Permanently
+          $ref: '#/responses/Moved-Permanently'
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/Forbidden'
+        406:
+          $ref: '#/responses/Not-Acceptable'
+        412:
+          $ref: '#/responses/Precondition-Failed'
+        415:
+          $ref: '#/responses/Unsupported-Media-Type'
+        422:
+          $ref: '#/responses/Unprocessable-Entity'
+        428:
+          $ref: '#/responses/Precondition-Required'
+        500:
+          $ref: '#/responses/Internal-Server-Error'
+        503:
+          $ref: '#/responses/Service-Unavailable'
+    delete:
+      tags: [key]
+      summary: Delete a key
+      description: Deletes this key and **all** (!) of its values.
+      parameters:
+        - $ref: '#/parameters/Key-Id'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+      responses:
+        204:
+          description: No Content
+        301:
+          $ref: '#/responses/Moved-Permanently'
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/Not-Found'
+        412:
+          $ref: '#/responses/Precondition-Failed'
+        422:
+          $ref: '#/responses/Unprocessable-Entity'
+        428:
+          $ref: '#/responses/Precondition-Required'
+        500:
+          $ref: '#/responses/Internal-Server-Error'
+        503:
+          $ref: '#/responses/Service-Unavailable'
+  /keys/{key-id}/values:
+    put:
+      summary: Replace values for a given key
+      tags: [value]
+      consumes:
+        - application/x.compass.entries+json
+      produces:
+        - application/x.compass.values+json
+      parameters:
+        - $ref: '#/parameters/Key-Id'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+        - $ref: '#/parameters/Entries'
+      responses:
+        200:
+          description: OK
+          headers:
+            Content-Location:
+              type: string
+              format: uri
+          schema:
+            $ref: '#/definitions/Values'
+        301:
+          $ref: '#/responses/Moved-Permanently'
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/Not-Found'
+        406:
+          $ref: '#/responses/Not-Acceptable'
+        412:
+          $ref: '#/responses/Precondition-Failed'
+        415:
+          $ref: '#/responses/Unsupported-Media-Type'
+        422:
+          $ref: '#/responses/Unprocessable-Entity'
+        428:
+          $ref: '#/responses/Precondition-Required'
+        500:
+          $ref: '#/responses/Internal-Server-Error'
+        503:
+          $ref: '#/responses/Service-Unavailable'
+    post:
+      summary: Add values to a given key
+      tags: [value]
+      consumes:
+        - application/x.compass.entries+json
+      produces:
+        - application/x.compass.values+json
+      parameters:
+        - $ref: '#/parameters/Key-Id'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+        - $ref: '#/parameters/Entries'
+      responses:
+        201:
+          description: Created
+          headers:
+            Content-Location:
+              type: string
+              format: uri
+          schema:
+            $ref: '#/definitions/Values'
+        301:
+          $ref: '#/responses/Moved-Permanently'
         401:
           $ref: '#/responses/Unauthorized'
         403:
@@ -327,16 +475,18 @@ paths:
         503:
           $ref: '#/responses/Service-Unavailable'
     delete:
-      description: Deletes this key and **all** (!) of its values.
+      tags: [value]
+      summary: Delete selected values
       parameters:
         - $ref: '#/parameters/Key-Id'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
+        - $ref: '#/parameters/Filter'
       responses:
         204:
           description: No Content
         301:
-          description: Moved Permanently
+          $ref: '#/responses/Moved-Permanently'
         401:
           $ref: '#/responses/Unauthorized'
         403:
@@ -354,14 +504,16 @@ paths:
         503:
           $ref: '#/responses/Service-Unavailable'
   /keys/{key-pattern}/values:
-    # TODO filter by dimension (for every operation)
     get:
+      tags: [value]
+      summary: List selected values of selected keys
       produces:
         - application/x.compass.values+json
       parameters:
         - $ref: '#/parameters/Key-Pattern'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
+        - $ref: '#/parameters/Filter'
       responses:
         200:
           headers:
@@ -377,41 +529,45 @@ paths:
           schema:
             $ref: '#/definitions/Values'
         301:
-          description: Moved Permanently
+          $ref: '#/responses/Moved-Permanently'
         304:
           description: Not Modified
         401:
           $ref: '#/responses/Unauthorized'
         403:
           $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/Not-Found'
         406:
           $ref: '#/responses/Not-Acceptable'
         500:
           $ref: '#/responses/Internal-Server-Error'
         503:
           $ref: '#/responses/Service-Unavailable'
-    post:
+  /keys/*/values:
+    patch:
+      tags: [value]
+      summary: Create, updated and/or delete selected values of selected keys
+      consumes:
+        - application/x.compass.values-patch+json
+      produces:
+        - application/x.compass.values+json
       parameters:
-        - $ref: '#/parameters/Key-Pattern'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
       responses:
         200:
           description: OK
-          schema:
-            $ref: '#/definitions/Values'
-        201:
-          description: Created
+          headers:
+            Content-Location:
+              type: string
+              format: uri
           schema:
             $ref: '#/definitions/Values'
         301:
-          description: Moved Permanently
+          $ref: '#/responses/Moved-Permanently'
         401:
           $ref: '#/responses/Unauthorized'
         403:
           $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/Not-Found'
         406:
           $ref: '#/responses/Not-Acceptable'
         412:
@@ -426,42 +582,6 @@ paths:
           $ref: '#/responses/Internal-Server-Error'
         503:
           $ref: '#/responses/Service-Unavailable'
-    delete:
-      parameters:
-        - $ref: '#/parameters/Key-Pattern'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
-        # TODO dynamic filter queries
-      responses:
-        204:
-          description: No Content
-        301:
-          description: Moved Permanently
-        401:
-          $ref: '#/responses/Unauthorized'
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/Not-Found'
-        412:
-          $ref: '#/responses/Precondition-Failed'
-        422:
-          $ref: '#/responses/Unprocessable-Entity'
-        428:
-          $ref: '#/responses/Precondition-Required'
-        500:
-          $ref: '#/responses/Internal-Server-Error'
-        503:
-          $ref: '#/responses/Service-Unavailable'
-  /keys/*/values:
-    # TODO does it make sense to allow this for the key-pattern variant?
-    patch:
-      consumes:
-        - application/x.compass.values-patch+json
-      responses:
-        200:
-          description: OK
-        # TODO missing response codes
 parameters:
   Dimension-Id:
     name: dimension-id
@@ -485,6 +605,26 @@ parameters:
       A special value is a single asterisk `*`, which will return all keys. This is the preferred way for *fat* client to bulk-fetch the whole
       configuration usually asynchronously to reduce roundtrips and response latency.
     required: true
+  Entries:
+    name: entries
+    in: body
+    schema:
+      $ref: '#/definitions/Entries'
+  Filter:
+    name: '*'
+    description: |
+      Any number filter query parameter based on the dimension of the values. This allows the following use cases:
+
+      1. `GET /keys/*/values?country`, all values with a country
+      2. `GET /keys/*/values?country=DE`, all values for Germany
+      3. `GET /keys/*/values?country=DE&after=2015-09-07T16:00:00`, all values for Germany that are valid after *2015-09-07T16:00:00*
+      4. `GET /keys/*/values?country=DE&country=AT`, all values for Germany and Austria
+    in: query
+    type: array
+    items:
+      type: string
+    collectionFormat: multi
+    allowEmptyValue: true
   If-None-Match:
     name: If-None-Match
     in: header
@@ -504,6 +644,12 @@ parameters:
     type: string
     format: http-date
 responses:
+  Moved-Permanently:
+    description: Moved Permanently
+    headers:
+      Location:
+        type: string
+        format: uri
   Unauthorized:
     description: Unauthorized
     schema:
@@ -592,18 +738,27 @@ definitions:
       id:
         type: string
         description: The unique identifier for this dimension. It can be namespaced.
-        # TODO pattern? ^[a-z0-9-]+$
         example: country
-      type:
+      operator:
         type: string
         description: |
-          Identifies the underlying dimension type. Most of the time this will be *identity*, which matches based on
-          value identity. Another common one is *pattern* which support regex matches.
+          The underlying operator that is used to apply any matching and ordering semantics. For the most use cases this will be `text/equals` which just
+          performs value equality comparison.
         enum:
-          - identity
-          - pattern
-          - temporal-after
-          - temporal-before
+          - text/equals
+          - date-time/less-than
+          - date-time/less-than-or-equals
+          - date-time/equals
+          - date-time/greater-than
+          - date-time/greater-than-or-equals
+          - locale/contains
+          - version/less-than
+          - version/less-than-or-equals
+          - version/equals
+          - version/greater-than
+          - version/greater-than-or-equals
+          - version-range/contains
+          - wildcard/matches
         example: identity
       name:
         type: string
@@ -617,6 +772,7 @@ definitions:
         example: ISO 3166-1 alpha-2 country code, see https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements
     required:
       - id
+      - operator
       - name
       - description
   Key:
@@ -625,7 +781,6 @@ definitions:
       id:
         type: string
         description: The unique identifier for this key. It can be namespaced.
-        pattern: ^([a-z0-9-]*\.)*[a-z0-9-]+$ # TODO is that even allowed here?
         example: tax-rate
       name:
         type: string
@@ -645,18 +800,16 @@ definitions:
     type: object
     additionalProperties:
       # keys are key identifiers
-      type: array
-      items:
-        $ref: '#/definitions/Entry'
+      $ref: '#/definitions/Entries'
     example:
       tax-rate:
         - dimensions:
             country: DE
-          value: 0.19
-        - dimensions:
-            country: DE
             postal-code: 27498
           value: 0
+        - dimensions:
+            country: DE
+          value: 0.19
       refund.url:
         - dimensions:
             region: eu-west-1
@@ -664,6 +817,10 @@ definitions:
         - dimensions:
             region: eu-central-1
           value: http://example.de/refunds
+  Entries:
+    type: array
+    items:
+      $ref: '#/definitions/Entry'
   Entry:
     properties:
       dimensions:
@@ -673,7 +830,10 @@ definitions:
           type: string
           example: DE
       value:
-        type: object # TODO any
+        type: object
+        description: |
+          Actual value for this key and its dimensions. This may be of any type, i.e. everything from primitive values like boolean and integers to complex
+          structures is possible. Although complex objects can usually be flattened with the use of custom dimensions very efficiently.
         example: 0.19
     required:
       - value

@@ -1,0 +1,6 @@
+{
+  "id": "before",
+  "operator": "date-time/less-than",
+  "name": "Before",
+  "description": "ISO 8601 timestamp that defines until a value will be active."
+}

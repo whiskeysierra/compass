@@ -27,7 +27,7 @@ public interface Dimension {
     
     DimensionId getId();
     
-    String getType();
+    String getOperator();
     
     String getName();
     
