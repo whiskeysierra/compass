@@ -759,7 +759,7 @@ definitions:
           - version/greater-than-or-equals
           - version-range/contains
           - wildcard/matches
-        example: identity
+        example: text/equals
       name:
         type: string
         description: The human readable version of this dimension's identifier. Usually this will be used for display reasons.
