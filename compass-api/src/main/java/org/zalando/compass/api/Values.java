@@ -20,8 +20,10 @@ package org.zalando.compass.api;
  * ​⁣
  */
 
-import com.google.common.collect.ListMultimap;
+import java.util.List;
 
-public interface Values extends ListMultimap<String, Entry<?>> {
+public interface Values {
+
+    <T> List<Entry<T>> get(final String key);
 
 }

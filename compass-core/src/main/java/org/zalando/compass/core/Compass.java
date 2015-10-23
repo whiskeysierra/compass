@@ -46,8 +46,7 @@ public final class Compass {
     public <T> T get(final Key key, final Map<String, String> dimensions) {
         final Values values = null; // TODO these need to be sorted by prio+type rules already
 
-        @SuppressWarnings("unchecked")
-        final List<Entry<T>> entries = (List) values.get(key.getId());
+        final List<Entry<T>> entries = values.get(key.getId());
 
         return entries.stream()
                 .filter(entry -> matches(entry, dimensions))
@@ -57,7 +56,7 @@ public final class Compass {
     }
 
     private <T, D> boolean matches(final Entry<T> entry, final Map<String, String> dimensions) {
-        for (String dimension : ordering.sortedCopy(dimensions.keySet())) {
+        for (final String dimension : ordering.sortedCopy(dimensions.keySet())) {
             if (entry.getDimensions().containsKey(dimension)) {
                 final Operator<D> operator = operators.get(dimension);
 
