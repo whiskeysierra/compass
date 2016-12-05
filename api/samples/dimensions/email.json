@@ -1,6 +1,5 @@
 {
   "id": "email",
-  "operator": "wildcard/matches",
-  "name": "Email",
+  "operator": "wildcard",
   "description": "Email patterns, e.g. `*@qa-zalando.de`"
 }

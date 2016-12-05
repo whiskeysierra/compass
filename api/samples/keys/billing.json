@@ -1,0 +1,4 @@
+{
+  "id": "billing.report-job.active",
+  "description": "Toggle to enable/disable the billing report job."
+}

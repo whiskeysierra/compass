@@ -2,18 +2,11 @@
 
 - architecture
     - API is RESTful
-    - default implementations for server and client
-        - Spring
-        - Java 8
-    - fat client
-    - server and client share sorting/filtering algorithm (as a library?)
     - plugins
-        - to be shared by server and client
         - jar files
-        - service loader vs. spring dependency context
         - e.g. new dimension
         - differentiate between dimension definition and implementation (e.g. host pattern vs. pattern impl)
-        - or server side plugin, e.g. OAuth 2.0
+            - dimension (definition) vs. operator (implementation)
 
 - algorithm
     - list of entries is order by specificity
@@ -26,22 +19,13 @@
         
 - no requirements towards:
     - values: json
+    - JSONSchema?
 - history
     - require comment for every change
     - persist every change (including old value)
     - /*/history in API 
+    - 410 Gone + Latest known version as body?!
 - OAuth plugin
-- Spring concept
-    - interoperability with
-        - @Value
-        - PropertySource
-        - Spring Cloud Config Server
-    - can it be done in a library?
-    - refresh?
-- client
-    - *static* vs. dynamic dimension values
-        - e.g. static could be AWS region or application id (probably available as an environment variable)
-        - e.g. dynamic could be application specific data, like country code
 - plugins
     - SPI, via ServiceLoader?
     - compass-dimension-time

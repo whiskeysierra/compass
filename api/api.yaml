@@ -1,0 +1,329 @@
+swagger: '2.0'
+info:
+  title: Compass
+  description: Configuration Management API
+  version: "0.1.0"
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+  - application/problem+json
+paths:
+  /dimensions:
+    get:
+      summary: List all dimensions
+      # TODO pagination
+      description: |
+        Retrieves the complete list of all dimensions currently defined. This is usually used for display purposes.
+        Dimensions are sorted by priority in descending order.
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              dimensions:
+                type: array
+                items:
+                  $ref: '#/definitions/Dimension'
+    put:
+      summary: Re-order all dimensions
+      description: |
+        Dimensions have one strict global ordering, i.e. every dimension is comparable to any other.
+        To change the priority one needs to update all dimensions with an explicit ordering. Clients are free to use this for any kind of specific operation
+        on top, e.g. swapping two dimensions, rotating or moving one dimension up or down the list.
+      parameters:
+        - name: dimensions
+          in: body
+          schema:
+            type: object
+            properties:
+              dimensions:
+                type: array
+                items:
+                  type: object
+                    title: DimensionReference
+                    properties:
+                      id:
+                        type: string
+                    required:
+                      - id
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              dimensions:
+                type: array
+                items:
+                  $ref: '#/definitions/Dimension'
+  /dimensions/{dimension-id}:
+    get:
+      summary: View a dimension
+      parameters:
+        - $ref: '#/parameters/DimensionId'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Dimension'
+    put:
+      summary: Create or update a dimension
+      description: Creating a new dimension will put it at the end of the priority list, i.e. it will have the lowest priority.
+      parameters:
+        - $ref: '#/parameters/DimensionId'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Dimension'
+        201:
+          description: Created
+          schema:
+            $ref: '#/definitions/Dimension'
+    delete:
+      summary: Delete a dimension
+      description: This requires that the dimension is not used by *any* key.
+      parameters:
+        - $ref: '#/parameters/DimensionId'
+      responses:
+        204:
+          description: No Content
+  /keys:
+    get:
+      summary: List all keys
+      # TODO pagination
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              keys:
+                type: array
+                items:
+                  $ref: '#/definitions/Key'
+  /keys/{key-id}:
+    get:
+      summary: View a key
+      parameters:
+        - $ref: '#/parameters/KeyId'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Key'
+    put:
+      summary: Create or update a key
+      parameters:
+        - $ref: '#/parameters/KeyId'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Key'
+        201:
+          description: Created
+          schema:
+            $ref: '#/definitions/Key'
+    delete:
+      summary: Delete a key
+      description: Deletes this key and **all** (!) of its values.
+      parameters:
+        - $ref: '#/parameters/KeyId'
+      responses:
+        204:
+          description: No Content
+  /keys/{key-id}/values:
+    put:
+      summary: Replace values for a given key
+      parameters:
+        - $ref: '#/parameters/KeyId'
+        - $ref: '#/parameters/Entries'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Values'
+    post:
+      summary: Add values to a given key
+      parameters:
+        - $ref: '#/parameters/KeyId'
+        - $ref: '#/parameters/Entries'
+      responses:
+        201:
+          description: Created
+          schema:
+            $ref: '#/definitions/Values'
+    delete:
+      summary: Delete selected values
+      parameters:
+        - $ref: '#/parameters/KeyId'
+        - $ref: '#/parameters/Filter'
+      responses:
+        204:
+          description: No Content
+  /keys/{key-pattern}/values:
+    get:
+      summary: List selected values of selected keys
+      # TODO pagination
+      parameters:
+        - $ref: '#/parameters/KeyPattern'
+        - $ref: '#/parameters/Filter'
+      responses:
+        200:
+          description: Values found
+          schema:
+            $ref: '#/definitions/Values'
+  /keys/*/values:
+    patch:
+      summary: Create, updated and/or delete selected values of selected keys
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Values'
+parameters:
+  DimensionId:
+    name: dimension-id
+    in: path
+    type: string
+    required: true
+  KeyId:
+    name: key-id
+    in: path
+    type: string
+    required: true
+  KeyPattern:
+    name: key-pattern
+    in: path
+    type: string
+    description: |
+      Wildcard key pattern, any asterisk will be used to match any substring, including the empty string. Wildcards can be used to fetch keys based on
+      a common prefix (`billing.*`), suffix (`*.active`), both (`billing.*.active`) or infix (`*.job.*`). Wildcards can also be used for partial
+      namespaces, e.g. `billing.*-job.active` will match `billing.report-job.active` and `billing.salary-job.active`.
+
+      A special value is a single asterisk `*`, which will return all keys. This is the preferred way for *fat* client to bulk-fetch the whole
+      configuration usually asynchronously to reduce roundtrips and response latency.
+    required: true
+  Entries:
+    name: entries
+    in: body
+    schema:
+      $ref: '#/definitions/Entries'
+  Filter:
+    name: '*'
+    description: |
+      Any number of filter query parameters based on the dimension of the values. This allows the following use cases:
+
+      1. `GET /keys/*/values?country`, all values with a country
+      2. `GET /keys/*/values?country=DE`, all values for Germany
+      3. `GET /keys/*/values?country=DE&after=2015-09-07T16:00:00`, all values for Germany that are valid after *2015-09-07T16:00:00*
+      4. `GET /keys/*/values?country=DE&country=AT`, all values for Germany and Austria
+    in: query
+    type: array
+    items:
+      type: string
+    collectionFormat: multi
+    allowEmptyValue: true
+definitions:
+  Problem:
+    $ref: 'https://zalando.github.io/problem/schema.yaml#/Problem'
+  Dimension:
+    type: object
+    properties:
+      id:
+        description: The unique identifier for this dimension. It can be namespaced.
+        type: string
+        readOnly: true
+        example: country
+      operator: # TODO or type?!
+        description: |
+          The underlying operator that is used to apply any matching and ordering semantics. For the most use cases this will be `equality` which just
+          performs value equality comparison.
+        type: string
+        x-samples:
+          - equality
+          - less-than
+          - greater-than
+          - less-than-or-equal
+          - greater-than-or-equal
+          - pattern
+          - wildcard
+          - version
+          # TODO specify
+        example: equality
+      description:
+        type: string
+        description: |
+          A description of this key that should define what the dimension is about and what possible values it can have.
+          Alternatively this can be a URL to an accessible web page.
+        example: ISO 3166-1 alpha-2 country code, see https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements
+    required:
+      - operator
+      - description
+  Key:
+    type: object
+    properties:
+      id:
+        description: The unique identifier for this key. It can be namespaced.
+        type: string
+        pattern: "^([a-z0-9]+(-[a-z0-9]+)*)(\.([a-z0-9]+(-[a-z0-9]+)*))*$"
+        readOnly: true
+        example: tax-rate
+      description:
+        type: string
+        description: |
+          A description of this key that should define what the key is about. Alternatively this can be a 
+          URL to an accessible web page.
+        example: Tax rate as a factor in the range [0,1].
+    required:
+      - description
+  Values:
+    type: object
+    properties:
+      values:
+        type: object
+        additionalProperties:
+          # keys are key identifiers
+          $ref: '#/definitions/Entries'
+        example:
+          tax-rate:
+            - dimensions:
+                country: DE
+                postal-code: 27498
+              value: 0
+            - dimensions:
+                country: DE
+              value: 0.19
+  Entries:
+    type: object
+    properties:
+      entries:
+        type: array
+        items:
+          $ref: '#/definitions/Entry'
+  Entry:
+    properties:
+      dimensions:
+        type: object
+        additionalProperties:
+          # keys are dimension identifiers
+          type: string
+          example: DE
+      value:
+        type: object
+        description: |
+          Actual value for this key and its dimensions. This may be of any type, i.e. everything from primitive values like boolean and integers to complex
+          structures is possible. Although complex objects can usually be flattened with the use of custom dimensions very efficiently.
+        example: 0.19
+    required:
+      - value
+    example:
+      dimensions:
+        country: DE
+        after: 2017-01-01T00:00:00
+      value: 0.2

@@ -1,5 +1,0 @@
-{
-  "id": "billing.ReportJob.active",
-  "name": "Billing: Report job is active",
-  "description": "Toggle to enable/disable the billing report job."
-}

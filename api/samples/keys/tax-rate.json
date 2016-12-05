@@ -1,5 +1,4 @@
 {
   "id": "tax-rate",
-  "name": "Tax Rate",
   "description": "Tax rate as a factor in the range [0,1]."
 }

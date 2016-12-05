@@ -32,9 +32,6 @@
     </properties>
 
     <modules>
-        <module>compass-api</module>
-        <module>compass-core</module>
-        <module>compass-client</module>
         <module>compass-server</module>
         <module>compass-spi</module>
     </modules>
@@ -42,34 +39,12 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>update-file-header</goal>
-                        </goals>
-                        <phase>process-sources</phase>
-                    </execution>
-                </executions>
-                <configuration>
-                    <licenseName>apache_v2</licenseName>
-                    <processStartTag>⁣​</processStartTag>
-                    <processEndTag>​⁣</processEndTag>
-                    <sectionDelimiter>⁣⁣</sectionDelimiter>
-                    <excludes>
-                        <exclude>**/*.json</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.3</version>
                 <configuration>
                     <compilerArgs>
-                        <compilerArg>-Xlint:unchecked</compilerArg>
+                        <compilerArg>-Xlint:all</compilerArg>
                         <compilerArg>-Werror</compilerArg>
                         <compilerArg>-parameters</compilerArg>
                     </compilerArgs>
@@ -143,18 +118,13 @@
         <dependencies>
             <dependency>
                 <groupId>org.zalando</groupId>
-                <artifactId>compass-api</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.zalando</groupId>
                 <artifactId>compass-spi</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.zalando</groupId>
-                <artifactId>compass-core</artifactId>
-                <version>${project.version}</version>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>20.0</version>
             </dependency>
             <dependency>
                 <groupId>org.zalando</groupId>
