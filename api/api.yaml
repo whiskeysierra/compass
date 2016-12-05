@@ -240,20 +240,26 @@ definitions:
         type: string
         readOnly: true
         example: country
-      operator: # TODO or type?!
+      schema:
+        description: # TODO
+        $ref: 'http://json-schema.org/schema#'
+        # TODO patching this requires a re-check!
+      operator: # TODO or type or relation?
         description: |
           The underlying operator that is used to apply any matching and ordering semantics. For the most use cases this will be `equality` which just
           performs value equality comparison.
+        # TODO not ordering, but also "distance"
         type: string
+        # TODO expose GET /relations
         x-samples:
           - equality
           - less-than
           - greater-than
           - less-than-or-equal
           - greater-than-or-equal
-          - pattern
-          - wildcard
-          - version
+          - pattern/matches
+          - wildcard/matches
+          - version-range/contains
           # TODO specify
         example: equality
       description:
@@ -263,6 +269,7 @@ definitions:
           Alternatively this can be a URL to an accessible web page.
         example: ISO 3166-1 alpha-2 country code, see https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements
     required:
+      - schema
       - operator
       - description
   Key:
@@ -274,6 +281,10 @@ definitions:
         pattern: "^([a-z0-9]+(-[a-z0-9]+)*)(\.([a-z0-9]+(-[a-z0-9]+)*))*$"
         readOnly: true
         example: tax-rate
+      schema:
+        description: # TODO
+        $ref: 'http://json-schema.org/schema#'
+        # TODO patching this requires a re-check!
       description:
         type: string
         description: |
@@ -281,6 +292,7 @@ definitions:
           URL to an accessible web page.
         example: Tax rate as a factor in the range [0,1].
     required:
+      - schema
       - description
   Values:
     type: object
