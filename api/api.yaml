@@ -71,6 +71,10 @@ paths:
         Creating a new dimension will put it at the end of the priority list, i.e. it will have the lowest priority.
       parameters:
         - $ref: '#/parameters/DimensionId'
+        - name: dimension
+          in: body
+          schema:
+            $ref: '#/definitions/Dimension'
       responses:
         200:
           description: OK
@@ -112,6 +116,10 @@ paths:
       summary: Create or update a key
       parameters:
         - $ref: '#/parameters/Key'
+        - name: key
+          in: body
+          schema:
+            $ref: '#/definitions/Key'
       responses:
         200:
           description: OK
