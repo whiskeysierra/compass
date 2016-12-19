@@ -5,13 +5,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Value;
+import org.zalando.fauxpas.FauxPas;
 
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+
+import static org.zalando.fauxpas.FauxPas.throwingFunction;
 
 @Repository
 public class ValueRepository {
@@ -27,18 +35,20 @@ public class ValueRepository {
     }
 
     @SneakyThrows
-    public void create(final String key, final Value value) {
-        final ImmutableMap<String, String> params = ImmutableMap.of(
-                "key", key,
-                "dimensions", mapper.writeValueAsString(value.getDimensions()),
-                "value", mapper.writeValueAsString(value.getValue()));
+    public void create(final String key, final Collection<Value> values) {
+        final SqlParameterSource[] params = values.stream()
+                .map(throwingFunction(value -> new MapSqlParameterSource(ImmutableMap.of(
+                        "key", key,
+                        "dimensions", mapper.writeValueAsString(value.getDimensions()),
+                        "value", mapper.writeValueAsString(value.getValue())))))
+                .toArray(SqlParameterSource[]::new);
 
-        template.update("" +
+        template.batchUpdate("" +
                 "INSERT INTO value (key, dimensions, value)" +
                 "     VALUES (:key, :dimensions::JSONB, :value::JSONB)", params);
     }
 
-    public List<Value> get(final String key) {
+    public List<Value> readAll(final String key) {
         final ImmutableMap<String, String> params = ImmutableMap.of("key", key);
 
         return template.query("" +
@@ -56,6 +66,18 @@ public class ValueRepository {
         final Object value = mapper.readValue(row.getBytes("value"), Object.class);
 
         return new Value(dimensions, value);
+    }
+
+    public void delete(final String key, final Map<String, Object> filter) throws IOException {
+        final ImmutableMap<String, String> params = ImmutableMap.of(
+                "key", key,
+                "dimensions", mapper.writeValueAsString(filter));
+
+        template.update("" +
+                "DELETE" +
+                "  FROM value" +
+                " WHERE key = :key" +
+                "   AND dimensions @> :dimensions::JSONB", params);
     }
 
 }

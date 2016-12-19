@@ -1,6 +1,7 @@
 package org.zalando.compass.domain.persistence;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,8 @@ import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfigu
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +23,7 @@ import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.library.JacksonConfiguration;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.fasterxml.jackson.databind.node.JsonNodeFactory.instance;
@@ -27,7 +31,9 @@ import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.toList;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -56,34 +62,71 @@ public class DimensionRepositoryIntegrationTest {
     }
 
     @Autowired
+    private JdbcTemplate template;
+
+    @Autowired
     private DimensionRepository unit;
 
-    @Test
-    public void shouldNotFind() throws IOException {
-        assertThat(unit.get(emptySet()), is(emptyList()));
+    @Before
+    public void setUp() throws Exception {
+        template.execute("SELECT SETVAL('dimension_priority_seq', 1)");
     }
 
     @Test
     public void shouldCreate() throws IOException {
-        final boolean created = unit.create(
-                new Dimension("country", new ObjectNode(instance).put("type", "string"),
-                        "=", "ISO 3166-1 alpha-2 country code"));
+        assertThat(createDimension(), is(true));
+    }
 
-        assertThat(created, is(true));
+    @Test
+    public void shouldNotCreateTwice() throws IOException {
+        assertThat(createDimension(), is(true));
+        assertThat(createDimension(), is(false));
+    }
 
-        final boolean createdAgain = unit.create(
-                new Dimension("country", new ObjectNode(instance).put("type", "string"),
-                        "=", "ISO 3166-1 alpha-2 country code"));
+    @Test
+    public void shouldUpdate() throws IOException {
+        createDimension();
 
-        assertThat(createdAgain, is(false));
+        unit.update(new Dimension("country", new ObjectNode(instance).put("type", "integer"),
+                "=", "Country ID"));
+
+        final Dimension dimension = unit.read(singleton("country")).get(0);
+
+        assertThat(dimension.getSchema().get("type").asText(), is("integer"));
+        assertThat(dimension.getDescription(), is("Country ID"));
+    }
+
+    @Test
+    public void shouldReorder() throws IOException {
+        createDimension(newCountry());
+        createDimension(newSalesChannel());
+        createDimension(newLocale());
+
+        final List<Dimension> before = unit.readAll();
+        assertThat(before.stream().map(Dimension::getId).collect(toList()),
+                contains("country", "sales-channel", "locale"));
+
+        unit.reorder(Arrays.asList("sales-channel", "locale", "country"));
+
+        final List<Dimension> after = unit.readAll();
+        assertThat(after.stream().map(Dimension::getId).collect(toList()),
+                contains("sales-channel", "locale", "country"));
+    }
+
+    @Test(expected = DuplicateKeyException.class)
+    public void shouldFailToReorderIfNonUniquePriority() throws IOException {
+        createDimension(newCountry());
+        createDimension(newSalesChannel());
+        createDimension(newLocale());
+
+        unit.reorder(Arrays.asList("sales-channel", "locale"));
     }
 
     @Test
     public void shouldFindOnly() throws IOException {
-        unit.create(new Dimension("country", new ObjectNode(instance).put("type", "string"),
-                "=", "ISO 3166-1 alpha-2 country code"));
+        createDimension();
 
-        final List<Dimension> dimensions = unit.get(singleton("country"));
+        final List<Dimension> dimensions = unit.read(singleton("country"));
         assertThat(dimensions, hasSize(1));
 
         final Dimension dimension = dimensions.get(0);
@@ -95,22 +138,49 @@ public class DimensionRepositoryIntegrationTest {
     }
 
     @Test
-    public void shouldFindTwoOutOfThree() throws IOException {
-        unit.create(new Dimension("country", new ObjectNode(instance).put("type", "string"),
-                "=", "ISO 3166-1 alpha-2 country code"));
-
-        unit.create(new Dimension("sales-channel", new ObjectNode(instance).put("type", "string"),
-                "=", "A sales channel..."));
-
-        unit.create(new Dimension("locale", new ObjectNode(instance).put("type", "string"),
-                "=", "Language"));
-
-        final List<Dimension> dimensions = unit.get(newHashSet("country", "sales-channel"));
-        assertThat(dimensions, hasSize(2));
-
-        assertThat(dimensions.stream().map(Dimension::getId).collect(toSet()),
-                is(newHashSet("country", "sales-channel")));
+    public void shouldNotFind() throws IOException {
+        assertThat(unit.read(emptySet()), is(emptyList()));
     }
 
+    @Test
+    public void shouldFindTwoOutOfThree() throws IOException {
+        createDimension(newCountry());
+        createDimension(newSalesChannel());
+        createDimension(newLocale());
+
+        final List<Dimension> dimensions = unit.read(newHashSet("country", "sales-channel"));
+        assertThat(dimensions.stream().map(Dimension::getId).collect(toList()), contains("country", "sales-channel"));
+    }
+
+    @Test
+    public void shouldDelete() throws IOException {
+        createDimension(newCountry());
+
+        assertThat(unit.delete("country"), is(true));
+        assertThat(unit.read(singleton("country")), is(empty()));
+    }
+
+    private boolean createDimension() throws IOException {
+        return createDimension(newCountry());
+    }
+
+    private Dimension newCountry() {
+        return new Dimension("country", new ObjectNode(instance).put("type", "string"),
+                "=", "ISO 3166-1 alpha-2 country code");
+    }
+
+    private Dimension newSalesChannel() {
+        return new Dimension("sales-channel", new ObjectNode(instance).put("type", "string"),
+                "=", "A sales channel...");
+    }
+
+    private Dimension newLocale() {
+        return new Dimension("locale", new ObjectNode(instance).put("type", "string"),
+                "=", "Language");
+    }
+
+    private boolean createDimension(final Dimension dimension) throws IOException {
+        return unit.create(dimension);
+    }
 
 }

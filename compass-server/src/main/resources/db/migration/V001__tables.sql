@@ -7,7 +7,7 @@ CREATE TABLE key (
 
 CREATE TABLE dimension (
   id TEXT PRIMARY KEY,
-  priority INT UNIQUE, -- TODO auto increment?
+  priority SERIAL UNIQUE DEFERRABLE NOT NULL,
   schema JSONB NOT NULL,
   relation TEXT NOT NULL,
   description TEXT NOT NULL

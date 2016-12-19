@@ -77,12 +77,12 @@
                             <goal>report</goal>
                         </goals>
                     </execution>
+                    <!-- TODO enable
                     <execution>
                         <id>check</id>
                         <goals>
                             <goal>check</goal>
                         </goals>
-                        <!-- TODO enable
                         <configuration>
                             <rules>
                                 <rule>
@@ -102,8 +102,8 @@
                                 </rule>
                             </rules>
                         </configuration>
-                        -->
                     </execution>
+                    -->
                 </executions>
             </plugin>
             <plugin>

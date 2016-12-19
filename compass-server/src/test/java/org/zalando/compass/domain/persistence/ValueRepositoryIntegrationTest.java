@@ -27,6 +27,7 @@ import java.util.List;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singleton;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -63,15 +64,15 @@ public class ValueRepositoryIntegrationTest {
 
     @Test
     public void shouldNotFind() throws IOException {
-        assertThat(unit.get("foo"), is(emptyList()));
+        assertThat(unit.readAll("foo"), is(emptyList()));
     }
 
     @Test
     public void shouldFindWithoutDimensions() throws IOException {
         keys.create(new Key("my", new ObjectNode(JsonNodeFactory.instance), ""));
-        unit.create("my", new Value(ImmutableMap.of(), true));
+        unit.create("my", singleton(new Value(ImmutableMap.of(), true)));
 
-        final List<Value> values = unit.get("my");
+        final List<Value> values = unit.readAll("my");
         assertThat(values, hasSize(1));
 
         final Value value = values.get(0);
@@ -82,12 +83,12 @@ public class ValueRepositoryIntegrationTest {
     @Test
     public void shouldFindWithDimensions() throws IOException {
         keys.create(new Key("my", new ObjectNode(JsonNodeFactory.instance), ""));
-        unit.create("my", new Value(ImmutableMap.of(
+        unit.create("my", singleton(new Value(ImmutableMap.of(
                 "foo", "bar",
                 "bar", "buz"
-        ), false));
+        ), false)));
 
-        final List<Value> values = unit.get("my");
+        final List<Value> values = unit.readAll("my");
         assertThat(values, hasSize(1));
 
         final Value value = values.get(0);
