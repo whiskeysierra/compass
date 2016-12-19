@@ -28,6 +28,7 @@ import java.util.List;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singleton;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -69,10 +70,12 @@ public class ValueRepositoryIntegrationTest {
 
     @Test
     public void shouldFindWithoutDimensions() throws IOException {
-        keys.create(new Key("my", new ObjectNode(JsonNodeFactory.instance), ""));
-        unit.create("my", singleton(new Value(ImmutableMap.of(), true)));
+        keys.create(new Key("one", new ObjectNode(JsonNodeFactory.instance), ""));
+        keys.create(new Key("two", new ObjectNode(JsonNodeFactory.instance), ""));
+        unit.create("one", singleton(new Value(ImmutableMap.of(), true)));
+        unit.create("two", singleton(new Value(ImmutableMap.of(), true)));
 
-        final List<Value> values = unit.readAll("my");
+        final List<Value> values = unit.readAll("one");
         assertThat(values, hasSize(1));
 
         final Value value = values.get(0);
@@ -82,13 +85,12 @@ public class ValueRepositoryIntegrationTest {
 
     @Test
     public void shouldFindWithDimensions() throws IOException {
-        keys.create(new Key("my", new ObjectNode(JsonNodeFactory.instance), ""));
-        unit.create("my", singleton(new Value(ImmutableMap.of(
-                "foo", "bar",
-                "bar", "buz"
-        ), false)));
+        keys.create(new Key("one", new ObjectNode(JsonNodeFactory.instance), ""));
+        keys.create(new Key("two", new ObjectNode(JsonNodeFactory.instance), ""));
+        unit.create("one", singleton(new Value(ImmutableMap.of("foo", "bar", "bar", "buz"), false)));
+        unit.create("two", singleton(new Value(ImmutableMap.of(), true)));
 
-        final List<Value> values = unit.readAll("my");
+        final List<Value> values = unit.readAll("one");
         assertThat(values, hasSize(1));
 
         final Value value = values.get(0);
@@ -96,6 +98,20 @@ public class ValueRepositoryIntegrationTest {
         assertThat(value.getDimensions().values(), hasSize(2));
         assertThat(value.getDimensions(), hasEntry("foo", "bar"));
         assertThat(value.getDimensions(), hasEntry("bar", "buz"));
+    }
+
+    @Test
+    public void shouldDelete() throws IOException {
+        keys.create(new Key("one", new ObjectNode(JsonNodeFactory.instance), ""));
+        keys.create(new Key("two", new ObjectNode(JsonNodeFactory.instance), ""));
+        unit.create("one", singleton(new Value(ImmutableMap.of("foo", "bar", "bar", "buz"), false)));
+        unit.create("two", singleton(new Value(ImmutableMap.of(), true)));
+
+        unit.delete("one", ImmutableMap.of("foo", "bar"));
+        assertThat(unit.readAll("one"), is(empty()));
+
+        unit.delete("two", ImmutableMap.of());
+        assertThat(unit.readAll("two"), is(empty()));
     }
 
 }

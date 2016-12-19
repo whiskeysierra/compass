@@ -1,4 +1,10 @@
 package org.zalando.compass.domain.model;
 
-public class Relations {
+import java.util.List;
+
+@lombok.Value
+public final class Relations {
+
+    private final List<Relation> relations;
+
 }

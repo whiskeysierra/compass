@@ -123,7 +123,7 @@ public class DimensionRepositoryIntegrationTest {
     }
 
     @Test
-    public void shouldFindOnly() throws IOException {
+    public void shouldRead() throws IOException {
         createDimension();
 
         final List<Dimension> dimensions = unit.read(singleton("country"));
@@ -138,8 +138,17 @@ public class DimensionRepositoryIntegrationTest {
     }
 
     @Test
-    public void shouldNotFind() throws IOException {
+    public void shouldNotRead() throws IOException {
         assertThat(unit.read(emptySet()), is(emptyList()));
+    }
+
+    @Test
+    public void shouldReadAll() throws IOException {
+        createDimension(newCountry());
+        createDimension(newSalesChannel());
+        createDimension(newLocale());
+
+        assertThat(unit.readAll(), contains(newCountry(), newSalesChannel(), newLocale()));
     }
 
     @Test

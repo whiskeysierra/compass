@@ -18,3 +18,5 @@ CREATE TABLE value (
   dimensions JSONB NOT NULL, -- map of dimension id to dimension value
   value JSONB NOT NULL
 );
+
+CREATE INDEX ON value USING GIN (dimensions);

@@ -3,26 +3,30 @@ package org.zalando.compass.domain.persistence;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
-import lombok.SneakyThrows;
+import com.google.gag.annotation.remark.Hack;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.fauxpas.FauxPas;
 
 import java.io.IOException;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import static org.zalando.fauxpas.FauxPas.throwingBiFunction;
 import static org.zalando.fauxpas.FauxPas.throwingFunction;
 
 @Repository
 public class ValueRepository {
+
+    private static final TypeReference<ImmutableMap<String, Object>> TYPE_REF =
+            new TypeReference<ImmutableMap<String, Object>>() {
+            };
 
     private final NamedParameterJdbcTemplate template;
     private final ObjectMapper mapper;
@@ -34,7 +38,6 @@ public class ValueRepository {
         this.mapper = mapper;
     }
 
-    @SneakyThrows
     public void create(final String key, final Collection<Value> values) {
         final SqlParameterSource[] params = values.stream()
                 .map(throwingFunction(value -> new MapSqlParameterSource(ImmutableMap.of(
@@ -55,17 +58,18 @@ public class ValueRepository {
                 "SELECT dimensions AS dimensions," +
                 "       value" +
                 "  FROM value" +
-                " WHERE key = :key", params, this::map);
+                " WHERE key = :key", params, mapRow());
     }
 
-    @SneakyThrows
-    private Value map(final ResultSet row, @SuppressWarnings("unused") final int num) throws SQLException {
-        final ImmutableMap<String, Object> dimensions = mapper.readValue(row.getBytes("dimensions"),
-                new TypeReference<ImmutableMap<String, Object>>() {
-                });
-        final Object value = mapper.readValue(row.getBytes("value"), Object.class);
+    @Hack
+    private RowMapper<Value> mapRow() {
+        return throwingBiFunction(this::map)::apply;
+    }
 
-        return new Value(dimensions, value);
+    private Value map(final ResultSet row, @SuppressWarnings("unused") final int num) throws Exception {
+        return new Value(
+                mapper.readValue(row.getBytes("dimensions"), TYPE_REF),
+                mapper.readValue(row.getBytes("value"), Object.class));
     }
 
     public void delete(final String key, final Map<String, Object> filter) throws IOException {
