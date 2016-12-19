@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: compass
+  resources:
+    add-mappings: false
+  mvc:
+    favicon.enabled: false
+    dispatch-trace-request: true
+  datasource:
+    url: jdbc:postgresql://${DATASOURCE_HOST:localhost}/postgres # TODO
+    username: postgres
+    password: postgres
+    max-wait: 10000
+    max-active: 50
+    connection-timeout: 30000
+    minimum-idle: 10
+    maximum-pool-size: 50
+
+server.compression:
+  enabled: true
+  mime-types:
+    - application/json
+    - application/*+json
+
+twintip:
+  mapping: /api
+  yaml: "classpath:api/api.yaml"
+
+management:
+  add-application-context-header: false
+  health.db.enabled: false
+  port: 7979
+
+endpoints:
+  jmx.unique-names: true
+  jolokia.path: /jmx
+
+tracer:
+  stacked: true
+  traces:
+    X-Flow-ID: flow-id
+
+logbook:
+  exclude:
+    - /favicon.ico
+    - /.well-known/schema-discovery
+    - /api
