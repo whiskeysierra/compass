@@ -42,7 +42,5 @@ public class KeyResource {
     public void deleteKey(@RequestParam final String id) {
         throw new UnsupportedOperationException();
     }
-    
-    
-    
+
 }
