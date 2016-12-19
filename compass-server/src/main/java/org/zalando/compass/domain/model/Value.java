@@ -1,4 +1,11 @@
 package org.zalando.compass.domain.model;
 
-public class Value {
+import com.google.common.collect.ImmutableMap;
+
+@lombok.Value
+public final class Value {
+
+    private final ImmutableMap<String, Object> dimensions;
+    private final Object value;
+
 }

@@ -22,7 +22,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 public class KeyResource {
 
     @RequestMapping(method = GET)
-    public Keys getKeys(@RequestParam(defaultValue = "50") @Min(0) @Max(100) final int limit) {
+    public Keys getKeys() {
         throw new UnsupportedOperationException();
     }
 

@@ -1,13 +1,4 @@
 {
-  "_links": {
-    "prev": {
-      "href": "http://localhost:8080/keys?before=&limit=5"
-    },
-    "next": {
-      "href": "http://localhost:8080/keys?after=&limit=5"
-    }
-  },
-  "total_count": 127,
   "keys": [
     {
       "id": "tax-rate",

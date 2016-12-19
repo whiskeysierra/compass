@@ -1,3 +1,0 @@
-CREATE TABLE key (
-    id TEXT PRIMARY KEY
-);

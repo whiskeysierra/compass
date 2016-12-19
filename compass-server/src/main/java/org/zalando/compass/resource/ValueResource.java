@@ -13,6 +13,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import java.util.Map;
 
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
@@ -27,8 +28,7 @@ public class ValueResource {
     }
 
     @RequestMapping(method = GET, path = "/values")
-    public Values getValues(@RequestParam final String id, @RequestParam final Map<String, String> filter,
-            @RequestParam(defaultValue = "50") @Min(0) @Max(100) final int limit) {
+    public Values getValues(@RequestParam final String id, @RequestParam final Map<String, String> filter) {
         throw new UnsupportedOperationException();
     }
 
@@ -42,10 +42,9 @@ public class ValueResource {
         throw new UnsupportedOperationException();
     }
 
-    @RequestMapping(method = GET, path = "/values")
+    @RequestMapping(method = DELETE, path = "/values")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteValues(@RequestParam final String id,
-            @RequestParam(defaultValue = "50") @Min(0) @Max(100) final int limit) {
+    public void deleteValues(@RequestParam final String id) {
         throw new UnsupportedOperationException();
     }
 

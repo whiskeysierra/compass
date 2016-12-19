@@ -2,6 +2,7 @@ package org.zalando.compass;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.ErrorMvcAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -14,9 +15,7 @@ import java.time.Clock;
 
 import static org.springframework.context.annotation.FilterType.REGEX;
 
-@Configuration
-@ComponentScan(basePackageClasses = Application.class,
-        excludeFilters = @ComponentScan.Filter(type = REGEX, pattern = ".+Test(Configuration)?$"))
+@SpringBootApplication
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @EnableAutoConfiguration(exclude = ErrorMvcAutoConfiguration.class)
 @EnableScheduling

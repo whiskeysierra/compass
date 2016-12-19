@@ -15,7 +15,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 public class RelationResource {
 
     @RequestMapping(method = GET)
-    public Relations getRelations(@RequestParam(defaultValue = "50") @Min(0) @Max(100) final int limit) {
+    public Relations getRelations() {
         throw new UnsupportedOperationException();
     }
 
