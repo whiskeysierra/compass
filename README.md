@@ -32,7 +32,7 @@
 ### YCB
 
 - without pre-defined values for dimensions
-- without value hierarchies (???)
+- without value hierarchies
 - with REST API
 
 ## Concepts

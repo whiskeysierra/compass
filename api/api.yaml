@@ -171,7 +171,7 @@ paths:
           schema:
             $ref: '#/definitions/Values'
     post:
-      summary: Add values to a given key
+      summary: Add or replaces values to a given key
       parameters:
         - $ref: '#/parameters/Key'
         - $ref: '#/parameters/Values'

@@ -51,23 +51,14 @@
     {
       "id": "before",
       "schema": null,
-      "relation": "",
+      "relation": "<",
       "description": ""
     },
     {
       "id": "version-range",
       "schema": {
-        "type": "object",
-        "properties": {
-          "lower_inclusive": {},
-          "lower_exclusive": {},
-          "upper_inclusive": {},
-          "upper_exclusive": {}
-        },
-        "example": {
-          "lower_inclusive": "1.0",
-          "upper_exclusive": "2.0"
-        }
+        "type": "string",
+        "example": "[1.0,2.0)"
       },
       "relation": "range",
       "description": ""
