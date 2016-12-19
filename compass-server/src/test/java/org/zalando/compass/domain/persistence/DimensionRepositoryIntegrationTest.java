@@ -65,13 +65,13 @@ public class DimensionRepositoryIntegrationTest {
 
     @Test
     public void shouldCreate() throws IOException {
-        final boolean created = unit.createOrUpdate(
+        final boolean created = unit.create(
                 new Dimension("country", new ObjectNode(instance).put("type", "string"),
                         "=", "ISO 3166-1 alpha-2 country code"));
 
         assertThat(created, is(true));
 
-        final boolean createdAgain = unit.createOrUpdate(
+        final boolean createdAgain = unit.create(
                 new Dimension("country", new ObjectNode(instance).put("type", "string"),
                         "=", "ISO 3166-1 alpha-2 country code"));
 
@@ -80,7 +80,7 @@ public class DimensionRepositoryIntegrationTest {
 
     @Test
     public void shouldFindOnly() throws IOException {
-        unit.createOrUpdate(new Dimension("country", new ObjectNode(instance).put("type", "string"),
+        unit.create(new Dimension("country", new ObjectNode(instance).put("type", "string"),
                 "=", "ISO 3166-1 alpha-2 country code"));
 
         final List<Dimension> dimensions = unit.get(singleton("country"));
@@ -96,13 +96,13 @@ public class DimensionRepositoryIntegrationTest {
 
     @Test
     public void shouldFindTwoOutOfThree() throws IOException {
-        unit.createOrUpdate(new Dimension("country", new ObjectNode(instance).put("type", "string"),
+        unit.create(new Dimension("country", new ObjectNode(instance).put("type", "string"),
                 "=", "ISO 3166-1 alpha-2 country code"));
 
-        unit.createOrUpdate(new Dimension("sales-channel", new ObjectNode(instance).put("type", "string"),
+        unit.create(new Dimension("sales-channel", new ObjectNode(instance).put("type", "string"),
                 "=", "A sales channel..."));
 
-        unit.createOrUpdate(new Dimension("locale", new ObjectNode(instance).put("type", "string"),
+        unit.create(new Dimension("locale", new ObjectNode(instance).put("type", "string"),
                 "=", "Language"));
 
         final List<Dimension> dimensions = unit.get(newHashSet("country", "sales-channel"));

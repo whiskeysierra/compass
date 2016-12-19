@@ -68,7 +68,7 @@ public class ValueRepositoryIntegrationTest {
 
     @Test
     public void shouldFindWithoutDimensions() throws IOException {
-        keys.create(new Key("my", new ObjectNode(JsonNodeFactory.instance), "=", ""));
+        keys.create(new Key("my", new ObjectNode(JsonNodeFactory.instance), ""));
         unit.create("my", new Value(ImmutableMap.of(), true));
 
         final List<Value> values = unit.get("my");
@@ -81,7 +81,7 @@ public class ValueRepositoryIntegrationTest {
 
     @Test
     public void shouldFindWithDimensions() throws IOException {
-        keys.create(new Key("my", new ObjectNode(JsonNodeFactory.instance), "=", ""));
+        keys.create(new Key("my", new ObjectNode(JsonNodeFactory.instance), ""));
         unit.create("my", new Value(ImmutableMap.of(
                 "foo", "bar",
                 "bar", "buz"

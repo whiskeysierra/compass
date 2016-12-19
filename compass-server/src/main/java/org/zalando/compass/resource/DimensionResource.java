@@ -14,7 +14,6 @@ import org.zalando.compass.domain.persistence.DimensionRepository;
 
 import javax.annotation.Nullable;
 import javax.ws.rs.NotFoundException;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;

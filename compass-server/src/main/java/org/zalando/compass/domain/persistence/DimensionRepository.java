@@ -8,7 +8,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Dimension;
 
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -38,7 +37,8 @@ public class DimensionRepository {
 
         return template.update("" +
                 "INSERT INTO dimension (id, schema, relation, description)" +
-                "VALUES (:id, :schema::JSONB, :relation, :description)", params) > 0;
+                "VALUES (:id, :schema::JSONB, :relation, :description)" +
+                "ON CONFLICT DO NOTHING", params) > 0;
     }
 
     @SneakyThrows
