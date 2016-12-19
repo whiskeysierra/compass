@@ -9,12 +9,9 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Value;
 
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @Repository
 public class ValueRepository {
@@ -29,27 +26,26 @@ public class ValueRepository {
         this.mapper = mapper;
     }
 
-    public void create(final String key, final Value value) throws IOException {
-        final Map<String, Object> dimensions = new LinkedHashMap<>(value.getDimensions());
-        dimensions.put("_key", key);
-
+    @SneakyThrows
+    public void create(final String key, final Value value) {
         final ImmutableMap<String, String> params = ImmutableMap.of(
-                "dimensions", mapper.writeValueAsString(dimensions),
+                "key", key,
+                "dimensions", mapper.writeValueAsString(value.getDimensions()),
                 "value", mapper.writeValueAsString(value.getValue()));
 
         template.update("" +
-                "INSERT INTO value (dimensions, value)" +
-                "     VALUES (:dimensions::JSONB, :value::JSONB)", params);
+                "INSERT INTO value (key, dimensions, value)" +
+                "     VALUES (:key, :dimensions::JSONB, :value::JSONB)", params);
     }
 
-    public List<Value> get(final String key) throws IOException {
+    public List<Value> get(final String key) {
         final ImmutableMap<String, String> params = ImmutableMap.of("key", key);
 
         return template.query("" +
-                "SELECT dimensions - '_key' AS dimensions," +
+                "SELECT dimensions AS dimensions," +
                 "       value" +
                 "  FROM value" +
-                " WHERE dimensions->>'_key' = :key", params, this::map);
+                " WHERE key = :key", params, this::map);
     }
 
     @SneakyThrows

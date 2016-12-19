@@ -14,6 +14,7 @@ import org.zalando.problem.spring.web.advice.ProblemHandling;
 import org.zalando.problem.spring.web.advice.SpringAdviceTrait;
 
 import javax.annotation.Nonnull;
+import javax.ws.rs.NotFoundException;
 
 import static com.google.common.base.Throwables.getRootCause;
 
@@ -28,18 +29,13 @@ public class ExceptionHandling implements ProblemHandling, SpringAdviceTrait {
         return create(HttpStatus.BAD_REQUEST, getRootCause(exception), request);
     }
 
+    // TODO add support for JAX-RS exceptions to problem-spring-web
     @ExceptionHandler
-    public ResponseEntity<Problem> handleIllegalArgumentException(
-            final IllegalArgumentException exception,
+    public ResponseEntity<Problem> handleNotFoundException(
+            final NotFoundException exception,
             final NativeWebRequest request) throws HttpMediaTypeNotAcceptableException {
 
-        return create(HttpStatus.BAD_REQUEST, exception, request);
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<Problem> handleDuplicateKeyException(final DuplicateKeyException exception,
-            final NativeWebRequest request) throws HttpMediaTypeNotAcceptableException {
-        return create(HttpStatus.CONFLICT, exception, request);
+        return create(HttpStatus.NOT_FOUND, exception, request);
     }
 
     @Override

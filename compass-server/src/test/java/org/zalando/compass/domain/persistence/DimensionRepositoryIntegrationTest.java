@@ -1,7 +1,6 @@
 package org.zalando.compass.domain.persistence;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.collect.Sets;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,6 @@ import org.zalando.compass.library.JacksonConfiguration;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.databind.node.JsonNodeFactory.instance;
 import static com.google.common.collect.Sets.newHashSet;
@@ -30,7 +28,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toSet;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -67,8 +64,23 @@ public class DimensionRepositoryIntegrationTest {
     }
 
     @Test
+    public void shouldCreate() throws IOException {
+        final boolean created = unit.createOrUpdate(
+                new Dimension("country", new ObjectNode(instance).put("type", "string"),
+                        "=", "ISO 3166-1 alpha-2 country code"));
+
+        assertThat(created, is(true));
+
+        final boolean createdAgain = unit.createOrUpdate(
+                new Dimension("country", new ObjectNode(instance).put("type", "string"),
+                        "=", "ISO 3166-1 alpha-2 country code"));
+
+        assertThat(createdAgain, is(false));
+    }
+
+    @Test
     public void shouldFindOnly() throws IOException {
-        unit.create(new Dimension("country", new ObjectNode(instance).put("type", "string"),
+        unit.createOrUpdate(new Dimension("country", new ObjectNode(instance).put("type", "string"),
                 "=", "ISO 3166-1 alpha-2 country code"));
 
         final List<Dimension> dimensions = unit.get(singleton("country"));
@@ -84,13 +96,13 @@ public class DimensionRepositoryIntegrationTest {
 
     @Test
     public void shouldFindTwoOutOfThree() throws IOException {
-        unit.create(new Dimension("country", new ObjectNode(instance).put("type", "string"),
+        unit.createOrUpdate(new Dimension("country", new ObjectNode(instance).put("type", "string"),
                 "=", "ISO 3166-1 alpha-2 country code"));
 
-        unit.create(new Dimension("sales-channel", new ObjectNode(instance).put("type", "string"),
+        unit.createOrUpdate(new Dimension("sales-channel", new ObjectNode(instance).put("type", "string"),
                 "=", "A sales channel..."));
 
-        unit.create(new Dimension("locale", new ObjectNode(instance).put("type", "string"),
+        unit.createOrUpdate(new Dimension("locale", new ObjectNode(instance).put("type", "string"),
                 "=", "Language"));
 
         final List<Dimension> dimensions = unit.get(newHashSet("country", "sales-channel"));

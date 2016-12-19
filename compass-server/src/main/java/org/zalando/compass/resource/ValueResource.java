@@ -9,8 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.Values;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import java.util.Map;
 
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;

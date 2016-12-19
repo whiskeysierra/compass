@@ -1,5 +1,7 @@
 package org.zalando.compass.domain.persistence;
 
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,6 +18,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
+import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.library.JacksonConfiguration;
 
@@ -53,6 +56,9 @@ public class ValueRepositoryIntegrationTest {
     }
 
     @Autowired
+    private KeyRepository keys;
+
+    @Autowired
     private ValueRepository unit;
 
     @Test
@@ -62,6 +68,7 @@ public class ValueRepositoryIntegrationTest {
 
     @Test
     public void shouldFindWithoutDimensions() throws IOException {
+        keys.create(new Key("my", new ObjectNode(JsonNodeFactory.instance), "=", ""));
         unit.create("my", new Value(ImmutableMap.of(), true));
 
         final List<Value> values = unit.get("my");
@@ -74,6 +81,7 @@ public class ValueRepositoryIntegrationTest {
 
     @Test
     public void shouldFindWithDimensions() throws IOException {
+        keys.create(new Key("my", new ObjectNode(JsonNodeFactory.instance), "=", ""));
         unit.create("my", new Value(ImmutableMap.of(
                 "foo", "bar",
                 "bar", "buz"
