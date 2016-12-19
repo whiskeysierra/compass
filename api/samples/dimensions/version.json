@@ -1,5 +1,0 @@
-{
-  "id": "version",
-  "operator": "version-range/contains",
-  "description": "A semantic version range identifying for which versions a value is valid."
-}

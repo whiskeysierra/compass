@@ -1,0 +1,39 @@
+{
+  "_links": {
+  },
+  "total_count": 8,
+  "relations": [
+    {
+      "id": "=",
+      "description": "Equality"
+    },
+    {
+      "id": "<",
+      "description": "Less than"
+    },
+    {
+      "id": ">",
+      "description": "Greater than"
+    },
+    {
+      "id": "≤",
+      "description": "Less than or equal"
+    },
+    {
+      "id": "≥",
+      "description": "Greater than or equal"
+    },
+    {
+      "id": "=~",
+      "description": "Matches regular expression"
+    },
+    {
+      "id": "range",
+      "description": "Range or interval"
+    },
+    {
+      "id": "prefix",
+      "description": "Special version of equality that falls back to longest prefix matches"
+    }
+  ]
+}

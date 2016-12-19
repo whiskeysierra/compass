@@ -1,0 +1,79 @@
+{
+  "_links": {
+    "prev": {
+      "href": "http://localhost:8080/keys?before=&limit=5"
+    },
+    "next": {
+      "href": "http://localhost:8080/keys?after=&limit=5"
+    }
+  },
+  "total_count": 127,
+  "keys": [
+    {
+      "id": "tax-rate",
+      "schema": {
+        "type": "number",
+        "format": "double",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "description": "The sales tax rate expressed as a factor."
+    },
+    {
+      "id": "refunds.calculation-strategy",
+      "schema": {
+        "type": "string",
+        "enum": [
+          "capped-remaining-value-of-goods",
+          "coupon",
+          "directly-reimbursed-amount",
+          "express-delivery-fee",
+          "manual-input",
+          "manual-input-with-shipping-costs",
+          "taxes",
+          "value-of-goods-with-shipping-costs"
+        ]
+      },
+      "description": "Determines how the refund amount is is calculated."
+    },
+    {
+      "id": "refunds.allow-negative-refund-amount",
+      "schema": {
+        "type": "boolean"
+      },
+      "description": "Determines whether the refund amount can be negative."
+    },
+    {
+      "id": "refunds.allow-zero-refund-amount",
+      "schema": {
+        "type": "boolean"
+      },
+      "description": "Determines whether the refund amount can be 0."
+    },
+    {
+      "id": "refund.maximum-refund-amount",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "format": "decimal",
+            "example": 99.95
+          },
+          "currency": {
+            "type": "string",
+            "format": "iso-4217",
+            "pattern": "[A-Z]{3}",
+            "example": "EUR"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "amount",
+          "currency"
+        ]
+      },
+      "description": "The maximum allowed refund amount."
+    }
+  ]
+}

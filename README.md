@@ -55,7 +55,7 @@ TODO
 
 - Plugin SPI, e.g.
   - pattern
-  - range (e.g. `[1.0,2.0)`)
+  - range, e.g. `[1.0,2.0)` (dynamic values, e.g. integers, versions, ...)
   - prefix match (e.g. locale, geohash)
 - dimension values should not *overlap*, how can this be verified?
 - maybe every custom dimension implementation needs to implement:

@@ -1,0 +1,76 @@
+{
+  "_links": {
+    "prev": {
+      "href": "http://localhost:8080/dimensions?before=&limit=5"
+    },
+    "next": {
+      "href": "http://localhost:8080/dimensions?after=&limit=5"
+    }
+  },
+  "total_count": 62,
+  "dimensions": [
+    {
+      "id": "device",
+      "schema": {
+        "type": "string",
+        "enum": [
+          "iPhone",
+          "Android",
+          "Desktop Browser"
+        ]
+      },
+      "relation": "=",
+      "description": ""
+    },
+    {
+      "id": "language",
+      "schema": {
+        "type": "string",
+        "format": "bcp47"
+      },
+      "relation": "prefix",
+      "description": ""
+    },
+    {
+      "id": "location",
+      "schema": {
+        "type": "string",
+        "enum": [
+          "AF",
+          "AN",
+          "AS",
+          "EU",
+          "NA",
+          "OC",
+          "SA"
+        ]
+      },
+      "relation": "=",
+      "description": ""
+    },
+    {
+      "id": "before",
+      "schema": null,
+      "relation": "",
+      "description": ""
+    },
+    {
+      "id": "version-range",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "lower_inclusive": {},
+          "lower_exclusive": {},
+          "upper_inclusive": {},
+          "upper_exclusive": {}
+        },
+        "example": {
+          "lower_inclusive": "1.0",
+          "upper_exclusive": "2.0"
+        }
+      },
+      "relation": "range",
+      "description": ""
+    }
+  ]
+}
