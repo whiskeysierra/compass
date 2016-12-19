@@ -11,56 +11,51 @@ produces:
   - application/json
   - application/problem+json
 paths:
-  /dimensions:
+  /relations:
     get:
-      summary: List all dimensions
-      # TODO pagination
+      summary: List all relations
       description: |
-        Retrieves the complete list of all dimensions currently defined. This is usually used for display purposes.
-        Dimensions are sorted by priority in descending order.
+        Retrieves the complete list of all relations currently available for use. A relation specifies how the values
+        of a dimension are matched when being queried. Useful relations would be *equality*, *greater-than*, *less-
+        than* and so forth.
+      parameters:
+        - $ref: '#/parameters/Limit'
       responses:
         200:
           description: OK
           schema:
-            type: object
-            properties:
-              dimensions:
-                type: array
-                items:
-                  $ref: '#/definitions/Dimension'
+            $ref: '#/definitions/Relations'
+  /dimensions:
+    get:
+      summary: List all dimensions
+      description: |
+        Retrieves the complete list of all dimensions currently defined. This is usually used for display purposes.
+        Dimensions are sorted by priority in descending order.
+      parameters:
+        - $ref: '#/parameters/Limit'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Dimensions'
     put:
       summary: Re-order all dimensions
       description: |
         Dimensions have one strict global ordering, i.e. every dimension is comparable to any other.
-        To change the priority one needs to update all dimensions with an explicit ordering. Clients are free to use this for any kind of specific operation
-        on top, e.g. swapping two dimensions, rotating or moving one dimension up or down the list.
+        To change the priority one needs to update all dimensions with an explicit ordering. Clients are free to use
+        this for any kind of specific operation on top, e.g. swapping two dimensions, rotating or moving one dimension
+        up or down the list.
       parameters:
         - name: dimensions
           in: body
           schema:
-            type: object
-            properties:
-              dimensions:
-                type: array
-                items:
-                  type: object
-                    title: DimensionReference
-                    properties:
-                      id:
-                        type: string
-                    required:
-                      - id
+            $ref: '#/definitions/Dimensions'
       responses:
         200:
           description: OK
           schema:
-            type: object
-            properties:
-              dimensions:
-                type: array
-                items:
-                  $ref: '#/definitions/Dimension'
-  /dimensions/{dimension-id}:
+            $ref: '#/definitions/Dimensions'
+  /dimensions/{dimension}:
     get:
       summary: View a dimension
       parameters:
@@ -72,7 +67,8 @@ paths:
             $ref: '#/definitions/Dimension'
     put:
       summary: Create or update a dimension
-      description: Creating a new dimension will put it at the end of the priority list, i.e. it will have the lowest priority.
+      description: |
+        Creating a new dimension will put it at the end of the priority list, i.e. it will have the lowest priority.
       parameters:
         - $ref: '#/parameters/DimensionId'
       responses:
@@ -86,7 +82,7 @@ paths:
             $ref: '#/definitions/Dimension'
     delete:
       summary: Delete a dimension
-      description: This requires that the dimension is not used by *any* key.
+      description: This requires that the dimension is **not used by any key**.
       parameters:
         - $ref: '#/parameters/DimensionId'
       responses:
@@ -95,22 +91,18 @@ paths:
   /keys:
     get:
       summary: List all keys
-      # TODO pagination
+      parameters:
+        - $ref: '#/parameters/Limit'
       responses:
         200:
           description: OK
           schema:
-            type: object
-            properties:
-              keys:
-                type: array
-                items:
-                  $ref: '#/definitions/Key'
-  /keys/{key-id}:
+            $ref: '#/definitions/Keys'
+  /keys/{key}:
     get:
       summary: View a key
       parameters:
-        - $ref: '#/parameters/KeyId'
+        - $ref: '#/parameters/Key'
       responses:
         200:
           description: OK
@@ -119,7 +111,7 @@ paths:
     put:
       summary: Create or update a key
       parameters:
-        - $ref: '#/parameters/KeyId'
+        - $ref: '#/parameters/Key'
       responses:
         200:
           description: OK
@@ -133,16 +125,38 @@ paths:
       summary: Delete a key
       description: Deletes this key and **all** (!) of its values.
       parameters:
-        - $ref: '#/parameters/KeyId'
+        - $ref: '#/parameters/Key'
       responses:
         204:
           description: No Content
-  /keys/{key-id}/values:
-    put:
-      summary: Replace values for a given key
+  /keys/{key}/value:
+    get:
+      summary: Best matching value for a given key and context
       parameters:
-        - $ref: '#/parameters/KeyId'
-        - $ref: '#/parameters/Entries'
+        - $ref: '#/parameters/Key'
+        - $ref: '#/parameters/Filter'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Value'
+  /keys/{key}/values:
+    get:
+      summary: List all values for a given key and context
+      parameters:
+        - $ref: '#/parameters/Key'
+        - $ref: '#/parameters/Filter'
+        - $ref: '#/parameters/Limit'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Values'
+    put:
+      summary: Replace all values for a given key
+      parameters:
+        - $ref: '#/parameters/Key'
+        - $ref: '#/parameters/Values'
       responses:
         200:
           description: OK
@@ -151,8 +165,8 @@ paths:
     post:
       summary: Add values to a given key
       parameters:
-        - $ref: '#/parameters/KeyId'
-        - $ref: '#/parameters/Entries'
+        - $ref: '#/parameters/Key'
+        - $ref: '#/parameters/Values'
       responses:
         201:
           description: Created
@@ -161,107 +175,113 @@ paths:
     delete:
       summary: Delete selected values
       parameters:
-        - $ref: '#/parameters/KeyId'
+        - $ref: '#/parameters/Key'
         - $ref: '#/parameters/Filter'
       responses:
         204:
           description: No Content
-  /keys/{key-pattern}/values:
-    get:
-      summary: List selected values of selected keys
-      # TODO pagination
-      parameters:
-        - $ref: '#/parameters/KeyPattern'
-        - $ref: '#/parameters/Filter'
-      responses:
-        200:
-          description: Values found
-          schema:
-            $ref: '#/definitions/Values'
-  /keys/*/values:
-    patch:
-      summary: Create, updated and/or delete selected values of selected keys
-      responses:
-        200:
-          description: OK
-          schema:
-            $ref: '#/definitions/Values'
 parameters:
   DimensionId:
-    name: dimension-id
+    name: dimension
     in: path
-    type: string
+    type:
+      $ref: '#/definitions/DimensionId'
     required: true
-  KeyId:
-    name: key-id
+  Key:
+    name: key
     in: path
-    type: string
+    type:
+      $ref: '#/definitions/KeyId'
     required: true
-  KeyPattern:
-    name: key-pattern
-    in: path
-    type: string
-    description: |
-      Wildcard key pattern, any asterisk will be used to match any substring, including the empty string. Wildcards can be used to fetch keys based on
-      a common prefix (`billing.*`), suffix (`*.active`), both (`billing.*.active`) or infix (`*.job.*`). Wildcards can also be used for partial
-      namespaces, e.g. `billing.*-job.active` will match `billing.report-job.active` and `billing.salary-job.active`.
-
-      A special value is a single asterisk `*`, which will return all keys. This is the preferred way for *fat* client to bulk-fetch the whole
-      configuration usually asynchronously to reduce roundtrips and response latency.
-    required: true
-  Entries:
-    name: entries
+  Values:
+    name: values
     in: body
     schema:
-      $ref: '#/definitions/Entries'
+      $ref: '#/definitions/Values'
   Filter:
     name: '*'
     description: |
       Any number of filter query parameters based on the dimension of the values. This allows the following use cases:
 
-      1. `GET /keys/*/values?country`, all values with a country
-      2. `GET /keys/*/values?country=DE`, all values for Germany
-      3. `GET /keys/*/values?country=DE&after=2015-09-07T16:00:00`, all values for Germany that are valid after *2015-09-07T16:00:00*
-      4. `GET /keys/*/values?country=DE&country=AT`, all values for Germany and Austria
+      1. `GET /keys/tax-rate/values?country`, all tax rates with a country
+      2. `GET /keys/tax-rate/values?country=DE`, all tax rates for Germany
+      3. `GET /keys/tax-rate/values?country=DE&after=2015-09-07T16:00:00`, all tax rates for Germany that are valid after *2015-09-07T16:00:00*
+      4. `GET /keys/tax-rate/values?country=DE&country=AT`, all tax rates for Germany and Austria
     in: query
     type: array
     items:
       type: string
     collectionFormat: multi
     allowEmptyValue: true
+  Limit:
+    name: limit
+    in: query
+    type: integer
+    format: int32
+    minimum: 0
+    maximum: 100
+    required: false
+    default: 50
 definitions:
   Problem:
     $ref: 'https://zalando.github.io/problem/schema.yaml#/Problem'
+  Page:
+    allOf:
+      - $ref: 'http://hyperschema.org/mediatypes/hal.json#'
+      - type: object
+        properties:
+          total_count:
+            type: integer
+            format: int32
+            example: 1337
+          required:
+            - total_count
+  Relations:
+    allOf:
+      - $ref: '#/definitions/Page'
+      - type: object
+        properties:
+          relations:
+            type: array
+            items:
+              $ref: '#/definitions/Relation'
+  Relation:
+    type: object
+    properties:
+      id:
+        descrition: The unique identifier for this relation.
+        type: string
+        example: equality
+      description:
+        type: string
+        description: # TODO
+  Dimensions:
+    allOf:
+      - $ref: '#/definitions/Page'
+      - type: object
+        properties:
+          dimensions:
+            type: array
+            items:
+              $ref: '#/definitions/Dimension'
   Dimension:
     type: object
     properties:
       id:
-        description: The unique identifier for this dimension. It can be namespaced.
-        type: string
+        description: The unique identifier for this dimension.
+        type:
+          $ref: '#/definitions/DimensionId'
         readOnly: true
-        example: country
       schema:
         description: # TODO
         $ref: 'http://json-schema.org/schema#'
-        # TODO patching this requires a re-check!
-      operator: # TODO or type or relation?
+        # TODO updating this requires a re-check!
+        # TODO we need to be able to safely pass dimensions as query parameters
+      relation:
         description: |
-          The underlying operator that is used to apply any matching and ordering semantics. For the most use cases this will be `equality` which just
-          performs value equality comparison.
-        # TODO not ordering, but also "distance"
+          The underlying operator that is used to apply any matching and ordering semantics. For a complete list of
+          available relations, use `GET /relations`.
         type: string
-        # TODO expose GET /relations
-        x-samples:
-          - equality
-          - less-than
-          - greater-than
-          - less-than-or-equal
-          - greater-than-or-equal
-          - pattern/matches
-          - wildcard/matches
-          - version-range/contains
-          # TODO specify
-        example: equality
       description:
         type: string
         description: |
@@ -270,21 +290,33 @@ definitions:
         example: ISO 3166-1 alpha-2 country code, see https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements
     required:
       - schema
-      - operator
+      - relation
       - description
+  DimensionId:
+    type: string
+    pattern: '^([a-z0-9]+(-[a-z0-9]+)*)(\.([a-z0-9]+(-[a-z0-9]+)*))*$'
+    example: country
+  Keys:
+    allOf:
+      - $ref: '#/definitions/Page'
+      - type: object
+        properties:
+          keys:
+            type: array
+            items:
+              $ref: '#/definitions/Key'
   Key:
     type: object
     properties:
       id:
         description: The unique identifier for this key. It can be namespaced.
-        type: string
-        pattern: "^([a-z0-9]+(-[a-z0-9]+)*)(\.([a-z0-9]+(-[a-z0-9]+)*))*$"
+        type:
+          $ref: '#/definitions/KeyId'
         readOnly: true
-        example: tax-rate
       schema:
         description: # TODO
         $ref: 'http://json-schema.org/schema#'
-        # TODO patching this requires a re-check!
+        # TODO updating this requires a re-check!
       description:
         type: string
         description: |
@@ -294,44 +326,35 @@ definitions:
     required:
       - schema
       - description
+  KeyId:
+    type: string
+    pattern: '^([a-z0-9]+(-[a-z0-9]+)*)(\.([a-z0-9]+(-[a-z0-9]+)*))*$'
+    example: tax-rate
   Values:
-    type: object
-    properties:
-      values:
-        type: object
-        additionalProperties:
-          # keys are key identifiers
-          $ref: '#/definitions/Entries'
-        example:
-          tax-rate:
-            - dimensions:
-                country: DE
-                postal-code: 27498
-              value: 0
-            - dimensions:
-                country: DE
-              value: 0.19
-  Entries:
-    type: object
-    properties:
-      entries:
-        type: array
-        items:
-          $ref: '#/definitions/Entry'
-  Entry:
+    allOf:
+      - $ref: '#/definitions/Page'
+      - type: object
+        properties:
+          values:
+            type: array
+            items:
+              $ref: '#/definitions/Value'
+  Value:
     properties:
       dimensions:
         type: object
         additionalProperties:
           # keys are dimension identifiers
-          type: string
-          example: DE
+          # values are typed according to the dimension's schema
+        example:
+          country: DE
+          after: 2017-01-01T00:00:00
       value:
         type: object
         description: |
           Actual value for this key and its dimensions. This may be of any type, i.e. everything from primitive values like boolean and integers to complex
           structures is possible. Although complex objects can usually be flattened with the use of custom dimensions very efficiently.
-        example: 0.19
+        example: 0.2
     required:
       - value
     example:
