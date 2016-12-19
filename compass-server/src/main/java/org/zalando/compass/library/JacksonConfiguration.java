@@ -18,6 +18,8 @@ import org.zalando.jackson.datatype.money.MoneyModule;
 import org.zalando.jackson.module.unknownproperty.UnknownPropertyModule;
 import org.zalando.problem.ProblemModule;
 
+import static com.fasterxml.jackson.core.JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN;
+
 @Configuration
 public class JacksonConfiguration {
 
@@ -29,6 +31,7 @@ public class JacksonConfiguration {
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         mapper.disable(SerializationFeature.WRITE_NULL_MAP_VALUES);
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        mapper.configure(WRITE_BIGDECIMAL_AS_PLAIN, true);
 
         mapper.enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES);
         mapper.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
@@ -39,8 +42,6 @@ public class JacksonConfiguration {
 
         mapper.enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
         mapper.disable(MapperFeature.DEFAULT_VIEW_INCLUSION);
-
-        writeBigDecimalAsPlain(mapper);
 
         mapper.registerModule(new AfterburnerModule());
         mapper.registerModule(new GuavaModule());
@@ -54,11 +55,6 @@ public class JacksonConfiguration {
         mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
 
         return mapper;
-    }
-
-    @SuppressWarnings("deprecation")
-    private static void writeBigDecimalAsPlain(final ObjectMapper mapper) {
-        mapper.enable(SerializationFeature.WRITE_BIGDECIMAL_AS_PLAIN);
     }
 
 }
