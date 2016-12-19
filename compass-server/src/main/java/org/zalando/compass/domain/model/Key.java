@@ -7,7 +7,6 @@ public final class Key {
 
     private final String id;
     private final JsonNode schema;
-    private final String relation;
     private final String description;
 
 }
