@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,7 +42,6 @@ public class JacksonConfiguration {
         mapper.enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
         mapper.disable(MapperFeature.DEFAULT_VIEW_INCLUSION);
 
-        mapper.registerModule(new AfterburnerModule());
         mapper.registerModule(new GuavaModule());
         mapper.registerModule(new JavaTimeModule());
         mapper.registerModule(new Jdk8Module());
