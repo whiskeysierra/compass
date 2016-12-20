@@ -5,12 +5,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.RelationService;
 import org.zalando.compass.domain.model.Relations;
-import org.springframework.web.context.annotation.RequestScope;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @RestController
-@RequestScope
 @RequestMapping(path = "/relations")
 public class RelationResource {
 

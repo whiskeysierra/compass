@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.zalando.compass.domain.logic.NotFoundException;
 import org.zalando.problem.Problem;
 import org.zalando.problem.spring.web.advice.ProblemHandling;
 import org.zalando.problem.spring.web.advice.SpringAdviceTrait;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.NotFoundException;
 
 import static com.google.common.base.Throwables.getRootCause;
 

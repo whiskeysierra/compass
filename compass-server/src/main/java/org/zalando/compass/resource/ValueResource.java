@@ -11,10 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.ValueService;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.Values;
-import org.springframework.web.context.annotation.RequestScope;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Map;
 
 import static java.util.Collections.emptyMap;
@@ -24,8 +22,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 // TODO validate that dimension values can only be primitives
+// TODO default to empty object if dimensions are missing
 @RestController
-@RequestScope
 @RequestMapping(path = "/keys/{id}")
 public class ValueResource {
 

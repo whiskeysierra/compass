@@ -9,14 +9,12 @@ import org.zalando.compass.domain.logic.relations.LessThanOrEqual;
 import org.zalando.compass.domain.logic.relations.Matches;
 import org.zalando.compass.domain.logic.relations.Prefix;
 import org.zalando.compass.domain.model.Relation;
-import org.springframework.web.context.annotation.RequestScope;
 
 import java.util.List;
 
 import static java.util.Arrays.asList;
 
 @Service
-@RequestScope
 public class RelationService {
 
     public List<Relation> readAll() {

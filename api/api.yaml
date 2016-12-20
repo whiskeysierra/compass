@@ -144,7 +144,7 @@ paths:
             $ref: '#/definitions/Value'
   /keys/{key}/values:
     get:
-      summary: List all values for a given key and context
+      summary: List values for a given key and context
       parameters:
         - $ref: '#/parameters/Key'
         - $ref: '#/parameters/Filter'
@@ -322,6 +322,7 @@ definitions:
         example:
           country: DE
           after: 2017-01-01T00:00:00
+        default: {}
       value:
         type: object
         description: |

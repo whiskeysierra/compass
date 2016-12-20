@@ -10,10 +10,8 @@ import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.Values;
 import org.zalando.compass.domain.persistence.DimensionRepository;
 import org.zalando.compass.domain.persistence.ValueRepository;
-import org.springframework.web.context.annotation.RequestScope;
 
 import javax.annotation.Nullable;
-import javax.ws.rs.NotFoundException;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -33,7 +31,6 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 @Service
-@RequestScope
 public class ValueService {
 
     private final ValueRepository valueRepository;
@@ -59,16 +56,19 @@ public class ValueService {
     }
 
     public Values readAll(final String key, final Map<String, String> filter) {
-        final List<Value> values = valueRepository.readAll(key);
         final Map<Dimension, Relation> dimensions = readDimensions();
-
-        values.sort(byDimensionSizeDescending()
-                .thenComparing(byDimensionsLexicographically(dimensions))
-                .thenComparing(byDimensionValues(dimensions)));
+        final List<Value> values = values(key, dimensions);
 
         return values.stream()
                 .filter(byMatch(filter, dimensions))
                 .collect(collectingAndThen(toList(), Values::new));
+    }
+
+    public Values readAll(final String key) {
+        final Map<Dimension, Relation> dimensions = readDimensions();
+        final List<Value> values = values(key, dimensions);
+
+        return new Values(values);
     }
 
     private Map<Dimension, Relation> readDimensions() {
@@ -81,6 +81,16 @@ public class ValueService {
                             throw new IllegalStateException(String.format("Duplicate key %s", u));
                         },
                         LinkedHashMap::new));
+    }
+
+    private List<Value> values(final String key, final Map<Dimension, Relation> dimensions) {
+        final List<Value> values = valueRepository.readAll(key);
+
+        values.sort(byDimensionSizeDescending()
+                .thenComparing(byDimensionsLexicographically(dimensions))
+                .thenComparing(byDimensionValues(dimensions)));
+
+        return values;
     }
 
     private Comparator<Value> byDimensionSizeDescending() {

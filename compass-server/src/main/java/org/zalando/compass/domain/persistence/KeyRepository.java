@@ -9,7 +9,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Key;
-import org.springframework.web.context.annotation.RequestScope;
 
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -20,7 +19,6 @@ import java.util.Set;
 import static org.zalando.fauxpas.FauxPas.throwingBiFunction;
 
 @Repository
-@RequestScope
 public class KeyRepository {
 
     private final NamedParameterJdbcTemplate template;
