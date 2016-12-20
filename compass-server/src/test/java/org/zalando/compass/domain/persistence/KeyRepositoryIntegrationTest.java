@@ -4,12 +4,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
-import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
@@ -18,7 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.model.Key;
-import org.zalando.compass.library.JacksonConfiguration;
 
 import java.io.IOException;
 import java.util.List;
@@ -42,17 +35,9 @@ import static org.junit.Assert.assertThat;
 public class KeyRepositoryIntegrationTest {
 
     @TestConfiguration
-    @ImportAutoConfiguration({
-            DataSourceAutoConfiguration.class,
-            DataSourceTransactionManagerAutoConfiguration.class,
-            FlywayAutoConfiguration.class,
-            TransactionAutoConfiguration.class,
-    })
     @Import({
             KeyRepository.class,
-            JacksonConfiguration.class,
-            EmbeddedDataSourceConfiguration.class,
-            JdbcTemplateAutoConfiguration.class, // not used as an auto configuration
+            RepositoryConfiguration.class
     })
     static class Configuration {
 
