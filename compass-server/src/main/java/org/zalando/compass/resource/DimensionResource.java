@@ -39,7 +39,7 @@ public class DimensionResource {
     @RequestMapping(method = PUT)
     public Dimensions putAll(@RequestBody final Dimensions dimensions) {
         service.reorder(dimensions.getDimensions());
-        return dimensions;
+        return service.readAll();
     }
 
     @RequestMapping(method = GET, path = "/{id}")

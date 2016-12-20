@@ -17,13 +17,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.google.common.collect.Ordering.explicit;
 import static java.util.Collections.emptyMap;
 import static java.util.Comparator.comparing;
 import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
 
 @Service
 public class ValueService {
@@ -45,13 +47,8 @@ public class ValueService {
     }
 
     public Value read(final String key, final Map<String, String> filter) {
-        final List<Value> values = readAll(key, filter).getValues();
-
-        if (values.isEmpty()) {
-            throw new NotFoundException();
-        }
-
-        return values.get(0);
+        return readAll(key, filter).getValues().stream()
+                .findFirst().orElseThrow(NotFoundException::new);
     }
 
     public Values readAll(final String key, final Map<String, String> filter) {
@@ -59,19 +56,25 @@ public class ValueService {
 
         final List<Dimension> universe = dimensionRepository.readAll();
 
-        final List<String> dimensionsInOrder = universe.stream()
+        final Map<String, Dimension> lookup = universe.stream().collect(toMap(Dimension::getId, identity()));
+
+        final List<String> inOrder = universe.stream()
                 .map(Dimension::getId).collect(Collectors.toList());
 
-        values.sort(comparing(this::byDimensions,
-                explicit(dimensionsInOrder).reverse().lexicographical().reverse())
+        final Map<String, Relation> relations = relationService.readAll().stream()
+                .collect(toMap(Relation::getId, identity()));
+
+        values.sort(comparing(this::byDimensions, comparing(Set<String>::size).reversed())
+                .thenComparing(comparing(this::byDimensions, explicit(inOrder).reverse().lexicographical().reverse()))
                 .thenComparing((l, r) -> {
-                    for (final String dimension : dimensionsInOrder) {
+                    for (final String dimension : inOrder) {
                         if (l.getDimensions().containsKey(dimension) && r.getDimensions().containsKey(dimension)) {
                             final Object left = l.getDimensions().get(dimension);
                             final Object right = r.getDimensions().get(dimension);
+                            final Relation relation = relations.get(lookup.get(dimension).getRelation());
 
                             // TODO don't use toString
-                            final int result = left.toString().compareTo(right.toString());
+                            final int result = relation.compare(left.toString(), right.toString());
 
                             if (result != 0) {
                                 return result;
@@ -86,16 +89,30 @@ public class ValueService {
             return new Values(values);
         }
 
-        final Set<String> relations2 = universe.stream()
-                .map(Dimension::getRelation)
-                .collect(toSet());
+        return values.stream()
+                .filter(value -> {
+                    for (String dimension : inOrder) {
+                        final boolean isConfigured = value.getDimensions().containsKey(dimension);
+                        final boolean isRequested = filter.containsKey(dimension);
 
-        final Map<String, Relation> relations = relationService.readAll().stream()
-                .collect(toMap(Relation::getId, identity()));
+                        if (isConfigured) {
+                            if (!isRequested) {
+                                return false;
+                            }
 
-        // TODO apply algorithm based on relation
+                            final String configured = value.getDimensions().get(dimension).toString();
+                            final String requested = filter.get(dimension);
+                            final Relation relation = relations.get(lookup.get(dimension).getRelation());
 
-        return new Values(values);
+                            if (!relation.test(configured, requested)) {
+                                return false;
+                            }
+                        }
+                    }
+
+                    return true;
+                })
+                .collect(collectingAndThen(toList(), Values::new));
     }
 
     private ImmutableSet<String> byDimensions(final Value value) {
