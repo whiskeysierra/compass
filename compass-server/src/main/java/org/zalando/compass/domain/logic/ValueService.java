@@ -117,7 +117,7 @@ public class ValueService {
     private Predicate<Value> byMatch(final Map<String, String> filter, final Map<Dimension, Relation> dimensions) {
         return dimensions.entrySet().stream()
                 .map(entry -> match(filter, entry))
-                .reduce(Predicate::and).orElse(v -> false);
+                .reduce(Predicate::and).orElse(v -> false); // TODO verify that this shouldn't be true
     }
 
     private Predicate<Value> match(final Map<String, String> filter, final Entry<Dimension, Relation> entry) {

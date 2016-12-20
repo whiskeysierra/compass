@@ -66,7 +66,7 @@ public class ValueRepositoryIntegrationTest {
         assertThat(values, hasSize(1));
 
         final Value value = values.get(0);
-        assertThat(value.getValue(), is(true));
+        assertThat(value.getValue(), is(BooleanNode.TRUE));
         assertThat(value.getDimensions(), is(emptyMap()));
     }
 
@@ -81,10 +81,10 @@ public class ValueRepositoryIntegrationTest {
         assertThat(values, hasSize(1));
 
         final Value value = values.get(0);
-        assertThat(value.getValue(), is(false));
+        assertThat(value.getValue(), is(BooleanNode.FALSE));
         assertThat(value.getDimensions().values(), hasSize(2));
-        assertThat(value.getDimensions(), hasEntry("foo", "bar"));
-        assertThat(value.getDimensions(), hasEntry("bar", "buz"));
+        assertThat(value.getDimensions(), hasEntry("foo", new TextNode("bar")));
+        assertThat(value.getDimensions(), hasEntry("bar", new TextNode("buz")));
     }
 
     @Test
