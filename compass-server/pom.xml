@@ -33,6 +33,7 @@
         <put-it-to-rest.version>0.10.0</put-it-to-rest.version>
         <logbook.version>1.1.0</logbook.version>
         <stups-oauth2.version>1.0.15-GH-44</stups-oauth2.version>
+        <zuchini.version>1.0-SNAPSHOT</zuchini.version>
     </properties>
 
     <dependencyManagement>
@@ -300,6 +301,43 @@
             <groupId>com.opentable.components</groupId>
             <artifactId>otj-pg-embedded</artifactId>
             <version>0.7.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Cucumber/Zuchini -->
+
+        <dependency>
+            <groupId>org.zuchini</groupId>
+            <artifactId>zuchini-compat-annotations</artifactId>
+            <version>${zuchini.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.zuchini</groupId>
+            <artifactId>zuchini-junit</artifactId>
+            <version>${zuchini.version}</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.hamcrest</groupId>
+                    <artifactId>hamcrest-library</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.antlr</groupId>
+                    <artifactId>antlr4-annotations</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.zuchini</groupId>
+            <artifactId>zuchini-spring</artifactId>
+            <version>${zuchini.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.zuchini</groupId>
+            <artifactId>zuchini-intellij-support</artifactId>
+            <version>${zuchini.version}</version>
             <scope>test</scope>
         </dependency>
 

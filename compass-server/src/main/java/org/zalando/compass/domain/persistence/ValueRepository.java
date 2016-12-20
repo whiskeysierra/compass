@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Value;
+import org.springframework.web.context.annotation.RequestScope;
 
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -23,6 +24,7 @@ import static org.zalando.fauxpas.FauxPas.throwingBiFunction;
 import static org.zalando.fauxpas.FauxPas.throwingFunction;
 
 @Repository
+@RequestScope
 public class ValueRepository {
 
     private static final TypeReference<ImmutableMap<String, JsonNode>> TYPE_REF =

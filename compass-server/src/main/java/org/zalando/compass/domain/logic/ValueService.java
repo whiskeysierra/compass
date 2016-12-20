@@ -10,6 +10,7 @@ import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.Values;
 import org.zalando.compass.domain.persistence.DimensionRepository;
 import org.zalando.compass.domain.persistence.ValueRepository;
+import org.springframework.web.context.annotation.RequestScope;
 
 import javax.annotation.Nullable;
 import javax.ws.rs.NotFoundException;
@@ -32,6 +33,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 @Service
+@RequestScope
 public class ValueService {
 
     private final ValueRepository valueRepository;
@@ -63,10 +65,6 @@ public class ValueService {
         values.sort(byDimensionSizeDescending()
                 .thenComparing(byDimensionsLexicographically(dimensions))
                 .thenComparing(byDimensionValues(dimensions)));
-
-        if (filter.isEmpty()) {
-            return new Values(values);
-        }
 
         return values.stream()
                 .filter(byMatch(filter, dimensions))

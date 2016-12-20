@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Dimensions;
 import org.zalando.compass.domain.persistence.DimensionRepository;
+import org.springframework.web.context.annotation.RequestScope;
 
 import javax.annotation.Nullable;
 import javax.ws.rs.NotFoundException;
@@ -16,6 +17,7 @@ import static java.util.stream.Collectors.toList;
 import static org.springframework.dao.support.DataAccessUtils.singleResult;
 
 @Service
+@RequestScope
 public class DimensionService {
 
     private final DimensionRepository repository;

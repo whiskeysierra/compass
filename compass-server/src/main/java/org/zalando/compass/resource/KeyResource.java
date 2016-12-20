@@ -2,11 +2,12 @@ package org.zalando.compass.resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.annotation.RequestScope;
 import org.zalando.compass.domain.logic.KeyService;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Keys;
@@ -21,6 +22,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 @RestController
+@RequestScope
 @RequestMapping(path = "/keys")
 public class KeyResource {
 
@@ -37,12 +39,12 @@ public class KeyResource {
     }
 
     @RequestMapping(method = GET, path = "/{id}")
-    public Key get(@RequestParam final String id) {
+    public Key get(@PathVariable final String id) {
         return service.read(id);
     }
 
     @RequestMapping(method = PUT, path = "/{id}")
-    public ResponseEntity<Key> put(@RequestParam final String id,
+    public ResponseEntity<Key> put(@PathVariable final String id,
             @RequestBody final Key key) throws IOException {
 
         checkArgument(id.equals(key.getId()), "ID in path and body must match");
@@ -56,7 +58,7 @@ public class KeyResource {
 
     @RequestMapping(method = DELETE, path = "/{id}")
     @ResponseStatus(NO_CONTENT)
-    public void delete(@RequestParam final String id) {
+    public void delete(@PathVariable final String id) {
         service.delete(id);
     }
 

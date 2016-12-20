@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Keys;
 import org.zalando.compass.domain.persistence.KeyRepository;
+import org.springframework.web.context.annotation.RequestScope;
 
 import javax.annotation.Nullable;
 import javax.ws.rs.NotFoundException;
@@ -15,6 +16,7 @@ import static java.util.Collections.singleton;
 import static org.springframework.dao.support.DataAccessUtils.singleResult;
 
 @Service
+@RequestScope
 public class KeyService {
 
     private final KeyRepository repository;

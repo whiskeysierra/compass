@@ -2,11 +2,12 @@ package org.zalando.compass.resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.annotation.RequestScope;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Dimensions;
@@ -21,6 +22,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 @RestController
+@RequestScope
 @RequestMapping(path = "/dimensions")
 public class DimensionResource {
 
@@ -43,12 +45,12 @@ public class DimensionResource {
     }
 
     @RequestMapping(method = GET, path = "/{id}")
-    public Dimension get(@RequestParam final String id) {
+    public Dimension get(@PathVariable final String id) {
         return service.read(id);
     }
 
     @RequestMapping(method = PUT, path = "/{id}")
-    public ResponseEntity<Dimension> put(@RequestParam final String id,
+    public ResponseEntity<Dimension> put(@PathVariable final String id,
             @RequestBody final Dimension dimension) throws IOException {
 
         checkArgument(id.equals(dimension.getId()), "ID in path and body must match");
@@ -63,7 +65,7 @@ public class DimensionResource {
 
     @RequestMapping(method = DELETE, path = "/{id}")
     @ResponseStatus(NO_CONTENT)
-    public void delete(@RequestParam final String id) {
+    public void delete(@PathVariable final String id) {
         service.delete(id);
     }
 

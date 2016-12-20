@@ -2,6 +2,7 @@ package org.zalando.compass.resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.ValueService;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.Values;
+import org.springframework.web.context.annotation.RequestScope;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -23,6 +25,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 // TODO validate that dimension values can only be primitives
 @RestController
+@RequestScope
 @RequestMapping(path = "/keys/{id}")
 public class ValueResource {
 
@@ -34,30 +37,30 @@ public class ValueResource {
     }
 
     @RequestMapping(method = GET, path = "/value")
-    public Value get(@RequestParam final String id, @RequestParam final Map<String, String> filter) {
+    public Value get(@PathVariable final String id, @RequestParam final Map<String, String> filter) {
         return service.read(id, filter);
     }
 
     @RequestMapping(method = GET, path = "/values")
-    public Values getAll(@RequestParam final String id, @RequestParam final Map<String, String> filter) {
+    public Values getAll(@PathVariable final String id, @RequestParam final Map<String, String> filter) {
         return service.readAll(id, filter);
     }
 
     @RequestMapping(method = PUT, path = "/values")
-    public Values put(@RequestParam final String id, @RequestBody final Values values) throws IOException {
+    public Values put(@PathVariable final String id, @RequestBody final Values values) throws IOException {
         service.replace(id, values);
         return values;
     }
 
     @RequestMapping(method = POST, path = "/values")
-    public Values post(@RequestParam final String id, @RequestBody final Values values) {
+    public Values post(@PathVariable final String id, @RequestBody final Values values) {
         service.createOrUpdate(id, values);
         return service.readAll(id, emptyMap());
     }
 
     @RequestMapping(method = DELETE, path = "/values")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@RequestParam final String id, @RequestParam final Map<String, Object> filter) throws IOException {
+    public void delete(@PathVariable final String id, @RequestParam final Map<String, Object> filter) throws IOException {
         service.delete(id, filter);
     }
 
