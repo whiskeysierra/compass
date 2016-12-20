@@ -1,6 +1,6 @@
 package org.zalando.compass.domain.logic;
 
-import com.google.common.collect.ImmutableSet;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,17 +11,21 @@ import org.zalando.compass.domain.model.Values;
 import org.zalando.compass.domain.persistence.DimensionRepository;
 import org.zalando.compass.domain.persistence.ValueRepository;
 
+import javax.annotation.Nullable;
 import javax.ws.rs.NotFoundException;
 import java.io.IOException;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static com.google.common.collect.Ordering.explicit;
 import static java.util.Collections.emptyMap;
 import static java.util.Comparator.comparing;
+import static java.util.Comparator.nullsLast;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
@@ -44,6 +48,7 @@ public class ValueService {
 
     public void createOrUpdate(final String key, final Values values) {
         valueRepository.create(key, values.getValues());
+        // TODO or update?!
     }
 
     public Value read(final String key, final Map<String, String> filter) {
@@ -53,70 +58,78 @@ public class ValueService {
 
     public Values readAll(final String key, final Map<String, String> filter) {
         final List<Value> values = valueRepository.readAll(key);
+        final Map<Dimension, Relation> dimensions = readDimensions();
 
-        final List<Dimension> universe = dimensionRepository.readAll();
-
-        final Map<String, Dimension> lookup = universe.stream().collect(toMap(Dimension::getId, identity()));
-
-        final List<String> inOrder = universe.stream()
-                .map(Dimension::getId).collect(Collectors.toList());
-
-        final Map<String, Relation> relations = relationService.readAll().stream()
-                .collect(toMap(Relation::getId, identity()));
-
-        values.sort(comparing(this::byDimensions, comparing(Set<String>::size).reversed())
-                .thenComparing(comparing(this::byDimensions, explicit(inOrder).reverse().lexicographical().reverse()))
-                .thenComparing((l, r) -> {
-                    for (final String dimension : inOrder) {
-                        if (l.getDimensions().containsKey(dimension) && r.getDimensions().containsKey(dimension)) {
-                            final Object left = l.getDimensions().get(dimension);
-                            final Object right = r.getDimensions().get(dimension);
-                            final Relation relation = relations.get(lookup.get(dimension).getRelation());
-
-                            // TODO don't use toString
-                            final int result = relation.compare(left.toString(), right.toString());
-
-                            if (result != 0) {
-                                return result;
-                            }
-                        }
-                    }
-
-                    return 0;
-                }));
+        values.sort(byDimensionSizeDescending()
+                .thenComparing(byDimensionsLexicographically(dimensions))
+                .thenComparing(byDimensionValues(dimensions)));
 
         if (filter.isEmpty()) {
             return new Values(values);
         }
 
         return values.stream()
-                .filter(value -> {
-                    for (String dimension : inOrder) {
-                        final boolean isConfigured = value.getDimensions().containsKey(dimension);
-                        final boolean isRequested = filter.containsKey(dimension);
-
-                        if (isConfigured) {
-                            if (!isRequested) {
-                                return false;
-                            }
-
-                            final String configured = value.getDimensions().get(dimension).toString();
-                            final String requested = filter.get(dimension);
-                            final Relation relation = relations.get(lookup.get(dimension).getRelation());
-
-                            if (!relation.test(configured, requested)) {
-                                return false;
-                            }
-                        }
-                    }
-
-                    return true;
-                })
+                .filter(byMatch(filter, dimensions))
                 .collect(collectingAndThen(toList(), Values::new));
     }
 
-    private ImmutableSet<String> byDimensions(final Value value) {
-        return value.getDimensions().keySet();
+    private Map<Dimension, Relation> readDimensions() {
+        final Map<String, Relation> relations = relationService.readAll().stream()
+                .collect(toMap(Relation::getId, identity()));
+
+        return dimensionRepository.readAll().stream()
+                .collect(toMap(identity(), dimension -> relations.get(dimension.getRelation()),
+                        (u, v) -> {
+                            throw new IllegalStateException(String.format("Duplicate key %s", u));
+                        },
+                        LinkedHashMap::new));
+    }
+
+    private Comparator<Value> byDimensionSizeDescending() {
+        return comparing(Value::getDimensions, comparing(Map::size)).reversed();
+    }
+
+    private Comparator<Value> byDimensionsLexicographically(final Map<Dimension, ?> dimensions) {
+        return comparing(value -> value.getDimensions().keySet(), explicit(dimensions.keySet().stream()
+                .map(Dimension::getId).collect(toList())).lexicographical());
+    }
+
+    private Comparator<Value> byDimensionValues(final Map<Dimension, Relation> dimensions) {
+        return comparing(Value::getDimensions, dimensions.entrySet().stream()
+                .map(this::byDimensionValue)
+                .reduce(this::startWithTie, Comparator::thenComparing));
+    }
+
+    private Comparator<Map<String, JsonNode>> byDimensionValue(final Entry<Dimension, Relation> entry) {
+        final Dimension dimension = entry.getKey();
+        final Relation relation = entry.getValue();
+        return comparing(get(dimension), nullsLast(comparing(JsonNode::asText, relation)));
+    }
+
+    private Function<Map<String, JsonNode>, JsonNode> get(final Dimension dimension) {
+        return map -> map.get(dimension.getId());
+    }
+
+    private <T> int startWithTie(@SuppressWarnings("unused") final T l, @SuppressWarnings("unused") final T r) {
+        return 0;
+    }
+
+    private Predicate<Value> byMatch(final Map<String, String> filter, final Map<Dimension, Relation> dimensions) {
+        return dimensions.entrySet().stream()
+                .map(entry -> match(filter, entry))
+                .reduce(Predicate::and).orElse(v -> false);
+    }
+
+    private Predicate<Value> match(final Map<String, String> filter, final Entry<Dimension, Relation> entry) {
+        final Dimension dimension = entry.getKey();
+        final Relation relation = entry.getValue();
+        return value -> {
+            @Nullable final JsonNode configured = value.getDimensions().get(dimension.getId());
+            @Nullable final String requested = filter.get(dimension.getId());
+
+            return configured == null
+                    || requested != null && relation.test(configured.asText(), requested);
+        };
     }
 
     @Transactional

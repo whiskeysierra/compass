@@ -52,6 +52,7 @@ public class DimensionResource {
             @RequestBody final Dimension dimension) throws IOException {
 
         checkArgument(id.equals(dimension.getId()), "ID in path and body must match");
+        // TODO validate that schema is neither object (or null), array or a $ref to one of those
 
         if (service.createOrUpdate(dimension)) {
             return ResponseEntity.status(CREATED).body(dimension);

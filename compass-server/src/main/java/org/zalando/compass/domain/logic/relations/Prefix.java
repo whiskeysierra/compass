@@ -1,17 +1,15 @@
 package org.zalando.compass.domain.logic.relations;
 
+import com.google.common.collect.ComparisonChain;
 import org.zalando.compass.domain.model.Relation;
 
-import java.util.Comparator;
+import static java.util.Comparator.reverseOrder;
 
 public final class Prefix implements Relation {
 
-    private final Comparator<String> comparator = Comparator.comparing(String::length).reversed()
-            .thenComparing(Comparator.naturalOrder());
-
     @Override
     public String getId() {
-        return "prefix";
+        return "^";
     }
 
     @Override
@@ -21,7 +19,10 @@ public final class Prefix implements Relation {
 
     @Override
     public int compare(final String left, final String right) {
-        return comparator.compare(left, right);
+        return ComparisonChain.start()
+                .compare(left.length(), right.length(), reverseOrder())
+                .compare(left, right)
+                .result();
     }
 
     @Override

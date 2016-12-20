@@ -6,7 +6,7 @@ public final class LessThanOrEqual implements Relation {
 
     @Override
     public String getId() {
-        return "≤";
+        return "<=";
     }
 
     @Override
@@ -21,7 +21,7 @@ public final class LessThanOrEqual implements Relation {
 
     @Override
     public boolean test(final String configured, final String requested) {
-        return compare(configured, requested) <= 0;
+        return requested.compareTo(configured) <= 0;
     }
 
 }

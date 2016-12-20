@@ -28,7 +28,6 @@ public class ExceptionHandling implements ProblemHandling, SpringAdviceTrait {
         return create(HttpStatus.BAD_REQUEST, getRootCause(exception), request);
     }
 
-    // TODO add support for JAX-RS exceptions to problem-spring-web
     @ExceptionHandler
     public ResponseEntity<Problem> handleNotFoundException(
             final NotFoundException exception,

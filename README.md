@@ -90,6 +90,10 @@ TODO
   - /*/history in API 
   - 410 Gone + Latest known version as body?!
 
+## Known Issues
+
+- ISO 8601 time zones
+
 ## Alternatives
 
 - [YCB](https://github.com/yahoo/ycb-java)

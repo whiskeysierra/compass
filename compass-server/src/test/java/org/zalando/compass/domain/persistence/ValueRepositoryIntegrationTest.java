@@ -1,7 +1,9 @@
 package org.zalando.compass.domain.persistence;
 
+import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,8 +59,8 @@ public class ValueRepositoryIntegrationTest {
     public void shouldFindWithoutDimensions() throws IOException {
         keys.create(new Key("one", new ObjectNode(JsonNodeFactory.instance), ""));
         keys.create(new Key("two", new ObjectNode(JsonNodeFactory.instance), ""));
-        unit.create("one", singleton(new Value(ImmutableMap.of(), true)));
-        unit.create("two", singleton(new Value(ImmutableMap.of(), true)));
+        unit.create("one", singleton(new Value(ImmutableMap.of(), BooleanNode.TRUE)));
+        unit.create("two", singleton(new Value(ImmutableMap.of(), BooleanNode.TRUE)));
 
         final List<Value> values = unit.readAll("one");
         assertThat(values, hasSize(1));
@@ -72,8 +74,8 @@ public class ValueRepositoryIntegrationTest {
     public void shouldFindWithDimensions() throws IOException {
         keys.create(new Key("one", new ObjectNode(JsonNodeFactory.instance), ""));
         keys.create(new Key("two", new ObjectNode(JsonNodeFactory.instance), ""));
-        unit.create("one", singleton(new Value(ImmutableMap.of("foo", "bar", "bar", "buz"), false)));
-        unit.create("two", singleton(new Value(ImmutableMap.of(), true)));
+        unit.create("one", singleton(new Value(ImmutableMap.of("foo", new TextNode("bar"), "bar", new TextNode("buz")), BooleanNode.FALSE)));
+        unit.create("two", singleton(new Value(ImmutableMap.of(), BooleanNode.TRUE)));
 
         final List<Value> values = unit.readAll("one");
         assertThat(values, hasSize(1));
@@ -89,8 +91,8 @@ public class ValueRepositoryIntegrationTest {
     public void shouldDelete() throws IOException {
         keys.create(new Key("one", new ObjectNode(JsonNodeFactory.instance), ""));
         keys.create(new Key("two", new ObjectNode(JsonNodeFactory.instance), ""));
-        unit.create("one", singleton(new Value(ImmutableMap.of("foo", "bar", "bar", "buz"), false)));
-        unit.create("two", singleton(new Value(ImmutableMap.of(), true)));
+        unit.create("one", singleton(new Value(ImmutableMap.of("foo", new TextNode("bar"), "bar", new TextNode("buz")), BooleanNode.FALSE)));
+        unit.create("two", singleton(new Value(ImmutableMap.of(), BooleanNode.TRUE)));
 
         unit.delete("one", ImmutableMap.of("foo", "bar"));
         assertThat(unit.readAll("one"), is(empty()));

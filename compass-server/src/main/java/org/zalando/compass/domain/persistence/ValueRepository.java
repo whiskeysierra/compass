@@ -1,6 +1,7 @@
 package org.zalando.compass.domain.persistence;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.gag.annotation.remark.Hack;
@@ -24,8 +25,8 @@ import static org.zalando.fauxpas.FauxPas.throwingFunction;
 @Repository
 public class ValueRepository {
 
-    private static final TypeReference<ImmutableMap<String, Object>> TYPE_REF =
-            new TypeReference<ImmutableMap<String, Object>>() {
+    private static final TypeReference<ImmutableMap<String, JsonNode>> TYPE_REF =
+            new TypeReference<ImmutableMap<String, JsonNode>>() {
             };
 
     private final NamedParameterJdbcTemplate template;
@@ -69,7 +70,7 @@ public class ValueRepository {
     private Value map(final ResultSet row, @SuppressWarnings("unused") final int num) throws Exception {
         return new Value(
                 mapper.readValue(row.getBytes("dimensions"), TYPE_REF),
-                mapper.readValue(row.getBytes("value"), Object.class));
+                mapper.readTree(row.getBytes("value")));
     }
 
     public void delete(final String key, final Map<String, Object> filter) throws IOException {
