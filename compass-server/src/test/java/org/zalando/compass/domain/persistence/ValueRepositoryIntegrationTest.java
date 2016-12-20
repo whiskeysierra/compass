@@ -1,10 +1,9 @@
 package org.zalando.compass.domain.persistence;
 
-import com.fasterxml.jackson.databind.node.BooleanNode;
+import com.fasterxml.jackson.databind.node.DecimalNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
-import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +19,10 @@ import org.zalando.compass.domain.model.Value;
 import java.io.IOException;
 import java.util.List;
 
+import static com.fasterxml.jackson.databind.node.BooleanNode.FALSE;
+import static com.fasterxml.jackson.databind.node.BooleanNode.TRUE;
+import static com.google.common.collect.ImmutableMap.of;
+import static java.math.BigDecimal.ONE;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singleton;
@@ -59,14 +62,14 @@ public class ValueRepositoryIntegrationTest {
     public void shouldFindWithoutDimensions() throws IOException {
         keys.create(new Key("one", new ObjectNode(JsonNodeFactory.instance), ""));
         keys.create(new Key("two", new ObjectNode(JsonNodeFactory.instance), ""));
-        unit.create("one", singleton(new Value(ImmutableMap.of(), BooleanNode.TRUE)));
-        unit.create("two", singleton(new Value(ImmutableMap.of(), BooleanNode.TRUE)));
+        unit.createOrUpdate("one", singleton(new Value(of(), TRUE)));
+        unit.createOrUpdate("two", singleton(new Value(of(), TRUE)));
 
         final List<Value> values = unit.readAll("one");
         assertThat(values, hasSize(1));
 
         final Value value = values.get(0);
-        assertThat(value.getValue(), is(BooleanNode.TRUE));
+        assertThat(value.getValue(), is(TRUE));
         assertThat(value.getDimensions(), is(emptyMap()));
     }
 
@@ -74,14 +77,14 @@ public class ValueRepositoryIntegrationTest {
     public void shouldFindWithDimensions() throws IOException {
         keys.create(new Key("one", new ObjectNode(JsonNodeFactory.instance), ""));
         keys.create(new Key("two", new ObjectNode(JsonNodeFactory.instance), ""));
-        unit.create("one", singleton(new Value(ImmutableMap.of("foo", new TextNode("bar"), "bar", new TextNode("buz")), BooleanNode.FALSE)));
-        unit.create("two", singleton(new Value(ImmutableMap.of(), BooleanNode.TRUE)));
+        unit.createOrUpdate("one", singleton(new Value(of("foo", new TextNode("bar"), "bar", new TextNode("buz")), FALSE)));
+        unit.createOrUpdate("two", singleton(new Value(of(), TRUE)));
 
         final List<Value> values = unit.readAll("one");
         assertThat(values, hasSize(1));
 
         final Value value = values.get(0);
-        assertThat(value.getValue(), is(BooleanNode.FALSE));
+        assertThat(value.getValue(), is(FALSE));
         assertThat(value.getDimensions().values(), hasSize(2));
         assertThat(value.getDimensions(), hasEntry("foo", new TextNode("bar")));
         assertThat(value.getDimensions(), hasEntry("bar", new TextNode("buz")));
@@ -91,13 +94,13 @@ public class ValueRepositoryIntegrationTest {
     public void shouldDelete() throws IOException {
         keys.create(new Key("one", new ObjectNode(JsonNodeFactory.instance), ""));
         keys.create(new Key("two", new ObjectNode(JsonNodeFactory.instance), ""));
-        unit.create("one", singleton(new Value(ImmutableMap.of("foo", new TextNode("bar"), "bar", new TextNode("buz")), BooleanNode.FALSE)));
-        unit.create("two", singleton(new Value(ImmutableMap.of(), BooleanNode.TRUE)));
+        unit.createOrUpdate("one", singleton(new Value(of("foo", TRUE, "bar", new DecimalNode(ONE)), FALSE)));
+        unit.createOrUpdate("two", singleton(new Value(of(), TRUE)));
 
-        unit.delete("one", ImmutableMap.of("foo", "bar"));
+        unit.delete("one", of("foo", "true"));
         assertThat(unit.readAll("one"), is(empty()));
 
-        unit.delete("two", ImmutableMap.of());
+        unit.delete("two", of());
         assertThat(unit.readAll("two"), is(empty()));
     }
 

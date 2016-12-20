@@ -14,9 +14,10 @@ CREATE TABLE dimension (
 );
 
 CREATE TABLE value (
-  key TEXT NOT NULL REFERENCES key(id),
+  key TEXT NOT NULL REFERENCES key(id) ON DELETE CASCADE,
   dimensions JSONB NOT NULL, -- map of dimension id to dimension value
-  value JSONB NOT NULL
+  value JSONB NOT NULL,
+  UNIQUE (key, dimensions)
 );
 
 CREATE INDEX ON value USING GIN (dimensions);

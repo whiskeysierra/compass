@@ -153,21 +153,11 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/Values'
-    put:
-      summary: Replace all values for a given key
-      parameters:
-        - $ref: '#/parameters/Key'
-        - $ref: '#/parameters/Values'
-      responses:
-        200:
-          description: OK
-          schema:
-            $ref: '#/definitions/Values'
     post:
       summary: Add or replaces values to a given key
       parameters:
         - $ref: '#/parameters/Key'
-        - $ref: '#/parameters/Values'
+        - $ref: '#/parameters/Value'
       responses:
         201:
           description: Created
@@ -199,6 +189,11 @@ parameters:
     in: body
     schema:
       $ref: '#/definitions/Values'
+  Value:
+    name: value
+    in: body
+    schema:
+      $ref: '#/definitions/Value'
   Filter:
     name: '*'
     description: |

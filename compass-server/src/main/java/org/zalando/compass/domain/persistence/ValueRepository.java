@@ -39,7 +39,7 @@ public class ValueRepository {
         this.mapper = mapper;
     }
 
-    public void create(final String key, final Collection<Value> values) {
+    public void createOrUpdate(final String key, final Collection<Value> values) {
         final SqlParameterSource[] params = values.stream()
                 .map(throwingFunction(value -> new MapSqlParameterSource(ImmutableMap.of(
                         "key", key,
@@ -49,7 +49,9 @@ public class ValueRepository {
 
         template.batchUpdate("" +
                 "INSERT INTO value (key, dimensions, value)" +
-                "     VALUES (:key, :dimensions::JSONB, :value::JSONB)", params);
+                "     VALUES (:key, :dimensions::JSONB, :value::JSONB)" +
+                "ON CONFLICT (key, dimensions) DO UPDATE" +
+                "        SET value = excluded.value", params);
     }
 
     public List<Value> readAll(final String key) {
@@ -73,7 +75,7 @@ public class ValueRepository {
                 mapper.readTree(row.getBytes("value")));
     }
 
-    public void delete(final String key, final Map<String, Object> filter) throws IOException {
+    public void delete(final String key, final Map<String, String> filter) throws IOException {
         final ImmutableMap<String, String> params = ImmutableMap.of(
                 "key", key,
                 "dimensions", mapper.writeValueAsString(filter));
@@ -82,7 +84,9 @@ public class ValueRepository {
                 "DELETE" +
                 "  FROM value" +
                 " WHERE key = :key" +
-                "   AND dimensions @> :dimensions::JSONB", params);
+                // transform dimension values to text for comparison
+                "   AND (SELECT COALESCE(JSONB_OBJECT_AGG(key, value), '{}'::JSONB) " +
+                "          FROM JSONB_EACH_TEXT(dimensions)) @> :dimensions::JSONB", params);
     }
 
 }

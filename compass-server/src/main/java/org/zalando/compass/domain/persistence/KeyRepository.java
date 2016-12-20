@@ -81,7 +81,7 @@ public class KeyRepository {
     public void update(final Key key) throws IOException {
         final ImmutableMap<String, Object> params = ImmutableMap.of(
                 "id", key.getId(),
-                "schema", mapper.writeValueAsString(key.getSchema()), // TODO force validation on update
+                "schema", mapper.writeValueAsString(key.getSchema()),
                 "description", key.getDescription());
 
         template.update("" +

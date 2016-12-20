@@ -8,7 +8,7 @@ spring:
     throw-exception-if-no-handler-found: true
     dispatch-trace-request: true
   datasource:
-    url: jdbc:postgresql://${DATASOURCE_HOST:localhost}/postgres # TODO
+    url: jdbc:postgresql://${DATASOURCE_HOST:localhost}/postgres
     username: postgres
     password: postgres
     max-wait: 10000

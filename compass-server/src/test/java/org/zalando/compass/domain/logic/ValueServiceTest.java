@@ -121,7 +121,7 @@ public class ValueServiceTest {
     }
 
     @Test
-    public void shouldReadAllEqualityWithoutFilter() {
+    public void shouldReadAll() {
         assertThat(unit.readAll("tax-rate").getValues(), contains(
                 new Value(of("country", text("CH"), "after", text("2018-01-01T00:00:00Z")), decimal(0.09)),
                 new Value(of("country", text("DE"), "after", text("2018-01-01T00:00:00Z")), decimal(0.22)),

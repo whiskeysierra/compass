@@ -3,7 +3,6 @@ package org.zalando.compass.domain.logic;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Relation;
 import org.zalando.compass.domain.model.Value;
@@ -22,7 +21,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.google.common.collect.Ordering.explicit;
-import static java.util.Collections.emptyMap;
+import static java.util.Collections.singleton;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
 import static java.util.function.Function.identity;
@@ -45,9 +44,8 @@ public class ValueService {
         this.relationService = relationService;
     }
 
-    public void createOrUpdate(final String key, final Values values) {
-        valueRepository.create(key, values.getValues());
-        // TODO or update?!
+    public void createOrUpdate(final String key, final Value value) {
+        valueRepository.createOrUpdate(key, singleton(value));
     }
 
     public Value read(final String key, final Map<String, String> filter) {
@@ -77,10 +75,11 @@ public class ValueService {
 
         return dimensionRepository.readAll().stream()
                 .collect(toMap(identity(), dimension -> relations.get(dimension.getRelation()),
-                        (u, v) -> {
-                            throw new IllegalStateException(String.format("Duplicate key %s", u));
-                        },
-                        LinkedHashMap::new));
+                        this::denyDuplicates, LinkedHashMap::new));
+    }
+
+    private <T> T denyDuplicates(final T u, @SuppressWarnings("unused") final T v) {
+        throw new IllegalStateException(String.format("Duplicate key %s", u));
     }
 
     private List<Value> values(final String key, final Map<Dimension, Relation> dimensions) {
@@ -125,7 +124,7 @@ public class ValueService {
     private Predicate<Value> byMatch(final Map<String, String> filter, final Map<Dimension, Relation> dimensions) {
         return dimensions.entrySet().stream()
                 .map(entry -> match(filter, entry))
-                .reduce(Predicate::and).orElse(v -> false); // TODO verify that this shouldn't be true
+                .reduce(Predicate::and).orElse(v -> true);
     }
 
     private Predicate<Value> match(final Map<String, String> filter, final Entry<Dimension, Relation> entry) {
@@ -140,13 +139,7 @@ public class ValueService {
         };
     }
 
-    @Transactional
-    public void replace(final String key, final Values values) throws IOException {
-        delete(key, emptyMap());
-        createOrUpdate(key, values);
-    }
-
-    public void delete(final String key, final Map<String, Object> filter) throws IOException {
+    public void delete(final String key, final Map<String, String> filter) throws IOException {
         valueRepository.delete(key, filter);
     }
 

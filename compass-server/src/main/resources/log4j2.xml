@@ -2,7 +2,7 @@
 <Configuration status="warn">
     <Appenders>
         <Console name="stdout" target="SYSTEM_OUT">
-            <PatternLayout pattern="%date {%level} [%thread] [%X{X-Flow-ID}] [%logger] %maxLength{%message}{800}%n"/>
+            <PatternLayout pattern="%date {%level} [%thread] [%X{X-Flow-ID}] [%logger] %message%n"/>
         </Console>
     </Appenders>
 

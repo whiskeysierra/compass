@@ -22,7 +22,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 // TODO validate that dimension values can only be primitives
-// TODO default to empty object if dimensions are missing
+// TODO 404 if key doesn't exist
 @RestController
 @RequestMapping(path = "/keys/{id}")
 public class ValueResource {
@@ -44,21 +44,22 @@ public class ValueResource {
         return service.readAll(id, filter);
     }
 
-    @RequestMapping(method = PUT, path = "/values")
-    public Values put(@PathVariable final String id, @RequestBody final Values values) throws IOException {
-        service.replace(id, values);
-        return values;
+    // TODO document in api.yaml
+    // TODO find better name
+    @RequestMapping(method = GET, path = "/all-the-values")
+    public Values getAll(@PathVariable final String id) {
+        return service.readAll(id);
     }
 
     @RequestMapping(method = POST, path = "/values")
-    public Values post(@PathVariable final String id, @RequestBody final Values values) {
-        service.createOrUpdate(id, values);
-        return service.readAll(id, emptyMap());
+    public Values post(@PathVariable final String id, @RequestBody final Value value) {
+        service.createOrUpdate(id, value);
+        return service.readAll(id, emptyMap()); // TODO or service.readAll(id)
     }
 
     @RequestMapping(method = DELETE, path = "/values")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable final String id, @RequestParam final Map<String, Object> filter) throws IOException {
+    public void delete(@PathVariable final String id, @RequestParam final Map<String, String> filter) throws IOException {
         service.delete(id, filter);
     }
 
