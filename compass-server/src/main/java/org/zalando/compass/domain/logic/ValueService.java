@@ -1,6 +1,7 @@
 package org.zalando.compass.domain.logic;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.ImmutableMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.zalando.compass.domain.model.Dimension;
@@ -8,8 +9,8 @@ import org.zalando.compass.domain.model.Relation;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.Values;
 import org.zalando.compass.domain.persistence.DimensionRepository;
-import org.zalando.compass.domain.persistence.KeyRepository;
 import org.zalando.compass.domain.persistence.ValueRepository;
+import org.zalando.compass.library.SchemaValidator;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -32,22 +33,44 @@ import static java.util.stream.Collectors.toMap;
 @Service
 public class ValueService {
 
+    private final SchemaValidator validator;
     private final RelationService relationService;
     private final DimensionRepository dimensionRepository;
-    private final KeyRepository keyRepository;
+    private final KeyService keyService;
     private final ValueRepository valueRepository;
 
     @Autowired
-    public ValueService(final RelationService relationService, final DimensionRepository dimensionRepository,
-            final KeyRepository keyRepository, final ValueRepository valueRepository) {
+    public ValueService(final SchemaValidator validator, final RelationService relationService,
+            final DimensionRepository dimensionRepository,
+            final KeyService keyService, final ValueRepository valueRepository) {
+        this.validator = validator;
         this.relationService = relationService;
         this.dimensionRepository = dimensionRepository;
-        this.keyRepository = keyRepository;
+        this.keyService = keyService;
         this.valueRepository = valueRepository;
     }
 
     public void createOrUpdate(final String key, final Value value) {
+        validateDimensions(value);
+        validateValue(key, value);
+
         valueRepository.createOrUpdate(key, singleton(value));
+    }
+
+    private void validateDimensions(final Value value) {
+        final ImmutableMap<String, JsonNode> dimensions = value.getDimensions();
+
+        for (final Dimension dimension : dimensionRepository.read(dimensions.keySet())) {
+            final JsonNode schema = dimension.getSchema();
+            final JsonNode node = dimensions.get(dimension.getId());
+            validator.validate(schema, node);
+        }
+    }
+
+    private void validateValue(final String key, final Value value) {
+        final JsonNode schema = keyService.read(key).getSchema();
+        final JsonNode node = value.getValue();
+        validator.validate(schema, node);
     }
 
     public Value read(final String key, final Map<String, String> filter) {
@@ -76,7 +99,7 @@ public class ValueService {
     }
 
     private void checkKeyExists(final String key) {
-        if (!keyRepository.exists(key)) {
+        if (!keyService.exists(key)) {
             throw new NotFoundException();
         }
     }

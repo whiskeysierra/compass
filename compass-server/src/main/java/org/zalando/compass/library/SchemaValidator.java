@@ -2,13 +2,11 @@ package org.zalando.compass.library;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.networknt.schema.JsonSchema;
@@ -22,7 +20,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -32,16 +29,21 @@ import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 
 @Component
-class SchemaValidator {
+public class SchemaValidator {
 
-    private final LoadingCache<String, JsonSchema> schemas;
-
-    public SchemaValidator() {
-        this.schemas = CacheBuilder.newBuilder().build(new SchemaLoader());
-    }
+    private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+    private final JsonSchemaFactory factory = new JsonSchemaFactory(mapper);
+    private final LoadingCache<String, JsonSchema> schemas = CacheBuilder.newBuilder().build(new SchemaLoader());
 
     public void validate(final String name, final JsonNode node) {
-        final JsonSchema schema = schemas.getUnchecked(name);
+        validate(schemas.getUnchecked(name), node);
+    }
+
+    public void validate(final JsonNode schema, final JsonNode node) {
+        validate(factory.getSchema(schema), node);
+    }
+
+    private void validate(final JsonSchema schema, final JsonNode node) {
         final Set<ValidationMessage> messages = schema.validate(node);
 
         if (!messages.isEmpty()) {
@@ -64,19 +66,16 @@ class SchemaValidator {
                 .build();
     }
 
-    private static final class SchemaLoader extends CacheLoader<String, JsonSchema> {
+    private final class SchemaLoader extends CacheLoader<String, JsonSchema> {
 
         private final Set<String> filter =
                 ImmutableSet.of("example", "deprecated", "readOnly", "x-extensible-enum");
 
         private final JsonNode definitions;
-        private final JsonSchemaFactory factory;
 
         public SchemaLoader() {
             try {
-                final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
                 this.definitions = filter(mapper.readTree(getResource("api/api.yaml")));
-                this.factory = new JsonSchemaFactory(mapper);
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }

@@ -32,7 +32,6 @@ public class KeyService {
         return false;
     }
 
-    @Nullable
     public Key read(final String id) {
         final List<Key> keys = repository.read(singleton(id));
 
@@ -47,6 +46,10 @@ public class KeyService {
 
     public Keys readAll() {
         return new Keys(repository.readAll());
+    }
+
+    public boolean exists(final String id) {
+        return repository.exists(id);
     }
 
     public void delete(final String id) {

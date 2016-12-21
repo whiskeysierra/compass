@@ -9,8 +9,8 @@ import org.junit.Test;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.DimensionRepository;
-import org.zalando.compass.domain.persistence.KeyRepository;
 import org.zalando.compass.domain.persistence.ValueRepository;
+import org.zalando.compass.library.SchemaValidator;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -27,12 +27,13 @@ import static org.mockito.Mockito.when;
 
 public class ValueServiceTest {
 
+    private final SchemaValidator validator = mock(SchemaValidator.class);
     private final RelationService relationService = new RelationService();
     private final DimensionRepository dimensionRepository = mock(DimensionRepository.class);
-    private final KeyRepository keyRepository = mock(KeyRepository.class);
+    private final KeyService keyService = mock(KeyService.class);
     private final ValueRepository valueRepository = mock(ValueRepository.class);
 
-    private final ValueService unit = new ValueService(relationService, dimensionRepository, keyRepository,
+    private final ValueService unit = new ValueService(validator, relationService, dimensionRepository, keyService,
             valueRepository
     );
 
@@ -46,7 +47,7 @@ public class ValueServiceTest {
                 new Dimension("locale", stringSchema(), "^", ""),
                 new Dimension("email", stringSchema(), "~", "")));
 
-        when(keyRepository.exists("tax-rate")).thenReturn(true);
+        when(keyService.exists("tax-rate")).thenReturn(true);
 
         final List<Value> values = asList(
                 new Value(of(), decimal(0.25)), // legally questionable, but ok for the sake of a test
