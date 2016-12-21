@@ -55,3 +55,4 @@ TODO
 ## Alternatives
 
 - [YCB](https://github.com/yahoo/ycb-java)
+- [Decision Model and Notation (DMN)](https://en.wikipedia.org/wiki/Decision_Model_and_Notation) for example [Camunda DMN Engine](https://docs.camunda.org/manual/latest/user-guide/dmn-engine)

@@ -1,5 +1,6 @@
 package org.zalando.compass.resource;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Dimensions;
+import org.zalando.compass.library.Reader;
 
 import java.io.IOException;
 
@@ -24,10 +26,12 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 @RequestMapping(path = "/dimensions")
 public class DimensionResource {
 
+    private final Reader reader;
     private final DimensionService service;
 
     @Autowired
-    public DimensionResource(final DimensionService service) {
+    public DimensionResource(final Reader reader, final DimensionService service) {
+        this.reader = reader;
         this.service = service;
     }
 
@@ -37,7 +41,8 @@ public class DimensionResource {
     }
 
     @RequestMapping(method = PUT)
-    public Dimensions putAll(@RequestBody final Dimensions dimensions) {
+    public Dimensions putAll(@RequestBody final JsonNode node) throws IOException {
+        final Dimensions dimensions = reader.read(node, Dimensions.class);
         service.reorder(dimensions.getDimensions());
         return service.readAll();
     }
@@ -49,7 +54,8 @@ public class DimensionResource {
 
     @RequestMapping(method = PUT, path = "/{id}")
     public ResponseEntity<Dimension> put(@PathVariable final String id,
-            @RequestBody final Dimension input) throws IOException {
+            @RequestBody final JsonNode node) throws IOException {
+        final Dimension input = reader.read(node, Dimension.class);
 
         checkArgument(input.getId() == null || id.equals(input.getId()),
                 "If present, ID body must match with URL");

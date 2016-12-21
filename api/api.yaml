@@ -259,8 +259,7 @@ definitions:
     properties:
       id:
         description: The unique identifier for this dimension.
-        type:
-          $ref: '#/definitions/ID'
+        $ref: '#/definitions/ID'
         readOnly: true
         example: country
       schema:
@@ -298,8 +297,7 @@ definitions:
     properties:
       id:
         description: The unique identifier for this key. It can be namespaced.
-        type:
-          $ref: '#/definitions/ID'
+        $ref: '#/definitions/ID'
         readOnly: true
         example: tax-rate
       schema:
@@ -325,15 +323,14 @@ definitions:
     properties:
       dimensions:
         type: object
-        additionalProperties:
-          # keys are dimension identifiers
-          # values are typed according to the dimension's schema
+        # keys are dimension identifiers
+        # values are typed according to the dimension's schema
+        additionalProperties: true
         example:
           country: DE
           after: 2017-01-01T00:00:00
         default: {}
       value:
-        type: object
         description: |
           Actual value for this key and its dimensions. This may be of any type, i.e. everything from primitive values like boolean and integers to complex
           structures is possible. Although complex objects can usually be flattened with the use of custom dimensions very efficiently.

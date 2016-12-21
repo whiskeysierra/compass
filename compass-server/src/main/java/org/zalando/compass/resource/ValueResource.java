@@ -1,5 +1,6 @@
 package org.zalando.compass.resource;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.ValueService;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.Values;
+import org.zalando.compass.library.Reader;
 
 import java.io.IOException;
 import java.util.Map;
@@ -22,10 +24,12 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @RestController
 public class ValueResource {
 
+    private final Reader reader;
     private final ValueService service;
 
     @Autowired
-    public ValueResource(final ValueService service) {
+    public ValueResource(final Reader reader, final ValueService service) {
+        this.reader = reader;
         this.service = service;
     }
 
@@ -41,7 +45,8 @@ public class ValueResource {
 
     @RequestMapping(method = POST, path = "/keys/{id}/values")
     public Values post(@PathVariable final String id, @RequestParam final Map<String, String> filter,
-            @RequestBody final Value value) {
+            @RequestBody final JsonNode node) throws IOException {
+        final Value value = reader.read(node, Value.class);
         service.createOrUpdate(id, value);
         return service.readAll(id, filter);
     }

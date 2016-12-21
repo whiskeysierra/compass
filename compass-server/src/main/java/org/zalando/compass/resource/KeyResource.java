@@ -1,5 +1,6 @@
 package org.zalando.compass.resource;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.KeyService;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Keys;
+import org.zalando.compass.library.Reader;
 
 import java.io.IOException;
 
@@ -24,10 +26,12 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 @RequestMapping(path = "/keys")
 public class KeyResource {
 
+    private final Reader reader;
     private final KeyService service;
 
     @Autowired
-    public KeyResource(final KeyService service) {
+    public KeyResource(final Reader reader, final KeyService service) {
+        this.reader = reader;
         this.service = service;
     }
 
@@ -43,7 +47,9 @@ public class KeyResource {
 
     @RequestMapping(method = PUT, path = "/{id}")
     public ResponseEntity<Key> put(@PathVariable final String id,
-            @RequestBody final Key input) throws IOException {
+            @RequestBody final JsonNode node) throws IOException {
+
+        final Key input = reader.read(node, Key.class);
 
         checkArgument(input.getId() == null || id.equals(input.getId()),
                 "If present, ID body must match with URL");
