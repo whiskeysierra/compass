@@ -98,11 +98,8 @@ public class ValueService {
     }
 
     private Map<Dimension, Relation> readDimensions() {
-        final Map<String, Relation> relations = relationService.readAll().stream()
-                .collect(toMap(Relation::getId, identity()));
-
         return dimensionRepository.readAll().stream()
-                .collect(toMap(identity(), dimension -> relations.get(dimension.getRelation()),
+                .collect(toMap(identity(), dimension -> relationService.read(dimension.getRelation()),
                         this::denyDuplicates, LinkedHashMap::new));
     }
 

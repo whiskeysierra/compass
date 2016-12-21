@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.dao.support.DataAccessUtils.singleResult;
@@ -19,19 +20,23 @@ import static org.springframework.dao.support.DataAccessUtils.singleResult;
 public class DimensionService {
 
     private final SchemaValidator validator;
+    private final RelationService relationService;
     private final DimensionRepository dimensionRepository;
     private final ValueRepository valueRepository;
 
     @Autowired
-    public DimensionService(final SchemaValidator validator, final DimensionRepository dimensionRepository,
+    public DimensionService(final SchemaValidator validator, final RelationService relationService,
+            final DimensionRepository dimensionRepository,
             final ValueRepository valueRepository) {
         this.validator = validator;
+        this.relationService = relationService;
         this.dimensionRepository = dimensionRepository;
         this.valueRepository = valueRepository;
     }
 
     public boolean createOrUpdate(final Dimension dimension) throws IOException {
-        // TODO validate relation
+        checkArgument(relationService.read(dimension.getRelation()) != null,
+                "Unknown relation '%s'", dimension.getRelation());
 
         if (dimensionRepository.create(dimension)) {
             return true;
