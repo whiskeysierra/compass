@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Keys;
 import org.zalando.compass.domain.persistence.KeyRepository;
+import org.zalando.compass.domain.persistence.ValueRepository;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -16,24 +17,34 @@ import static org.springframework.dao.support.DataAccessUtils.singleResult;
 @Service
 public class KeyService {
 
-    private final KeyRepository repository;
+    private final SchemaValidator validator;
+    private final KeyRepository keyRepository;
+    private final ValueRepository valueRepository;
 
     @Autowired
-    public KeyService(final KeyRepository repository) {
-        this.repository = repository;
+    public KeyService(final SchemaValidator validator, final KeyRepository keyRepository,
+            final ValueRepository valueRepository) {
+        this.validator = validator;
+        this.keyRepository = keyRepository;
+        this.valueRepository = valueRepository;
     }
 
     public boolean createOrUpdate(final Key key) throws IOException {
-        if (repository.create(key)) {
+        if (keyRepository.create(key)) {
             return true;
         }
 
-        repository.update(key);
+        validateAllValues(key);
+        keyRepository.update(key);
         return false;
     }
 
+    private void validateAllValues(final Key key) {
+        validator.validate(key, valueRepository.readAllByKey(key.getId()));
+    }
+
     public Key read(final String id) {
-        final List<Key> keys = repository.read(singleton(id));
+        final List<Key> keys = keyRepository.read(singleton(id));
 
         @Nullable final Key key = singleResult(keys);
 
@@ -45,15 +56,15 @@ public class KeyService {
     }
 
     public Keys readAll() {
-        return new Keys(repository.readAll());
+        return new Keys(keyRepository.readAll());
     }
 
     public boolean exists(final String id) {
-        return repository.exists(id);
+        return keyRepository.exists(id);
     }
 
     public void delete(final String id) {
-        if (!repository.delete(id)) {
+        if (!keyRepository.delete(id)) {
             throw new NotFoundException();
         }
     }

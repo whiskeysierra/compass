@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Dimensions;
-import org.zalando.compass.library.Reader;
+import org.zalando.compass.library.JsonReader;
 
 import java.io.IOException;
 
@@ -26,11 +26,11 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 @RequestMapping(path = "/dimensions")
 public class DimensionResource {
 
-    private final Reader reader;
+    private final JsonReader reader;
     private final DimensionService service;
 
     @Autowired
-    public DimensionResource(final Reader reader, final DimensionService service) {
+    public DimensionResource(final JsonReader reader, final DimensionService service) {
         this.reader = reader;
         this.service = service;
     }

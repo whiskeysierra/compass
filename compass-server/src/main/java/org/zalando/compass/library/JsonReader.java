@@ -8,13 +8,13 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 @Component
-public class Reader {
+public class JsonReader {
 
-    private final SchemaValidator validator;
+    private final JsonSchemaValidator validator;
     private final ObjectMapper mapper;
 
     @Autowired
-    public Reader(final SchemaValidator validator, final ObjectMapper mapper) {
+    public JsonReader(final JsonSchemaValidator validator, final ObjectMapper mapper) {
         this.validator = validator;
         this.mapper = mapper;
     }

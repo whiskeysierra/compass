@@ -1,7 +1,7 @@
 package org.zalando.compass.domain.logic;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.zalando.compass.domain.model.Dimension;
@@ -10,7 +10,6 @@ import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.Values;
 import org.zalando.compass.domain.persistence.DimensionRepository;
 import org.zalando.compass.domain.persistence.ValueRepository;
-import org.zalando.compass.library.SchemaValidator;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -59,19 +58,12 @@ public class ValueService {
     }
 
     private void validateDimensions(final Value value) {
-        final ImmutableMap<String, JsonNode> dimensions = value.getDimensions();
-
-        for (final Dimension dimension : dimensionRepository.read(dimensions.keySet())) {
-            final JsonNode schema = dimension.getSchema();
-            final JsonNode node = dimensions.get(dimension.getId());
-            validator.validate(schema, node, "dimensions", dimension.getId());
-        }
+        final ImmutableSet<String> dimensions = value.getDimensions().keySet();
+        validator.validate(dimensionRepository.read(dimensions), value);
     }
 
     private void validateValue(final String key, final Value value) {
-        final JsonNode schema = keyService.read(key).getSchema();
-        final JsonNode node = value.getValue();
-        validator.validate(schema, node, "value");
+        validator.validate(keyService.read(key), value);
     }
 
     public Value read(final String key, final Map<String, String> filter) {
@@ -82,7 +74,7 @@ public class ValueService {
     public Values readAll(final String key, final Map<String, String> filter) {
         checkKeyExists(key);
 
-        final List<Value> values = valueRepository.readAll(key);
+        final List<Value> values = valueRepository.readAllByKey(key);
         final Map<Dimension, Relation> dimensions = readDimensions();
 
         sort(values, dimensions);
@@ -91,7 +83,7 @@ public class ValueService {
     }
 
     public Values findAll(final String pattern) {
-        final List<Value> values = valueRepository.findAll(pattern);
+        final List<Value> values = valueRepository.readAllByKeyPattern(pattern);
         final Map<Dimension, Relation> dimensions = readDimensions();
 
         sort(values, dimensions);

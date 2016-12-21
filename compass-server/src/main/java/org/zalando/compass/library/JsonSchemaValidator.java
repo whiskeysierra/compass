@@ -20,13 +20,11 @@ import org.zalando.problem.ThrowableProblem;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import static com.google.common.io.Resources.getResource;
-import static com.networknt.schema.JsonValidator.AT_ROOT;
 import static java.util.Arrays.stream;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.collectingAndThen;
@@ -35,7 +33,7 @@ import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 
 @Component
-public class SchemaValidator {
+public class JsonSchemaValidator {
 
     private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
     private final JsonSchemaFactory factory = new JsonSchemaFactory(mapper);

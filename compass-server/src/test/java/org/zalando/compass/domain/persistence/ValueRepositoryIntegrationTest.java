@@ -55,7 +55,7 @@ public class ValueRepositoryIntegrationTest {
 
     @Test
     public void shouldNotFind() throws IOException {
-        assertThat(unit.readAll("foo"), is(emptyList()));
+        assertThat(unit.readAllByKey("foo"), is(emptyList()));
     }
 
     @Test
@@ -65,7 +65,7 @@ public class ValueRepositoryIntegrationTest {
         unit.createOrUpdate("one", singleton(new Value(of(), TRUE)));
         unit.createOrUpdate("two", singleton(new Value(of(), TRUE)));
 
-        final List<Value> values = unit.readAll("one");
+        final List<Value> values = unit.readAllByKey("one");
         assertThat(values, hasSize(1));
 
         final Value value = values.get(0);
@@ -80,7 +80,7 @@ public class ValueRepositoryIntegrationTest {
         unit.createOrUpdate("one", singleton(new Value(of("foo", new TextNode("bar"), "bar", new TextNode("buz")), FALSE)));
         unit.createOrUpdate("two", singleton(new Value(of(), TRUE)));
 
-        final List<Value> values = unit.readAll("one");
+        final List<Value> values = unit.readAllByKey("one");
         assertThat(values, hasSize(1));
 
         final Value value = values.get(0);
@@ -98,10 +98,10 @@ public class ValueRepositoryIntegrationTest {
         unit.createOrUpdate("two", singleton(new Value(of(), TRUE)));
 
         unit.delete("one", of("foo", "true"));
-        assertThat(unit.readAll("one"), is(empty()));
+        assertThat(unit.readAllByKey("one"), is(empty()));
 
         unit.delete("two", of());
-        assertThat(unit.readAll("two"), is(empty()));
+        assertThat(unit.readAllByKey("two"), is(empty()));
     }
 
 }

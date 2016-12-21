@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.KeyService;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Keys;
-import org.zalando.compass.library.Reader;
+import org.zalando.compass.library.JsonReader;
 
 import java.io.IOException;
 
@@ -26,11 +26,11 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 @RequestMapping(path = "/keys")
 public class KeyResource {
 
-    private final Reader reader;
+    private final JsonReader reader;
     private final KeyService service;
 
     @Autowired
-    public KeyResource(final Reader reader, final KeyService service) {
+    public KeyResource(final JsonReader reader, final KeyService service) {
         this.reader = reader;
         this.service = service;
     }

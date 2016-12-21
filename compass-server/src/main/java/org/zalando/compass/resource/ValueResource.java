@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.ValueService;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.Values;
-import org.zalando.compass.library.Reader;
+import org.zalando.compass.library.JsonReader;
 
 import java.io.IOException;
 import java.util.Map;
@@ -24,11 +24,11 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @RestController
 public class ValueResource {
 
-    private final Reader reader;
+    private final JsonReader reader;
     private final ValueService service;
 
     @Autowired
-    public ValueResource(final Reader reader, final ValueService service) {
+    public ValueResource(final JsonReader reader, final ValueService service) {
         this.reader = reader;
         this.service = service;
     }
@@ -57,6 +57,7 @@ public class ValueResource {
         service.delete(id, filter);
     }
 
+    // TODO think this through
     @RequestMapping(method = GET, path = "/values")
     public Values getAll(@RequestParam(name = "q", required = false, defaultValue = "") final String query) {
         return service.findAll(query);

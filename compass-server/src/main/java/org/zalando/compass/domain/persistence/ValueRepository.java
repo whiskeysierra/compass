@@ -54,24 +54,34 @@ public class ValueRepository {
                 "        SET value = excluded.value", params);
     }
 
-    public List<Value> readAll(final String key) {
+    public List<Value> readAllByKey(final String key) {
         final ImmutableMap<String, String> params = ImmutableMap.of("key", key);
 
         return template.query("" +
-                "SELECT dimensions AS dimensions," +
+                "SELECT dimensions," +
                 "       value" +
                 "  FROM value" +
                 " WHERE key = :key", params, mapRow());
     }
 
-    public List<Value> findAll(final String keyPattern) {
-        final ImmutableMap<String, String> params = ImmutableMap.of("key", "*" + keyPattern + "*");
+    public List<Value> readAllByKeyPattern(final String keyPattern) {
+        final ImmutableMap<String, String> params = ImmutableMap.of("key", "%" + keyPattern + "%");
 
         return template.query("" +
-                "SELECT dimensions AS dimensions," +
+                "SELECT dimensions," +
                 "       value" +
                 "  FROM value" +
                 " WHERE key ILIKE :key", params, mapRow());
+    }
+
+    public List<Value> readAllByDimension(final String dimension) {
+        final ImmutableMap<String, Object> params = ImmutableMap.of("dimension", dimension);
+
+        return template.query("" +
+                "SELECT dimensions," +
+                "       value" +
+                "  FROM value" +
+                " WHERE dimensions ? :dimension", params, mapRow());
     }
 
     @Hack

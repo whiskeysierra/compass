@@ -10,7 +10,6 @@ import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.DimensionRepository;
 import org.zalando.compass.domain.persistence.ValueRepository;
-import org.zalando.compass.library.SchemaValidator;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -67,8 +66,8 @@ public class ValueServiceTest {
                 new Value(of("email", text(".*@zalando\\.de")), decimal(0.0)),
                 new Value(of("email", text(".*@goldmansachs\\.com")), decimal(1.0)));
 
-        when(valueRepository.readAll(any())).thenReturn(values);
-        when(valueRepository.findAll(any())).thenReturn(values);
+        when(valueRepository.readAllByKey(any())).thenReturn(values);
+        when(valueRepository.readAllByKeyPattern(any())).thenReturn(values);
     }
 
     private ObjectNode stringSchema() {
