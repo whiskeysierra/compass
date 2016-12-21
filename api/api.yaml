@@ -45,7 +45,7 @@ paths:
           schema:
             $ref: '#/definitions/Dimensions'
     put:
-      summary: Re-order all dimensions
+      summary: Update, add and/or re-order dimensions
       description: |
         Dimensions have one strict global ordering, i.e. every dimension is comparable to any other.
         To change the priority one needs to update all dimensions with an explicit ordering. Clients are free to use

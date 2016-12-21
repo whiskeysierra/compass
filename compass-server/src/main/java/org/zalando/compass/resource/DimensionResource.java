@@ -43,7 +43,7 @@ public class DimensionResource {
     @RequestMapping(method = PUT)
     public Dimensions putAll(@RequestBody final JsonNode node) throws IOException {
         final Dimensions dimensions = reader.read(node, Dimensions.class);
-        service.reorder(dimensions.getDimensions());
+        service.createOrUpdate(dimensions.getDimensions());
         return service.readAll();
     }
 

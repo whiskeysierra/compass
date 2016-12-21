@@ -15,6 +15,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.dao.support.DataAccessUtils.singleResult;
+import static org.zalando.fauxpas.FauxPas.throwingConsumer;
 
 @Service
 public class DimensionService {
@@ -68,7 +69,8 @@ public class DimensionService {
         return new Dimensions(dimensionRepository.readAll());
     }
 
-    public void reorder(final List<Dimension> dimensions) {
+    public void createOrUpdate(final List<Dimension> dimensions) {
+        dimensions.forEach(throwingConsumer(this::createOrUpdate));
         dimensionRepository.reorder(dimensions.stream()
                 .map(Dimension::getId).collect(toList()));
     }
