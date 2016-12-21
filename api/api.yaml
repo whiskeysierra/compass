@@ -23,6 +23,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/Relations'
+  /relations/{relation}:
+    get:
+      summary: View a relation
+      parameters:
+        - $ref: '#/parameters/RelationId'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Relation'
   /dimensions:
     get:
       summary: List all dimensions
@@ -184,17 +194,22 @@ paths:
 #          schema:
 #            $ref: '#/definitions/Values' # TODO should include keys?!
 parameters:
+  RelationId:
+    name: relation
+    in: path
+    type: string
+    required: true
   DimensionId:
     name: dimension
     in: path
     type:
-      $ref: '#/definitions/DimensionId'
+      $ref: '#/definitions/ID'
     required: true
   Key:
     name: key
     in: path
     type:
-      $ref: '#/definitions/KeyId'
+      $ref: '#/definitions/ID'
     required: true
   Values:
     name: values

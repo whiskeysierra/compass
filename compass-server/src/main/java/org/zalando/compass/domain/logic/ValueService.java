@@ -18,16 +18,20 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Ordering.explicit;
+import static com.google.common.collect.Sets.difference;
 import static java.util.Collections.singleton;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
 @Service
 public class ValueService {
@@ -59,7 +63,12 @@ public class ValueService {
 
     private void validateDimensions(final Value value) {
         final ImmutableSet<String> dimensions = value.getDimensions().keySet();
-        validator.validate(dimensionRepository.read(dimensions), value);
+        final List<Dimension> read = dimensionRepository.read(dimensions);
+
+        final Set<String> difference = difference(dimensions, read.stream().map(Dimension::getId).collect(toSet()));
+        checkArgument(difference.isEmpty(), "Unknown dimensions: " + difference);
+
+        validator.validate(read, value);
     }
 
     private void validateValue(final String key, final Value value) {
@@ -67,11 +76,11 @@ public class ValueService {
     }
 
     public Value read(final String key, final Map<String, String> filter) {
-        return readAll(key, filter).getValues().stream()
+        return readAllByKey(key, filter).getValues().stream()
                 .findFirst().orElseThrow(NotFoundException::new);
     }
 
-    public Values readAll(final String key, final Map<String, String> filter) {
+    public Values readAllByKey(final String key, final Map<String, String> filter) {
         checkKeyExists(key);
 
         final List<Value> values = valueRepository.readAllByKey(key);
@@ -82,8 +91,8 @@ public class ValueService {
         return new Values(match(values, dimensions, filter));
     }
 
-    public Values findAll(final String pattern) {
-        final List<Value> values = valueRepository.readAllByKeyPattern(pattern);
+    public Values readAllByKeyPattern(final String keyPattern) {
+        final List<Value> values = valueRepository.readAllByKeyPattern(keyPattern);
         final Map<Dimension, Relation> dimensions = readDimensions();
 
         sort(values, dimensions);

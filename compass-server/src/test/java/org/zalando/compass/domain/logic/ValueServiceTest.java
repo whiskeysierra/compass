@@ -125,14 +125,14 @@ public class ValueServiceTest {
 
     @Test
     public void shouldReadAllEqualityWithFilter() {
-        assertThat(unit.readAll("tax-rate", of("country", "DE")).getValues(), contains(
+        assertThat(unit.readAllByKey("tax-rate", of("country", "DE")).getValues(), contains(
                 new Value(of("country", text("DE")), decimal(0.19)),
                 new Value(of(), decimal(0.25))));
     }
 
     @Test
     public void shouldFindAll() {
-        assertThat(unit.findAll("tax").getValues(), contains(
+        assertThat(unit.readAllByKeyPattern("tax").getValues(), contains(
                 new Value(of("country", text("CH"), "after", text("2018-01-01T00:00:00Z")), decimal(0.09)),
                 new Value(of("country", text("DE"), "after", text("2018-01-01T00:00:00Z")), decimal(0.22)),
                 new Value(of("country", text("CH"), "after", text("2017-01-01T00:00:00Z")), decimal(0.08)),

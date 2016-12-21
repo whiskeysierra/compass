@@ -40,7 +40,7 @@ public class ValueResource {
 
     @RequestMapping(method = GET, path = "/keys/{id}/values")
     public Values getAll(@PathVariable final String id, @RequestParam final Map<String, String> filter) {
-        return service.readAll(id, filter);
+        return service.readAllByKey(id, filter);
     }
 
     @RequestMapping(method = POST, path = "/keys/{id}/values")
@@ -48,7 +48,7 @@ public class ValueResource {
             @RequestBody final JsonNode node) throws IOException {
         final Value value = reader.read(node, Value.class);
         service.createOrUpdate(id, value);
-        return service.readAll(id, filter);
+        return service.readAllByKey(id, filter);
     }
 
     @RequestMapping(method = DELETE, path = "/keys/{id}/values")
@@ -60,7 +60,7 @@ public class ValueResource {
     // TODO think this through
     @RequestMapping(method = GET, path = "/values")
     public Values getAll(@RequestParam(name = "q", required = false, defaultValue = "") final String query) {
-        return service.findAll(query);
+        return service.readAllByKeyPattern(query);
     }
 
 }
