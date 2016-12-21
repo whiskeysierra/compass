@@ -43,9 +43,12 @@ public class KeyResource {
 
     @RequestMapping(method = PUT, path = "/{id}")
     public ResponseEntity<Key> put(@PathVariable final String id,
-            @RequestBody final Key key) throws IOException {
+            @RequestBody final Key input) throws IOException {
 
-        checkArgument(id.equals(key.getId()), "ID in path and body must match");
+        checkArgument(input.getId() == null || id.equals(input.getId()),
+                "If present, ID body must match with URL");
+
+        final Key key = input.withId(id);
 
         if (service.createOrUpdate(key)) {
             return ResponseEntity.status(CREATED).body(key);

@@ -64,6 +64,16 @@ public class ValueRepository {
                 " WHERE key = :key", params, mapRow());
     }
 
+    public List<Value> findAll(final String keyPattern) {
+        final ImmutableMap<String, String> params = ImmutableMap.of("key", "*" + keyPattern + "*");
+
+        return template.query("" +
+                "SELECT dimensions AS dimensions," +
+                "       value" +
+                "  FROM value" +
+                " WHERE key ILIKE :key", params, mapRow());
+    }
+
     @Hack
     private RowMapper<Value> mapRow() {
         return throwingBiFunction(this::map)::apply;

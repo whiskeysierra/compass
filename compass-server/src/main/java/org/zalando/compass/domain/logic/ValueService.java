@@ -8,6 +8,7 @@ import org.zalando.compass.domain.model.Relation;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.Values;
 import org.zalando.compass.domain.persistence.DimensionRepository;
+import org.zalando.compass.domain.persistence.KeyRepository;
 import org.zalando.compass.domain.persistence.ValueRepository;
 
 import javax.annotation.Nullable;
@@ -25,23 +26,24 @@ import static java.util.Collections.singleton;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 @Service
 public class ValueService {
 
-    private final ValueRepository valueRepository;
-    private final DimensionRepository dimensionRepository;
     private final RelationService relationService;
+    private final DimensionRepository dimensionRepository;
+    private final KeyRepository keyRepository;
+    private final ValueRepository valueRepository;
 
     @Autowired
-    public ValueService(final ValueRepository valueRepository, final DimensionRepository dimensionRepository,
-            final RelationService relationService) {
-        this.valueRepository = valueRepository;
-        this.dimensionRepository = dimensionRepository;
+    public ValueService(final RelationService relationService, final DimensionRepository dimensionRepository,
+            final KeyRepository keyRepository, final ValueRepository valueRepository) {
         this.relationService = relationService;
+        this.dimensionRepository = dimensionRepository;
+        this.keyRepository = keyRepository;
+        this.valueRepository = valueRepository;
     }
 
     public void createOrUpdate(final String key, final Value value) {
@@ -54,19 +56,29 @@ public class ValueService {
     }
 
     public Values readAll(final String key, final Map<String, String> filter) {
-        final Map<Dimension, Relation> dimensions = readDimensions();
-        final List<Value> values = values(key, dimensions);
+        checkKeyExists(key);
 
-        return values.stream()
-                .filter(byMatch(filter, dimensions))
-                .collect(collectingAndThen(toList(), Values::new));
+        final List<Value> values = valueRepository.readAll(key);
+        final Map<Dimension, Relation> dimensions = readDimensions();
+
+        sort(values, dimensions);
+
+        return new Values(match(values, dimensions, filter));
     }
 
-    public Values readAll(final String key) {
+    public Values findAll(final String pattern) {
+        final List<Value> values = valueRepository.findAll(pattern);
         final Map<Dimension, Relation> dimensions = readDimensions();
-        final List<Value> values = values(key, dimensions);
+
+        sort(values, dimensions);
 
         return new Values(values);
+    }
+
+    private void checkKeyExists(final String key) {
+        if (!keyRepository.exists(key)) {
+            throw new NotFoundException();
+        }
     }
 
     private Map<Dimension, Relation> readDimensions() {
@@ -82,14 +94,10 @@ public class ValueService {
         throw new IllegalStateException(String.format("Duplicate key %s", u));
     }
 
-    private List<Value> values(final String key, final Map<Dimension, Relation> dimensions) {
-        final List<Value> values = valueRepository.readAll(key);
-
+    private void sort(final List<Value> values, final Map<Dimension, Relation> dimensions) {
         values.sort(byDimensionSizeDescending()
                 .thenComparing(byDimensionsLexicographically(dimensions))
                 .thenComparing(byDimensionValues(dimensions)));
-
-        return values;
     }
 
     private Comparator<Value> byDimensionSizeDescending() {
@@ -110,10 +118,10 @@ public class ValueService {
     private Comparator<Map<String, JsonNode>> byDimensionValue(final Entry<Dimension, Relation> entry) {
         final Dimension dimension = entry.getKey();
         final Relation relation = entry.getValue();
-        return comparing(get(dimension), nullsLast(comparing(JsonNode::asText, relation)));
+        return comparing(getValueFor(dimension), nullsLast(comparing(JsonNode::asText, relation)));
     }
 
-    private Function<Map<String, JsonNode>, JsonNode> get(final Dimension dimension) {
+    private Function<Map<String, JsonNode>, JsonNode> getValueFor(final Dimension dimension) {
         return map -> map.get(dimension.getId());
     }
 
@@ -121,7 +129,14 @@ public class ValueService {
         return 0;
     }
 
-    private Predicate<Value> byMatch(final Map<String, String> filter, final Map<Dimension, Relation> dimensions) {
+    private List<Value> match(final List<Value> values, final Map<Dimension, Relation> dimensions,
+            final Map<String, String> filter) {
+        return values.stream()
+                .filter(byMatch(dimensions, filter))
+                .collect(toList());
+    }
+
+    private Predicate<Value> byMatch(final Map<Dimension, Relation> dimensions, final Map<String, String> filter) {
         return dimensions.entrySet().stream()
                 .map(entry -> match(filter, entry))
                 .reduce(Predicate::and).orElse(v -> true);

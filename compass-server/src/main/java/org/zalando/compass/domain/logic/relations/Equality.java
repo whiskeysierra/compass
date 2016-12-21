@@ -10,8 +10,13 @@ public final class Equality implements Relation {
     }
 
     @Override
-    public String getDescription() {
+    public String getTitle() {
         return "Equality";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Matches values where the requested dimension values is equal to the configured one.";
     }
 
     @Override

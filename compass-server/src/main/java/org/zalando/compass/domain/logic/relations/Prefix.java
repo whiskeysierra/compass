@@ -13,8 +13,17 @@ public final class Prefix implements Relation {
     }
 
     @Override
+    public String getTitle() {
+        return "Longest Prefix Match";
+    }
+
+    @Override
     public String getDescription() {
-        return "Prefix";
+        return "Matches values where the requested dimension values shares the longest prefix with the configured one. " +
+                "In case of multiple candidates it will match the longest value " +
+                "with a fallback to the least (natural order). " +
+                "Prefix matching is useful for data structures that have a natural hierarchy, including " +
+                "but not limited to locales, geohashes and IP subnet masks.";
     }
 
     @Override

@@ -14,7 +14,7 @@ import static java.util.Comparator.reverseOrder;
 public final class Matches implements Relation {
 
     private final LoadingCache<String, Pattern> cache = CacheBuilder.newBuilder()
-            // not 100% sure why we need that case here
+            // not 100% sure why we need that cast here
             .build(from((Function<String, Pattern>) Pattern::compile));
 
     @Override
@@ -23,8 +23,15 @@ public final class Matches implements Relation {
     }
 
     @Override
-    public String getDescription() {
+    public String getTitle() {
         return "Matches";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Matches values where the requested dimension values matches the configured regular expression. " +
+                "In case of multiple candidates it will match the longest value " +
+                "with a fallback to the least (natural order).";
     }
 
     @Override
@@ -37,8 +44,11 @@ public final class Matches implements Relation {
 
     @Override
     public boolean test(final String configured, final String requested) {
-        final Pattern pattern = cache.getUnchecked(configured);
-        return pattern.matcher(requested).matches();
+        return compile(configured).matcher(requested).matches();
+    }
+
+    private Pattern compile(final String pattern) {
+        return cache.getUnchecked(pattern);
     }
 
 }

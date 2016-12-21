@@ -9,9 +9,11 @@ import org.junit.Test;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.DimensionRepository;
+import org.zalando.compass.domain.persistence.KeyRepository;
 import org.zalando.compass.domain.persistence.ValueRepository;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static com.fasterxml.jackson.databind.node.JsonNodeFactory.instance;
 import static com.google.common.collect.ImmutableMap.of;
@@ -25,15 +27,28 @@ import static org.mockito.Mockito.when;
 
 public class ValueServiceTest {
 
-    private final ValueRepository valueRepository = mock(ValueRepository.class);
-    private final DimensionRepository dimensionRepository = mock(DimensionRepository.class);
     private final RelationService relationService = new RelationService();
+    private final DimensionRepository dimensionRepository = mock(DimensionRepository.class);
+    private final KeyRepository keyRepository = mock(KeyRepository.class);
+    private final ValueRepository valueRepository = mock(ValueRepository.class);
 
-    private final ValueService unit = new ValueService(valueRepository, dimensionRepository, relationService);
+    private final ValueService unit = new ValueService(relationService, dimensionRepository, keyRepository,
+            valueRepository
+    );
 
     @Before
     public void setUp() throws Exception {
-        when(valueRepository.readAll(any())).thenReturn(asList(
+        when(dimensionRepository.readAll()).thenReturn(asList(
+                new Dimension("after", stringSchema(), ">=", ""),
+                new Dimension("before", stringSchema(), "<=", ""),
+                new Dimension("country", stringSchema(), "=", ""),
+                new Dimension("postal-code", stringSchema(), "=", ""),
+                new Dimension("locale", stringSchema(), "^", ""),
+                new Dimension("email", stringSchema(), "~", "")));
+
+        when(keyRepository.exists("tax-rate")).thenReturn(true);
+
+        final List<Value> values = asList(
                 new Value(of(), decimal(0.25)), // legally questionable, but ok for the sake of a test
                 new Value(of("after", text("2017-01-01T00:00:00Z")), decimal(0.5)),
                 new Value(of("country", text("CH")), decimal(0.07)),
@@ -49,15 +64,10 @@ public class ValueServiceTest {
                 new Value(of("locale", text("de-DE")), decimal(0.19)),
                 new Value(of("locale", text("en-DE")), decimal(0.18)),
                 new Value(of("email", text(".*@zalando\\.de")), decimal(0.0)),
-                new Value(of("email", text(".*@goldmansachs\\.com")), decimal(1.0))));
+                new Value(of("email", text(".*@goldmansachs\\.com")), decimal(1.0)));
 
-        when(dimensionRepository.readAll()).thenReturn(asList(
-                new Dimension("after", stringSchema(), ">=", ""),
-                new Dimension("before", stringSchema(), "<=", ""),
-                new Dimension("country", stringSchema(), "=", ""),
-                new Dimension("postal-code", stringSchema(), "=", ""),
-                new Dimension("locale", stringSchema(), "^", ""),
-                new Dimension("email", stringSchema(), "~", "")));
+        when(valueRepository.readAll(any())).thenReturn(values);
+        when(valueRepository.findAll(any())).thenReturn(values);
     }
 
     private ObjectNode stringSchema() {
@@ -121,8 +131,8 @@ public class ValueServiceTest {
     }
 
     @Test
-    public void shouldReadAll() {
-        assertThat(unit.readAll("tax-rate").getValues(), contains(
+    public void shouldFindAll() {
+        assertThat(unit.findAll("tax").getValues(), contains(
                 new Value(of("country", text("CH"), "after", text("2018-01-01T00:00:00Z")), decimal(0.09)),
                 new Value(of("country", text("DE"), "after", text("2018-01-01T00:00:00Z")), decimal(0.22)),
                 new Value(of("country", text("CH"), "after", text("2017-01-01T00:00:00Z")), decimal(0.08)),

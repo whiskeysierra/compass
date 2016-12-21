@@ -12,21 +12,20 @@
 - configuration management
 - n-dimensional, user-defined key-space a.k.a. *dimensions*
 - REST API
-- pluggable relations: =, <, >, <=, >=, ~, in/contains
-- schema validation for dimension and key values
+- pluggable relations: =, <, >, <=, >=, ~
 
 ## Comparison
 
 ### Config Service (internal)
 
 - without projects
-- without authentication/authorization (for now)
+- without authentication/authorization (for now, see #14)
 - without pre-defined *contexts*
 - without central deployment
-- without logs (history later!)
+- without logs (history later, see #13)
 - with thin client
   - without bulk API
-  - without caching
+  - without caching (see #15)
 - with write API
 
 ### YCB
@@ -47,48 +46,7 @@ TODO
 
 ### Relations
 
-- equality
-- greater-than
-- less-than
-- greater-than-or-equal
-- less-than-or-equal
-
-- Plugin SPI, e.g.
-  - pattern
-  - range, e.g. `[1.0,2.0)` (dynamic values, e.g. integers, versions, ...)
-  - prefix match (e.g. locale, geohash)
-- dimension values should not *overlap*, how can this be verified?
-- maybe every custom dimension implementation needs to implement:
-  - name of the dimension
-  - *match* operation between dimension value and actual value
-  - *overlap* operation between different dimension values
-- validation in general?
-  - e.g. invalid patterns?
-
-## API
-
-- list of entries is order by specificity
-- dimensions are ordered by priority
-  - by key?
-- same dimensions are ordered depending on the rules of that dimension
-- linear search
-- first match -> return
-- no match -> throw
-- TODO what if a dimension is not provided by the caller?
-  - required dimensions per key?
-
-## Backlog
-
-- encryption
-- authentication/authorization
-- caching
-- preconditions (ETag + If-Match)
-- PATCH
-- history
-  - require comment for every change?
-  - persist every change (including old value)
-  - /*/history in API 
-  - 410 Gone + Latest known version as body?!
+TODO
 
 ## Known Issues
 

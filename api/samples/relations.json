@@ -2,34 +2,37 @@
   "relations": [
     {
       "id": "=",
-      "description": "Equality"
+      "title": "Equality",
+      "description": "Equality ..."
     },
     {
       "id": "<",
-      "description": "Less than"
+      "title": "Less than ...",
+      "description": "Less than ..."
     },
     {
       "id": ">",
-      "description": "Greater than"
+      "title": "Greater than",
+      "description": "Greater than ..."
     },
     {
-      "id": "≤",
-      "description": "Less than or equal"
+      "id": "<=",
+      "title": "Less than or equal",
+      "description": "Less than or equal ..."
     },
     {
-      "id": "≥",
-      "description": "Greater than or equal"
+      "id": ">=",
+      "title": "Greater than or equal",
+      "description": "Greater than or equal ..."
     },
     {
-      "id": "=~",
+      "id": "~",
+      "title": "Matchesn",
       "description": "Matches regular expression"
     },
     {
-      "id": "range",
-      "description": "Range or interval"
-    },
-    {
-      "id": "prefix",
+      "id": "^",
+      "title": "Prefix",
       "description": "Special version of equality that falls back to longest prefix matches"
     }
   ]

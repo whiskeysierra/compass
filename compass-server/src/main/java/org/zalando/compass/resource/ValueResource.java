@@ -15,16 +15,11 @@ import org.zalando.compass.domain.model.Values;
 import java.io.IOException;
 import java.util.Map;
 
-import static java.util.Collections.emptyMap;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
-import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
-// TODO validate that dimension values can only be primitives
-// TODO 404 if key doesn't exist
 @RestController
-@RequestMapping(path = "/keys/{id}")
 public class ValueResource {
 
     private final ValueService service;
@@ -34,33 +29,32 @@ public class ValueResource {
         this.service = service;
     }
 
-    @RequestMapping(method = GET, path = "/value")
+    @RequestMapping(method = GET, path = "/keys/{id}/value")
     public Value get(@PathVariable final String id, @RequestParam final Map<String, String> filter) {
         return service.read(id, filter);
     }
 
-    @RequestMapping(method = GET, path = "/values")
+    @RequestMapping(method = GET, path = "/keys/{id}/values")
     public Values getAll(@PathVariable final String id, @RequestParam final Map<String, String> filter) {
         return service.readAll(id, filter);
     }
 
-    // TODO document in api.yaml
-    // TODO find better name
-    @RequestMapping(method = GET, path = "/all-the-values")
-    public Values getAll(@PathVariable final String id) {
-        return service.readAll(id);
-    }
-
-    @RequestMapping(method = POST, path = "/values")
-    public Values post(@PathVariable final String id, @RequestBody final Value value) {
+    @RequestMapping(method = POST, path = "/keys/{id}/values")
+    public Values post(@PathVariable final String id, @RequestParam final Map<String, String> filter,
+            @RequestBody final Value value) {
         service.createOrUpdate(id, value);
-        return service.readAll(id, emptyMap()); // TODO or service.readAll(id)
+        return service.readAll(id, filter);
     }
 
-    @RequestMapping(method = DELETE, path = "/values")
+    @RequestMapping(method = DELETE, path = "/keys/{id}/values")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable final String id, @RequestParam final Map<String, String> filter) throws IOException {
         service.delete(id, filter);
+    }
+
+    @RequestMapping(method = GET, path = "/values")
+    public Values getAll(@RequestParam(name = "q", required = false, defaultValue = "") final String query) {
+        return service.findAll(query);
     }
 
 }

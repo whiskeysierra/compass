@@ -7,6 +7,8 @@ public interface Relation extends Comparator<String>, BiPredicate<String, String
 
     String getId();
 
+    String getTitle();
+
     String getDescription();
 
 }

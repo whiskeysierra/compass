@@ -59,6 +59,15 @@ public class KeyRepository {
                 "ORDER BY id ASC", params, mapRow());
     }
 
+    public boolean exists(final String key) {
+        final ImmutableMap<String, String> params = ImmutableMap.of("key", key);
+
+        return template.queryForObject("" +
+                "SELECT EXISTS (SELECT 1 " +
+                "                 FROM key" +
+                "                WHERE id = :key)", params, boolean.class);
+    }
+
     public List<Key> readAll() {
         return template.query("" +
                 "  SELECT id, schema, description" +

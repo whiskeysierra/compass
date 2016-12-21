@@ -49,10 +49,12 @@ public class DimensionResource {
 
     @RequestMapping(method = PUT, path = "/{id}")
     public ResponseEntity<Dimension> put(@PathVariable final String id,
-            @RequestBody final Dimension dimension) throws IOException {
+            @RequestBody final Dimension input) throws IOException {
 
-        checkArgument(id.equals(dimension.getId()), "ID in path and body must match");
-        // TODO validate that schema is neither object (or null), array or a $ref to one of those
+        checkArgument(input.getId() == null || id.equals(input.getId()),
+                "If present, ID body must match with URL");
+
+        final Dimension dimension = input.withId(id);
 
         if (service.createOrUpdate(dimension)) {
             return ResponseEntity.status(CREATED).body(dimension);

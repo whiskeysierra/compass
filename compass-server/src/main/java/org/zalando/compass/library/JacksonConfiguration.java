@@ -13,7 +13,6 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.zalando.jackson.datatype.money.MoneyModule;
 import org.zalando.jackson.module.unknownproperty.UnknownPropertyModule;
 import org.zalando.problem.ProblemModule;
 
@@ -22,9 +21,9 @@ import static com.fasterxml.jackson.core.JsonGenerator.Feature.WRITE_BIGDECIMAL_
 @Configuration
 public class JacksonConfiguration {
 
-    @Bean
+    @Bean(name = "jacksonObjectMapper")
     @Primary
-    public static ObjectMapper jacksonObjectMapper() {
+    public static ObjectMapper objectMapper() {
         final ObjectMapper mapper = new ObjectMapper();
 
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -45,7 +44,6 @@ public class JacksonConfiguration {
         mapper.registerModule(new GuavaModule());
         mapper.registerModule(new JavaTimeModule());
         mapper.registerModule(new Jdk8Module());
-        mapper.registerModule(new MoneyModule());
         mapper.registerModule(new ParameterNamesModule());
         mapper.registerModule(new ProblemModule());
         mapper.registerModule(new UnknownPropertyModule());

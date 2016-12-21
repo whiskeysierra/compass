@@ -157,6 +157,7 @@ paths:
       summary: Add or replaces values to a given key
       parameters:
         - $ref: '#/parameters/Key'
+        - $ref: '#/parameters/Filter'
         - $ref: '#/parameters/Value'
       responses:
         201:
@@ -219,16 +220,31 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Relation'
+    required:
+      - relations
   Relation:
     type: object
     properties:
       id:
         descrition: The unique identifier for this relation.
         type: string
+        example: =
+      title:
+        description: The readable name for this relation
+        type: string
         example: equality
       description:
         type: string
-        description: # TODO
+        description: |
+          A description of this relation that should define what characteristics is has in terms of matching values.
+    required:
+      - id
+      - title
+      - description
+  ID:
+    type: string
+    pattern: '^([a-z0-9]+(-[a-z0-9]+)*)(\.([a-z0-9]+(-[a-z0-9]+)*))*$'
+    example: country
   Dimensions:
     type: object
     properties:
@@ -236,24 +252,28 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Dimension'
+    required:
+      - dimensions
   Dimension:
     type: object
     properties:
       id:
         description: The unique identifier for this dimension.
         type:
-          $ref: '#/definitions/DimensionId'
+          $ref: '#/definitions/ID'
         readOnly: true
+        example: country
       schema:
-        description: # TODO
+        description: The schema that applies to all values of this dimension across all values.
         $ref: 'http://json-schema.org/schema#'
-        # TODO updating this requires a re-check!
-        # TODO we need to be able to safely pass dimensions as query parameters
+        example:
+          type: string
       relation:
         description: |
           The underlying operator that is used to apply any matching and ordering semantics. For a complete list of
           available relations, use `GET /relations`.
         type: string
+        example: =
       description:
         type: string
         description: |
@@ -264,10 +284,6 @@ definitions:
       - schema
       - relation
       - description
-  DimensionId:
-    type: string
-    pattern: '^([a-z0-9]+(-[a-z0-9]+)*)(\.([a-z0-9]+(-[a-z0-9]+)*))*$'
-    example: country
   Keys:
     type: object
     properties:
@@ -275,18 +291,20 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Key'
+    required:
+      - keys
   Key:
     type: object
     properties:
       id:
         description: The unique identifier for this key. It can be namespaced.
         type:
-          $ref: '#/definitions/KeyId'
+          $ref: '#/definitions/ID'
         readOnly: true
+        example: tax-rate
       schema:
-        description: # TODO
+        description: The schema that applies to all values of this key.
         $ref: 'http://json-schema.org/schema#'
-        # TODO updating this requires a re-check!
       description:
         type: string
         description: |
@@ -296,10 +314,6 @@ definitions:
     required:
       - schema
       - description
-  KeyId:
-    type: string
-    pattern: '^([a-z0-9]+(-[a-z0-9]+)*)(\.([a-z0-9]+(-[a-z0-9]+)*))*$'
-    example: tax-rate
   Values:
     type: object
     properties:

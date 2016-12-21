@@ -10,8 +10,14 @@ public final class LessThanOrEqual implements Relation {
     }
 
     @Override
-    public String getDescription() {
+    public String getTitle() {
         return "Less than or equal";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Matches values where the requested dimension values is less than or equal to the configured one. " +
+                "In case of multiple candidates it will match the least (natural order).";
     }
 
     @Override

@@ -164,11 +164,6 @@
         </dependency>
         <dependency>
             <groupId>org.zalando</groupId>
-            <artifactId>jackson-datatype-money</artifactId>
-            <version>0.11.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.zalando</groupId>
             <artifactId>jackson-module-unknown-property</artifactId>
             <version>0.1.0</version>
         </dependency>
@@ -305,7 +300,6 @@
         </dependency>
 
         <!-- Cucumber/Zuchini -->
-
         <dependency>
             <groupId>org.zuchini</groupId>
             <artifactId>zuchini-compat-annotations</artifactId>

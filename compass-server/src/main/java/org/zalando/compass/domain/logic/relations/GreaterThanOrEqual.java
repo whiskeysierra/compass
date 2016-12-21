@@ -10,13 +10,19 @@ public final class GreaterThanOrEqual implements Relation {
     }
 
     @Override
-    public String getDescription() {
+    public String getTitle() {
         return "Greater than or equal";
     }
 
     @Override
+    public String getDescription() {
+        return "Matches values where the requested dimension values is greater than or equal to the configured one. " +
+                "In case of multiple candidates it will match the greatest (natural order).";
+    }
+
+    @Override
     public int compare(final String left, final String right) {
-        return right.compareTo(left);
+        return -left.compareTo(right);
     }
 
     @Override
