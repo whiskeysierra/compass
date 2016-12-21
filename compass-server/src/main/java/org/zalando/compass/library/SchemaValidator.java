@@ -11,6 +11,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
+import com.networknt.schema.JsonValidator;
 import com.networknt.schema.ValidationMessage;
 import org.springframework.stereotype.Component;
 import org.zalando.problem.Problem;
@@ -19,12 +20,17 @@ import org.zalando.problem.ThrowableProblem;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import static com.google.common.io.Resources.getResource;
+import static com.networknt.schema.JsonValidator.AT_ROOT;
+import static java.util.Arrays.stream;
 import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 
@@ -39,12 +45,14 @@ public class SchemaValidator {
         validate(schemas.getUnchecked(name), node);
     }
 
-    public void validate(final JsonNode schema, final JsonNode node) {
-        validate(factory.getSchema(schema), node);
+    public void validate(final JsonNode schema, final JsonNode node, final String... path) {
+        validate(factory.getSchema(schema), node, path);
     }
 
-    private void validate(final JsonSchema schema, final JsonNode node) {
-        final Set<ValidationMessage> messages = schema.validate(node);
+    private void validate(final JsonValidator validator, final JsonNode node, final String... path) {
+        final Set<ValidationMessage> messages = validator.validate(node, node,
+                stream(path).collect(collectingAndThen(joining("."),
+                        result -> result.isEmpty() ? "$" : "$." + result)));
 
         if (!messages.isEmpty()) {
             throw newProblem(messages);

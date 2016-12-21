@@ -51,6 +51,7 @@ public class ValueService {
     }
 
     public void createOrUpdate(final String key, final Value value) {
+        // TODO disallow undefined dimensions
         validateDimensions(value);
         validateValue(key, value);
 
@@ -63,14 +64,14 @@ public class ValueService {
         for (final Dimension dimension : dimensionRepository.read(dimensions.keySet())) {
             final JsonNode schema = dimension.getSchema();
             final JsonNode node = dimensions.get(dimension.getId());
-            validator.validate(schema, node);
+            validator.validate(schema, node, "dimensions", dimension.getId());
         }
     }
 
     private void validateValue(final String key, final Value value) {
         final JsonNode schema = keyService.read(key).getSchema();
         final JsonNode node = value.getValue();
-        validator.validate(schema, node);
+        validator.validate(schema, node, "value");
     }
 
     public Value read(final String key, final Map<String, String> filter) {
