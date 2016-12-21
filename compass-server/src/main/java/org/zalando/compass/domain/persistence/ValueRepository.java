@@ -81,7 +81,7 @@ public class ValueRepository {
                 "SELECT dimensions," +
                 "       value" +
                 "  FROM value" +
-                " WHERE dimensions ? :dimension", params, mapRow());
+                " WHERE JSONB_EXISTS(dimensions ,:dimension)", params, mapRow());
     }
 
     @Hack

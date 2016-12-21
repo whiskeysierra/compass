@@ -31,6 +31,8 @@ public class DimensionService {
     }
 
     public boolean createOrUpdate(final Dimension dimension) throws IOException {
+        // TODO validate relation
+
         if (dimensionRepository.create(dimension)) {
             return true;
         }
