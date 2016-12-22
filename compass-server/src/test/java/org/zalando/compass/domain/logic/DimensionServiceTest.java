@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.Test;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.persistence.DimensionRepository;
+import org.zalando.compass.domain.persistence.RelationRepository;
 import org.zalando.compass.domain.persistence.ValueRepository;
 
 import java.io.IOException;
@@ -14,11 +15,11 @@ import static org.mockito.Mockito.mock;
 public class DimensionServiceTest {
 
     private final SchemaValidator validator = mock(SchemaValidator.class);
-    private final RelationService relationService = new RelationService();
+    private final RelationRepository relationRepository = new RelationRepository();
     private final DimensionRepository dimensionRepository = mock(DimensionRepository.class);
     private final ValueRepository valueRepository = mock(ValueRepository.class);
 
-    private final DimensionService unit = new DimensionService(validator, relationService, dimensionRepository,
+    private final DimensionService unit = new DimensionService(validator, relationRepository, dimensionRepository,
             valueRepository);
 
     @Test(expected = IllegalArgumentException.class)

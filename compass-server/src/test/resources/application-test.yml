@@ -1,0 +1,4 @@
+rest.clients:
+  local:
+    base-url: http://localhost:8080
+    socket-timeout: 10 seconds

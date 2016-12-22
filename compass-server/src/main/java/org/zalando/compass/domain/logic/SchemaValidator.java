@@ -14,7 +14,7 @@ import java.util.Set;
 import static java.util.Collections.singleton;
 
 @Service
-public class SchemaValidator {
+class SchemaValidator {
 
     private final JsonSchemaValidator validator;
 

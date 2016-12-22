@@ -76,7 +76,6 @@
                             <goal>report</goal>
                         </goals>
                     </execution>
-                    <!-- TODO enable
                     <execution>
                         <id>check</id>
                         <goals>
@@ -90,19 +89,18 @@
                                         <limit>
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>1.0</minimum>
+                                            <minimum>0.0</minimum>
                                         </limit>
                                         <limit>
                                             <counter>BRANCH</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>1.0</minimum>
+                                            <minimum>0.0</minimum>
                                         </limit>
                                     </limits>
                                 </rule>
                             </rules>
                         </configuration>
                     </execution>
-                    -->
                 </executions>
             </plugin>
             <plugin>

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Dimensions;
-import org.zalando.compass.library.JsonReader;
+import org.zalando.compass.domain.persistence.DimensionRepository;
 
 import java.io.IOException;
 
@@ -28,28 +28,31 @@ public class DimensionResource {
 
     private final JsonReader reader;
     private final DimensionService service;
+    private final DimensionRepository repository;
 
     @Autowired
-    public DimensionResource(final JsonReader reader, final DimensionService service) {
+    public DimensionResource(final JsonReader reader, final DimensionService service,
+            final DimensionRepository repository) {
         this.reader = reader;
         this.service = service;
+        this.repository = repository;
     }
 
     @RequestMapping(method = GET)
     public Dimensions getAll() {
-        return service.readAll();
+        return new Dimensions(repository.findAll());
     }
 
     @RequestMapping(method = PUT)
     public Dimensions putAll(@RequestBody final JsonNode node) throws IOException {
         final Dimensions dimensions = reader.read(node, Dimensions.class);
         service.createOrUpdate(dimensions.getDimensions());
-        return service.readAll();
+        return new Dimensions(repository.findAll());
     }
 
     @RequestMapping(method = GET, path = "/{id}")
-    public Dimension get(@PathVariable final String id) {
-        return service.read(id);
+    public Dimension get(@PathVariable final String id) throws IOException {
+        return repository.read(id);
     }
 
     @RequestMapping(method = PUT, path = "/{id}")
@@ -71,7 +74,7 @@ public class DimensionResource {
 
     @RequestMapping(method = DELETE, path = "/{id}")
     @ResponseStatus(NO_CONTENT)
-    public void delete(@PathVariable final String id) {
+    public void delete(@PathVariable final String id) throws IOException {
         service.delete(id);
     }
 

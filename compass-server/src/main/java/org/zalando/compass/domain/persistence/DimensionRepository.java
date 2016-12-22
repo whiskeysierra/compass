@@ -7,21 +7,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.model.Dimension;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Optional;
 import java.util.Set;
 
+import static java.util.Collections.singleton;
+import static org.springframework.dao.support.DataAccessUtils.singleResult;
+import static org.zalando.compass.domain.persistence.DimensionCriteria.dimensions;
 import static org.zalando.fauxpas.FauxPas.throwingBiFunction;
 
-@Repository
-public class DimensionRepository {
+@Component
+public class DimensionRepository implements Repository<Dimension, String, DimensionCriteria> {
 
     private final NamedParameterJdbcTemplate template;
     private final ObjectMapper mapper;
@@ -32,6 +37,7 @@ public class DimensionRepository {
         this.mapper = mapper;
     }
 
+    @Override
     public boolean create(final Dimension dimension) throws IOException {
         final ImmutableMap<String, Object> params = ImmutableMap.of(
                 "id", dimension.getId(),
@@ -40,15 +46,26 @@ public class DimensionRepository {
                 "description", dimension.getDescription());
 
         try {
-            return template.update("" +
+            template.update("" +
                     "INSERT INTO dimension (id, schema, relation, description)" +
-                    "VALUES (:id, :schema::JSONB, :relation, :description)", params) > 0;
+                    "VALUES (:id, :schema::JSONB, :relation, :description)", params);
+            return true;
         } catch (final DuplicateKeyException e) {
             return false;
         }
     }
 
-    public List<Dimension> read(final Set<String> dimensions) {
+    @Override
+    public Optional<Dimension> find(final String id) throws IOException {
+        final List<Dimension> dimensions = findAll(dimensions(singleton(id)));
+        @Nullable final Dimension dimension = singleResult(dimensions);
+        return Optional.ofNullable(dimension);
+    }
+
+    @Override
+    public List<Dimension> findAll(final DimensionCriteria criteria) throws IOException {
+        final Set<String> dimensions = criteria.getDimensions();
+
         if (dimensions.isEmpty()) {
             return Collections.emptyList();
         }
@@ -62,7 +79,8 @@ public class DimensionRepository {
                 "ORDER BY priority ASC", params, mapRow());
     }
 
-    public List<Dimension> readAll() {
+    @Override
+    public List<Dimension> findAll() {
         return template.query("" +
                 "  SELECT id, schema, relation, description" +
                 "    FROM dimension " +
@@ -82,21 +100,25 @@ public class DimensionRepository {
                 row.getString("description"));
     }
 
-    public void update(final Dimension dimension) throws IOException {
+    @Override
+    public boolean update(final Dimension dimension) throws IOException {
         final ImmutableMap<String, Object> params = ImmutableMap.of(
                 "id", dimension.getId(),
                 "schema", mapper.writeValueAsString(dimension.getSchema()),
                 "relation", dimension.getRelation(),
                 "description", dimension.getDescription());
 
-        template.update("" +
+        final int updates = template.update("" +
                 "UPDATE dimension" +
                 "   SET schema = :schema::JSONB," +
                 "       relation = :relation," +
                 "       description = :description" +
                 " WHERE id = :id", params);
+
+        return updates > 0;
     }
 
+    // TODO express this more generically?!
     public void reorder(final List<String> dimensions) {
         final List<Object[]> ranks = new ArrayList<>(dimensions.size());
         final ListIterator<String> iterator = dimensions.listIterator();
@@ -112,11 +134,16 @@ public class DimensionRepository {
                 " WHERE id = dimension_id", ImmutableMap.of("ranks", ranks));
     }
 
-    public boolean delete(final String dimension) {
-        return template.update("" +
+    @Override
+    public void delete(final String dimension) {
+        final int deletions = template.update("" +
                 "DELETE" +
                 "  FROM dimension" +
-                " WHERE id = :id", ImmutableMap.of("id", dimension)) == 1;
+                " WHERE id = :id", ImmutableMap.of("id", dimension));
+
+        if (deletions == 0) {
+            throw new NotFoundException();
+        }
     }
 
 }

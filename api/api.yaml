@@ -182,17 +182,16 @@ paths:
       responses:
         204:
           description: No Content
-#  /values:
-#    get:
-#      summary: List all values for a given key pattern and context
-#      parameters:
-#        - $ref: '#/parameters/KeyPattern'
-#        - $ref: '#/parameters/Filter' # TODO different semantic here?! empty == all
-#      responses:
-#        200:
-#          description: OK
-#          schema:
-#            $ref: '#/definitions/Values' # TODO should include keys?!
+  /values:
+    get:
+      summary: List all values for a given key pattern and context
+      parameters:
+        - $ref: '#/parameters/Query' # for keys
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Entries'
 parameters:
   RelationId:
     name: relation
@@ -226,16 +225,15 @@ parameters:
     description: |
       Any number of filter query parameters based on the dimension of the values. This allows the following use cases:
 
-      1. `GET /keys/tax-rate/values?country`, all tax rates with a country
-      2. `GET /keys/tax-rate/values?country=DE`, all tax rates for Germany
-      3. `GET /keys/tax-rate/values?country=DE&after=2015-09-07T16:00:00`, all tax rates for Germany that are valid after *2015-09-07T16:00:00*
-      4. `GET /keys/tax-rate/values?country=DE&country=AT`, all tax rates for Germany and Austria
+      1. `GET /keys/tax-rate/values?country=DE`, all tax rates for Germany
+      2. `GET /keys/tax-rate/values?country=DE&after=2015-09-07T16:00:00`, all tax rates for Germany that are valid after *2015-09-07T16:00:00*
     in: query
-    type: array
-    items:
-      type: string
-    collectionFormat: multi
-    allowEmptyValue: true
+    type: string
+  Query:
+    name: q
+    description: User input query string
+    in: query
+    type: string
 definitions:
   Problem:
     $ref: 'https://zalando.github.io/problem/schema.yaml#/Problem'
@@ -254,15 +252,18 @@ definitions:
       id:
         descrition: The unique identifier for this relation.
         type: string
+        minLength: 1
         example: =
       title:
         description: The readable name for this relation
         type: string
+        minLength: 1
         example: equality
       description:
         type: string
         description: |
           A description of this relation that should define what characteristics is has in terms of matching values.
+        minLength: 1
     required:
       - id
       - title
@@ -298,14 +299,15 @@ definitions:
           The underlying operator that is used to apply any matching and ordering semantics. For a complete list of
           available relations, use `GET /relations`.
         type: string
+        minLength: 1
         example: =
       description:
         type: string
         description: |
           A description of this key that should define what the dimension is about and what possible values it can have.
           Alternatively this can be a URL to an accessible web page.
+        minLength: 1
         example: ISO 3166-1 alpha-2 country code, see https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements
-        # TODO not empty, minimum length
     required:
       - schema
       - relation
@@ -335,6 +337,7 @@ definitions:
         description: |
           A description of this key that should define what the key is about. Alternatively this can be a 
           URL to an accessible web page.
+        minLength: 1
         example: Tax rate as a factor in the range [0,1].
     required:
       - schema
@@ -347,6 +350,7 @@ definitions:
         items:
           $ref: '#/definitions/Value'
   Value:
+    type: object
     properties:
       dimensions:
         type: object
@@ -369,3 +373,23 @@ definitions:
         country: DE
         after: 2017-01-01T00:00:00
       value: 0.2
+  Entries:
+    type: object
+    additionalProperties:
+      type: array
+      items:
+        $ref: '#/definitions/Value'
+    example:
+      active:
+        - dimensions:
+            email: .*@qa-example.com
+            value: true
+        - dimensions:
+          value: false
+      tax-rate:
+        - dimension:
+            country: DE
+          value: 0.19
+        - dimension:
+            country: CH
+          value: 0.08

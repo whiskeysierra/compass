@@ -7,19 +7,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.model.Key;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
+import static org.springframework.dao.support.DataAccessUtils.singleResult;
 import static org.zalando.fauxpas.FauxPas.throwingBiFunction;
 
-@Repository
-public class KeyRepository {
+@Component
+public class KeyRepository implements Repository<Key, String, KeyCriteria> {
 
     private final NamedParameterJdbcTemplate template;
     private final ObjectMapper mapper;
@@ -30,6 +33,7 @@ public class KeyRepository {
         this.mapper = mapper;
     }
 
+    @Override
     public boolean create(final Key key) throws IOException {
         final ImmutableMap<String, Object> params = ImmutableMap.of(
                 "id", key.getId(),
@@ -45,7 +49,38 @@ public class KeyRepository {
         }
     }
 
-    public List<Key> read(final Set<String> keys) {
+    @Override
+    public boolean exists(final String key) {
+        final ImmutableMap<String, String> params = ImmutableMap.of("key", key);
+
+        return template.queryForObject("" +
+                "SELECT EXISTS (SELECT 1 " +
+                "                 FROM key" +
+                "                WHERE id = :key)", params, boolean.class);
+    }
+
+    @Override
+    public Optional<Key> find(final String id) throws IOException {
+        @Nullable final Key key = singleResult(template.query("" +
+                "  SELECT id, schema, description" +
+                "    FROM key" +
+                "   WHERE id = :id", ImmutableMap.of("id", id), mapRow()));
+
+        return Optional.ofNullable(key);
+    }
+
+    @Override
+    public List<Key> findAll() {
+        return template.query("" +
+                "  SELECT id, schema, description" +
+                "    FROM key " +
+                "ORDER BY id ASC", ImmutableMap.of(), mapRow());
+    }
+
+    @Override
+    public List<Key> findAll(final KeyCriteria criteria) throws IOException {
+        final Set<String> keys = criteria.getKeys();
+
         if (keys.isEmpty()) {
             return Collections.emptyList();
         }
@@ -57,22 +92,6 @@ public class KeyRepository {
                 "    FROM key" +
                 "   WHERE id IN (:keys)" +
                 "ORDER BY id ASC", params, mapRow());
-    }
-
-    public boolean exists(final String key) {
-        final ImmutableMap<String, String> params = ImmutableMap.of("key", key);
-
-        return template.queryForObject("" +
-                "SELECT EXISTS (SELECT 1 " +
-                "                 FROM key" +
-                "                WHERE id = :key)", params, boolean.class);
-    }
-
-    public List<Key> readAll() {
-        return template.query("" +
-                "  SELECT id, schema, description" +
-                "    FROM key " +
-                "ORDER BY id ASC", ImmutableMap.of(), mapRow());
     }
 
     @Hack
@@ -87,24 +106,32 @@ public class KeyRepository {
                 row.getString("description"));
     }
 
-    public void update(final Key key) throws IOException {
+    @Override
+    public boolean update(final Key key) throws IOException {
         final ImmutableMap<String, Object> params = ImmutableMap.of(
                 "id", key.getId(),
                 "schema", mapper.writeValueAsString(key.getSchema()),
                 "description", key.getDescription());
 
-        template.update("" +
+        final int updates = template.update("" +
                 "UPDATE key" +
                 "   SET schema = :schema::JSONB," +
                 "       description = :description" +
                 " WHERE id = :id", params);
+
+        return updates > 0;
     }
 
-    public boolean delete(final String key) {
-        return template.update("" +
+    @Override
+    public void delete(final String key) {
+        final int deletions = template.update("" +
                 "DELETE" +
                 "  FROM key" +
-                " WHERE id = :id", ImmutableMap.of("id", key)) == 1;
+                " WHERE id = :id", ImmutableMap.of("id", key));
+
+        if (deletions == 0) {
+            throw new NotFoundException();
+        }
     }
 
 }

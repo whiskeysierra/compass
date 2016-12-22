@@ -10,10 +10,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.ValueService;
+import org.zalando.compass.domain.model.Entries;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.Values;
-import org.zalando.compass.library.JsonReader;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Map;
 
@@ -34,13 +35,13 @@ public class ValueResource {
     }
 
     @RequestMapping(method = GET, path = "/keys/{id}/value")
-    public Value get(@PathVariable final String id, @RequestParam final Map<String, String> filter) {
+    public Value get(@PathVariable final String id, @RequestParam final Map<String, String> filter) throws IOException {
         return service.read(id, filter);
     }
 
     @RequestMapping(method = GET, path = "/keys/{id}/values")
-    public Values getAll(@PathVariable final String id, @RequestParam final Map<String, String> filter) {
-        return service.readAllByKey(id, filter);
+    public Values getAll(@PathVariable final String id, @RequestParam final Map<String, String> filter) throws IOException {
+        return new Values(service.readAllByKey(id, filter));
     }
 
     @RequestMapping(method = POST, path = "/keys/{id}/values")
@@ -48,7 +49,7 @@ public class ValueResource {
             @RequestBody final JsonNode node) throws IOException {
         final Value value = reader.read(node, Value.class);
         service.createOrUpdate(id, value);
-        return service.readAllByKey(id, filter);
+        return new Values(service.readAllByKey(id, filter));
     }
 
     @RequestMapping(method = DELETE, path = "/keys/{id}/values")
@@ -57,10 +58,9 @@ public class ValueResource {
         service.delete(id, filter);
     }
 
-    // TODO think this through
     @RequestMapping(method = GET, path = "/values")
-    public Values getAll(@RequestParam(name = "q", required = false, defaultValue = "") final String query) {
-        return service.readAllByKeyPattern(query);
+    public Entries getAll(@RequestParam(name = "q", required = false) @Nullable final String query) throws IOException {
+        return new Entries(service.readAllByKeyPattern(query));
     }
 
 }

@@ -18,8 +18,6 @@ import java.time.Clock;
 @EnableTransactionManagement
 public class Application {
 
-    public static final String NAME = "compass";
-
     @Bean
     public Clock clock() {
         return Clock.systemUTC();

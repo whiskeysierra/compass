@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.model.Key;
+import org.zalando.compass.domain.model.Realization;
 import org.zalando.compass.domain.model.Value;
 
 import java.io.IOException;
@@ -25,12 +26,12 @@ import static com.google.common.collect.ImmutableMap.of;
 import static java.math.BigDecimal.ONE;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
-import static java.util.Collections.singleton;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.zalando.compass.domain.persistence.ValueCriteria.byKey;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -55,17 +56,17 @@ public class ValueRepositoryIntegrationTest {
 
     @Test
     public void shouldNotFind() throws IOException {
-        assertThat(unit.readAllByKey("foo"), is(emptyList()));
+        assertThat(unit.findAll(byKey("foo")), is(emptyList()));
     }
 
     @Test
     public void shouldFindWithoutDimensions() throws IOException {
         keys.create(new Key("one", new ObjectNode(JsonNodeFactory.instance), ""));
         keys.create(new Key("two", new ObjectNode(JsonNodeFactory.instance), ""));
-        unit.createOrUpdate("one", singleton(new Value(of(), TRUE)));
-        unit.createOrUpdate("two", singleton(new Value(of(), TRUE)));
+        unit.create(new Value("one", of(), TRUE));
+        unit.create(new Value("two", of(), TRUE));
 
-        final List<Value> values = unit.readAllByKey("one");
+        final List<Value> values = unit.findAll(byKey("one"));
         assertThat(values, hasSize(1));
 
         final Value value = values.get(0);
@@ -77,10 +78,10 @@ public class ValueRepositoryIntegrationTest {
     public void shouldFindWithDimensions() throws IOException {
         keys.create(new Key("one", new ObjectNode(JsonNodeFactory.instance), ""));
         keys.create(new Key("two", new ObjectNode(JsonNodeFactory.instance), ""));
-        unit.createOrUpdate("one", singleton(new Value(of("foo", new TextNode("bar"), "bar", new TextNode("buz")), FALSE)));
-        unit.createOrUpdate("two", singleton(new Value(of(), TRUE)));
+        unit.create(new Value("one", of("foo", new TextNode("bar"), "bar", new TextNode("buz")), FALSE));
+        unit.create(new Value("two", of(), TRUE));
 
-        final List<Value> values = unit.readAllByKey("one");
+        final List<Value> values = unit.findAll(byKey("one"));
         assertThat(values, hasSize(1));
 
         final Value value = values.get(0);
@@ -94,14 +95,14 @@ public class ValueRepositoryIntegrationTest {
     public void shouldDelete() throws IOException {
         keys.create(new Key("one", new ObjectNode(JsonNodeFactory.instance), ""));
         keys.create(new Key("two", new ObjectNode(JsonNodeFactory.instance), ""));
-        unit.createOrUpdate("one", singleton(new Value(of("foo", TRUE, "bar", new DecimalNode(ONE)), FALSE)));
-        unit.createOrUpdate("two", singleton(new Value(of(), TRUE)));
+        unit.create(new Value("one", of("foo", TRUE, "bar", new DecimalNode(ONE)), FALSE));
+        unit.create(new Value("two", of(), TRUE));
 
-        unit.delete("one", of("foo", "true"));
-        assertThat(unit.readAllByKey("one"), is(empty()));
+        unit.delete(new Realization("one", of("foo", new TextNode("true"), "bar", new TextNode("1"))));
+        assertThat(unit.findAll(byKey("one")), is(empty()));
 
-        unit.delete("two", of());
-        assertThat(unit.readAllByKey("two"), is(empty()));
+        unit.delete(new Realization("two", of()));
+        assertThat(unit.findAll(byKey("two")), is(empty()));
     }
 
 }

@@ -23,13 +23,12 @@ import static com.fasterxml.jackson.databind.node.JsonNodeFactory.instance;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
-import static java.util.Collections.singleton;
+import static java.util.Optional.empty;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.zalando.compass.domain.persistence.DimensionCriteria.dimensions;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -59,23 +58,23 @@ public class DimensionRepositoryIntegrationTest {
 
     @Test
     public void shouldCreate() throws IOException {
-        assertThat(createDimension(), is(true));
+        assertThat(create(), is(true));
     }
 
     @Test
     public void shouldNotCreateTwice() throws IOException {
-        assertThat(createDimension(), is(true));
-        assertThat(createDimension(), is(false));
+        assertThat(create(), is(true));
+        assertThat(create(), is(false));
     }
 
     @Test
     public void shouldUpdate() throws IOException {
-        createDimension();
+        create();
 
         unit.update(new Dimension("country", new ObjectNode(instance).put("type", "integer"),
                 "=", "Country ID"));
 
-        final Dimension dimension = unit.read(singleton("country")).get(0);
+        final Dimension dimension = unit.read("country");
 
         assertThat(dimension.getSchema().get("type").asText(), is("integer"));
         assertThat(dimension.getDescription(), is("Country ID"));
@@ -83,38 +82,36 @@ public class DimensionRepositoryIntegrationTest {
 
     @Test
     public void shouldReorder() throws IOException {
-        createDimension(newCountry());
-        createDimension(newSalesChannel());
-        createDimension(newLocale());
+        create(newCountry());
+        create(newSalesChannel());
+        create(newLocale());
 
-        final List<Dimension> before = unit.readAll();
+        final List<Dimension> before = unit.findAll();
         assertThat(before.stream().map(Dimension::getId).collect(toList()),
                 contains("country", "sales-channel", "locale"));
 
         unit.reorder(Arrays.asList("sales-channel", "locale", "country"));
 
-        final List<Dimension> after = unit.readAll();
+        final List<Dimension> after = unit.findAll();
         assertThat(after.stream().map(Dimension::getId).collect(toList()),
                 contains("sales-channel", "locale", "country"));
     }
 
     @Test(expected = DuplicateKeyException.class)
     public void shouldFailToReorderIfNonUniquePriority() throws IOException {
-        createDimension(newCountry());
-        createDimension(newSalesChannel());
-        createDimension(newLocale());
+        create(newCountry());
+        create(newSalesChannel());
+        create(newLocale());
 
         unit.reorder(Arrays.asList("sales-channel", "locale"));
     }
 
     @Test
     public void shouldRead() throws IOException {
-        createDimension();
+        create();
 
-        final List<Dimension> dimensions = unit.read(singleton("country"));
-        assertThat(dimensions, hasSize(1));
+        final Dimension dimension = unit.read("country");
 
-        final Dimension dimension = dimensions.get(0);
         assertThat(dimension.getId(), is("country"));
         assertThat(dimension.getSchema().size(), is(1));
         assertThat(dimension.getSchema().get("type").asText(), is("string"));
@@ -124,38 +121,38 @@ public class DimensionRepositoryIntegrationTest {
 
     @Test
     public void shouldNotRead() throws IOException {
-        assertThat(unit.read(emptySet()), is(emptyList()));
+        assertThat(unit.findAll(dimensions(emptySet())), is(emptyList()));
     }
 
     @Test
     public void shouldReadAll() throws IOException {
-        createDimension(newCountry());
-        createDimension(newSalesChannel());
-        createDimension(newLocale());
+        create(newCountry());
+        create(newSalesChannel());
+        create(newLocale());
 
-        assertThat(unit.readAll(), contains(newCountry(), newSalesChannel(), newLocale()));
+        assertThat(unit.findAll(), contains(newCountry(), newSalesChannel(), newLocale()));
     }
 
     @Test
     public void shouldFindTwoOutOfThree() throws IOException {
-        createDimension(newCountry());
-        createDimension(newSalesChannel());
-        createDimension(newLocale());
+        create(newCountry());
+        create(newSalesChannel());
+        create(newLocale());
 
-        final List<Dimension> dimensions = unit.read(newHashSet("country", "sales-channel"));
+        final List<Dimension> dimensions = unit.findAll(dimensions(newHashSet("country", "sales-channel")));
         assertThat(dimensions.stream().map(Dimension::getId).collect(toList()), contains("country", "sales-channel"));
     }
 
     @Test
     public void shouldDelete() throws IOException {
-        createDimension(newCountry());
+        create(newCountry());
 
-        assertThat(unit.delete("country"), is(true));
-        assertThat(unit.read(singleton("country")), is(empty()));
+        unit.delete("country");
+        assertThat(unit.find("country"), is(empty()));
     }
 
-    private boolean createDimension() throws IOException {
-        return createDimension(newCountry());
+    private boolean create() throws IOException {
+        return create(newCountry());
     }
 
     private Dimension newCountry() {
@@ -173,7 +170,7 @@ public class DimensionRepositoryIntegrationTest {
                 "=", "Language");
     }
 
-    private boolean createDimension(final Dimension dimension) throws IOException {
+    private boolean create(final Dimension dimension) throws IOException {
         return unit.create(dimension);
     }
 

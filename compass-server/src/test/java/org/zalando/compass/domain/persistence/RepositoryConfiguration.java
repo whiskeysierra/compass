@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration
 import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
-import org.zalando.compass.library.JacksonConfiguration;
+import org.zalando.compass.resource.JsonConfiguration;
 
 @TestConfiguration
 @ImportAutoConfiguration({
@@ -18,7 +18,7 @@ import org.zalando.compass.library.JacksonConfiguration;
         TransactionAutoConfiguration.class,
 })
 @Import({
-        JacksonConfiguration.class,
+        JsonConfiguration.class,
         EmbeddedDataSourceConfiguration.class,
         JdbcTemplateAutoConfiguration.class, // not used as an auto configuration
 })

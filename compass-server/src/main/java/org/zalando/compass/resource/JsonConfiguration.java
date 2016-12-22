@@ -1,4 +1,4 @@
-package org.zalando.compass.library;
+package org.zalando.compass.resource;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -19,7 +19,7 @@ import org.zalando.problem.ProblemModule;
 import static com.fasterxml.jackson.core.JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN;
 
 @Configuration
-public class JacksonConfiguration {
+public class JsonConfiguration {
 
     @Bean(name = "jacksonObjectMapper")
     @Primary

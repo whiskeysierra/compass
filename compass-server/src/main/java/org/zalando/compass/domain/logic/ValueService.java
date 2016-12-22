@@ -1,14 +1,20 @@
 package org.zalando.compass.domain.logic;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ListMultimap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.zalando.compass.domain.model.Dimension;
+import org.zalando.compass.domain.model.Realization;
 import org.zalando.compass.domain.model.Relation;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.domain.model.Values;
 import org.zalando.compass.domain.persistence.DimensionRepository;
+import org.zalando.compass.domain.persistence.KeyRepository;
+import org.zalando.compass.domain.persistence.NotFoundException;
+import org.zalando.compass.domain.persistence.RelationRepository;
+import org.zalando.compass.domain.persistence.ValueCriteria;
 import org.zalando.compass.domain.persistence.ValueRepository;
 
 import javax.annotation.Nullable;
@@ -23,47 +29,62 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.ArrayListMultimap.create;
+import static com.google.common.collect.Maps.transformValues;
+import static com.google.common.collect.Multimaps.index;
 import static com.google.common.collect.Ordering.explicit;
 import static com.google.common.collect.Sets.difference;
-import static java.util.Collections.singleton;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
+import static org.zalando.compass.domain.persistence.DimensionCriteria.dimensions;
+import static org.zalando.compass.domain.persistence.ValueCriteria.byKey;
+import static org.zalando.compass.domain.persistence.ValueCriteria.byKeyPattern;
+import static org.zalando.compass.domain.persistence.ValueCriteria.withoutCriteria;
+import static org.zalando.fauxpas.FauxPas.throwingFunction;
 
 @Service
 public class ValueService {
 
     private final SchemaValidator validator;
-    private final RelationService relationService;
+    private final RelationRepository relationRepository;
     private final DimensionRepository dimensionRepository;
-    private final KeyService keyService;
+    private final KeyRepository keyRepository;
     private final ValueRepository valueRepository;
 
     @Autowired
-    public ValueService(final SchemaValidator validator, final RelationService relationService,
+    public ValueService(final SchemaValidator validator, final RelationRepository relationRepository,
             final DimensionRepository dimensionRepository,
-            final KeyService keyService, final ValueRepository valueRepository) {
+            final KeyRepository keyRepository, final ValueRepository valueRepository) {
         this.validator = validator;
-        this.relationService = relationService;
+        this.relationRepository = relationRepository;
         this.dimensionRepository = dimensionRepository;
-        this.keyService = keyService;
+        this.keyRepository = keyRepository;
         this.valueRepository = valueRepository;
     }
 
-    public void createOrUpdate(final String key, final Value value) {
-        // TODO disallow undefined dimensions
-        validateDimensions(value);
-        validateValue(key, value);
+    public boolean createOrUpdate(final String key, final Value next) throws IOException {
+        validateDimensions(next);
+        validateValue(key, next);
 
-        valueRepository.createOrUpdate(key, singleton(value));
+        final Realization id = new Realization(next.getKey(), next.getDimensions());
+        @Nullable final Value current = valueRepository.find(id).orElse(null);
+
+        if (current == null) {
+            return valueRepository.create(next);
+        } else {
+            valueRepository.update(next);
+        }
+
+        return false;
     }
 
-    private void validateDimensions(final Value value) {
+    private void validateDimensions(final Value value) throws IOException {
         final ImmutableSet<String> dimensions = value.getDimensions().keySet();
-        final List<Dimension> read = dimensionRepository.read(dimensions);
+        final List<Dimension> read = dimensionRepository.findAll(dimensions(dimensions));
 
         final Set<String> difference = difference(dimensions, read.stream().map(Dimension::getId).collect(toSet()));
         checkArgument(difference.isEmpty(), "Unknown dimensions: " + difference);
@@ -71,44 +92,50 @@ public class ValueService {
         validator.validate(read, value);
     }
 
-    private void validateValue(final String key, final Value value) {
-        validator.validate(keyService.read(key), value);
+    private void validateValue(final String key, final Value value) throws IOException {
+        validator.validate(keyRepository.read(key), value);
     }
 
-    public Value read(final String key, final Map<String, String> filter) {
-        return readAllByKey(key, filter).getValues().stream()
+    public Value read(final String key, final Map<String, String> filter) throws IOException {
+        return readAllByKey(key, filter).stream()
                 .findFirst().orElseThrow(NotFoundException::new);
     }
 
-    public Values readAllByKey(final String key, final Map<String, String> filter) {
+    public List<Value> readAllByKey(final String key, final Map<String, String> filter) throws IOException {
         checkKeyExists(key);
 
-        final List<Value> values = valueRepository.readAllByKey(key);
+        final List<Value> values = valueRepository.findAll(byKey(key));
         final Map<Dimension, Relation> dimensions = readDimensions();
 
         sort(values, dimensions);
 
-        return new Values(match(values, dimensions, filter));
+        return match(values, dimensions, filter);
     }
 
-    public Values readAllByKeyPattern(final String keyPattern) {
-        final List<Value> values = valueRepository.readAllByKeyPattern(keyPattern);
+    public ListMultimap<String, Value> readAllByKeyPattern(@Nullable final String keyPattern) throws IOException {
+        final ValueCriteria criteria = keyPattern == null ? withoutCriteria() : byKeyPattern(keyPattern);
+        final List<Value> values = valueRepository.findAll(criteria);
+
         final Map<Dimension, Relation> dimensions = readDimensions();
+        final ListMultimap<String, Value> entries = create(index(values, Value::getKey));
 
-        sort(values, dimensions);
+        entries.keySet().forEach(key ->
+            sort(entries.get(key), dimensions));
 
-        return new Values(values);
+        return entries;
     }
 
     private void checkKeyExists(final String key) {
-        if (!keyService.exists(key)) {
+        if (!keyRepository.exists(key)) {
+            // TODO move this out of here
             throw new NotFoundException();
         }
     }
 
     private Map<Dimension, Relation> readDimensions() {
-        return dimensionRepository.readAll().stream()
-                .collect(toMap(identity(), dimension -> relationService.read(dimension.getRelation()),
+        return dimensionRepository.findAll().stream()
+                .collect(toMap(identity(),
+                        throwingFunction(dimension -> relationRepository.read(dimension.getRelation())),
                         this::denyDuplicates, LinkedHashMap::new));
     }
 
@@ -177,7 +204,7 @@ public class ValueService {
     }
 
     public void delete(final String key, final Map<String, String> filter) throws IOException {
-        valueRepository.delete(key, filter);
+        valueRepository.delete(new Realization(key, transformValues(filter, TextNode::new)));
     }
 
 }
