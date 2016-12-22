@@ -47,8 +47,8 @@ public class ValueResource {
     @RequestMapping(method = POST, path = "/keys/{id}/values")
     public Values post(@PathVariable final String id, @RequestParam final Map<String, String> filter,
             @RequestBody final JsonNode node) throws IOException {
-        final Value value = reader.read(node, Value.class);
-        service.createOrUpdate(id, value);
+        final Value value = reader.read(node, Value.class).withKey(id);
+        service.createOrUpdate(value);
         return new Values(service.readAllByKey(id, filter));
     }
 

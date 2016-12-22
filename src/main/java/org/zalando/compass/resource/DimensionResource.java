@@ -59,17 +59,20 @@ public class DimensionResource {
     public ResponseEntity<Dimension> put(@PathVariable final String id,
             @RequestBody final JsonNode node) throws IOException {
         final Dimension input = reader.read(node, Dimension.class);
-
-        checkArgument(input.getId() == null || id.equals(input.getId()),
-                "If present, ID body must match with URL");
-
-        final Dimension dimension = input.withId(id);
+        final Dimension dimension = ensureConsistentId(id, input);
 
         if (service.createOrUpdate(dimension)) {
             return ResponseEntity.status(CREATED).body(dimension);
         } else {
             return ResponseEntity.ok(dimension);
         }
+    }
+
+    private Dimension ensureConsistentId(@PathVariable final String id, final Dimension input) {
+        checkArgument(input.getId() == null || id.equals(input.getId()),
+                "If present, ID body must match with URL");
+
+        return input.withId(id);
     }
 
     @RequestMapping(method = DELETE, path = "/{id}")

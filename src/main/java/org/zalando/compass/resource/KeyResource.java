@@ -50,19 +50,21 @@ public class KeyResource {
     @RequestMapping(method = PUT, path = "/{id}")
     public ResponseEntity<Key> put(@PathVariable final String id,
             @RequestBody final JsonNode node) throws IOException {
-
         final Key input = reader.read(node, Key.class);
-
-        checkArgument(input.getId() == null || id.equals(input.getId()),
-                "If present, ID body must match with URL");
-
-        final Key key = input.withId(id);
+        final Key key = ensureConsistentId(id, input);
 
         if (service.createOrUpdate(key)) {
             return ResponseEntity.status(CREATED).body(key);
         } else {
             return ResponseEntity.ok(key);
         }
+    }
+
+    private Key ensureConsistentId(@PathVariable final String id, final Key input) {
+        checkArgument(input.getId() == null || id.equals(input.getId()),
+                "If present, ID body must match with URL");
+
+        return input.withId(id);
     }
 
     @RequestMapping(method = DELETE, path = "/{id}")

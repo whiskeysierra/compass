@@ -59,10 +59,12 @@ public class DimensionService {
     }
 
     private void validateDimensionValuesIfNecessary(final Dimension next, final Dimension current) throws IOException {
-        if (!current.getSchema().equals(next.getSchema())) {
-            final List<Value> values = valueRepository.findAll(byDimension(next.getId()));
-            validator.validate(next, values);
+        if (current.getSchema().equals(next.getSchema())) {
+            return;
         }
+
+        final List<Value> values = valueRepository.findAll(byDimension(next.getId()));
+        validator.validate(next, values);
     }
 
     public void createOrUpdate(final List<Dimension> dimensions) {

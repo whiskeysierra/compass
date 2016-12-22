@@ -66,9 +66,9 @@ public class ValueService {
         this.valueRepository = valueRepository;
     }
 
-    public boolean createOrUpdate(final String key, final Value next) throws IOException {
+    public boolean createOrUpdate(final Value next) throws IOException {
         validateDimensions(next);
-        validateValue(key, next);
+        validateValue(next);
 
         final Realization id = new Realization(next.getKey(), next.getDimensions());
         @Nullable final Value current = valueRepository.find(id).orElse(null);
@@ -92,8 +92,8 @@ public class ValueService {
         validator.validate(read, value);
     }
 
-    private void validateValue(final String key, final Value value) throws IOException {
-        validator.validate(keyRepository.read(key), value);
+    private void validateValue(final Value value) throws IOException {
+        validator.validate(keyRepository.read(value.getKey()), value);
     }
 
     public Value read(final String key, final Map<String, String> filter) throws IOException {
