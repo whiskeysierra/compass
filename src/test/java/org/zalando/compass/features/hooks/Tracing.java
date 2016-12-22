@@ -7,12 +7,12 @@ import org.springframework.stereotype.Component;
 import org.zalando.tracer.Tracer;
 
 @Component
-public class TracerHook {
+public class Tracing {
 
     private final Tracer tracer;
 
     @Autowired
-    public TracerHook(final Tracer tracer) {
+    public Tracing(final Tracer tracer) {
         this.tracer = tracer;
     }
 

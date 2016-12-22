@@ -28,6 +28,15 @@ public class ExceptionHandling implements ProblemHandling, SpringAdviceTrait {
         return create(HttpStatus.BAD_REQUEST, getRootCause(exception), request);
     }
 
+    // TODO find a better suiting exception type for this
+    @ExceptionHandler
+    public ResponseEntity<Problem> handleIllegalArgument(
+            final IllegalArgumentException exception,
+            final NativeWebRequest request) throws HttpMediaTypeNotAcceptableException {
+
+        return create(HttpStatus.BAD_REQUEST, exception, request);
+    }
+
     @ExceptionHandler
     public ResponseEntity<Problem> handleNotFoundException(
             final NotFoundException exception,

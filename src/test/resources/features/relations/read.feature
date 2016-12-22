@@ -1,0 +1,21 @@
+Feature: Relations
+
+  Scenario: List relations
+    When "GET /relations" returns a list of relations:
+      | id   | title                   |
+      | "="  | "Equality"              |
+      | ">"  | "Greater than"          |
+      | ">=" | "Greater than or equal" |
+      | "<"  | "Less than"             |
+      | "<=" | "Less than or equal"    |
+      | "~"  | "Matches"               |
+      | "^"  | "Longest Prefix Match"  |
+
+  Scenario: Get relation
+    When "GET /relations/=" returns:
+      | id  | title      | description                                                                           |
+      | "=" | "Equality" | "Matches values where the requested dimension values is equal to the configured one." |
+
+  Scenario: Get unknown relation
+    Given there are no dimensions
+    Then "GET /relations/unknown" returns "404 Not Found"

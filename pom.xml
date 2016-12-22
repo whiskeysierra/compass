@@ -28,7 +28,7 @@
         <put-it-to-rest.version>0.10.0</put-it-to-rest.version>
         <logbook.version>1.1.0</logbook.version>
         <stups-oauth2.version>1.0.15-GH-44</stups-oauth2.version>
-        <zuchini.version>1.0-SNAPSHOT</zuchini.version>
+        <zuchini.version>0.1.0</zuchini.version>
     </properties>
 
     <dependencyManagement>

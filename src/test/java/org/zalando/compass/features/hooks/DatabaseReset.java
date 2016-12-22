@@ -6,13 +6,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ResetDatabaseHook {
+public class DatabaseReset {
 
 
     private final JdbcTemplate template;
 
     @Autowired
-    public ResetDatabaseHook(final JdbcTemplate template) {
+    public DatabaseReset(final JdbcTemplate template) {
         this.template = template;
     }
 

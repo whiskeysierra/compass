@@ -67,7 +67,9 @@ public class DimensionService {
         validator.validate(next, values);
     }
 
+    // TODO createOrReplace
     public void createOrUpdate(final List<Dimension> dimensions) {
+        // TODO delete the ones that are not mentioned
         dimensions.forEach(throwingConsumer(this::createOrUpdate));
         dimensionRepository.reorder(dimensions.stream()
                 .map(Dimension::getId).collect(toList()));
