@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class DatabaseReset {
 
-
     private final JdbcTemplate template;
 
     @Autowired

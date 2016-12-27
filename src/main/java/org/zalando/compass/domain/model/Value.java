@@ -20,7 +20,12 @@ public final class Value {
     private final JsonNode value;
 
     @JsonCreator
-    private Value(@Nullable final ImmutableMap<String, JsonNode> dimensions, final JsonNode value) {
+    private Value(final JsonNode value) {
+        this(null, null, value);
+    }
+
+    @JsonCreator
+    private Value(final ImmutableMap<String, JsonNode> dimensions, final JsonNode value) {
         this(null, dimensions, value);
     }
 

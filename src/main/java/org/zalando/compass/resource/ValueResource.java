@@ -3,6 +3,7 @@ package org.zalando.compass.resource;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,11 +46,18 @@ public class ValueResource {
     }
 
     @RequestMapping(method = POST, path = "/keys/{id}/values")
-    public Values post(@PathVariable final String id, @RequestParam final Map<String, String> filter,
+    public ResponseEntity<Values> post(@PathVariable final String id, @RequestParam final Map<String, String> filter,
             @RequestBody final JsonNode node) throws IOException {
         final Value value = reader.read(node, Value.class).withKey(id);
-        service.createOrUpdate(value);
-        return new Values(service.readAllByKey(id, filter));
+
+        final boolean created = service.createOrUpdate(value);
+        final Values values = new Values(service.readAllByKey(id, filter));
+
+        if (created) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(values);
+        } else {
+            return ResponseEntity.ok(values);
+        }
     }
 
     @RequestMapping(method = DELETE, path = "/keys/{id}/values")

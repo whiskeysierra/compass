@@ -23,6 +23,6 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
         SpringZuchiniConfiguration.class
 })
 @ActiveProfiles("test")
-public class FeatureTest {
+public class FeatureComponentTest {
 
 }

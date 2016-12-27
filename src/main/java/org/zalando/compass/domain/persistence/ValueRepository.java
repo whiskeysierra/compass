@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.gag.annotation.remark.Hack;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -21,9 +20,6 @@ import java.util.Optional;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static org.springframework.dao.support.DataAccessUtils.singleResult;
-import static org.zalando.compass.domain.persistence.ValueCriteria.byDimension;
-import static org.zalando.compass.domain.persistence.ValueCriteria.byKey;
-import static org.zalando.compass.domain.persistence.ValueCriteria.byKeyPattern;
 import static org.zalando.compass.domain.persistence.ValueCriteria.withoutCriteria;
 import static org.zalando.fauxpas.FauxPas.throwingBiFunction;
 
@@ -132,8 +128,8 @@ public class ValueRepository implements Repository<Value, Realization, ValueCrit
         final ImmutableMap<String, Object> params = of(
                 "key", value.getKey(),
                 "dimensions", mapper.writeValueAsString(value.getDimensions()),
-                "value", mapper.writeValueAsString(value.getValue())
-        );
+                "value", mapper.writeValueAsString(value.getValue()));
+
         final int updates = template.update("" +
                 "UPDATE value" +
                 "   SET value = :value::JSONB" +

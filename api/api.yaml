@@ -164,12 +164,16 @@ paths:
           schema:
             $ref: '#/definitions/Values'
     post:
-      summary: Add or replaces values to a given key
+      summary: Add or or replace value of a given key
       parameters:
         - $ref: '#/parameters/Key'
         - $ref: '#/parameters/Filter'
         - $ref: '#/parameters/Value'
       responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Values'
         201:
           description: Created
           schema:

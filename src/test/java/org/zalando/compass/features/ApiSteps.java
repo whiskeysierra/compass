@@ -1,7 +1,6 @@
-package org.zalando.compass.features.api;
+package org.zalando.compass.features;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
@@ -16,21 +15,16 @@ import org.zalando.riptide.capture.Capture;
 import org.zuchini.runner.tables.Datatable;
 import org.zuchini.spring.ScenarioScoped;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.springframework.http.HttpStatus.Series.SUCCESSFUL;
-import static org.zalando.fauxpas.FauxPas.throwingBiFunction;
 import static org.zalando.riptide.Bindings.anySeries;
 import static org.zalando.riptide.Bindings.on;
 import static org.zalando.riptide.Navigators.series;
@@ -40,15 +34,15 @@ import static org.zuchini.runner.tables.DatatableMatchers.matchesTable;
 
 @Component
 @ScenarioScoped
-public class Steps {
+public class ApiSteps {
 
     private final ThreadLocal<ResponseEntity<JsonNode>> lastResponse = new ThreadLocal<>();
 
-    private final ObjectMapper mapper;
+    private final TableMapper mapper;
     private final Rest rest;
 
     @Autowired
-    public Steps(final ObjectMapper mapper, final Rest rest) {
+    public ApiSteps(final TableMapper mapper, final Rest rest) {
         this.mapper = mapper;
         this.rest = rest;
     }
@@ -69,21 +63,22 @@ public class Steps {
     }
 
     @Then("^\"(.+) (.*)\" returns:$")
-    public void returns(final HttpMethod method, final String uri, final Datatable expected) {
-        final ResponseEntity<JsonNode> response = request(method, uri);
-
+    public void returns(final HttpMethod method, final String uri, final Datatable expected) throws IOException {
+        final JsonNode row = request(method, uri).getBody();
         final List<String> headers = expected.getHeader();
-        final Map<String, String> row = toRow(headers, response.getBody());
+        final Datatable actual = mapper.map(singletonList(row), headers);
 
-        final Datatable actual = Datatable.fromMaps(singletonList(row), headers);
         assertThat(actual, matchesTable(expected));
     }
 
     @Then("^\"(.+) (.*)\" returns a list of (.+):$")
-    public void returnsListOf(final HttpMethod method, final String uri, final String key, final Datatable expected) {
+    public void returnsListOf(final HttpMethod method, final String uri, final String key, final Datatable expected) throws IOException {
         final JsonNode body = request(method, uri).getBody();
 
-        matchesListOf(expected, body, key);
+        final ArrayList<JsonNode> nodes = newArrayList(body.get(key));
+        final Datatable actual = mapper.map(nodes, expected.getHeader());
+
+        assertThat(actual, matchesTable(expected));
     }
 
     @Then("^\"(.+) (.*)\" returns an empty list of (.+)$")
@@ -106,14 +101,9 @@ public class Steps {
     public void isRequestedWithThisItReturns(final HttpMethod method, final String uri, final int statusCode,
             final String reasonPhrase, final Datatable table) throws IOException {
 
-        final Map<String, Object> body = new HashMap<>(table.toMap().get(0));
-
-        body.replaceAll(throwingBiFunction((key, schema) ->
-                mapper.readTree(schema.toString())));
-
         final Capture<ClientHttpResponse> capture = Capture.empty();
         final ClientHttpResponse response = select(method).apply(uri)
-                .body(body)
+                .body(mapper.map(table).get(0))
                 .dispatch(statusCode(),
                         on(statusCode).call(ClientHttpResponse.class, capture))
                 .thenApply(capture)
@@ -127,14 +117,9 @@ public class Steps {
     public void isRequestedWithThisItReturns(final HttpMethod method, final String uri, final Datatable table)
             throws IOException {
 
-        final Map<String, Object> body = new HashMap<>(table.toMap().get(0));
-
-        body.replaceAll(throwingBiFunction((key, schema) ->
-                mapper.readTree(schema.toString())));
-
         final Capture<ResponseEntity<JsonNode>> capture = Capture.empty();
         final ResponseEntity<JsonNode> response = select(method).apply(uri)
-                .body(body)
+                .body(mapper.map(table).get(0))
                 .dispatch(series(),
                         anySeries().call(responseEntityOf(JsonNode.class), capture))
                 .thenApply(capture)
@@ -144,33 +129,22 @@ public class Steps {
     }
 
     @Then("^it returns \"(\\d+) (.+)\" with a list of (.+):$")
-    public void itReturnsWithAListOf( final int statusCode, final String reasonPhrase, final String key,
-            final Datatable expected) {
+    public void itReturnsWithAListOf(final int statusCode, final String reasonPhrase, final String key,
+            final Datatable expected) throws IOException {
 
         final ResponseEntity<JsonNode> response = lastResponse.get();
 
         assertThat(response.getStatusCodeValue(), is(statusCode));
         assertThat(response.getStatusCode().getReasonPhrase(), is(reasonPhrase));
 
-        matchesListOf(expected, response.getBody(), key);
-    }
+        final ArrayList<JsonNode> nodes = newArrayList(response.getBody().get(key));
+        final Datatable actual = mapper.map(nodes, expected.getHeader());
 
-    private void matchesListOf(final Datatable expected, final JsonNode body, final String key) {
-        final JsonNode list = body.get(key);
-        final List<Map<String, String>> rows = new ArrayList<>(list.size());
-        final List<String> headers = expected.getHeader();
-        final Iterator<JsonNode> elements = list.elements();
-
-        while (elements.hasNext()) {
-            rows.add(toRow(headers, elements.next()));
-        }
-
-        final Datatable actual = Datatable.fromMaps(rows, headers);
         assertThat(actual, matchesTable(expected));
     }
 
     private Function<String, Requester> select(final HttpMethod method) {
-        switch (method){
+        switch (method) {
             case GET:
                 return rest::get;
             case HEAD:
@@ -190,22 +164,6 @@ public class Steps {
             default:
                 throw new IllegalArgumentException("Unknown method: " + method);
         }
-    }
-
-    private Map<String, String> toRow(final List<String> headers, final JsonNode element) {
-        final Map<String, String> row = new HashMap<>(headers.size());
-
-        headers.forEach(header -> {
-            @Nullable final JsonNode node = element.get(header);
-
-            if (node == null) {
-                throw new NullPointerException(element + " doesn't contain property " + header);
-            }
-
-            row.put(header, node.toString());
-        });
-
-        return row;
     }
 
 }
