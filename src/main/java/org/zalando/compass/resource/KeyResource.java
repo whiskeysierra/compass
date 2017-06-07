@@ -14,6 +14,7 @@ import org.zalando.compass.domain.model.Keys;
 import org.zalando.compass.domain.persistence.KeyRepository;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -39,12 +40,12 @@ public class KeyResource {
 
     @RequestMapping(method = GET)
     public Keys getAll() {
-        return new Keys(repository.findAll());
+        return new Keys(repository.findAll().stream().map(Key::fromRow).collect(Collectors.toList()));
     }
 
     @RequestMapping(method = GET, path = "/{id}")
     public Key get(@PathVariable final String id) throws IOException {
-        return repository.read(id);
+        return Key.fromRow(repository.read(id));
     }
 
     @RequestMapping(method = PUT, path = "/{id}")

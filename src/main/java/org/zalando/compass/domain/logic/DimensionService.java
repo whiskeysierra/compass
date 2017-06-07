@@ -68,7 +68,9 @@ public class DimensionService {
             return;
         }
 
-        final List<Value> values = valueRepository.findAll(byDimension(next.getId()));
+        final List<Value> values = valueRepository.findAll(byDimension(next.getId())).stream()
+                .map(Value::fromRow)
+                .collect(toList());
         validator.validate(next, values);
     }
 

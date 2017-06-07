@@ -1,158 +1,103 @@
 package org.zalando.compass.domain.persistence;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
-import com.google.gag.annotation.remark.Hack;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.model.Realization;
-import org.zalando.compass.domain.model.Value;
+import org.zalando.compass.domain.persistence.model.tables.pojos.ValueRow;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.util.List;
 import java.util.Optional;
 
-import static com.google.common.collect.ImmutableMap.of;
-import static org.springframework.dao.support.DataAccessUtils.singleResult;
+import static org.jooq.impl.DSL.function;
+import static org.jooq.impl.DSL.trueCondition;
+import static org.jooq.impl.DSL.val;
 import static org.zalando.compass.domain.persistence.ValueCriteria.withoutCriteria;
-import static org.zalando.fauxpas.FauxPas.throwingBiFunction;
+import static org.zalando.compass.domain.persistence.model.Tables.VALUE;
 
 @Component
-public class ValueRepository implements Repository<Value, Realization, ValueCriteria> {
+public class ValueRepository implements Repository<ValueRow, Realization, ValueCriteria> {
 
-    private static final TypeReference<ImmutableMap<String, JsonNode>> TYPE_REF =
-            new TypeReference<ImmutableMap<String, JsonNode>>() {
-            };
-
-    private final NamedParameterJdbcTemplate template;
-    private final ObjectMapper mapper;
+    private final DSLContext db;
 
     @Autowired
-    public ValueRepository(final NamedParameterJdbcTemplate template,
-            final ObjectMapper mapper) {
-        this.template = template;
-        this.mapper = mapper;
+    public ValueRepository(final DSLContext db) {
+        this.db = db;
     }
 
     @Override
-    public boolean create(final Value value) throws IOException {
-        final ImmutableMap<String, Object> params = of(
-                "key", value.getKey(),
-                "dimensions", mapper.writeValueAsString(value.getDimensions()),
-                "value", mapper.writeValueAsString(value.getValue())
-        );
+    public boolean create(final ValueRow value) throws IOException {
+        final int inserts = db.insertInto(VALUE)
+                .columns(VALUE.KEY, VALUE.DIMENSIONS, VALUE.VALUE_)
+                .values(value.getKey(), value.getDimensions(), value.getValue())
+                .execute();
 
-        final int updates = template.update("" +
-                "INSERT INTO value (key, dimensions, value)" +
-                "     VALUES (:key, :dimensions::JSONB, :value::JSONB)", params);
-
-        return updates > 0;
+        return inserts > 0;
     }
 
     @Override
-    public Optional<Value> find(final Realization id) throws IOException {
-        final ImmutableMap<String, String> params = of(
-                "key", id.getKey(),
-                "dimensions", mapper.writeValueAsString(id.getDimensions())
-        );
+    public Optional<ValueRow> find(final Realization id) throws IOException {
+        @Nullable final ValueRow row = db.select(VALUE.fields())
+                .from(VALUE)
+                .where(VALUE.KEY.eq(id.getKey()))
+                .and(VALUE.DIMENSIONS.isNotNull()) // TODO match on dimensions somehow?!
+                .fetchOneInto(ValueRow.class);
 
-        @Nullable final Value value = singleResult(template.query("" +
-                "SELECT key," +
-                "       dimensions," +
-                "       value" +
-                "  FROM value" +
-                " WHERE key = :key" +
-                "   AND dimensions = :dimensions::JSONB", params, mapRow()));
-
-        return Optional.ofNullable(value);
+        return Optional.ofNullable(row);
     }
 
     @Override
-    public List<Value> findAll() throws IOException {
+    public List<ValueRow> findAll() throws IOException {
         return findAll(withoutCriteria());
     }
 
     @Override
-    public List<Value> findAll(final ValueCriteria criteria) throws IOException {
+    public List<ValueRow> findAll(final ValueCriteria criteria) throws IOException {
+        return db.select(VALUE.fields())
+                .from(VALUE)
+                .where(toCondition(criteria))
+                .fetchInto(ValueRow.class);
+    }
+
+    private Condition toCondition(final ValueCriteria criteria) {
         if (criteria.getKey() != null) {
-            return template.query("" +
-                    "SELECT key," +
-                    "       dimensions," +
-                    "       value" +
-                    "  FROM value" +
-                    " WHERE key = :key", of("key", criteria.getKey()), mapRow());
+            return VALUE.KEY.eq(criteria.getKey());
         } else if (criteria.getKeyPattern() != null) {
-            return template.query("" +
-                    "SELECT key," +
-                    "       dimensions," +
-                    "       value" +
-                    "  FROM value" +
-                    " WHERE key ILIKE :key", of("key", "%" + criteria.getKeyPattern() + "%"), mapRow());
+            return VALUE.KEY.likeIgnoreCase(criteria.getKeyPattern());
         } else if (criteria.getDimension() != null) {
-            return template.query("" +
-                    "SELECT key," +
-                    "       dimensions," +
-                    "       value" +
-                    "  FROM value" +
-                    " WHERE JSONB_EXISTS(dimensions ,:dimension)", of("dimension", criteria.getDimension()), mapRow());
+            return function("JSONB_EXISTS", Boolean.class, VALUE.DIMENSIONS, val(criteria.getDimension())).isTrue();
         } else {
-            return template.query("" +
-                    "SELECT key," +
-                    "       dimensions," +
-                    "       value" +
-                    "  FROM value" +
-                    " WHERE JSONB_EXISTS(dimensions ,:dimension)", of(), mapRow());
+            return trueCondition();
         }
     }
 
-    @Hack
-    private RowMapper<Value> mapRow() {
-        return throwingBiFunction(this::map)::apply;
-    }
-
-    private Value map(final ResultSet row, @SuppressWarnings("unused") final int num) throws Exception {
-        return new Value(
-                row.getString("key"),
-                mapper.readValue(row.getBytes("dimensions"), TYPE_REF),
-                mapper.readTree(row.getBytes("value")));
-    }
-
     @Override
-    public boolean update(final Value value) throws IOException {
-        final ImmutableMap<String, Object> params = of(
-                "key", value.getKey(),
-                "dimensions", mapper.writeValueAsString(value.getDimensions()),
-                "value", mapper.writeValueAsString(value.getValue()));
-
-        final int updates = template.update("" +
-                "UPDATE value" +
-                "   SET value = :value::JSONB" +
-                " WHERE key = :key" +
-                "   AND dimensions = :dimensions::JSONB", params);
+    public boolean update(final ValueRow value) throws IOException {
+        final int updates = db.update(VALUE)
+                .set(VALUE.VALUE_, value.getValue())
+                .where(VALUE.KEY.eq(value.getKey()))
+                .and(VALUE.DIMENSIONS.eq(value.getDimensions()))
+                .execute();
 
         return updates > 0;
     }
 
     @Override
     public void delete(final Realization id) throws IOException {
-        final ImmutableMap<String, String> params = of(
-                "key", id.getKey(),
-                "dimensions", mapper.writeValueAsString(id.getDimensions()));
+        /*
+         * TODO optimize query
+         *
+         * SELECT COALESCE(JSONB_OBJECT_AGG(key, value), '{}'::JSONB)
+         *   FROM JSONB_EACH_TEXT(dimensions)) = :dimensions::JSONB
+         *
+         */
 
-        // TODO document text value hack here!
-        final int deletions = template.update("" +
-                "DELETE" +
-                "  FROM value" +
-                " WHERE key = :key" +
-                // transform dimension values to text for comparison
-                "   AND (SELECT COALESCE(JSONB_OBJECT_AGG(key, value), '{}'::JSONB) " +
-                "          FROM JSONB_EACH_TEXT(dimensions)) = :dimensions::JSONB", params);
+        // TODO find values and delete all of them in one query
+
+        final int deletions = 0;
 
         if (deletions == 0) {
             throw new NotFoundException();

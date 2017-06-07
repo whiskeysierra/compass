@@ -20,6 +20,7 @@ import java.util.List;
 import static com.fasterxml.jackson.databind.node.JsonNodeFactory.instance;
 import static com.google.common.collect.ImmutableMap.of;
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -71,8 +72,8 @@ public class ValueServiceTest {
                 new Value("tax-rate", of(), decimal(0.25)) // legally questionable, but ok for the sake of a test
         );
 
-        when(valueRepository.findAll(byKey(any()))).thenReturn(values);
-        when(valueRepository.findAll(byKeyPattern(any()))).thenReturn(values);
+        when(valueRepository.findAll(byKey(any()))).thenReturn(values.stream().map(Value::toRow).collect(toList()));
+        when(valueRepository.findAll(byKeyPattern(any()))).thenReturn(values.stream().map(Value::toRow).collect(toList()));
     }
 
     private ObjectNode stringSchema() {

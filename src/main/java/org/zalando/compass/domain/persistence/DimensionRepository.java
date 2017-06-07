@@ -8,8 +8,6 @@ import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
-import org.zalando.compass.domain.persistence.model.Tables;
-import org.zalando.compass.domain.persistence.model.tables.daos.DimensionDao;
 import org.zalando.compass.domain.persistence.model.tables.pojos.DimensionRow;
 
 import javax.annotation.Nullable;
@@ -27,32 +25,27 @@ import static org.jooq.impl.DSL.row;
 import static org.jooq.impl.DSL.values;
 import static org.springframework.dao.support.DataAccessUtils.singleResult;
 import static org.zalando.compass.domain.persistence.DimensionCriteria.dimensions;
+import static org.zalando.compass.domain.persistence.model.Tables.DIMENSION;
 
 @Component
 public class DimensionRepository implements Repository<DimensionRow, String, DimensionCriteria> {
 
-    private final DimensionDao dao;
-    private final DSLContext context;
+    private final DSLContext db;
 
     @Autowired
-    public DimensionRepository(final DimensionDao dao, final DSLContext jooq) {
-        this.dao = dao;
-        this.context = jooq;
+    public DimensionRepository(final DSLContext db) {
+        this.db = db;
     }
 
     @Override
     public boolean create(final DimensionRow dimension) throws IOException {
         try {
-            dao.insert(new DimensionRow(
-                    dimension.getId(),
-                    null,
-                    dimension.getSchema(),
-                    dimension.getRelation(),
-                    dimension.getDescription()
-            ));
+            db.insertInto(DIMENSION)
+                    .columns(DIMENSION.ID, DIMENSION.SCHEMA, DIMENSION.RELATION, DIMENSION.DESCRIPTION)
+                    .values(dimension.getId(), dimension.getSchema(), dimension.getRelation(), dimension.getDescription())
+                    .execute();
             return true;
         } catch (final DuplicateKeyException e) {
-            // TODO verify that this actually works
             return false;
         }
     }
@@ -69,59 +62,63 @@ public class DimensionRepository implements Repository<DimensionRow, String, Dim
         final Set<String> dimensions = criteria.getDimensions();
 
         if (dimensions.isEmpty()) {
+            // TODO is that correct?!
             return Collections.emptyList();
         }
 
-        return context.select(Tables.DIMENSION.fields())
-                .from(Tables.DIMENSION)
-                .where(Tables.DIMENSION.ID.in(dimensions))
-                .orderBy(Tables.DIMENSION.PRIORITY.asc())
+        return db.select(DIMENSION.fields())
+                .from(DIMENSION)
+                .where(DIMENSION.ID.in(dimensions))
+                .orderBy(DIMENSION.PRIORITY.asc())
                 .fetchInto(DimensionRow.class);
     }
 
     @Override
     public List<DimensionRow> findAll() {
-        return context.select(Tables.DIMENSION.fields())
-                .from(Tables.DIMENSION)
-                .orderBy(Tables.DIMENSION.PRIORITY.asc())
+        return db.select(DIMENSION.fields())
+                .from(DIMENSION)
+                .orderBy(DIMENSION.PRIORITY.asc())
                 .fetchInto(DimensionRow.class);
     }
 
     @Override
     public boolean update(final DimensionRow dimension) throws IOException {
-        final int updates = context.update(Tables.DIMENSION)
-                .set(Tables.DIMENSION.SCHEMA, dimension.getSchema())
-                .set(Tables.DIMENSION.RELATION, dimension.getRelation())
-                .set(Tables.DIMENSION.DESCRIPTION, dimension.getDescription())
-                .where(Tables.DIMENSION.ID.eq(dimension.getId()))
+        final int updates = db.update(DIMENSION)
+                .set(DIMENSION.SCHEMA, dimension.getSchema())
+                .set(DIMENSION.RELATION, dimension.getRelation())
+                .set(DIMENSION.DESCRIPTION, dimension.getDescription())
+                .where(DIMENSION.ID.eq(dimension.getId()))
                 .execute();
 
         return updates > 0;
     }
 
     public void reorder(final List<String> dimensions) {
-        final List<Row2<String, Integer>> ranks = new ArrayList<>(dimensions.size());
-        final ListIterator<String> iterator = dimensions.listIterator();
+        db.update(DIMENSION)
+                .set(DIMENSION.PRIORITY, field("ranks.priority", Integer.class))
+                .from(index(dimensions).as("ranks", "dimension", "priority"))
+                .where(DIMENSION.ID.eq(field("ranks.dimension", String.class)))
+                .execute();
+    }
+
+    private static <T> Table<Record2<T, Integer>> index(final List<T> dimensions) {
+        final List<Row2<T, Integer>> ranks = new ArrayList<>(dimensions.size());
+        final ListIterator<T> iterator = dimensions.listIterator();
 
         while (iterator.hasNext()) {
             ranks.add(row(iterator.next(), iterator.nextIndex()));
         }
 
         @SuppressWarnings({"unchecked", "rawtypes"})
-        final Row2<String, Integer>[] rows = ranks.toArray(new Row2[ranks.size()]);
-        final Table<Record2<String, Integer>> values = values(rows);
+        final Row2<T, Integer>[] rows = ranks.toArray(new Row2[ranks.size()]);
 
-        context.update(Tables.DIMENSION)
-                .set(Tables.DIMENSION.PRIORITY, field("new_priority", Integer.class))
-                .from(values.as("ranks", "dimension_id", "new_priority"))
-                .where(Tables.DIMENSION.ID.eq(field("dimension_id", String.class)))
-                .execute();
+        return values(rows);
     }
 
     @Override
     public void delete(final String dimension) {
-        final int deletions = context.delete(Tables.DIMENSION)
-                .where(Tables.DIMENSION.ID.eq(dimension))
+        final int deletions = db.deleteFrom(DIMENSION)
+                .where(DIMENSION.ID.eq(dimension))
                 .execute();
 
         if (deletions == 0) {

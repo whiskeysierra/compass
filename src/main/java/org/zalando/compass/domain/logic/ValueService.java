@@ -7,6 +7,7 @@ import com.google.common.collect.ListMultimap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.zalando.compass.domain.model.Dimension;
+import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Realization;
 import org.zalando.compass.domain.model.Relation;
 import org.zalando.compass.domain.model.Value;
@@ -16,6 +17,8 @@ import org.zalando.compass.domain.persistence.NotFoundException;
 import org.zalando.compass.domain.persistence.RelationRepository;
 import org.zalando.compass.domain.persistence.ValueCriteria;
 import org.zalando.compass.domain.persistence.ValueRepository;
+import org.zalando.compass.domain.persistence.model.tables.pojos.KeyRow;
+import org.zalando.compass.domain.persistence.model.tables.pojos.ValueRow;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -71,12 +74,12 @@ public class ValueService {
         validateValue(next);
 
         final Realization id = new Realization(next.getKey(), next.getDimensions());
-        @Nullable final Value current = valueRepository.find(id).orElse(null);
+        final ValueRow row = next.toRow();
 
-        if (current == null) {
-            return valueRepository.create(next);
+        if (valueRepository.exists(id)) {
+            valueRepository.update(row);
         } else {
-            valueRepository.update(next);
+            return valueRepository.create(row);
         }
 
         return false;
@@ -96,7 +99,8 @@ public class ValueService {
     }
 
     private void validateValue(final Value value) throws IOException {
-        validator.validate(keyRepository.read(value.getKey()), value);
+        final KeyRow row = keyRepository.read(value.getKey());
+        validator.validate(Key.fromRow(row), value);
     }
 
     public Value read(final String key, final Map<String, String> filter) throws IOException {
@@ -107,7 +111,8 @@ public class ValueService {
     public List<Value> readAllByKey(final String key, final Map<String, String> filter) throws IOException {
         checkKeyExists(key);
 
-        final List<Value> values = valueRepository.findAll(byKey(key));
+        final List<ValueRow> rows = valueRepository.findAll(byKey(key));
+        final List<Value> values = rows.stream().map(Value::fromRow).collect(toList());
         final Map<Dimension, Relation> dimensions = readDimensions();
 
         return match(values, dimensions, filter);
@@ -115,7 +120,7 @@ public class ValueService {
 
     public ListMultimap<String, Value> readAllByKeyPattern(@Nullable final String keyPattern) throws IOException {
         final ValueCriteria criteria = keyPattern == null ? withoutCriteria() : byKeyPattern(keyPattern);
-        final List<Value> values = valueRepository.findAll(criteria);
+        final List<Value> values = valueRepository.findAll(criteria).stream().map(Value::fromRow).collect(toList());
 
         return create(index(values, Value::getKey));
     }

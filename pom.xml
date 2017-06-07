@@ -553,8 +553,8 @@
                         </strategy>
                         <generate>
                             <immutablePojos>true</immutablePojos>
+                            <interfaces>true</interfaces>
                             <pojosEqualsAndHashCode>true</pojosEqualsAndHashCode>
-                            <daos>true</daos>
                         </generate>
                         <target>
                             <packageName>org.zalando.compass.domain.persistence.model</packageName>
