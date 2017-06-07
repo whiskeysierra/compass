@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.ValueService;
 import org.zalando.compass.domain.model.Entries;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.domain.model.Values;
+import org.zalando.compass.domain.model.ValuePage;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -41,22 +41,22 @@ public class ValueResource {
     }
 
     @RequestMapping(method = GET, path = "/keys/{id}/values")
-    public Values getAll(@PathVariable final String id, @RequestParam final Map<String, String> filter) throws IOException {
-        return new Values(service.readAllByKey(id, filter));
+    public ValuePage getAll(@PathVariable final String id, @RequestParam final Map<String, String> filter) throws IOException {
+        return new ValuePage(service.readAllByKey(id, filter));
     }
 
     @RequestMapping(method = POST, path = "/keys/{id}/values")
-    public ResponseEntity<Values> post(@PathVariable final String id, @RequestParam final Map<String, String> filter,
+    public ResponseEntity<ValuePage> post(@PathVariable final String id, @RequestParam final Map<String, String> filter,
             @RequestBody final JsonNode node) throws IOException {
         final Value value = reader.read(node, Value.class).withKey(id);
 
         final boolean created = service.createOrUpdate(value);
-        final Values values = new Values(service.readAllByKey(id, filter));
+        final ValuePage page = new ValuePage(service.readAllByKey(id, filter));
 
         if (created) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(values);
+            return ResponseEntity.status(HttpStatus.CREATED).body(page);
         } else {
-            return ResponseEntity.ok(values);
+            return ResponseEntity.ok(page);
         }
     }
 

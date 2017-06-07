@@ -3,8 +3,8 @@ package org.zalando.compass.domain.model;
 import java.util.List;
 
 @lombok.Value
-public class Keys {
+public final class ValuePage {
 
-    private final List<Key> keys;
+    private final List<Value> values;
 
 }

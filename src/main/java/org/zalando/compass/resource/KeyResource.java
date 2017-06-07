@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.KeyService;
 import org.zalando.compass.domain.model.Key;
-import org.zalando.compass.domain.model.Keys;
+import org.zalando.compass.domain.model.KeyPage;
 import org.zalando.compass.domain.persistence.KeyRepository;
 
 import java.io.IOException;
@@ -39,8 +39,8 @@ public class KeyResource {
     }
 
     @RequestMapping(method = GET)
-    public Keys getAll() {
-        return new Keys(repository.findAll().stream().map(Key::fromRow).collect(Collectors.toList()));
+    public KeyPage getAll() {
+        return new KeyPage(repository.findAll().stream().map(Key::fromRow).collect(Collectors.toList()));
     }
 
     @RequestMapping(method = GET, path = "/{id}")

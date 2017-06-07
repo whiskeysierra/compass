@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
-import org.zalando.compass.domain.model.Dimensions;
+import org.zalando.compass.domain.model.DimensionPage;
 import org.zalando.compass.domain.persistence.DimensionRepository;
 import org.zalando.compass.domain.persistence.model.tables.pojos.DimensionRow;
 
@@ -41,17 +41,17 @@ public class DimensionResource {
     }
 
     @RequestMapping(method = GET)
-    public Dimensions getAll() {
-        return new Dimensions(repository.findAll().stream()
+    public DimensionPage getAll() {
+        return new DimensionPage(repository.findAll().stream()
                 .map(row -> new Dimension(row.getId(), row.getSchema(), row.getRelation(), row.getDescription()))
                 .collect(Collectors.toList()));
     }
 
     @RequestMapping(method = PUT)
-    public Dimensions putAll(@RequestBody final JsonNode node) throws IOException {
-        final Dimensions dimensions = reader.read(node, Dimensions.class);
-        service.createOrUpdate(dimensions.getDimensions());
-        return new Dimensions(repository.findAll().stream()
+    public DimensionPage putAll(@RequestBody final JsonNode node) throws IOException {
+        final DimensionPage page = reader.read(node, DimensionPage.class);
+        service.createOrUpdate(page.getDimensions());
+        return new DimensionPage(repository.findAll().stream()
                 .map(row -> new Dimension(row.getId(), row.getSchema(), row.getRelation(), row.getDescription()))
                 .collect(Collectors.toList()));
     }

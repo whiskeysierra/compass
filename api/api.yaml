@@ -22,7 +22,7 @@ paths:
         200:
           description: OK
           schema:
-            $ref: '#/definitions/Relations'
+            $ref: '#/definitions/RelationPage'
   /relations/{relation}:
     get:
       summary: View a relation
@@ -43,7 +43,7 @@ paths:
         200:
           description: OK
           schema:
-            $ref: '#/definitions/Dimensions'
+            $ref: '#/definitions/DimensionPage'
     put:
       summary: Update, add and/or re-order dimensions
       description: |
@@ -55,12 +55,12 @@ paths:
         - name: dimensions
           in: body
           schema:
-            $ref: '#/definitions/Dimensions'
+            $ref: '#/definitions/DimensionPage'
       responses:
         200:
           description: OK
           schema:
-            $ref: '#/definitions/Dimensions'
+            $ref: '#/definitions/DimensionPage'
   /dimensions/{dimension}:
     get:
       summary: View a dimension
@@ -105,7 +105,7 @@ paths:
         200:
           description: OK
           schema:
-            $ref: '#/definitions/Keys'
+            $ref: '#/definitions/KeyPage'
   /keys/{key}:
     get:
       summary: View a key
@@ -162,7 +162,7 @@ paths:
         200:
           description: OK
           schema:
-            $ref: '#/definitions/Values'
+            $ref: '#/definitions/ValuePage'
     post:
       summary: Add or or replace value of a given key
       parameters:
@@ -173,11 +173,11 @@ paths:
         200:
           description: OK
           schema:
-            $ref: '#/definitions/Values'
+            $ref: '#/definitions/ValuePage'
         201:
           description: Created
           schema:
-            $ref: '#/definitions/Values'
+            $ref: '#/definitions/ValuePage'
     delete:
       summary: Delete selected values
       parameters:
@@ -195,7 +195,25 @@ paths:
         200:
           description: OK
           schema:
-            $ref: '#/definitions/Entries'
+            type: object
+            additionalProperties:
+              type: array
+              items:
+                $ref: '#/definitions/Value'
+            example:
+              active:
+                - dimensions:
+                    email: .*@qa-example.com
+                    value: true
+                - dimensions:
+                  value: false
+              tax-rate:
+                - dimension:
+                    country: DE
+                  value: 0.19
+                - dimension:
+                    country: CH
+                  value: 0.08
 parameters:
   RelationId:
     name: relation
@@ -218,7 +236,7 @@ parameters:
     name: values
     in: body
     schema:
-      $ref: '#/definitions/Values'
+      $ref: '#/definitions/ValuePage'
   Value:
     name: value
     in: body
@@ -241,7 +259,7 @@ parameters:
 definitions:
   Problem:
     $ref: 'https://zalando.github.io/problem/schema.yaml#/Problem'
-  Relations:
+  RelationPage:
     type: object
     properties:
       relations:
@@ -276,7 +294,7 @@ definitions:
     type: string
     pattern: '^([a-z0-9]+(-[a-z0-9]+)*)(\.([a-z0-9]+(-[a-z0-9]+)*))*$'
     example: country
-  Dimensions:
+  DimensionPage:
     type: object
     properties:
       dimensions:
@@ -316,7 +334,7 @@ definitions:
       - schema
       - relation
       - description
-  Keys:
+  KeyPage:
     type: object
     properties:
       keys:
@@ -346,7 +364,7 @@ definitions:
     required:
       - schema
       - description
-  Values:
+  ValuePage:
     type: object
     properties:
       values:
@@ -377,23 +395,3 @@ definitions:
         country: DE
         after: 2017-01-01T00:00:00
       value: 0.2
-  Entries:
-    type: object
-    additionalProperties:
-      type: array
-      items:
-        $ref: '#/definitions/Value'
-    example:
-      active:
-        - dimensions:
-            email: .*@qa-example.com
-            value: true
-        - dimensions:
-          value: false
-      tax-rate:
-        - dimension:
-            country: DE
-          value: 0.19
-        - dimension:
-            country: CH
-          value: 0.08
