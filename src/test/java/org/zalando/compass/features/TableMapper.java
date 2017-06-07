@@ -64,7 +64,7 @@ public class TableMapper {
 
     // TODO https://github.com/jayway/JsonPath/issues/83
     @Hack("Only supports dot notation; no brackets or arrays")
-    public JsonNode map(final Map<String, String> row) throws IOException {
+    private JsonNode map(final Map<String, String> row) throws IOException {
         final JsonNode node = mapper.readTree("{}");
 
         final DocumentContext context = parse(node, configuration);

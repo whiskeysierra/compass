@@ -6,12 +6,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import org.junit.Before;
 import org.junit.Test;
-import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.DimensionRepository;
 import org.zalando.compass.domain.persistence.KeyRepository;
 import org.zalando.compass.domain.persistence.RelationRepository;
 import org.zalando.compass.domain.persistence.ValueRepository;
+import org.zalando.compass.domain.persistence.model.tables.pojos.DimensionRow;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -43,32 +43,33 @@ public class ValueServiceTest {
     @Before
     public void setUp() throws Exception {
         when(dimensionRepository.findAll()).thenReturn(asList(
-                new Dimension("after", stringSchema(), ">=", ""),
-                new Dimension("before", stringSchema(), "<=", ""),
-                new Dimension("country", stringSchema(), "=", ""),
-                new Dimension("postal-code", stringSchema(), "=", ""),
-                new Dimension("locale", stringSchema(), "^", ""),
-                new Dimension("email", stringSchema(), "~", "")));
+                new DimensionRow("after", null, stringSchema(), ">=", ""),
+                new DimensionRow("before", null, stringSchema(), "<=", ""),
+                new DimensionRow("country", null, stringSchema(), "=", ""),
+                new DimensionRow("postal-code", null, stringSchema(), "=", ""),
+                new DimensionRow("locale", null, stringSchema(), "^", ""),
+                new DimensionRow("email", null, stringSchema(), "~", "")));
 
         when(keyRepository.exists("tax-rate")).thenReturn(true);
 
         final List<Value> values = asList(
-                new Value("tax-rate", of(), decimal(0.25)), // legally questionable, but ok for the sake of a test
-                new Value("tax-rate", of("after", text("2017-01-01T00:00:00Z")), decimal(0.5)),
-                new Value("tax-rate", of("country", text("CH")), decimal(0.07)),
-                new Value("tax-rate", of("country", text("CH"), "after", text("2017-01-01T00:00:00Z")), decimal(0.08)),
-                new Value("tax-rate", of("country", text("CH"), "after", text("2018-01-01T00:00:00Z")), decimal(0.09)),
-                new Value("tax-rate", of("country", text("CH"), "before", text("2015-01-01T00:00:00Z")), decimal(0.06)),
                 new Value("tax-rate", of("country", text("CH"), "before", text("2014-01-01T00:00:00Z")), decimal(0.05)),
-                new Value("tax-rate", of("country", text("DE")), decimal(0.19)),
-                new Value("tax-rate", of("country", text("DE"), "after", text("2017-01-01T00:00:00Z")), decimal(0.2)),
+                new Value("tax-rate", of("country", text("CH"), "before", text("2015-01-01T00:00:00Z")), decimal(0.06)),
+                new Value("tax-rate", of("country", text("CH"), "after", text("2018-01-01T00:00:00Z")), decimal(0.09)),
+                new Value("tax-rate", of("country", text("CH"), "after", text("2017-01-01T00:00:00Z")), decimal(0.08)),
                 new Value("tax-rate", of("country", text("DE"), "after", text("2018-01-01T00:00:00Z")), decimal(0.22)),
+                new Value("tax-rate", of("country", text("DE"), "after", text("2017-01-01T00:00:00Z")), decimal(0.2)),
                 new Value("tax-rate", of("country", text("DE"), "postal-code", text("27498")), decimal(0.0)),
-                new Value("tax-rate", of("locale", text("de")), decimal(0.10)),
+                new Value("tax-rate", of("country", text("CH")), decimal(0.07)),
+                new Value("tax-rate", of("country", text("DE")), decimal(0.19)),
+                new Value("tax-rate", of("after", text("2017-01-01T00:00:00Z")), decimal(0.5)),
                 new Value("tax-rate", of("locale", text("de-DE")), decimal(0.19)),
                 new Value("tax-rate", of("locale", text("en-DE")), decimal(0.18)),
+                new Value("tax-rate", of("locale", text("de")), decimal(0.10)),
                 new Value("tax-rate", of("email", text(".*@zalando\\.de")), decimal(0.0)),
-                new Value("tax-rate", of("email", text(".*@goldmansachs\\.com")), decimal(1.0)));
+                new Value("tax-rate", of("email", text(".*@goldmansachs\\.com")), decimal(1.0)),
+                new Value("tax-rate", of(), decimal(0.25)) // legally questionable, but ok for the sake of a test
+        );
 
         when(valueRepository.findAll(byKey(any()))).thenReturn(values);
         when(valueRepository.findAll(byKeyPattern(any()))).thenReturn(values);
@@ -137,21 +138,21 @@ public class ValueServiceTest {
     @Test
     public void shouldFindAll() throws IOException {
         assertThat(unit.readAllByKeyPattern("tax").get("tax-rate"), contains(
-                new Value("tax-rate", of("country", text("CH"), "after", text("2018-01-01T00:00:00Z")), decimal(0.09)),
-                new Value("tax-rate", of("country", text("DE"), "after", text("2018-01-01T00:00:00Z")), decimal(0.22)),
-                new Value("tax-rate", of("country", text("CH"), "after", text("2017-01-01T00:00:00Z")), decimal(0.08)),
-                new Value("tax-rate", of("country", text("DE"), "after", text("2017-01-01T00:00:00Z")), decimal(0.2)),
                 new Value("tax-rate", of("country", text("CH"), "before", text("2014-01-01T00:00:00Z")), decimal(0.05)),
                 new Value("tax-rate", of("country", text("CH"), "before", text("2015-01-01T00:00:00Z")), decimal(0.06)),
+                new Value("tax-rate", of("country", text("CH"), "after", text("2018-01-01T00:00:00Z")), decimal(0.09)),
+                new Value("tax-rate", of("country", text("CH"), "after", text("2017-01-01T00:00:00Z")), decimal(0.08)),
+                new Value("tax-rate", of("country", text("DE"), "after", text("2018-01-01T00:00:00Z")), decimal(0.22)),
+                new Value("tax-rate", of("country", text("DE"), "after", text("2017-01-01T00:00:00Z")), decimal(0.2)),
                 new Value("tax-rate", of("country", text("DE"), "postal-code", text("27498")), decimal(0.0)),
-                new Value("tax-rate", of("after", text("2017-01-01T00:00:00Z")), decimal(0.5)),
                 new Value("tax-rate", of("country", text("CH")), decimal(0.07)),
                 new Value("tax-rate", of("country", text("DE")), decimal(0.19)),
+                new Value("tax-rate", of("after", text("2017-01-01T00:00:00Z")), decimal(0.5)),
                 new Value("tax-rate", of("locale", text("de-DE")), decimal(0.19)),
                 new Value("tax-rate", of("locale", text("en-DE")), decimal(0.18)),
                 new Value("tax-rate", of("locale", text("de")), decimal(0.10)),
-                new Value("tax-rate", of("email", text(".*@goldmansachs\\.com")), decimal(1.0)),
                 new Value("tax-rate", of("email", text(".*@zalando\\.de")), decimal(0.0)),
+                new Value("tax-rate", of("email", text(".*@goldmansachs\\.com")), decimal(1.0)),
                 new Value("tax-rate", of(), decimal(0.25))));
     }
 

@@ -20,8 +20,6 @@ import org.zalando.problem.ThrowableProblem;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
-import java.util.Iterator;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import static com.google.common.io.Resources.getResource;
@@ -37,7 +35,7 @@ public class JsonSchemaValidator {
 
     private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
     private final JsonSchemaFactory factory = new JsonSchemaFactory(mapper);
-    private final LoadingCache<String, JsonSchema> schemas = CacheBuilder.newBuilder().build(new SchemaLoader());
+    private final LoadingCache<String, JsonSchema> schemas = CacheBuilder.newBuilder().build(new SchemaLoader(mapper, factory));
 
     public void validate(final String name, final JsonNode node) {
         validate(schemas.getUnchecked(name), node);
@@ -72,19 +70,43 @@ public class JsonSchemaValidator {
                 .build();
     }
 
-    private final class SchemaLoader extends CacheLoader<String, JsonSchema> {
+    private static final class SchemaLoader extends CacheLoader<String, JsonSchema> {
 
-        private final Set<String> filter =
+        private static final Set<String> filter =
                 ImmutableSet.of("example", "deprecated", "readOnly", "x-extensible-enum");
 
+        private final JsonSchemaFactory factory;
         private final JsonNode definitions;
 
-        public SchemaLoader() {
+        public SchemaLoader(final ObjectMapper mapper, final JsonSchemaFactory factory) {
+            this.factory = factory;
             try {
                 this.definitions = filter(mapper.readTree(getResource("api/api.yaml")));
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
+        }
+
+        private static JsonNode filter(final JsonNode node) {
+            if (node.isObject()) {
+                node.fields().forEachRemaining(field -> filter(field.getKey(), field.getValue()));
+            } else if (node.isArray()) {
+                node.elements().forEachRemaining(SchemaLoader::filter);
+            }
+            return node;
+        }
+
+        private static JsonNode filter(final String key, final JsonNode node) {
+            if (node.isObject() && key.equals("properties")) {
+                node.fields().forEachRemaining(field -> {
+                    if (field.getValue().isObject()) {
+                        final ObjectNode value = (ObjectNode) field.getValue();
+                        value.remove(filter);
+                    }
+                });
+                return node;
+            }
+            return filter(node);
         }
 
         @Override
@@ -94,36 +116,6 @@ public class JsonSchemaValidator {
             return factory.getSchema(schema);
         }
 
-        private JsonNode filter(final JsonNode node) {
-            if (node.isObject()) {
-                final Iterator<Entry<String, JsonNode>> iter = node.fields();
-                while (iter.hasNext()) {
-                    final Entry<String, JsonNode> elem = iter.next();
-                    filter(elem.getKey(), elem.getValue());
-                }
-            } else if (node.isArray()) {
-                final Iterator<JsonNode> iter = node.elements();
-                while (iter.hasNext()) {
-                    filter(iter.next());
-                }
-            }
-            return node;
-        }
-
-        private JsonNode filter(final String key, final JsonNode node) {
-            if (node.isObject() && key.equals("properties")) {
-                final Iterator<Entry<String, JsonNode>> iter = node.fields();
-                while (iter.hasNext()) {
-                    final Entry<String, JsonNode> elem = iter.next();
-                    if (elem.getValue().isObject()) {
-                        final ObjectNode value = (ObjectNode) elem.getValue();
-                        value.remove(filter);
-                    }
-                }
-                return node;
-            }
-            return filter(node);
-        }
     }
 
 }

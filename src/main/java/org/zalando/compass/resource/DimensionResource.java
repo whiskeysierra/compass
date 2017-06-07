@@ -12,8 +12,10 @@ import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Dimensions;
 import org.zalando.compass.domain.persistence.DimensionRepository;
+import org.zalando.compass.domain.persistence.model.tables.pojos.DimensionRow;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -40,19 +42,24 @@ public class DimensionResource {
 
     @RequestMapping(method = GET)
     public Dimensions getAll() {
-        return new Dimensions(repository.findAll());
+        return new Dimensions(repository.findAll().stream()
+                .map(row -> new Dimension(row.getId(), row.getSchema(), row.getRelation(), row.getDescription()))
+                .collect(Collectors.toList()));
     }
 
     @RequestMapping(method = PUT)
     public Dimensions putAll(@RequestBody final JsonNode node) throws IOException {
         final Dimensions dimensions = reader.read(node, Dimensions.class);
         service.createOrUpdate(dimensions.getDimensions());
-        return new Dimensions(repository.findAll());
+        return new Dimensions(repository.findAll().stream()
+                .map(row -> new Dimension(row.getId(), row.getSchema(), row.getRelation(), row.getDescription()))
+                .collect(Collectors.toList()));
     }
 
     @RequestMapping(method = GET, path = "/{id}")
     public Dimension get(@PathVariable final String id) throws IOException {
-        return repository.read(id);
+        final DimensionRow row = repository.read(id);
+        return new Dimension(row.getId(), row.getSchema(), row.getRelation(), row.getDescription());
     }
 
     @RequestMapping(method = PUT, path = "/{id}")

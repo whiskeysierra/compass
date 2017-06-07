@@ -7,6 +7,7 @@ import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.DimensionRepository;
 import org.zalando.compass.domain.persistence.RelationRepository;
 import org.zalando.compass.domain.persistence.ValueRepository;
+import org.zalando.compass.domain.persistence.model.tables.pojos.DimensionRow;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -35,17 +36,21 @@ public class DimensionService {
         this.valueRepository = valueRepository;
     }
 
-    public boolean createOrUpdate(final Dimension next) throws IOException {
-        verifyRelationExists(next);
+    public boolean createOrUpdate(final Dimension dimension) throws IOException {
+        verifyRelationExists(dimension);
 
-        @Nullable final Dimension current = dimensionRepository.find(next.getId()).orElse(null);
+        @Nullable final Dimension current = dimensionRepository.find(dimension.getId())
+                .map(row -> new Dimension(row.getId(), row.getSchema(), row.getRelation(), row.getDescription()))
+                .orElse(null);
+
+        final DimensionRow next = new DimensionRow(dimension.getId(), null, dimension.getSchema(), dimension.getRelation(), dimension.getDescription());
 
         if (current == null) {
             if (dimensionRepository.create(next)) {
                 return true;
             }
         } else {
-            validateDimensionValuesIfNecessary(next, current);
+            validateDimensionValuesIfNecessary(dimension, current);
             dimensionRepository.update(next);
         }
 

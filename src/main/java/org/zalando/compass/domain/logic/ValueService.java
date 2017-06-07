@@ -84,7 +84,10 @@ public class ValueService {
 
     private void validateDimensions(final Value value) throws IOException {
         final ImmutableSet<String> dimensions = value.getDimensions().keySet();
-        final List<Dimension> read = dimensionRepository.findAll(dimensions(dimensions));
+        final List<Dimension> read = dimensionRepository.findAll(dimensions(dimensions))
+                .stream()
+                .map(row -> new Dimension(row.getId(), row.getSchema(), row.getRelation(), row.getDescription()))
+                .collect(toList());
 
         final Set<String> difference = difference(dimensions, read.stream().map(Dimension::getId).collect(toSet()));
         checkArgument(difference.isEmpty(), "Unknown dimensions: " + difference);
@@ -107,8 +110,6 @@ public class ValueService {
         final List<Value> values = valueRepository.findAll(byKey(key));
         final Map<Dimension, Relation> dimensions = readDimensions();
 
-        sort(values, dimensions);
-
         return match(values, dimensions, filter);
     }
 
@@ -116,13 +117,7 @@ public class ValueService {
         final ValueCriteria criteria = keyPattern == null ? withoutCriteria() : byKeyPattern(keyPattern);
         final List<Value> values = valueRepository.findAll(criteria);
 
-        final Map<Dimension, Relation> dimensions = readDimensions();
-        final ListMultimap<String, Value> entries = create(index(values, Value::getKey));
-
-        entries.keySet().forEach(key ->
-            sort(entries.get(key), dimensions));
-
-        return entries;
+        return create(index(values, Value::getKey));
     }
 
     private void checkKeyExists(final String key) {
@@ -134,6 +129,7 @@ public class ValueService {
 
     private Map<Dimension, Relation> readDimensions() {
         return dimensionRepository.findAll().stream()
+                .map(row -> new Dimension(row.getId(), row.getSchema(), row.getRelation(), row.getDescription()))
                 .collect(toMap(identity(),
                         throwingFunction(dimension -> relationRepository.read(dimension.getRelation())),
                         this::denyDuplicates, LinkedHashMap::new));
@@ -141,41 +137,6 @@ public class ValueService {
 
     private <T> T denyDuplicates(final T u, @SuppressWarnings("unused") final T v) {
         throw new IllegalStateException(String.format("Duplicate key %s", u));
-    }
-
-    private void sort(final List<Value> values, final Map<Dimension, Relation> dimensions) {
-        values.sort(byDimensionSizeDescending()
-                .thenComparing(byDimensionsLexicographically(dimensions))
-                .thenComparing(byDimensionValues(dimensions)));
-    }
-
-    private Comparator<Value> byDimensionSizeDescending() {
-        return comparing(Value::getDimensions, comparing(Map::size)).reversed();
-    }
-
-    private Comparator<Value> byDimensionsLexicographically(final Map<Dimension, ?> dimensions) {
-        return comparing(value -> value.getDimensions().keySet(), explicit(dimensions.keySet().stream()
-                .map(Dimension::getId).collect(toList())).lexicographical());
-    }
-
-    private Comparator<Value> byDimensionValues(final Map<Dimension, Relation> dimensions) {
-        return comparing(Value::getDimensions, dimensions.entrySet().stream()
-                .map(this::byDimensionValue)
-                .reduce(this::startWithTie, Comparator::thenComparing));
-    }
-
-    private Comparator<Map<String, JsonNode>> byDimensionValue(final Entry<Dimension, Relation> entry) {
-        final Dimension dimension = entry.getKey();
-        final Relation relation = entry.getValue();
-        return comparing(getValueFor(dimension), nullsLast(comparing(JsonNode::asText, relation)));
-    }
-
-    private Function<Map<String, JsonNode>, JsonNode> getValueFor(final Dimension dimension) {
-        return map -> map.get(dimension.getId());
-    }
-
-    private <T> int startWithTie(@SuppressWarnings("unused") final T l, @SuppressWarnings("unused") final T r) {
-        return 0;
     }
 
     private List<Value> match(final List<Value> values, final Map<Dimension, Relation> dimensions,

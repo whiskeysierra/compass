@@ -13,7 +13,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-import org.zalando.compass.domain.model.Dimension;
+import org.zalando.compass.domain.persistence.model.tables.pojos.DimensionRow;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -39,7 +39,7 @@ public class DimensionRepositoryIntegrationTest {
     @TestConfiguration
     @Import({
             DimensionRepository.class,
-            RepositoryConfiguration.class
+            RepositoryConfiguration.class,
     })
     static class Configuration {
 
@@ -71,10 +71,10 @@ public class DimensionRepositoryIntegrationTest {
     public void shouldUpdate() throws IOException {
         create();
 
-        unit.update(new Dimension("country", new ObjectNode(instance).put("type", "integer"),
+        unit.update(new DimensionRow("country", null, new ObjectNode(instance).put("type", "integer"),
                 "=", "Country ID"));
 
-        final Dimension dimension = unit.read("country");
+        final DimensionRow dimension = unit.read("country");
 
         assertThat(dimension.getSchema().get("type").asText(), is("integer"));
         assertThat(dimension.getDescription(), is("Country ID"));
@@ -86,14 +86,14 @@ public class DimensionRepositoryIntegrationTest {
         create(newSalesChannel());
         create(newLocale());
 
-        final List<Dimension> before = unit.findAll();
-        assertThat(before.stream().map(Dimension::getId).collect(toList()),
+        final List<DimensionRow> before = unit.findAll();
+        assertThat(before.stream().map(DimensionRow::getId).collect(toList()),
                 contains("country", "sales-channel", "locale"));
 
         unit.reorder(Arrays.asList("sales-channel", "locale", "country"));
 
-        final List<Dimension> after = unit.findAll();
-        assertThat(after.stream().map(Dimension::getId).collect(toList()),
+        final List<DimensionRow> after = unit.findAll();
+        assertThat(after.stream().map(DimensionRow::getId).collect(toList()),
                 contains("sales-channel", "locale", "country"));
     }
 
@@ -110,7 +110,7 @@ public class DimensionRepositoryIntegrationTest {
     public void shouldRead() throws IOException {
         create();
 
-        final Dimension dimension = unit.read("country");
+        final DimensionRow dimension = unit.read("country");
 
         assertThat(dimension.getId(), is("country"));
         assertThat(dimension.getSchema().size(), is(1));
@@ -130,7 +130,11 @@ public class DimensionRepositoryIntegrationTest {
         create(newSalesChannel());
         create(newLocale());
 
-        assertThat(unit.findAll(), contains(newCountry(), newSalesChannel(), newLocale()));
+        final List<String> dimensions = unit.findAll().stream()
+                .map(DimensionRow::getId)
+                .collect(toList());
+
+        assertThat(dimensions, contains("country", "sales-channel", "locale"));
     }
 
     @Test
@@ -139,8 +143,8 @@ public class DimensionRepositoryIntegrationTest {
         create(newSalesChannel());
         create(newLocale());
 
-        final List<Dimension> dimensions = unit.findAll(dimensions(newHashSet("country", "sales-channel")));
-        assertThat(dimensions.stream().map(Dimension::getId).collect(toList()), contains("country", "sales-channel"));
+        final List<DimensionRow> dimensions = unit.findAll(dimensions(newHashSet("country", "sales-channel")));
+        assertThat(dimensions.stream().map(DimensionRow::getId).collect(toList()), contains("country", "sales-channel"));
     }
 
     @Test
@@ -155,22 +159,22 @@ public class DimensionRepositoryIntegrationTest {
         return create(newCountry());
     }
 
-    private Dimension newCountry() {
-        return new Dimension("country", new ObjectNode(instance).put("type", "string"),
+    private DimensionRow newCountry() {
+        return new DimensionRow("country", null, new ObjectNode(instance).put("type", "string"),
                 "=", "ISO 3166-1 alpha-2 country code");
     }
 
-    private Dimension newSalesChannel() {
-        return new Dimension("sales-channel", new ObjectNode(instance).put("type", "string"),
+    private DimensionRow newSalesChannel() {
+        return new DimensionRow("sales-channel", null, new ObjectNode(instance).put("type", "string"),
                 "=", "A sales channel...");
     }
 
-    private Dimension newLocale() {
-        return new Dimension("locale", new ObjectNode(instance).put("type", "string"),
+    private DimensionRow newLocale() {
+        return new DimensionRow("locale", null, new ObjectNode(instance).put("type", "string"),
                 "=", "Language");
     }
 
-    private boolean create(final Dimension dimension) throws IOException {
+    private boolean create(final DimensionRow dimension) throws IOException {
         return unit.create(dimension);
     }
 

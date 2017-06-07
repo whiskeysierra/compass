@@ -1,18 +1,19 @@
 package org.zalando.compass.domain.persistence;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
-import com.google.gag.annotation.remark.Hack;
+import org.jooq.DSLContext;
+import org.jooq.Record2;
+import org.jooq.Row2;
+import org.jooq.Table;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
-import org.zalando.compass.domain.model.Dimension;
+import org.zalando.compass.domain.persistence.model.Tables;
+import org.zalando.compass.domain.persistence.model.tables.daos.DimensionDao;
+import org.zalando.compass.domain.persistence.model.tables.pojos.DimensionRow;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -21,125 +22,107 @@ import java.util.Optional;
 import java.util.Set;
 
 import static java.util.Collections.singleton;
+import static org.jooq.impl.DSL.field;
+import static org.jooq.impl.DSL.row;
+import static org.jooq.impl.DSL.values;
 import static org.springframework.dao.support.DataAccessUtils.singleResult;
 import static org.zalando.compass.domain.persistence.DimensionCriteria.dimensions;
-import static org.zalando.fauxpas.FauxPas.throwingBiFunction;
 
 @Component
-public class DimensionRepository implements Repository<Dimension, String, DimensionCriteria> {
+public class DimensionRepository implements Repository<DimensionRow, String, DimensionCriteria> {
 
-    private final NamedParameterJdbcTemplate template;
-    private final ObjectMapper mapper;
+    private final DimensionDao dao;
+    private final DSLContext context;
 
     @Autowired
-    public DimensionRepository(final NamedParameterJdbcTemplate template, final ObjectMapper mapper) {
-        this.template = template;
-        this.mapper = mapper;
+    public DimensionRepository(final DimensionDao dao, final DSLContext jooq) {
+        this.dao = dao;
+        this.context = jooq;
     }
 
     @Override
-    public boolean create(final Dimension dimension) throws IOException {
-        final ImmutableMap<String, Object> params = ImmutableMap.of(
-                "id", dimension.getId(),
-                "schema", mapper.writeValueAsString(dimension.getSchema()),
-                "relation", dimension.getRelation(),
-                "description", dimension.getDescription());
-
+    public boolean create(final DimensionRow dimension) throws IOException {
         try {
-            template.update("" +
-                    "INSERT INTO dimension (id, schema, relation, description)" +
-                    "VALUES (:id, :schema::JSONB, :relation, :description)", params);
+            dao.insert(new DimensionRow(
+                    dimension.getId(),
+                    null,
+                    dimension.getSchema(),
+                    dimension.getRelation(),
+                    dimension.getDescription()
+            ));
             return true;
         } catch (final DuplicateKeyException e) {
+            // TODO verify that this actually works
             return false;
         }
     }
 
     @Override
-    public Optional<Dimension> find(final String id) throws IOException {
-        final List<Dimension> dimensions = findAll(dimensions(singleton(id)));
-        @Nullable final Dimension dimension = singleResult(dimensions);
+    public Optional<DimensionRow> find(final String id) throws IOException {
+        final List<DimensionRow> dimensions = findAll(dimensions(singleton(id)));
+        @Nullable final DimensionRow dimension = singleResult(dimensions);
         return Optional.ofNullable(dimension);
     }
 
     @Override
-    public List<Dimension> findAll(final DimensionCriteria criteria) throws IOException {
+    public List<DimensionRow> findAll(final DimensionCriteria criteria) throws IOException {
         final Set<String> dimensions = criteria.getDimensions();
 
         if (dimensions.isEmpty()) {
             return Collections.emptyList();
         }
 
-        final ImmutableMap<String, Object> params = ImmutableMap.of("dimensions", dimensions);
-
-        return template.query("" +
-                "  SELECT id, schema, relation, description" +
-                "    FROM dimension" +
-                "   WHERE id IN (:dimensions)" +
-                "ORDER BY priority ASC", params, mapRow());
+        return context.select(Tables.DIMENSION.fields())
+                .from(Tables.DIMENSION)
+                .where(Tables.DIMENSION.ID.in(dimensions))
+                .orderBy(Tables.DIMENSION.PRIORITY.asc())
+                .fetchInto(DimensionRow.class);
     }
 
     @Override
-    public List<Dimension> findAll() {
-        return template.query("" +
-                "  SELECT id, schema, relation, description" +
-                "    FROM dimension " +
-                "ORDER BY priority ASC", ImmutableMap.of(), mapRow());
-    }
-
-    @Hack
-    private RowMapper<Dimension> mapRow() {
-        return throwingBiFunction(this::map)::apply;
-    }
-
-    private Dimension map(final ResultSet row, @SuppressWarnings("unused") final int rowNum) throws Exception {
-        return new Dimension(
-                row.getString("id"),
-                mapper.readTree(row.getBytes("schema")),
-                row.getString("relation"),
-                row.getString("description"));
+    public List<DimensionRow> findAll() {
+        return context.select(Tables.DIMENSION.fields())
+                .from(Tables.DIMENSION)
+                .orderBy(Tables.DIMENSION.PRIORITY.asc())
+                .fetchInto(DimensionRow.class);
     }
 
     @Override
-    public boolean update(final Dimension dimension) throws IOException {
-        final ImmutableMap<String, Object> params = ImmutableMap.of(
-                "id", dimension.getId(),
-                "schema", mapper.writeValueAsString(dimension.getSchema()),
-                "relation", dimension.getRelation(),
-                "description", dimension.getDescription());
-
-        final int updates = template.update("" +
-                "UPDATE dimension" +
-                "   SET schema = :schema::JSONB," +
-                "       relation = :relation," +
-                "       description = :description" +
-                " WHERE id = :id", params);
+    public boolean update(final DimensionRow dimension) throws IOException {
+        final int updates = context.update(Tables.DIMENSION)
+                .set(Tables.DIMENSION.SCHEMA, dimension.getSchema())
+                .set(Tables.DIMENSION.RELATION, dimension.getRelation())
+                .set(Tables.DIMENSION.DESCRIPTION, dimension.getDescription())
+                .where(Tables.DIMENSION.ID.eq(dimension.getId()))
+                .execute();
 
         return updates > 0;
     }
 
-    // TODO express this more generically?!
     public void reorder(final List<String> dimensions) {
-        final List<Object[]> ranks = new ArrayList<>(dimensions.size());
+        final List<Row2<String, Integer>> ranks = new ArrayList<>(dimensions.size());
         final ListIterator<String> iterator = dimensions.listIterator();
 
         while (iterator.hasNext()) {
-            ranks.add(new Object[]{iterator.next(), iterator.nextIndex()});
+            ranks.add(row(iterator.next(), iterator.nextIndex()));
         }
 
-        template.update("" +
-                "UPDATE dimension" +
-                "   SET priority = new_priority" +
-                "  FROM (VALUES :ranks) AS ranks(dimension_id, new_priority)" +
-                " WHERE id = dimension_id", ImmutableMap.of("ranks", ranks));
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        final Row2<String, Integer>[] rows = ranks.toArray(new Row2[ranks.size()]);
+        final Table<Record2<String, Integer>> values = values(rows);
+
+        context.update(Tables.DIMENSION)
+                .set(Tables.DIMENSION.PRIORITY, field("new_priority", Integer.class))
+                .from(values.as("ranks", "dimension_id", "new_priority"))
+                .where(Tables.DIMENSION.ID.eq(field("dimension_id", String.class)))
+                .execute();
     }
 
     @Override
     public void delete(final String dimension) {
-        final int deletions = template.update("" +
-                "DELETE" +
-                "  FROM dimension" +
-                " WHERE id = :id", ImmutableMap.of("id", dimension));
+        final int deletions = context.delete(Tables.DIMENSION)
+                .where(Tables.DIMENSION.ID.eq(dimension))
+                .execute();
 
         if (deletions == 0) {
             throw new NotFoundException();

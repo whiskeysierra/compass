@@ -16,6 +16,8 @@ spring:
     connection-timeout: 30000
     minimum-idle: 10
     maximum-pool-size: 50
+  jooq:
+    sql-dialect: postgres
 
 server:
   compression:

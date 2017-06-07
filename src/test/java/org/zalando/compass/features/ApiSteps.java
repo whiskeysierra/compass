@@ -143,6 +143,7 @@ public class ApiSteps {
         assertThat(actual, matchesTable(expected));
     }
 
+    // TODO ues dynamic execute version
     private Function<String, Requester> select(final HttpMethod method) {
         switch (method) {
             case GET:

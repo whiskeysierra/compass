@@ -21,9 +21,9 @@ import static com.fasterxml.jackson.core.JsonGenerator.Feature.WRITE_BIGDECIMAL_
 @Configuration
 public class JsonConfiguration {
 
-    @Bean(name = "jacksonObjectMapper")
+    @Bean
     @Primary
-    public static ObjectMapper objectMapper() {
+    public static ObjectMapper jacksonObjectMapper() {
         final ObjectMapper mapper = new ObjectMapper();
 
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);

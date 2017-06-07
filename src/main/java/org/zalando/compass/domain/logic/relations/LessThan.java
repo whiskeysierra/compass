@@ -21,11 +21,6 @@ public final class LessThan implements Relation {
     }
 
     @Override
-    public int compare(final String left, final String right) {
-        return left.compareTo(right);
-    }
-
-    @Override
     public boolean test(final String configured, final String requested) {
         return requested.compareTo(configured) < 0;
     }
