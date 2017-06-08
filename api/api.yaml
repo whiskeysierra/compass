@@ -1,7 +1,9 @@
 swagger: '2.0'
 info:
-  title: Compass
-  description: Configuration Management API
+  title: Compass Configuration Management API
+  # TODO description
+  description: |
+    ...
   version: "0.1.0"
 schemes:
   - https
@@ -13,11 +15,11 @@ produces:
 paths:
   /relations:
     get:
-      summary: List all relations
+      summary: Read all relations
       description: |
-        Retrieves the complete list of all relations currently available for use. A relation specifies how the values
-        of a dimension are matched when being queried. Useful relations would be *equality*, *greater-than*, *less-
-        than* and so forth.
+        Read the complete list of all relations available at this point in time. A relation specifies how the values
+        of a dimension are matched when being queried. Useful relations would be equality (=), greater-than (>),
+        less-than (<) and so forth.
       responses:
         200:
           description: OK
@@ -25,7 +27,7 @@ paths:
             $ref: '#/definitions/RelationPage'
   /relations/{relation}:
     get:
-      summary: View a relation
+      summary: Read a single relation.
       parameters:
         - $ref: '#/parameters/RelationId'
       responses:
@@ -35,46 +37,22 @@ paths:
             $ref: '#/definitions/Relation'
   /dimensions:
     get:
-      summary: List all dimensions
+      summary: Read all dimensions
       description: |
-        Retrieves the complete list of all dimensions currently defined. This is usually used for display purposes.
-        Dimensions are sorted by priority in descending order.
-      responses:
-        200:
-          description: OK
-          schema:
-            $ref: '#/definitions/DimensionPage'
-    put:
-      summary: Update, add and/or re-order dimensions
-      description: |
-        Dimensions have one strict global ordering, i.e. every dimension is comparable to any other.
-        To change the priority one needs to update all dimensions with an explicit ordering. Clients are free to use
-        this for any kind of specific operation on top, e.g. swapping two dimensions, rotating or moving one dimension
-        up or down the list.
-      parameters:
-        - name: dimensions
-          in: body
-          schema:
-            $ref: '#/definitions/DimensionPage'
+        Read the complete list of all dimensions currently defined. This is intended to be used for display purposes.
       responses:
         200:
           description: OK
           schema:
             $ref: '#/definitions/DimensionPage'
   /dimensions/{dimension}:
-    get:
-      summary: View a dimension
-      parameters:
-        - $ref: '#/parameters/DimensionId'
-      responses:
-        200:
-          description: OK
-          schema:
-            $ref: '#/definitions/Dimension'
     put:
-      summary: Create or update a dimension
+      summary: Replace a dimension
       description: |
-        Creating a new dimension will put it at the end of the priority list, i.e. it will have the lowest priority.
+        Either create a new dimension or update an existing one.
+
+        A modification to an existing dimension's schema requires that all values that are using this dimension
+        successfully validate against it. A violation of this rule will result in a rejected update.
       parameters:
         - $ref: '#/parameters/DimensionId'
         - name: dimension
@@ -90,9 +68,18 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/Dimension'
+    get:
+      summary: Read a dimension
+      parameters:
+        - $ref: '#/parameters/DimensionId'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Dimension'
     delete:
       summary: Delete a dimension
-      description: This requires that the dimension is **not used by any key**.
+      description: Deleting a dimension that is still referenced by a value is not supported and will be rejected.
       parameters:
         - $ref: '#/parameters/DimensionId'
       responses:
@@ -100,24 +87,20 @@ paths:
           description: No Content
   /keys:
     get:
-      summary: List all keys
+      summary: Read all keys
       responses:
         200:
           description: OK
           schema:
             $ref: '#/definitions/KeyPage'
   /keys/{key}:
-    get:
-      summary: View a key
-      parameters:
-        - $ref: '#/parameters/Key'
-      responses:
-        200:
-          description: OK
-          schema:
-            $ref: '#/definitions/Key'
     put:
-      summary: Create or update a key
+      summary: Replace a key
+      description: |
+        Either create a new key or update an existing one.
+
+        A modification to an existing key's schema requires that all values of this key successfully validate against
+        it. A violation of this rule will result in a rejected update.
       parameters:
         - $ref: '#/parameters/Key'
         - name: key
@@ -133,41 +116,42 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/Key'
+    get:
+      summary: Read a key
+      parameters:
+        - $ref: '#/parameters/Key'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Key'
     delete:
       summary: Delete a key
-      description: Deletes this key and **all** (!) of its values.
+      description: Deleting a key will delete all of its values.
       parameters:
         - $ref: '#/parameters/Key'
       responses:
         204:
           description: No Content
-  /keys/{key}/value:
-    get:
-      summary: Best matching value for a given key and context
-      parameters:
-        - $ref: '#/parameters/Key'
-        - $ref: '#/parameters/Filter'
-      responses:
-        200:
-          description: OK
-          schema:
-            $ref: '#/definitions/Value'
   /keys/{key}/values:
-    get:
-      summary: List values for a given key and context
+    put:
+      summary: Replace all values for the given key
       parameters:
         - $ref: '#/parameters/Key'
-        - $ref: '#/parameters/Filter'
+        - name: values
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ValuePage'
       responses:
         200:
           description: OK
           schema:
             $ref: '#/definitions/ValuePage'
     post:
-      summary: Add or or replace value of a given key
+      summary: Add a value for the given key
       parameters:
         - $ref: '#/parameters/Key'
-        - $ref: '#/parameters/Filter'
         - $ref: '#/parameters/Value'
       responses:
         200:
@@ -178,17 +162,46 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/ValuePage'
-    delete:
-      summary: Delete selected values
+    get:
+      summary: Read values for the given key and optional dimension
+      description: |
+
+        - `GET /keys/tax-rate/values?country=DE`, all tax rates for Germany
+        - `GET /keys/tax-rate/values?country=DE&after=2015-09-07T16:00:00`, all tax rates for Germany that are valid after 2015-09-07T16:00:00
       parameters:
         - $ref: '#/parameters/Key'
         - $ref: '#/parameters/Filter'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ValuePage'
+  /keys/{key}/value:
+    # TODO put? (with Filter being a concrete match?)
+    get:
+      summary: Read a value of the given key and optional dimensions
+      description: |
+        This endpoint is a convenience operation and equivalent to `GET /keys/{key}/values` with the same parameters
+        and using the very first value.
+      parameters:
+        - $ref: '#/parameters/Key'
+        - $ref: '#/parameters/Filter'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Value'
+    delete:
+      summary: Delete a value
+      parameters:
+        - $ref: '#/parameters/Key'
+        - $ref: '#/parameters/Filter' # TODO concrete match
       responses:
         204:
           description: No Content
   /values:
     get:
-      summary: List all values for a given key pattern and context
+      summary: Read all values for a given key pattern and context
       parameters:
         - $ref: '#/parameters/Query' # for keys
       responses:
@@ -203,7 +216,7 @@ paths:
             example:
               active:
                 - dimensions:
-                    email: .*@qa-example.com
+                    email: '.*@qa-example.com'
                     value: true
                 - dimensions:
                   value: false
@@ -223,14 +236,12 @@ parameters:
   DimensionId:
     name: dimension
     in: path
-    type:
-      $ref: '#/definitions/ID'
+    type: string
     required: true
   Key:
     name: key
     in: path
-    type:
-      $ref: '#/definitions/ID'
+    type: string
     required: true
   Values:
     name: values
@@ -248,7 +259,7 @@ parameters:
       Any number of filter query parameters based on the dimension of the values. This allows the following use cases:
 
       1. `GET /keys/tax-rate/values?country=DE`, all tax rates for Germany
-      2. `GET /keys/tax-rate/values?country=DE&after=2015-09-07T16:00:00`, all tax rates for Germany that are valid after *2015-09-07T16:00:00*
+      2. `GET /keys/tax-rate/values?country=DE&after=2015-09-07T16:00:00`, all tax rates for Germany that are valid after 2015-09-07T16:00:00
     in: query
     type: string
   Query:
@@ -257,8 +268,6 @@ parameters:
     in: query
     type: string
 definitions:
-  Problem:
-    $ref: 'https://zalando.github.io/problem/schema.yaml#/Problem'
   RelationPage:
     type: object
     properties:
@@ -272,7 +281,7 @@ definitions:
     type: object
     properties:
       id:
-        descrition: The unique identifier for this relation.
+        description: The unique identifier for this relation.
         type: string
         minLength: 1
         example: =
@@ -282,9 +291,9 @@ definitions:
         minLength: 1
         example: equality
       description:
-        type: string
         description: |
           A description of this relation that should define what characteristics is has in terms of matching values.
+        type: string
         minLength: 1
     required:
       - id
@@ -316,18 +325,18 @@ definitions:
         $ref: 'http://json-schema.org/schema#'
         example:
           type: string
+          pattern: '^[A-Z]{2}$'
       relation:
         description: |
           The underlying operator that is used to apply any matching and ordering semantics. For a complete list of
           available relations, use `GET /relations`.
         type: string
-        minLength: 1
         example: =
       description:
-        type: string
         description: |
           A description of this key that should define what the dimension is about and what possible values it can have.
           Alternatively this can be a URL to an accessible web page.
+        type: string
         minLength: 1
         example: ISO 3166-1 alpha-2 country code, see https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements
     required:
@@ -354,6 +363,11 @@ definitions:
       schema:
         description: The schema that applies to all values of this key.
         $ref: 'http://json-schema.org/schema#'
+        example:
+          type: number
+          format: decimal
+          min: 0.0
+          max: 1.0
       description:
         type: string
         description: |

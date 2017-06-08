@@ -61,6 +61,7 @@ public class DimensionRepository implements Repository<Dimension, String, Dimens
         return db.select(DIMENSION.fields())
                 .from(DIMENSION)
                 .where(DIMENSION.ID.in(dimensions))
+                .orderBy(DIMENSION.ID)
                 .fetchInto(DimensionRow.class)
                 .stream()
                 .map(this::map)
@@ -71,6 +72,7 @@ public class DimensionRepository implements Repository<Dimension, String, Dimens
     public List<Dimension> findAll() {
         return db.select(DIMENSION.fields())
                 .from(DIMENSION)
+                .orderBy(DIMENSION.ID)
                 .fetchInto(DimensionRow.class)
                 .stream()
                 .map(this::map)

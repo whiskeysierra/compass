@@ -626,9 +626,11 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>2.12</version>
                 <configuration>
+                    <!--
                     <parallel>classes</parallel>
                     <threadCount>1</threadCount>
                     <perCoreThreadCount>true</perCoreThreadCount>
+                    -->
                     <includes>
                         <include>**/*IntegrationTest.java</include>
                         <include>**/*ComponentTest.java</include>

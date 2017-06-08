@@ -4,7 +4,7 @@
       "id": "tax-rate",
       "schema": {
         "type": "number",
-        "format": "double",
+        "format": "decimal",
         "minimum": 0,
         "maximum": 1
       },
