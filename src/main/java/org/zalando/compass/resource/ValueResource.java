@@ -23,6 +23,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
+// TODO drop special parameter from filter map
+// TODO find a way to transform filter map into a "typed" version, e.g. Map<String, JsonNode>
 @RestController
 public class ValueResource {
 
@@ -50,7 +52,7 @@ public class ValueResource {
             @RequestBody final JsonNode node) throws IOException {
         final Value value = reader.read(node, Value.class).withKey(id);
 
-        final boolean created = service.createOrUpdate(value);
+        final boolean created = service.create(value);
         final ValuePage page = new ValuePage(service.readAllByKey(id, filter));
 
         if (created) {

@@ -2,25 +2,23 @@ package org.zalando.compass.domain.logic;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.DecimalNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import org.junit.Before;
 import org.junit.Test;
+import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.DimensionRepository;
 import org.zalando.compass.domain.persistence.KeyRepository;
 import org.zalando.compass.domain.persistence.RelationRepository;
 import org.zalando.compass.domain.persistence.ValueRepository;
-import org.zalando.compass.domain.persistence.model.tables.pojos.DimensionRow;
+import org.zalando.compass.library.Schema;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 
-import static com.fasterxml.jackson.databind.node.JsonNodeFactory.instance;
 import static com.google.common.collect.ImmutableMap.of;
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -44,12 +42,12 @@ public class ValueServiceTest {
     @Before
     public void setUp() throws Exception {
         when(dimensionRepository.findAll()).thenReturn(asList(
-                new DimensionRow("after", null, stringSchema(), ">=", ""),
-                new DimensionRow("before", null, stringSchema(), "<=", ""),
-                new DimensionRow("country", null, stringSchema(), "=", ""),
-                new DimensionRow("postal-code", null, stringSchema(), "=", ""),
-                new DimensionRow("locale", null, stringSchema(), "^", ""),
-                new DimensionRow("email", null, stringSchema(), "~", "")));
+                new Dimension("after", Schema.stringSchema(), ">=", ""),
+                new Dimension("before", Schema.stringSchema(), "<=", ""),
+                new Dimension("country", Schema.stringSchema(), "=", ""),
+                new Dimension("postal-code", Schema.stringSchema(), "=", ""),
+                new Dimension("locale", Schema.stringSchema(), "^", ""),
+                new Dimension("email", Schema.stringSchema(), "~", "")));
 
         when(keyRepository.exists("tax-rate")).thenReturn(true);
 
@@ -72,12 +70,8 @@ public class ValueServiceTest {
                 new Value("tax-rate", of(), decimal(0.25)) // legally questionable, but ok for the sake of a test
         );
 
-        when(valueRepository.findAll(byKey(any()))).thenReturn(values.stream().map(Value::toRow).collect(toList()));
-        when(valueRepository.findAll(byKeyPattern(any()))).thenReturn(values.stream().map(Value::toRow).collect(toList()));
-    }
-
-    private ObjectNode stringSchema() {
-        return new ObjectNode(instance).put("type", "string");
+        when(valueRepository.findAll(byKey(any()))).thenReturn(values);
+        when(valueRepository.findAll(byKeyPattern(any()))).thenReturn(values);
     }
 
     @Test

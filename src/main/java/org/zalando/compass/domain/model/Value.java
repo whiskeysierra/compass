@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
 import lombok.experimental.Wither;
-import org.zalando.compass.domain.persistence.model.tables.pojos.ValueRow;
 
 import javax.annotation.Nullable;
 
@@ -35,16 +34,6 @@ public final class Value {
         this.key = key;
         this.dimensions = firstNonNull(dimensions, ImmutableMap.of());
         this.value = value;
-    }
-
-    public ValueRow toRow() {
-        // TODO implement proper conversion!
-        return new ValueRow(key, null, value);
-    }
-
-    public static Value fromRow(final ValueRow row) {
-        // TODO implement proper conversion!
-        return new Value(row.getKey(), null, row.getValue());
     }
 
 }

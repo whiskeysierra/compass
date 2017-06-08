@@ -2,43 +2,36 @@ package org.zalando.compass.domain.logic;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Key;
-import org.zalando.compass.domain.model.Realization;
 import org.zalando.compass.domain.model.Relation;
 import org.zalando.compass.domain.model.Value;
+import org.zalando.compass.domain.model.ValueId;
 import org.zalando.compass.domain.persistence.DimensionRepository;
 import org.zalando.compass.domain.persistence.KeyRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
 import org.zalando.compass.domain.persistence.RelationRepository;
 import org.zalando.compass.domain.persistence.ValueCriteria;
 import org.zalando.compass.domain.persistence.ValueRepository;
-import org.zalando.compass.domain.persistence.model.tables.pojos.KeyRow;
-import org.zalando.compass.domain.persistence.model.tables.pojos.ValueRow;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.collect.ArrayListMultimap.create;
 import static com.google.common.collect.Maps.transformValues;
 import static com.google.common.collect.Multimaps.index;
-import static com.google.common.collect.Ordering.explicit;
 import static com.google.common.collect.Sets.difference;
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.nullsLast;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -69,28 +62,16 @@ public class ValueService {
         this.valueRepository = valueRepository;
     }
 
-    public boolean createOrUpdate(final Value next) throws IOException {
-        validateDimensions(next);
-        validateValue(next);
+    public boolean create(final Value value) throws IOException {
+        validateDimensions(value);
+        validateValue(value);
 
-        final Realization id = new Realization(next.getKey(), next.getDimensions());
-        final ValueRow row = next.toRow();
-
-        if (valueRepository.exists(id)) {
-            valueRepository.update(row);
-        } else {
-            return valueRepository.create(row);
-        }
-
-        return false;
+        return valueRepository.create(value);
     }
 
     private void validateDimensions(final Value value) throws IOException {
         final ImmutableSet<String> dimensions = value.getDimensions().keySet();
-        final List<Dimension> read = dimensionRepository.findAll(dimensions(dimensions))
-                .stream()
-                .map(row -> new Dimension(row.getId(), row.getSchema(), row.getRelation(), row.getDescription()))
-                .collect(toList());
+        final List<Dimension> read = dimensionRepository.findAll(dimensions(dimensions));
 
         final Set<String> difference = difference(dimensions, read.stream().map(Dimension::getId).collect(toSet()));
         checkArgument(difference.isEmpty(), "Unknown dimensions: " + difference);
@@ -99,8 +80,8 @@ public class ValueService {
     }
 
     private void validateValue(final Value value) throws IOException {
-        final KeyRow row = keyRepository.read(value.getKey());
-        validator.validate(Key.fromRow(row), value);
+        final Key row = keyRepository.read(value.getKey());
+        validator.validate(row, value);
     }
 
     public Value read(final String key, final Map<String, String> filter) throws IOException {
@@ -111,8 +92,7 @@ public class ValueService {
     public List<Value> readAllByKey(final String key, final Map<String, String> filter) throws IOException {
         checkKeyExists(key);
 
-        final List<ValueRow> rows = valueRepository.findAll(byKey(key));
-        final List<Value> values = rows.stream().map(Value::fromRow).collect(toList());
+        final List<Value> values = valueRepository.findAll(byKey(key));
         final Map<Dimension, Relation> dimensions = readDimensions();
 
         return match(values, dimensions, filter);
@@ -120,9 +100,9 @@ public class ValueService {
 
     public ListMultimap<String, Value> readAllByKeyPattern(@Nullable final String keyPattern) throws IOException {
         final ValueCriteria criteria = keyPattern == null ? withoutCriteria() : byKeyPattern(keyPattern);
-        final List<Value> values = valueRepository.findAll(criteria).stream().map(Value::fromRow).collect(toList());
+        final List<Value> values = valueRepository.findAll(criteria);
 
-        return create(index(values, Value::getKey));
+        return ArrayListMultimap.create(index(values, Value::getKey));
     }
 
     private void checkKeyExists(final String key) {
@@ -170,7 +150,7 @@ public class ValueService {
     }
 
     public void delete(final String key, final Map<String, String> filter) throws IOException {
-        valueRepository.delete(new Realization(key, transformValues(filter, TextNode::new)));
+        valueRepository.delete(new ValueId(key, transformValues(filter, TextNode::new)));
     }
 
 }

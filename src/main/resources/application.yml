@@ -11,11 +11,6 @@ spring:
     url: jdbc:postgresql://${DATASOURCE_HOST:localhost}/postgres
     username: postgres
     password: postgres
-    max-wait: 10000
-    max-active: 50
-    connection-timeout: 30000
-    minimum-idle: 10
-    maximum-pool-size: 50
   jooq:
     sql-dialect: postgres
 

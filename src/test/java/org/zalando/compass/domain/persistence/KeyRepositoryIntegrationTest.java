@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-import org.zalando.compass.domain.persistence.model.tables.pojos.KeyRow;
+import org.zalando.compass.domain.model.Key;
 
 import java.io.IOException;
 import java.util.List;
@@ -59,10 +59,10 @@ public class KeyRepositoryIntegrationTest {
     public void shouldUpdate() throws IOException {
         create();
 
-        unit.update(new KeyRow("country", new ObjectNode(instance).put("type", "integer"),
+        unit.update(new Key("country", new ObjectNode(instance).put("type", "integer"),
                 "Country ID"));
 
-        final KeyRow key = unit.read("country");
+        final Key key = unit.read("country");
 
         assertThat(key.getSchema().get("type").asText(), is("integer"));
         assertThat(key.getDescription(), is("Country ID"));
@@ -72,7 +72,7 @@ public class KeyRepositoryIntegrationTest {
     public void shouldRead() throws IOException {
         create();
 
-        final KeyRow key = unit.read("country");
+        final Key key = unit.read("country");
 
         assertThat(key.getId(), is("country"));
         assertThat(key.getSchema().size(), is(1));
@@ -100,8 +100,8 @@ public class KeyRepositoryIntegrationTest {
         create(newSalesChannel());
         create(newLocale());
 
-        final List<KeyRow> keys = unit.findAll(keys(newHashSet("country", "sales-channel")));
-        assertThat(keys.stream().map(KeyRow::getId).collect(toList()), contains("country", "sales-channel"));
+        final List<Key> keys = unit.findAll(keys(newHashSet("country", "sales-channel")));
+        assertThat(keys.stream().map(Key::getId).collect(toList()), contains("country", "sales-channel"));
     }
 
     @Test
@@ -116,22 +116,22 @@ public class KeyRepositoryIntegrationTest {
         return create(newCountry());
     }
 
-    private KeyRow newCountry() {
-        return new KeyRow("country", new ObjectNode(instance).put("type", "string"),
+    private Key newCountry() {
+        return new Key("country", new ObjectNode(instance).put("type", "string"),
                 "ISO 3166-1 alpha-2 country code");
     }
 
-    private KeyRow newSalesChannel() {
-        return new KeyRow("sales-channel", new ObjectNode(instance).put("type", "string"),
+    private Key newSalesChannel() {
+        return new Key("sales-channel", new ObjectNode(instance).put("type", "string"),
                 "A sales channel...");
     }
 
-    private KeyRow newLocale() {
-        return new KeyRow("locale", new ObjectNode(instance).put("type", "string"),
+    private Key newLocale() {
+        return new Key("locale", new ObjectNode(instance).put("type", "string"),
                 "Language");
     }
 
-    private boolean create(final KeyRow Key) throws IOException {
+    private boolean create(final Key Key) throws IOException {
         return unit.create(Key);
     }
 

@@ -2,6 +2,7 @@ package org.zalando.compass.library.jooq;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.NullNode;
 import lombok.SneakyThrows;
 import org.jooq.Binding;
 import org.jooq.BindingGetResultSetContext;
@@ -19,6 +20,7 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Types;
 import java.util.Objects;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static org.zalando.compass.resource.JsonConfiguration.jacksonObjectMapper;
 
 public final class PostgresJsonbBinding implements Binding<Object, JsonNode> {
@@ -36,7 +38,7 @@ public final class PostgresJsonbBinding implements Binding<Object, JsonNode> {
         @Override
         @SneakyThrows
         public Object to(final JsonNode node) {
-            return node == null || node.isNull() ? null : mapper.writeValueAsString(node);
+            return mapper.writeValueAsString(firstNonNull(node, NullNode.getInstance()));
         }
 
         @Override

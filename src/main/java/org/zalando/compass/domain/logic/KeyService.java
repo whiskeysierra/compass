@@ -6,13 +6,10 @@ import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.KeyRepository;
 import org.zalando.compass.domain.persistence.ValueRepository;
-import org.zalando.compass.domain.persistence.model.tables.pojos.KeyRow;
-import org.zalando.compass.domain.persistence.model.tables.pojos.ValueRow;
 
 import java.io.IOException;
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
 import static org.zalando.compass.domain.persistence.ValueCriteria.byKey;
 
 @Service
@@ -31,20 +28,18 @@ public class KeyService {
     }
 
     public boolean createOrUpdate(final Key key) throws IOException {
-        final KeyRow row = key.toRow();
-
-        if (keyRepository.create(row)) {
+        if (keyRepository.create(key)) {
             return true;
         }
 
         validateAllValues(key);
-        keyRepository.update(row);
+        keyRepository.update(key);
         return false;
     }
 
     private void validateAllValues(final Key key) throws IOException {
-        final List<ValueRow> rows = valueRepository.findAll(byKey(key.getId()));
-        validator.validate(key, rows.stream().map(Value::fromRow).collect(toList()));
+        final List<Value> values = valueRepository.findAll(byKey(key.getId()));
+        validator.validate(key, values);
     }
 
     public void delete(final String id) {

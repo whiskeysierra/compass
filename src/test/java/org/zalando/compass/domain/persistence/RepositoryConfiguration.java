@@ -8,7 +8,6 @@ import org.springframework.boot.autoconfigure.jooq.JooqAutoConfiguration;
 import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
-import org.zalando.compass.library.jooq.DaoPostProcessor;
 
 @TestConfiguration
 @ImportAutoConfiguration({
@@ -19,7 +18,6 @@ import org.zalando.compass.library.jooq.DaoPostProcessor;
         JooqAutoConfiguration.class,
 })
 @Import({
-        DaoPostProcessor.class,
         EmbeddedDataSourceConfiguration.class,
 })
 public class RepositoryConfiguration {

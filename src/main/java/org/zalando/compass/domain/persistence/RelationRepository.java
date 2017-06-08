@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.model.Relation;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,7 +22,7 @@ public class RelationRepository implements Repository<Relation, String, Void> {
             .collect(collectingAndThen(toMap(Relation::getId, identity()), ImmutableMap::copyOf));
 
     @Override
-    public boolean create(final Relation relation) throws IOException {
+    public boolean create(final Relation relation) {
         throw new UnsupportedOperationException();
     }
 
@@ -38,17 +37,17 @@ public class RelationRepository implements Repository<Relation, String, Void> {
     }
 
     @Override
-    public List<Relation> findAll(final Void criteria) throws IOException {
+    public List<Relation> findAll(final Void criteria) {
         return list;
     }
 
     @Override
-    public boolean update(final Relation relation) throws IOException {
+    public boolean update(final Relation relation) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void delete(final String id) throws IOException {
+    public void delete(final String id) {
         throw new UnsupportedOperationException();
     }
 

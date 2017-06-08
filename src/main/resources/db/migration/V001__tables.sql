@@ -1,4 +1,3 @@
--- The 1. Dimension!
 CREATE TABLE key (
   id TEXT PRIMARY KEY,
   schema JSONB NOT NULL,
@@ -7,17 +6,22 @@ CREATE TABLE key (
 
 CREATE TABLE dimension (
   id TEXT PRIMARY KEY,
-  priority SERIAL UNIQUE DEFERRABLE NOT NULL,
   schema JSONB NOT NULL,
   relation TEXT NOT NULL,
   description TEXT NOT NULL
 );
 
 CREATE TABLE value (
-  key TEXT NOT NULL REFERENCES key(id) ON DELETE CASCADE,
-  dimensions JSONB NOT NULL, -- map of dimension id to dimension value
-  value JSONB NOT NULL,
-  UNIQUE (key, dimensions)
+  id BIGSERIAL PRIMARY KEY,
+  key_id TEXT NOT NULL REFERENCES key(id) ON DELETE CASCADE,
+  index BIGSERIAL NOT NULL,
+  value JSONB NOT NULL, -- adheres to key.schema
+  UNIQUE (key_id, index) DEFERRABLE
 );
 
-CREATE INDEX ON value USING GIN (dimensions);
+CREATE TABLE value_dimension (
+  value_id BIGINT NOT NULL REFERENCES value(id) ON DELETE CASCADE,
+  dimension_id TEXT NOT NULL REFERENCES dimension(id),
+  dimension_value JSONB NOT NULL, -- adheres to dimension.schema,
+  UNIQUE (value_id, dimension_id) DEFERRABLE
+);

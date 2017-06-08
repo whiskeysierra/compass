@@ -9,7 +9,7 @@ import java.util.Map;
 @lombok.Value
 @Builder
 @AllArgsConstructor
-public class Realization {
+public class ValueId {
 
     private String key;
     private Map<String, JsonNode> dimensions;

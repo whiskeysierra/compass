@@ -58,7 +58,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>20.0</version>
+            <version>22.0</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -539,6 +539,9 @@
                                 </forcedType>
                             </forcedTypes>
                         </database>
+                        <generate>
+                            <immutablePojos>true</immutablePojos>
+                        </generate>
                         <strategy>
                             <matchers>
                                 <tables>
@@ -551,11 +554,6 @@
                                 </tables>
                             </matchers>
                         </strategy>
-                        <generate>
-                            <immutablePojos>true</immutablePojos>
-                            <interfaces>true</interfaces>
-                            <pojosEqualsAndHashCode>true</pojosEqualsAndHashCode>
-                        </generate>
                         <target>
                             <packageName>org.zalando.compass.domain.persistence.model</packageName>
                             <directory>target/generated-sources/jooq</directory>

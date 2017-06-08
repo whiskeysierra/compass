@@ -12,7 +12,6 @@ import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionPage;
 import org.zalando.compass.domain.persistence.DimensionRepository;
-import org.zalando.compass.domain.persistence.model.tables.pojos.DimensionRow;
 
 import java.io.IOException;
 import java.util.stream.Collectors;
@@ -47,19 +46,9 @@ public class DimensionResource {
                 .collect(Collectors.toList()));
     }
 
-    @RequestMapping(method = PUT)
-    public DimensionPage putAll(@RequestBody final JsonNode node) throws IOException {
-        final DimensionPage page = reader.read(node, DimensionPage.class);
-        service.createOrUpdate(page.getDimensions());
-        return new DimensionPage(repository.findAll().stream()
-                .map(row -> new Dimension(row.getId(), row.getSchema(), row.getRelation(), row.getDescription()))
-                .collect(Collectors.toList()));
-    }
-
     @RequestMapping(method = GET, path = "/{id}")
     public Dimension get(@PathVariable final String id) throws IOException {
-        final DimensionRow row = repository.read(id);
-        return new Dimension(row.getId(), row.getSchema(), row.getRelation(), row.getDescription());
+        return repository.read(id);
     }
 
     @RequestMapping(method = PUT, path = "/{id}")

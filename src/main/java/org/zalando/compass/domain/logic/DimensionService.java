@@ -7,16 +7,13 @@ import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.DimensionRepository;
 import org.zalando.compass.domain.persistence.RelationRepository;
 import org.zalando.compass.domain.persistence.ValueRepository;
-import org.zalando.compass.domain.persistence.model.tables.pojos.DimensionRow;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.stream.Collectors.toList;
 import static org.zalando.compass.domain.persistence.ValueCriteria.byDimension;
-import static org.zalando.fauxpas.FauxPas.throwingConsumer;
 
 @Service
 public class DimensionService {
@@ -36,22 +33,20 @@ public class DimensionService {
         this.valueRepository = valueRepository;
     }
 
+    // TODO require primitive dimension value type (schema)
     public boolean createOrUpdate(final Dimension dimension) throws IOException {
         verifyRelationExists(dimension);
 
         @Nullable final Dimension current = dimensionRepository.find(dimension.getId())
-                .map(row -> new Dimension(row.getId(), row.getSchema(), row.getRelation(), row.getDescription()))
                 .orElse(null);
 
-        final DimensionRow next = new DimensionRow(dimension.getId(), null, dimension.getSchema(), dimension.getRelation(), dimension.getDescription());
-
         if (current == null) {
-            if (dimensionRepository.create(next)) {
+            if (dimensionRepository.create(dimension)) {
                 return true;
             }
         } else {
             validateDimensionValuesIfNecessary(dimension, current);
-            dimensionRepository.update(next);
+            dimensionRepository.update(dimension);
         }
 
         return false;
@@ -68,18 +63,8 @@ public class DimensionService {
             return;
         }
 
-        final List<Value> values = valueRepository.findAll(byDimension(next.getId())).stream()
-                .map(Value::fromRow)
-                .collect(toList());
+        final List<Value> values = valueRepository.findAll(byDimension(next.getId()));
         validator.validate(next, values);
-    }
-
-    // TODO createOrReplace
-    public void createOrUpdate(final List<Dimension> dimensions) {
-        // TODO delete the ones that are not mentioned
-        dimensions.forEach(throwingConsumer(this::createOrUpdate));
-        dimensionRepository.reorder(dimensions.stream()
-                .map(Dimension::getId).collect(toList()));
     }
 
     public void delete(final String id) throws IOException {
