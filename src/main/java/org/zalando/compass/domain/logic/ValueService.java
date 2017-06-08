@@ -1,8 +1,6 @@
 package org.zalando.compass.domain.logic;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.TextNode;
-import com.google.common.base.Predicates;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
@@ -87,7 +85,18 @@ public class ValueService {
 
     public Value read(final String key, final Map<String, JsonNode> filter) throws IOException {
         // TODO can't reuse readAllByKey
-        return readAllByKey(key, filter).stream()
+        checkKeyExists(key);
+
+        final List<Value> values = valueRepository.findAll(byKey(key));
+        final Map<Dimension, Relation> dimensions = readDimensions();
+
+        final List<Value> matched = values.stream()
+                .filter(dimensions.entrySet().stream()
+                        .map(entry -> match(filter, entry))
+                        .reduce(Predicate::and).orElse(v -> true))
+                .collect(toList());
+
+        return matched.stream()
                 .findFirst().orElseThrow(NotFoundException::new);
     }
 
@@ -97,7 +106,11 @@ public class ValueService {
         final List<Value> values = valueRepository.findAll(byKey(key));
         final Map<Dimension, Relation> dimensions = readDimensions();
 
-        return match(values, dimensions, filter);
+        return values.stream()
+                .filter(dimensions.entrySet().stream()
+                        .map(entry -> !filter.isEmpty() ? match(filter, entry) : (Predicate<Value>) ($ -> true))
+                        .reduce(Predicate::and).orElse(v -> true))
+                .collect(toList());
     }
 
     public ListMultimap<String, Value> readAllByKeyPattern(@Nullable final String keyPattern) throws IOException {
@@ -126,19 +139,6 @@ public class ValueService {
         throw new IllegalStateException(String.format("Duplicate key %s", u));
     }
 
-    private List<Value> match(final List<Value> values, final Map<Dimension, Relation> dimensions,
-            final Map<String, JsonNode> filter) {
-        return values.stream()
-                .filter(byMatch(dimensions, filter))
-                .collect(toList());
-    }
-
-    private Predicate<Value> byMatch(final Map<Dimension, Relation> dimensions, final Map<String, JsonNode> filter) {
-        return dimensions.entrySet().stream()
-                .map(entry -> match(filter, entry))
-                .reduce(Predicate::and).orElse(v -> true);
-    }
-
     private Predicate<Value> match(final Map<String, JsonNode> filter, final Entry<Dimension, Relation> entry) {
         final Dimension dimension = entry.getKey();
         final Relation relation = entry.getValue();
@@ -148,7 +148,7 @@ public class ValueService {
             @Nullable final JsonNode requested = filter.get(dimension.getId());
 
             // TODO break this up and make it more readable
-            return filter.isEmpty() || configured == null
+            return configured == null
                     || requested != null && !requested.isNull() && relation.test(configured, requested);
         };
     }
