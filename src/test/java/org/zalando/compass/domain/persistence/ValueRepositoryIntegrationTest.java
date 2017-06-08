@@ -127,7 +127,20 @@ public class ValueRepositoryIntegrationTest {
     @Test(expected = NotFoundException.class)
     public void shouldNotDelete() {
         keys.create(new Key("one", new ObjectNode(JsonNodeFactory.instance), ""));
+        dimensions.create(new Dimension("foo", schema("boolean"), "=", ""));
+        unit.create(new Value("one", of("foo", FALSE), TRUE));
+
+        assertThat(unit.findAll(byKey("one")), hasSize(1));
+
+        unit.delete(new ValueId("one", of("unknown", new TextNode("foo"))));
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void shouldNotDeleteWithoutDimensions() {
+        keys.create(new Key("one", new ObjectNode(JsonNodeFactory.instance), ""));
         unit.create(new Value("one", of(), TRUE));
+
+        assertThat(unit.findAll(byKey("one")), hasSize(1));
 
         unit.delete(new ValueId("one", of("unknown", new TextNode("foo"))));
     }

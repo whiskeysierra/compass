@@ -86,6 +86,7 @@ public class ValueService {
     }
 
     public Value read(final String key, final Map<String, JsonNode> filter) throws IOException {
+        // TODO can't reuse readAllByKey
         return readAllByKey(key, filter).stream()
                 .findFirst().orElseThrow(NotFoundException::new);
     }
@@ -147,7 +148,7 @@ public class ValueService {
             @Nullable final JsonNode requested = filter.get(dimension.getId());
 
             // TODO break this up and make it more readable
-            return filter.isEmpty() | configured == null
+            return filter.isEmpty() || configured == null
                     || requested != null && !requested.isNull() && relation.test(configured, requested);
         };
     }

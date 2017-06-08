@@ -29,6 +29,7 @@ import static java.util.stream.Collectors.toList;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.notExists;
 import static org.jooq.impl.DSL.row;
+import static org.jooq.impl.DSL.select;
 import static org.jooq.impl.DSL.selectOne;
 import static org.jooq.impl.DSL.trueCondition;
 import static org.jooq.impl.DSL.val;
@@ -176,13 +177,17 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
                     .from(VALUE_DIMENSION)
                     .where(VALUE_DIMENSION.VALUE_ID.eq(VALUE.ID)));
         } else {
+
             return notExists(selectOne()
-                    .from(VALUE_DIMENSION)
-                    .fullOuterJoin(asTable(dimensions).as("dimensions", "dimension_id", "dimension_value"))
+                    .from(asTable(dimensions).as("expected", "dimension_id", "dimension_value"))
+                    .fullOuterJoin(select(VALUE_DIMENSION.DIMENSION_ID, VALUE_DIMENSION.DIMENSION_VALUE)
+                            .from(VALUE_DIMENSION)
+                            .where(VALUE_DIMENSION.VALUE_ID.eq(VALUE.ID))
+                            .asTable("actual"))
                     .using(field("dimension_id"), field("dimension_value"))
-                    .where(VALUE_DIMENSION.VALUE_ID.eq(VALUE.ID))
-                    .and(VALUE_DIMENSION.DIMENSION_ID.isNull()
-                            .or(field("dimensions.dimension_id").isNull())));
+                    // TODO find out why coalesce doesn't work here
+                    .where(field("actual.dimension_id").isNull())
+                    .or(field("expected.dimension_id").isNull()));
         }
     }
 
