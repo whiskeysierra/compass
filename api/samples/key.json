@@ -1,0 +1,10 @@
+{
+  "id": "tax-rate",
+  "schema": {
+    "type": "number",
+    "format": "decimal",
+    "minimum": 0,
+    "maximum": 1
+  },
+  "description": "The sales tax rate expressed as a factor."
+}

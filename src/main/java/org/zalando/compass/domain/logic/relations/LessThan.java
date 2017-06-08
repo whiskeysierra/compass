@@ -1,8 +1,8 @@
 package org.zalando.compass.domain.logic.relations;
 
-import org.zalando.compass.domain.model.Relation;
+import com.fasterxml.jackson.databind.JsonNode;
 
-public final class LessThan implements Relation {
+public final class LessThan extends Inequality {
 
     @Override
     public String getId() {
@@ -16,13 +16,12 @@ public final class LessThan implements Relation {
 
     @Override
     public String getDescription() {
-        return "Matches values where the requested dimension values is strictly less than the configured one. " +
-                "In case of multiple candidates it will match the least (natural order).";
+        return "Matches values where the requested dimension values is strictly less than the configured one.";
     }
 
     @Override
-    public boolean test(final String configured, final String requested) {
-        return requested.compareTo(configured) < 0;
+    public boolean test(final JsonNode configured, final JsonNode requested) {
+        return compare(requested, configured) < 0;
     }
 
 }

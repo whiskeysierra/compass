@@ -2,6 +2,7 @@ package org.zalando.compass.domain.logic;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
@@ -84,12 +85,12 @@ public class ValueService {
         validator.validate(row, value);
     }
 
-    public Value read(final String key, final Map<String, String> filter) throws IOException {
+    public Value read(final String key, final Map<String, JsonNode> filter) throws IOException {
         return readAllByKey(key, filter).stream()
                 .findFirst().orElseThrow(NotFoundException::new);
     }
 
-    public List<Value> readAllByKey(final String key, final Map<String, String> filter) throws IOException {
+    public List<Value> readAllByKey(final String key, final Map<String, JsonNode> filter) throws IOException {
         checkKeyExists(key);
 
         final List<Value> values = valueRepository.findAll(byKey(key));
@@ -125,32 +126,34 @@ public class ValueService {
     }
 
     private List<Value> match(final List<Value> values, final Map<Dimension, Relation> dimensions,
-            final Map<String, String> filter) {
+            final Map<String, JsonNode> filter) {
         return values.stream()
                 .filter(byMatch(dimensions, filter))
                 .collect(toList());
     }
 
-    private Predicate<Value> byMatch(final Map<Dimension, Relation> dimensions, final Map<String, String> filter) {
+    private Predicate<Value> byMatch(final Map<Dimension, Relation> dimensions, final Map<String, JsonNode> filter) {
         return dimensions.entrySet().stream()
                 .map(entry -> match(filter, entry))
                 .reduce(Predicate::and).orElse(v -> true);
     }
 
-    private Predicate<Value> match(final Map<String, String> filter, final Entry<Dimension, Relation> entry) {
+    private Predicate<Value> match(final Map<String, JsonNode> filter, final Entry<Dimension, Relation> entry) {
         final Dimension dimension = entry.getKey();
         final Relation relation = entry.getValue();
+
         return value -> {
             @Nullable final JsonNode configured = value.getDimensions().get(dimension.getId());
-            @Nullable final String requested = filter.get(dimension.getId());
+            @Nullable final JsonNode requested = filter.get(dimension.getId());
 
-            return configured == null
-                    || requested != null && relation.test(configured.asText(), requested);
+            // TODO break this up and make it more readable
+            return filter.isEmpty() | configured == null
+                    || requested != null && !requested.isNull() && relation.test(configured, requested);
         };
     }
 
-    public void delete(final String key, final Map<String, String> filter) throws IOException {
-        valueRepository.delete(new ValueId(key, transformValues(filter, TextNode::new)));
+    public void delete(final String key, final Map<String, JsonNode> filter) throws IOException {
+        valueRepository.delete(new ValueId(key, filter));
     }
 
 }

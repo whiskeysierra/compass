@@ -76,46 +76,46 @@ public class ValueServiceTest {
 
     @Test
     public void shouldReadEquality() throws IOException {
-        assertThat(unit.read("tax-rate", of("country", "DE")).getValue(), is(decimal(0.19)));
+        assertThat(unit.read("tax-rate", of("country", text("DE"))).getValue(), is(decimal(0.19)));
     }
 
     @Test
     public void shouldReadEqualityFallback() throws IOException {
-        assertThat(unit.read("tax-rate", of("country", "UK")).getValue(), is(decimal(0.25)));
+        assertThat(unit.read("tax-rate", of("country", text("UK"))).getValue(), is(decimal(0.25)));
     }
 
     @Test
     public void shouldReadLessThan() throws IOException {
         assertThat(unit.read("tax-rate",
-                of("country", "CH", "before", "2013-12-20T11:47:19Z")).getValue(), is(decimal(0.05)));
+                of("country", text("CH"), "before", text("2013-12-20T11:47:19Z"))).getValue(), is(decimal(0.05)));
     }
 
     @Test
     public void shouldReadLessThanEqual() throws IOException {
         assertThat(unit.read("tax-rate",
-                of("country", "CH", "before", "2014-01-01T00:00:00Z")).getValue(), is(decimal(0.05)));
+                of("country", text("CH"), "before", text("2014-01-01T00:00:00Z"))).getValue(), is(decimal(0.05)));
     }
 
     @Test
     public void shouldReadGreaterThan() throws IOException {
         assertThat(unit.read("tax-rate",
-                of("country", "CH", "after", "2019-12-20T11:47:19Z")).getValue(), is(decimal(0.09)));
+                of("country", text("CH"), "after", text("2019-12-20T11:47:19Z"))).getValue(), is(decimal(0.09)));
     }
 
     @Test
     public void shouldReadGreaterThanEqual() throws IOException {
         assertThat(unit.read("tax-rate",
-                of("country", "CH", "after", "2018-01-01T00:00:00Z")).getValue(), is(decimal(0.09)));
+                of("country", text("CH"), "after", text("2018-01-01T00:00:00Z"))).getValue(), is(decimal(0.09)));
     }
 
     @Test
     public void shouldReadPrefix() throws IOException {
-        assertThat(unit.read("tax-rate", of("locale", "de-AT")).getValue(), is(decimal(0.10)));
+        assertThat(unit.read("tax-rate", of("locale", text("de-AT"))).getValue(), is(decimal(0.10)));
     }
 
     @Test
     public void shouldReadMatches() throws IOException {
-        assertThat(unit.read("tax-rate", of("email", "user@zalando.de")).getValue(), is(decimal(0.0)));
+        assertThat(unit.read("tax-rate", of("email", text("user@zalando.de"))).getValue(), is(decimal(0.0)));
     }
 
     @Test
@@ -125,7 +125,7 @@ public class ValueServiceTest {
 
     @Test
     public void shouldReadAllEqualityWithFilter() throws IOException {
-        assertThat(unit.readAllByKey("tax-rate", of("country", "DE")), contains(
+        assertThat(unit.readAllByKey("tax-rate", of("country", text("DE"))), contains(
                 new Value("tax-rate", of("country", text("DE")), decimal(0.19)),
                 new Value("tax-rate", of(), decimal(0.25))));
     }
@@ -151,8 +151,8 @@ public class ValueServiceTest {
                 new Value("tax-rate", of(), decimal(0.25))));
     }
 
-    private JsonNode text(final String v) {
-        return new TextNode(v);
+    private JsonNode text(final String text) {
+        return new TextNode(text);
     }
 
     private JsonNode decimal(final double v) {

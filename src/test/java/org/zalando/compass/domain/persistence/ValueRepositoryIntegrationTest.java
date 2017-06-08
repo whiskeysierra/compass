@@ -31,7 +31,6 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 import static org.zalando.compass.domain.persistence.ValueCriteria.byKey;
 import static org.zalando.compass.library.Schema.schema;
@@ -110,20 +109,27 @@ public class ValueRepositoryIntegrationTest {
         unit.create(new Value("one", of("foo", FALSE), TRUE));
         unit.create(new Value("two", of(), TRUE));
 
-        unit.delete(new ValueId("one", of("foo", TRUE, "bar", new DecimalNode(ONE))));
-        assertThat(unit.findAll(byKey("one")), is(not(empty())));
-        assertThat(unit.findAll(byKey("two")), is(not(empty())));
+        assertThat(unit.findAll(byKey("one")), hasSize(2));
+        assertThat(unit.findAll(byKey("two")), hasSize(1));
 
-        unit.delete(new ValueId("one", of("unknown", new TextNode("foo"))));
-        assertThat(unit.findAll(byKey("one")), is(not(empty())));
-        assertThat(unit.findAll(byKey("two")), is(not(empty())));
+        unit.delete(new ValueId("one", of("foo", TRUE, "bar", new DecimalNode(ONE))));
+        assertThat(unit.findAll(byKey("one")), hasSize(1));
+        assertThat(unit.findAll(byKey("two")), hasSize(1));
 
         unit.delete(new ValueId("one", of("foo", FALSE)));
         assertThat(unit.findAll(byKey("one")), is(empty()));
-        assertThat(unit.findAll(byKey("two")), is(not(empty())));
+        assertThat(unit.findAll(byKey("two")), hasSize(1));
 
         unit.delete(new ValueId("two", of()));
         assertThat(unit.findAll(byKey("two")), is(empty()));
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void shouldNotDelete() {
+        keys.create(new Key("one", new ObjectNode(JsonNodeFactory.instance), ""));
+        unit.create(new Value("one", of(), TRUE));
+
+        unit.delete(new ValueId("one", of("unknown", new TextNode("foo"))));
     }
 
 }

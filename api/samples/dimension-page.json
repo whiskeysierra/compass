@@ -20,7 +20,7 @@
         "format": "bcp47"
       },
       "relation": "prefix",
-      "description": ""
+      "description": "IETF language tag as defined by RFC 5646"
     },
     {
       "id": "location",

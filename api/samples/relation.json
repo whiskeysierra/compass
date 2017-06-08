@@ -1,0 +1,5 @@
+{
+  "id": "=",
+  "title": "Equality",
+  "description": "Matches values where the requested dimension values are equal to the configured ones."
+}

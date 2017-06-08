@@ -1,5 +1,6 @@
 package org.zalando.compass.domain.logic.relations;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Function;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
@@ -9,7 +10,7 @@ import java.util.regex.Pattern;
 
 import static com.google.common.cache.CacheLoader.from;
 
-public final class Matches implements Relation {
+public final class RegularExpression implements Relation {
 
     private final LoadingCache<String, Pattern> cache = CacheBuilder.newBuilder()
             // not 100% sure why we need that cast here
@@ -22,19 +23,17 @@ public final class Matches implements Relation {
 
     @Override
     public String getTitle() {
-        return "Matches";
+        return "Regular expression";
     }
 
     @Override
     public String getDescription() {
-        return "Matches values where the requested dimension values matches the configured regular expression. " +
-                "In case of multiple candidates it will match the longest value " +
-                "with a fallback to the least (natural order).";
+        return "Matches values where the requested dimension values matches the configured regular expression.";
     }
 
     @Override
-    public boolean test(final String configured, final String requested) {
-        return compile(configured).matcher(requested).matches();
+    public boolean test(final JsonNode configured, final JsonNode requested) {
+        return compile(configured.asText()).matcher(requested.asText()).matches();
     }
 
     private Pattern compile(final String pattern) {

@@ -96,7 +96,8 @@ public class DimensionRepositoryIntegrationTest {
                 .map(Dimension::getId)
                 .collect(toList());
 
-        assertThat(dimensions, contains("country", "sales-channel", "locale"));
+        // ordered by id
+        assertThat(dimensions, contains("country", "locale", "sales-channel"));
     }
 
     @Test

@@ -1,0 +1,9 @@
+{
+  "id": "language",
+  "schema": {
+    "type": "string",
+    "format": "bcp47"
+  },
+  "relation": "prefix",
+  "description": "IETF language tag as defined by RFC 5646"
+}

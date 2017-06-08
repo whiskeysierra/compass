@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -25,7 +26,18 @@ public class JsonConfiguration {
     @Primary
     public static ObjectMapper jacksonObjectMapper() {
         final ObjectMapper mapper = new ObjectMapper();
+        configure(mapper);
+        return mapper;
+    }
 
+    @Bean(name = "yaml")
+    public static ObjectMapper yamlObjectMapper() {
+        final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        configure(mapper);
+        return mapper;
+    }
+
+    private static void configure(final ObjectMapper mapper) {
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         mapper.disable(SerializationFeature.WRITE_NULL_MAP_VALUES);
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
@@ -33,6 +45,7 @@ public class JsonConfiguration {
 
         mapper.enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES);
         mapper.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
+        mapper.enable(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS);
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         mapper.disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE);
 
@@ -49,8 +62,6 @@ public class JsonConfiguration {
         mapper.registerModule(new UnknownPropertyModule());
 
         mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
-
-        return mapper;
     }
 
 }

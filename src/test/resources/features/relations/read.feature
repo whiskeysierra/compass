@@ -8,13 +8,13 @@ Feature: Relations
       | ">=" | "Greater than or equal" |
       | "<"  | "Less than"             |
       | "<=" | "Less than or equal"    |
-      | "~"  | "Matches"               |
-      | "^"  | "Longest Prefix Match"  |
+      | "~"  | "Regular expression"    |
+      | "^"  | "Prefix match"          |
 
   Scenario: Get relation
     When "GET /relations/=" returns:
-      | id  | title      | description                                                                           |
-      | "=" | "Equality" | "Matches values where the requested dimension values is equal to the configured one." |
+      | id  | title      | description                                                                             |
+      | "=" | "Equality" | "Matches values where the requested dimension values are equal to the configured ones." |
 
   Scenario: Get unknown relation
     Given there are no dimensions

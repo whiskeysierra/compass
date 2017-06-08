@@ -12,9 +12,15 @@ consumes:
 produces:
   - application/json
   - application/problem+json
+tags:
+  - name: relations
+  - name: dimensions
+  - name: keys
+  - name: values
 paths:
   /relations:
     get:
+      tags: [relations]
       summary: Read all relations
       description: |
         Read the complete list of all relations available at this point in time. A relation specifies how the values
@@ -27,9 +33,13 @@ paths:
             $ref: '#/definitions/RelationPage'
   /relations/{relation}:
     get:
+      tags: [relations]
       summary: Read a single relation.
       parameters:
-        - $ref: '#/parameters/RelationId'
+        - name: relation
+          in: path
+          type: string
+          required: true
       responses:
         200:
           description: OK
@@ -37,6 +47,7 @@ paths:
             $ref: '#/definitions/Relation'
   /dimensions:
     get:
+      tags: [dimensions]
       summary: Read all dimensions
       description: |
         Read the complete list of all dimensions currently defined. This is intended to be used for display purposes.
@@ -47,6 +58,7 @@ paths:
             $ref: '#/definitions/DimensionPage'
   /dimensions/{dimension}:
     put:
+      tags: [dimensions]
       summary: Replace a dimension
       description: |
         Either create a new dimension or update an existing one.
@@ -69,6 +81,7 @@ paths:
           schema:
             $ref: '#/definitions/Dimension'
     get:
+      tags: [dimensions]
       summary: Read a dimension
       parameters:
         - $ref: '#/parameters/DimensionId'
@@ -78,6 +91,7 @@ paths:
           schema:
             $ref: '#/definitions/Dimension'
     delete:
+      tags: [dimensions]
       summary: Delete a dimension
       description: Deleting a dimension that is still referenced by a value is not supported and will be rejected.
       parameters:
@@ -87,6 +101,7 @@ paths:
           description: No Content
   /keys:
     get:
+      tags: [keys]
       summary: Read all keys
       responses:
         200:
@@ -95,6 +110,7 @@ paths:
             $ref: '#/definitions/KeyPage'
   /keys/{key}:
     put:
+      tags: [keys]
       summary: Replace a key
       description: |
         Either create a new key or update an existing one.
@@ -117,6 +133,7 @@ paths:
           schema:
             $ref: '#/definitions/Key'
     get:
+      tags: [keys]
       summary: Read a key
       parameters:
         - $ref: '#/parameters/Key'
@@ -126,6 +143,7 @@ paths:
           schema:
             $ref: '#/definitions/Key'
     delete:
+      tags: [keys]
       summary: Delete a key
       description: Deleting a key will delete all of its values.
       parameters:
@@ -135,6 +153,7 @@ paths:
           description: No Content
   /keys/{key}/values:
     put:
+      tags: [values]
       summary: Replace all values for the given key
       parameters:
         - $ref: '#/parameters/Key'
@@ -149,10 +168,14 @@ paths:
           schema:
             $ref: '#/definitions/ValuePage'
     post:
+      tags: [values]
       summary: Add a value for the given key
       parameters:
         - $ref: '#/parameters/Key'
-        - $ref: '#/parameters/Value'
+        - name: value
+          in: body
+          schema:
+            $ref: '#/definitions/Value'
       responses:
         200:
           description: OK
@@ -163,9 +186,12 @@ paths:
           schema:
             $ref: '#/definitions/ValuePage'
     get:
+      tags: [values]
       summary: Read values for the given key and optional dimension
       description: |
+        Values are always returned in insertion order. Ordering can be changed by replacing all values.
 
+        - `GET /keys/tax-rate/values`, all tax rates
         - `GET /keys/tax-rate/values?country=DE`, all tax rates for Germany
         - `GET /keys/tax-rate/values?country=DE&after=2015-09-07T16:00:00`, all tax rates for Germany that are valid after 2015-09-07T16:00:00
       parameters:
@@ -178,11 +204,28 @@ paths:
             $ref: '#/definitions/ValuePage'
   /keys/{key}/value:
     # TODO put? (with Filter being a concrete match?)
+    put:
+      tags: [values]
+      summary: Replace value of the given key
+      # TODO description
+      parameters:
+        - $ref: '#/parameters/Key'
+        # TODO What about dimensions? $ref: '#/parameters/Filter'
+        - name: value
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Value'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Value'
     get:
+      tags: [values]
       summary: Read a value of the given key and optional dimensions
       description: |
-        This endpoint is a convenience operation and equivalent to `GET /keys/{key}/values` with the same parameters
-        and using the very first value.
+        This endpoint is a convenience operation to select the best matching value for a given set of dimensions.
       parameters:
         - $ref: '#/parameters/Key'
         - $ref: '#/parameters/Filter'
@@ -192,7 +235,9 @@ paths:
           schema:
             $ref: '#/definitions/Value'
     delete:
+      tags: [values]
       summary: Delete a value
+      # TODO description
       parameters:
         - $ref: '#/parameters/Key'
         - $ref: '#/parameters/Filter' # TODO concrete match
@@ -201,9 +246,14 @@ paths:
           description: No Content
   /values:
     get:
-      summary: Read all values for a given key pattern and context
+      tags: [values]
+      summary: Read all values and filter by key pattern
+      # TODO description
       parameters:
-        - $ref: '#/parameters/Query' # for keys
+        - name: q
+          description: User input query string # TODO document
+          in: query
+          type: string
       responses:
         200:
           description: OK
@@ -228,11 +278,6 @@ paths:
                     country: CH
                   value: 0.08
 parameters:
-  RelationId:
-    name: relation
-    in: path
-    type: string
-    required: true
   DimensionId:
     name: dimension
     in: path
@@ -243,30 +288,11 @@ parameters:
     in: path
     type: string
     required: true
-  Values:
-    name: values
-    in: body
-    schema:
-      $ref: '#/definitions/ValuePage'
-  Value:
-    name: value
-    in: body
-    schema:
-      $ref: '#/definitions/Value'
   Filter:
     name: '*'
-    description: |
-      Any number of filter query parameters based on the dimension of the values. This allows the following use cases:
-
-      1. `GET /keys/tax-rate/values?country=DE`, all tax rates for Germany
-      2. `GET /keys/tax-rate/values?country=DE&after=2015-09-07T16:00:00`, all tax rates for Germany that are valid after 2015-09-07T16:00:00
+    description:
     in: query
-    type: string
-  Query:
-    name: q
-    description: User input query string
-    in: query
-    type: string
+    type: string # TODO actually, this should be based on the dimension
 definitions:
   RelationPage:
     type: object

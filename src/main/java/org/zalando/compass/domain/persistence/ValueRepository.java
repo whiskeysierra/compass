@@ -26,7 +26,6 @@ import java.util.stream.IntStream;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.collect.Streams.mapWithIndex;
 import static java.util.stream.Collectors.toList;
-import static org.jooq.impl.DSL.coalesce;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.notExists;
 import static org.jooq.impl.DSL.row;
@@ -91,6 +90,21 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
                 .collect(toList());
     }
 
+    private Condition toCondition(final ValueCriteria criteria) {
+        if (criteria.getKey() != null) {
+            return VALUE.KEY_ID.eq(criteria.getKey());
+        } else if (criteria.getKeyPattern() != null) {
+            return VALUE.KEY_ID.likeIgnoreCase(criteria.getKeyPattern());
+        } else if (criteria.getDimension() != null) {
+            return DSL.exists(selectOne()
+                    .from(VALUE_DIMENSION)
+                    .where(VALUE_DIMENSION.VALUE_ID.eq(VALUE.ID))
+                    .and(VALUE_DIMENSION.DIMENSION_ID.eq(criteria.getDimension())));
+        } else {
+            return trueCondition();
+        }
+    }
+
     private Value map(final Entry<ValueRecord, List<ValueDimensionRecord>> entry) {
         final ValueRecord row = entry.getKey();
 
@@ -120,20 +134,55 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
                 ValueDimensionRecord::getDimensionValue));
     }
 
-    private Condition matches(final Map<String, JsonNode> dimensions) {
+    @Override
+    public boolean update(final Value value) {
+        final int updates = db.update(VALUE)
+                .set(VALUE.VALUE_, value.getValue())
+                .where(VALUE.KEY_ID.eq(value.getKey()))
+                .and(exactMatch(value.getDimensions()))
+                .execute();
+
+        return updates > 0;
+    }
+
+    // TODO replace?
+    public boolean update(final List<Value> values) {
+        final List<Query> queries = mapWithIndex(values.stream(), (value, index) ->
+                db.update(VALUE)
+                        .set(VALUE.VALUE_, value.getValue())
+                        .set(VALUE.INDEX, index)
+                        .where(VALUE.KEY_ID.eq(value.getKey()))
+                        .and(exactMatch(value.getDimensions())))
+                .collect(toList());
+
+        return IntStream.of(db.batch(queries).execute()).sum() > 0;
+    }
+
+    @Override
+    public void delete(final ValueId id) {
+        final int deletions = db.deleteFrom(VALUE)
+                .where(VALUE.KEY_ID.eq(id.getKey()))
+                .and(exactMatch(id.getDimensions()))
+                .execute();
+
+        if (deletions == 0) {
+            throw new NotFoundException();
+        }
+    }
+
+    private Condition exactMatch(final Map<String, JsonNode> dimensions) {
         if (dimensions.isEmpty()) {
             return notExists(selectOne()
                     .from(VALUE_DIMENSION)
-                    .where(VALUE_DIMENSION.VALUE_ID.eq(VALUE.ID))
-                    .limit(1));
+                    .where(VALUE_DIMENSION.VALUE_ID.eq(VALUE.ID)));
         } else {
-            return DSL.notExists(selectOne()
+            return notExists(selectOne()
                     .from(VALUE_DIMENSION)
                     .fullOuterJoin(asTable(dimensions).as("dimensions", "dimension_id", "dimension_value"))
                     .using(field("dimension_id"), field("dimension_value"))
                     .where(VALUE_DIMENSION.VALUE_ID.eq(VALUE.ID))
-                    .and(coalesce(VALUE_DIMENSION.DIMENSION_ID, field("dimensions.dimension_id")).isNull())
-                    .limit(1));
+                    .and(VALUE_DIMENSION.DIMENSION_ID.isNull()
+                            .or(field("dimensions.dimension_id").isNull())));
         }
     }
 
@@ -147,70 +196,6 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
         final Row2<String, JsonNode>[] array = rows.toArray(new Row2[rows.size()]);
 
         return values(array);
-    }
-
-    private Condition toCondition(final ValueCriteria criteria) {
-        if (criteria.getKey() != null) {
-            return VALUE.KEY_ID.eq(criteria.getKey());
-        } else if (criteria.getKeyPattern() != null) {
-            return VALUE.KEY_ID.likeIgnoreCase(criteria.getKeyPattern());
-        } else if (criteria.getDimension() != null) {
-            return DSL.exists(selectOne()
-                    .from(VALUE_DIMENSION)
-                    .where(VALUE_DIMENSION.VALUE_ID.eq(VALUE.ID))
-                    .and(VALUE_DIMENSION.DIMENSION_ID.eq(criteria.getDimension())));
-        } else {
-            return trueCondition();
-        }
-    }
-
-    @Override
-    public boolean update(final Value value) {
-        final int updates = db.update(VALUE)
-                .set(VALUE.VALUE_, value.getValue())
-                .where(VALUE.KEY_ID.eq(value.getKey()))
-                .and(matches(value.getDimensions()))
-                .execute();
-
-        return updates > 0;
-    }
-
-    // TODO replace?
-    public boolean update(final List<Value> values) {
-        final List<Query> queries = mapWithIndex(values.stream(), (value, index) ->
-                db.update(VALUE)
-                        .set(VALUE.VALUE_, value.getValue())
-                        .set(VALUE.INDEX, index)
-                        .where(VALUE.KEY_ID.eq(value.getKey()))
-                        .and(matches(value.getDimensions())))
-                .collect(toList());
-
-        return IntStream.of(db.batch(queries).execute()).sum() > 0;
-    }
-
-    @Override
-    public void delete(final ValueId id) {
-        final Optional<Entry<ValueRecord, List<ValueDimensionRecord>>> entry = findInternal(id);
-
-        if (entry.isPresent()) {
-            entry.get().getKey().delete();
-        } else {
-            throw new NotFoundException();
-        }
-    }
-
-    private Optional<Entry<ValueRecord, List<ValueDimensionRecord>>> findInternal(final ValueId id) {
-        final Map<ValueRecord, List<ValueDimensionRecord>> groups = db.select()
-                .from(VALUE)
-                .leftJoin(VALUE_DIMENSION)
-                .on(VALUE.ID.eq(VALUE_DIMENSION.VALUE_ID))
-                .where(VALUE.KEY_ID.eq(id.getKey()))
-                .and(matches(id.getDimensions()))
-                .fetchGroups(ValueRecord.class, ValueDimensionRecord.class);
-
-        return groups.isEmpty() ?
-                Optional.empty() :
-                Optional.of(groups.entrySet().iterator().next());
     }
 
 }

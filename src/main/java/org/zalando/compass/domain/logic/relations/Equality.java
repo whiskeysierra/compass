@@ -1,5 +1,6 @@
 package org.zalando.compass.domain.logic.relations;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.zalando.compass.domain.model.Relation;
 
 public final class Equality implements Relation {
@@ -16,11 +17,11 @@ public final class Equality implements Relation {
 
     @Override
     public String getDescription() {
-        return "Matches values where the requested dimension values is equal to the configured one.";
+        return "Matches values where the requested dimension values are equal to the configured ones.";
     }
 
     @Override
-    public boolean test(final String configured, final String requested) {
+    public boolean test(final JsonNode configured, final JsonNode requested) {
         return configured.equals(requested);
     }
 
