@@ -4,10 +4,10 @@ Feature: Dimension update
     Given the following dimensions:
       | id       | schema.type | relation | description |
       | "device" | "string"    | "="      | ".."        |
-    When "PUT /dimensions/device" is requested with this it returns "200 OK":
+    When "PUT /dimensions/device" returns "200 OK" when requested with:
       | id       | schema.type | schema.enum          | relation | description                  |
       | "device" | "string"    | ["mobile","desktop"] | "="      | "Lorem ipsum dolor sit amet" |
-    Then "GET /dimensions/device" returns:
+    Then "GET /dimensions/device" returns "200 OK" with:
       | id       | schema.type | schema.enum          | relation | description                  |
       | "device" | "string"    | ["mobile","desktop"] | "="      | "Lorem ipsum dolor sit amet" |
 
@@ -15,7 +15,7 @@ Feature: Dimension update
     Given the following dimensions:
       | id       | schema.type | relation | description |
       | "device" | "string"    | "="      | ".."        |
-    When "PUT /dimensions/device" is requested with this it returns "400 Bad Request":
+    When "PUT /dimensions/device" returns "400 Bad Request" when requested with:
       | id    | schema.type | relation | description                  |
       | "bar" | "string"    | "="      | "Lorem ipsum dolor sit amet" |
 
@@ -23,10 +23,10 @@ Feature: Dimension update
     Given the following dimensions:
       | id       | schema.type | relation | description |
       | "device" | "string"    | "="      | ".."        |
-    When "PUT /dimensions/device" is requested with this:
+    When "PUT /dimensions/device" when requested with:
       | id       | schema.type | relation | description |
       | "device" | "any"       | 17       | false       |
-    Then it returns "400 Bad Request" with a list of violations:
+    Then "400 Bad Request" was returned with a list of violations:
       | field           | message                                                                                                           |
       | "$.description" | "$.description: boolean found, string expected"                                                                   |
       | "$.relation"    | "$.relation: integer found, string expected"                                                                      |

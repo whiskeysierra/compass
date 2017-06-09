@@ -6,10 +6,11 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
 import org.zalando.riptide.Rest;
+import org.zalando.riptide.Route;
 import org.zalando.riptide.capture.Capture;
 import org.zuchini.runner.tables.Datatable;
 import org.zuchini.spring.ScenarioScoped;
@@ -22,11 +23,13 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.springframework.http.HttpStatus.Series.SUCCESSFUL;
-import static org.zalando.riptide.Bindings.anySeries;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.parseMediaType;
+import static org.zalando.riptide.Bindings.anyStatus;
 import static org.zalando.riptide.Bindings.on;
-import static org.zalando.riptide.Navigators.series;
-import static org.zalando.riptide.Navigators.statusCode;
+import static org.zalando.riptide.Navigators.contentType;
+import static org.zalando.riptide.Navigators.status;
+import static org.zalando.riptide.Route.call;
 import static org.zalando.riptide.Route.responseEntityOf;
 import static org.zuchini.runner.tables.DatatableMatchers.matchesTable;
 
@@ -45,89 +48,79 @@ public class ApiSteps {
         this.rest = rest;
     }
 
-    @Given("^\"(.+) (.*)\" returns \"(\\d+) (.+)\"$")
+    @Given("^\"([A-Z]+) ([^ ]*)\" returns \"(\\d+) (.+)\"$")
     public void returns(final HttpMethod method, final String uri, final int statusCode, final String reasonPhrase)
             throws IOException {
 
-        final Capture<ClientHttpResponse> capture = Capture.empty();
-        final ClientHttpResponse response = rest.execute(method, uri)
-                .dispatch(series(),
-                        anySeries().call(ClientHttpResponse.class, capture))
-                .thenApply(capture)
-                .join();
+        final ResponseEntity<JsonNode> response = request(method, uri);
 
-        assertThat(response.getRawStatusCode(), is(statusCode));
+        assertThat(response.getStatusCodeValue(), is(statusCode));
         assertThat(response.getStatusCode().getReasonPhrase(), is(reasonPhrase));
     }
 
-    @Then("^\"(.+) (.*)\" returns:$")
-    public void returns(final HttpMethod method, final String uri, final Datatable expected) throws IOException {
-        final JsonNode row = request(method, uri).getBody();
+    @Then("^\"([A-Z]+) ([^ ]*)\" returns \"(\\d+) (.+)\" with:$")
+    public void returnsWith(final HttpMethod method, final String uri, final int statusCode, final String reasonPhrase, 
+            final Datatable expected) throws IOException {
+        final ResponseEntity<JsonNode> response = request(method, uri);
+
+        assertThat(response.getStatusCodeValue(), is(statusCode));
+        assertThat(response.getStatusCode().getReasonPhrase(), is(reasonPhrase));
+        
+        final JsonNode body = response.getBody();
         final List<String> headers = expected.getHeader();
-        final Datatable actual = mapper.map(singletonList(row), headers);
+        final Datatable actual = mapper.map(singletonList(body), headers);
 
         assertThat(actual, matchesTable(expected));
     }
 
-    @Then("^\"(.+) (.*)\" returns a list of (.+):$")
-    public void returnsListOf(final HttpMethod method, final String uri, final String key, final Datatable expected) throws IOException {
-        final JsonNode body = request(method, uri).getBody();
+    @Then("^\"([A-Z]+) ([^ ]*)\" returns \"(\\d+) (.+)\" with a list of (.+):$")
+    public void returnWithAListOf(final HttpMethod method, final String uri, final int statusCode, 
+            final String reasonPhrase, final String key, final Datatable expected) throws IOException {
+        final ResponseEntity<JsonNode> response = request(method, uri);
 
+        assertThat(response.getStatusCodeValue(), is(statusCode));
+        assertThat(response.getStatusCode().getReasonPhrase(), is(reasonPhrase));
+        
+        final JsonNode body = response.getBody();
         final ArrayList<JsonNode> nodes = newArrayList(body.get(key));
         final Datatable actual = mapper.map(nodes, expected.getHeader());
 
         assertThat(actual, matchesTable(expected));
     }
 
-    @Then("^\"(.+) (.*)\" returns an empty list of (.+)$")
-    public void no_are_returned(final HttpMethod method, final String uri, final String key) {
-        final JsonNode list = request(method, uri).getBody().get(key);
+    @Then("^\"([A-Z]+) ([^ ]*)\" returns \"(\\d+) (.+)\" with an empty list of (.+)$")
+    public void returnsWithAnEmptyListOf(final HttpMethod method, final String uri, final int statusCode,
+            final String reasonPhrase, final String key) {
+        final ResponseEntity<JsonNode> response = request(method, uri);
+
+        assertThat(response.getStatusCodeValue(), is(statusCode));
+        assertThat(response.getStatusCode().getReasonPhrase(), is(reasonPhrase));
+        
+        final JsonNode list = response.getBody().get(key);
         assertThat(list.size(), is(0));
     }
 
-    private ResponseEntity<JsonNode> request(final HttpMethod method, final String uri) {
-        final Capture<ResponseEntity<JsonNode>> capture = Capture.empty();
-
-        return rest.execute(method, uri)
-                .dispatch(series(),
-                        on(SUCCESSFUL).call(responseEntityOf(JsonNode.class), capture))
-                .thenApply(capture)
-                .join();
-    }
-
-    @When("^\"(.+) (.*)\" is requested with this it returns \"(\\d+) (.+)\":$")
-    public void isRequestedWithThisItReturns(final HttpMethod method, final String uri, final int statusCode,
+    @When("^\"([A-Z]+) ([^ ]*)\" returns \"(\\d+) (.+)\" when requested with:$")
+    public void returnsWhenRequestedWith(final HttpMethod method, final String uri, final int statusCode,
             final String reasonPhrase, final Datatable table) throws IOException {
 
-        final Capture<ClientHttpResponse> capture = Capture.empty();
-        final ClientHttpResponse response = rest.execute(method, uri)
-                .body(mapper.map(table).get(0))
-                .dispatch(statusCode(),
-                        on(statusCode).call(ClientHttpResponse.class, capture))
-                .thenApply(capture)
-                .join();
+        final ResponseEntity<JsonNode> response = request(method, uri, mapper.map(table).get(0));
 
-        assertThat(response.getRawStatusCode(), is(statusCode));
+        assertThat(response.getStatusCodeValue(), is(statusCode));
         assertThat(response.getStatusCode().getReasonPhrase(), is(reasonPhrase));
     }
 
-    @When("^\"(.+) (.*)\" is requested with this:$")
-    public void isRequestedWithThisItReturns(final HttpMethod method, final String uri, final Datatable table)
+    @When("^\"([A-Z]+) ([^ ]*)\" when requested with:$")
+    public void whenRequestedWith(final HttpMethod method, final String uri, final Datatable table)
             throws IOException {
 
-        final Capture<ResponseEntity<JsonNode>> capture = Capture.empty();
-        final ResponseEntity<JsonNode> response = rest.execute(method, uri)
-                .body(mapper.map(table).get(0))
-                .dispatch(series(),
-                        anySeries().call(responseEntityOf(JsonNode.class), capture))
-                .thenApply(capture)
-                .join();
+        final ResponseEntity<JsonNode> response = request(method, uri, mapper.map(table).get(0));
 
         lastResponse.set(response);
     }
 
-    @Then("^it returns \"(\\d+) (.+)\" with a list of (.+):$")
-    public void itReturnsWithAListOf(final int statusCode, final String reasonPhrase, final String key,
+    @Then("^\"(\\d+) (.+)\" was returned with a list of (.+):$")
+    public void returnsWithAListOf(final int statusCode, final String reasonPhrase, final String key,
             final Datatable expected) throws IOException {
 
         final ResponseEntity<JsonNode> response = lastResponse.get();
@@ -139,6 +132,26 @@ public class ApiSteps {
         final Datatable actual = mapper.map(nodes, expected.getHeader());
 
         assertThat(actual, matchesTable(expected));
+    }
+
+    private ResponseEntity<JsonNode> request(final HttpMethod method, final String uri) {
+        return request(method, uri, null);
+    }
+
+    private ResponseEntity<JsonNode> request(final HttpMethod method, final String uri,
+            final Object body) {
+        final Capture<ResponseEntity<JsonNode>> capture = Capture.empty();
+        final Route route = call(responseEntityOf(JsonNode.class), capture);
+
+        return rest.execute(method, uri)
+                .body(body)
+                .dispatch(status(),
+                        on(HttpStatus.NO_CONTENT).call(route),
+                        anyStatus().dispatch(contentType(),
+                                on(APPLICATION_JSON).call(route),
+                                on(parseMediaType("application/*+json")).call(route)))
+                .thenApply(capture)
+                .join();
     }
 
 }

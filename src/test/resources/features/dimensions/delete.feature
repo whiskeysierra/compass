@@ -7,7 +7,7 @@ Feature: Dimension deletion
       | "language" | {"type":"string","format":"bcp47"}   | "^"      | ".."        |
       | "location" | {"type":"string","format":"geohash"} | "^"      | ".."        |
     When "DELETE /dimensions/device" returns "204 No Content"
-    When "GET /dimensions" returns a list of dimensions:
+    When "GET /dimensions" returns "200 OK" with a list of dimensions:
       | id         | schema                               | relation | description |
       | "language" | {"type":"string","format":"bcp47"}   | "^"      | ".."        |
       | "location" | {"type":"string","format":"geohash"} | "^"      | ".."        |

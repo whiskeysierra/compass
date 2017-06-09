@@ -1,6 +1,5 @@
 package org.zalando.compass.library;
 
-import com.google.common.annotations.VisibleForTesting;
 import org.hibernate.validator.HibernateValidatorConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -14,8 +13,7 @@ import javax.validation.executable.ExecutableValidator;
 import java.time.Clock;
 
 @Configuration
-@VisibleForTesting
-public class ValidatorConfiguration {
+class ValidatorConfiguration {
 
     private final Clock clock;
 

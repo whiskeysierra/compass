@@ -16,10 +16,13 @@ import com.networknt.schema.ValidationMessage;
 import org.springframework.stereotype.Component;
 import org.zalando.problem.Problem;
 import org.zalando.problem.ThrowableProblem;
+import org.zalando.problem.spring.web.advice.validation.ConstraintViolationProblem;
+import org.zalando.problem.spring.web.advice.validation.Violation;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
+import java.util.List;
 import java.util.Set;
 
 import static com.google.common.io.Resources.getResource;
@@ -56,18 +59,12 @@ public class JsonSchemaValidator {
     }
 
     private static ThrowableProblem newProblem(final Set<ValidationMessage> messages) {
-        return Problem.builder()
-                .withType(URI.create("https://zalando.github.io/problem/constraint-violation"))
-                .withStatus(BAD_REQUEST)
-                .withTitle("Constraint Violation")
-                .withDetail("Schema Validation Failed")
-                .with("violations", messages.stream()
-                        .sorted(comparing(ValidationMessage::getMessage))
-                        .map(message -> ImmutableMap.of(
-                                "field", message.getPath(),
-                                "message", message.getMessage()))
-                        .collect(toList()))
-                .build();
+        final List<Violation> violations = messages.stream()
+                .sorted(comparing(ValidationMessage::getMessage)) // needed for testing, TODO by path + message?
+                .map(message -> new Violation(message.getPath(), message.getMessage()))
+                .collect(toList());
+
+        return new ConstraintViolationProblem(BAD_REQUEST, violations);
     }
 
     private static final class SchemaLoader extends CacheLoader<String, JsonSchema> {

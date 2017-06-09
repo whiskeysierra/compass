@@ -12,6 +12,6 @@ Feature: Value deletion
       | "CH"               | 0.08  |
       | "DE"               | 0.19  |
     When "DELETE /keys/tax-rate/values?country=CH" returns "204 No Content"
-    Then "GET /keys/tax-rate/values" returns a list of values:
+    Then "GET /keys/tax-rate/values" returns "200 OK" with a list of values:
       | dimensions.country | value |
       | "DE"               | 0.19  |

@@ -9,7 +9,7 @@ Feature: Reading dimensions
       | "before"   | {"type":"string","format":"date-time"} | "<="     | ".."        |
       | "after"    | {"type":"string","format":"date-time"} | ">="     | ".."        |
       | "email"    | {"type":"string","format":"email"}     | "~"      | ".."        |
-    When "GET /dimensions" returns a list of dimensions:
+    When "GET /dimensions" returns "200 OK" with a list of dimensions:
       | id         | schema                                 | relation | description |
       | "after"    | {"type":"string","format":"date-time"} | ">="     | ".."        |
       | "before"   | {"type":"string","format":"date-time"} | "<="     | ".."        |
@@ -20,12 +20,12 @@ Feature: Reading dimensions
 
   Scenario: List empty dimensions
     Given there are no dimensions
-    Then "GET /dimensions" returns an empty list of dimensions
+    Then "GET /dimensions" returns "200 OK" with an empty list of dimensions
 
   Scenario: Get dimension
-    Given "PUT /dimensions/device" is requested with this it returns "201 Created":
+    Given "PUT /dimensions/device" returns "201 Created" when requested with:
       | id       | schema.type | relation | description |
       | "device" | "string"    | "="      | ".."        |
-    When "GET /dimensions/device" returns:
+    When "GET /dimensions/device" returns "200 OK" with:
       | id       | schema.type | relation | description |
       | "device" | "string"    | "="      | ".."        |
