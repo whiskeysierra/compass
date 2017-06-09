@@ -1,10 +1,13 @@
-package org.zalando.compass.domain.logic;
+package org.zalando.compass.domain.logic.value;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.DecimalNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import org.junit.Before;
 import org.junit.Test;
+import org.zalando.compass.domain.logic.ValidationService;
+import org.zalando.compass.domain.logic.ValueService;
+import org.zalando.compass.domain.logic.value.DefaultValueService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.DimensionRepository;
@@ -28,7 +31,7 @@ import static org.mockito.Mockito.when;
 import static org.zalando.compass.domain.persistence.ValueCriteria.byKey;
 import static org.zalando.compass.domain.persistence.ValueCriteria.byKeyPattern;
 
-public class ValueServiceTest {
+public class DefaultValueServiceTest {
 
     private final ValidationService validator = mock(ValidationService.class);
     private final RelationRepository relationRepository = new RelationRepository();
@@ -36,12 +39,20 @@ public class ValueServiceTest {
     private final KeyRepository keyRepository = mock(KeyRepository.class);
     private final ValueRepository valueRepository = mock(ValueRepository.class);
 
-    private final ValueService unit = new ValueService(validator, relationRepository, dimensionRepository,
-            keyRepository, valueRepository);
+    private final ValueMatcher matcher = new ValueMatcher(dimensionRepository, relationRepository);
+
+    // TODO test individual commands in isolation
+    private final ValueService unit = new DefaultValueService(
+            new CreateValue(validator, valueRepository, dimensionRepository, keyRepository),
+            new ReadValue(valueRepository, matcher),
+            new ReadValues(valueRepository, matcher),
+            new ReadAllValues(valueRepository),
+            new DeleteValue(valueRepository)
+    );
 
     @Before
     public void setUp() throws Exception {
-        when(dimensionRepository.findAll()).thenReturn(asList(
+        when(dimensionRepository.findAll(any())).thenReturn(asList(
                 new Dimension("after", Schema.stringSchema(), ">=", ""),
                 new Dimension("before", Schema.stringSchema(), "<=", ""),
                 new Dimension("country", Schema.stringSchema(), "=", ""),

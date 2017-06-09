@@ -14,6 +14,15 @@ import org.springframework.stereotype.Component;
 import java.util.Collections;
 import java.util.Map;
 
+/**
+ * A parser that takes a raw {@code Map<String, String>} usually passed as a query string, e.g.
+ * {@code country=DE&age=32&active=true} and converts it to a {@code Map<String, JsonNode>}. It does so by guessing
+ * the type based on the appearance of the value, e.g. if a value looks like a boolean it will become a
+ * {@link com.fasterxml.jackson.databind.node.BooleanNode}.
+ *
+ * In order to prevent incorrect typing, e.g. the value {@code true} should stay a string, it needs to be wrapped in
+ * double quotes: {@code "true"}.
+ */
 @Component
 public class DuckTypingJsonParser {
 

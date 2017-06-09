@@ -2,6 +2,7 @@ package org.zalando.compass.resource;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
@@ -52,11 +54,8 @@ class KeyResource {
         final Key input = reader.read(node, Key.class);
         final Key key = ensureConsistentId(id, input);
 
-        if (service.createOrUpdate(key)) {
-            return ResponseEntity.status(CREATED).body(key);
-        } else {
-            return ResponseEntity.ok(key);
-        }
+        final HttpStatus status = service.replace(key) ? CREATED : OK;
+        return ResponseEntity.status(status).body(key);
     }
 
     private Key ensureConsistentId(@PathVariable final String id, final Key input) {

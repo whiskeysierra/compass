@@ -56,14 +56,11 @@ class ValueResource {
         final Map<String, JsonNode> filter = parser.parse(query);
         final Value value = reader.read(node, Value.class).withKey(id);
 
-        final boolean created = service.create(value);
+        service.create(value);
+
         final ValuePage page = new ValuePage(service.readAllByKey(id, filter));
 
-        if (created) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(page);
-        } else {
-            return ResponseEntity.ok(page);
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(page);
     }
 
     @RequestMapping(method = DELETE, path = "/keys/{id}/values")

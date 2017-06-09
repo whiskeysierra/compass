@@ -78,6 +78,7 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
         return findAll(withoutCriteria());
     }
 
+    // TODO should we have criteria on this level?
     @Override
     public List<Value> findAll(final ValueCriteria criteria) {
         return db.select()
@@ -165,6 +166,10 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
                 .where(VALUE.KEY_ID.eq(id.getKey()))
                 .and(exactMatch(id.getDimensions()))
                 .execute();
+
+        if (deletions > 1) {
+            throw new AssertionError("Expected at most 1 value to be deleted, but matched " + deletions);
+        }
 
         if (deletions == 0) {
             throw new NotFoundException();

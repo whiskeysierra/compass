@@ -44,7 +44,7 @@ class ReplaceDimension {
      * @return true if dimension was created, false if an existing one was updated
      */
     @Transactional
-    boolean replace(final Dimension dimension) {
+    public boolean replace(final Dimension dimension) {
         // TODO require primitive dimension value type (schema)
         verifyRelationExists(dimension);
 

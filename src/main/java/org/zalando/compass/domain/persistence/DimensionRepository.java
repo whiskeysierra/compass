@@ -2,7 +2,6 @@ package org.zalando.compass.domain.persistence;
 
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.model.Dimension;
 
@@ -25,15 +24,14 @@ public class DimensionRepository implements Repository<Dimension, String, Dimens
 
     @Override
     public boolean create(final Dimension dimension) {
-        try {
-            db.insertInto(DIMENSION)
-                    .columns(DIMENSION.ID, DIMENSION.SCHEMA, DIMENSION.RELATION, DIMENSION.DESCRIPTION)
-                    .values(dimension.getId(), dimension.getSchema(), dimension.getRelation(), dimension.getDescription())
-                    .execute();
-            return true;
-        } catch (final DuplicateKeyException e) {
-            return false;
-        }
+        final int inserts = db.insertInto(DIMENSION)
+                .columns(DIMENSION.ID, DIMENSION.SCHEMA, DIMENSION.RELATION, DIMENSION.DESCRIPTION)
+                .values(dimension.getId(), dimension.getSchema(), dimension.getRelation(),
+                        dimension.getDescription())
+                .onDuplicateKeyIgnore()
+                .execute();
+
+        return inserts == 1;
     }
 
     @Override
@@ -90,11 +88,11 @@ public class DimensionRepository implements Repository<Dimension, String, Dimens
 
     @Override
     public void delete(final String id) {
-        final int deletions = db.deleteFrom(DIMENSION)
+        final int deletes = db.deleteFrom(DIMENSION)
                 .where(DIMENSION.ID.eq(id))
                 .execute();
 
-        if (deletions == 0) {
+        if (deletes == 0) {
             throw new NotFoundException();
         }
     }

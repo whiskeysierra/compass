@@ -2,7 +2,6 @@ package org.zalando.compass.domain.persistence;
 
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.model.Key;
 
@@ -26,15 +25,13 @@ public class KeyRepository implements Repository<Key, String, KeyCriteria> {
 
     @Override
     public boolean create(final Key key) {
-        try {
-            db.insertInto(KEY)
-                    .columns(KEY.ID, KEY.SCHEMA, KEY.DESCRIPTION)
-                    .values(key.getId(), key.getSchema(), key.getDescription())
-                    .execute();
-            return true;
-        } catch (final DuplicateKeyException e) {
-            return false;
-        }
+        final int inserts = db.insertInto(KEY)
+                .columns(KEY.ID, KEY.SCHEMA, KEY.DESCRIPTION)
+                .values(key.getId(), key.getSchema(), key.getDescription())
+                .onDuplicateKeyIgnore()
+                .execute();
+
+        return inserts == 1;
     }
 
     @Override
@@ -90,11 +87,11 @@ public class KeyRepository implements Repository<Key, String, KeyCriteria> {
 
     @Override
     public void delete(final String key) {
-        final int deletions = db.deleteFrom(KEY)
+        final int deletes = db.deleteFrom(KEY)
                 .where(KEY.ID.eq(key))
                 .execute();
 
-        if (deletions == 0) {
+        if (deletes == 0) {
             throw new NotFoundException();
         }
     }

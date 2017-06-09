@@ -1,7 +1,7 @@
-org.zalando.compass.domain.logic.relations.Equality
-org.zalando.compass.domain.logic.relations.GreaterThan
-org.zalando.compass.domain.logic.relations.GreaterThanOrEqual
-org.zalando.compass.domain.logic.relations.LessThan
-org.zalando.compass.domain.logic.relations.LessThanOrEqual
-org.zalando.compass.domain.logic.relations.RegularExpression
-org.zalando.compass.domain.logic.relations.Prefix
+org.zalando.compass.domain.logic.relation.Equality
+org.zalando.compass.domain.logic.relation.GreaterThan
+org.zalando.compass.domain.logic.relation.GreaterThanOrEqual
+org.zalando.compass.domain.logic.relation.LessThan
+org.zalando.compass.domain.logic.relation.LessThanOrEqual
+org.zalando.compass.domain.logic.relation.RegularExpression
+org.zalando.compass.domain.logic.relation.Prefix

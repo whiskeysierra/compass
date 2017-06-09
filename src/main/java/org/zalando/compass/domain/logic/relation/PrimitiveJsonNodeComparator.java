@@ -1,4 +1,4 @@
-package org.zalando.compass.domain.logic.relations;
+package org.zalando.compass.domain.logic.relation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ComparisonChain;
@@ -6,14 +6,25 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
 import com.google.common.primitives.Booleans;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+// TODO library?
 final class PrimitiveJsonNodeComparator extends Ordering<JsonNode> {
 
     @Override
-    public int compare(final JsonNode left, final JsonNode right) {
+    public int compare(@Nullable final JsonNode left, @Nullable final JsonNode right) {
+        if (left == null && right == null) {
+            return 0;
+        } else if (left == null) {
+            return -1;
+        } else if (right == null) {
+            return 1;
+        }
+
         if (left.isNull() && right.isNull()) {
             return 0;
         } else if (left.isNull()) {

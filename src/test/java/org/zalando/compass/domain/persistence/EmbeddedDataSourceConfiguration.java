@@ -17,6 +17,7 @@ public class EmbeddedDataSourceConfiguration {
 
     @Bean(destroyMethod = "close")
     public EmbeddedPostgres embeddedPostgres() throws IOException {
+        // TODO find out why we have some exceptions in some tests and why they don't seam to matter...
         return EmbeddedPostgres.start();
     }
 

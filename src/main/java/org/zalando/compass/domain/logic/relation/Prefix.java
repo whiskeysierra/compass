@@ -1,4 +1,4 @@
-package org.zalando.compass.domain.logic.relations;
+package org.zalando.compass.domain.logic.relation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.zalando.compass.domain.model.Relation;

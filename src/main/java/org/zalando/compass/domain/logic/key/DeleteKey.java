@@ -1,17 +1,17 @@
-package org.zalando.compass.domain.logic.dimension;
+package org.zalando.compass.domain.logic.key;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.zalando.compass.domain.persistence.DimensionRepository;
+import org.zalando.compass.domain.persistence.KeyRepository;
 
 @Component
-class DeleteDimension {
+class DeleteKey {
 
-    private final DimensionRepository repository;
+    private final KeyRepository repository;
 
     @Autowired
-    DeleteDimension(final DimensionRepository repository) {
+    DeleteKey(final KeyRepository repository) {
         this.repository = repository;
     }
 
