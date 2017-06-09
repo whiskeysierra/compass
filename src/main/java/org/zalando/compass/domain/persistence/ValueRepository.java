@@ -78,7 +78,7 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
         return findAll(withoutCriteria());
     }
 
-    // TODO should we have cri
+    // TODO should we have criteria on this level?
     @Override
     public List<Value> findAll(final ValueCriteria criteria) {
         return db.select()
