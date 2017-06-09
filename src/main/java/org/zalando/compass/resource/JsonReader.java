@@ -9,7 +9,7 @@ import org.zalando.compass.library.JsonSchemaValidator;
 import java.io.IOException;
 
 @Component
-public class JsonReader {
+class JsonReader {
 
     private final JsonSchemaValidator validator;
     private final ObjectMapper mapper;

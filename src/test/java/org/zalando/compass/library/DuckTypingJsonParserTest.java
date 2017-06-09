@@ -14,11 +14,11 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.zalando.compass.resource.JsonConfiguration.yamlObjectMapper;
+import static org.zalando.compass.library.JsonConfiguration.yamlObjectMapper;
 
-public final class FilterParserTest {
+public final class DuckTypingJsonParserTest {
 
-    private final FilterParser unit = new FilterParser(yamlObjectMapper());
+    private final DuckTypingJsonParser unit = new DuckTypingJsonParser(yamlObjectMapper());
 
     @Test
     public void shouldParseEmpty() {

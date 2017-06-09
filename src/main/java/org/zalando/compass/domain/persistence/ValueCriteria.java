@@ -15,7 +15,6 @@ public class ValueCriteria {
 
     public static ValueCriteria byKey(final String key) {
         return new ValueCriteria(key, null, null);
-
     }
 
     public static ValueCriteria byKeyPattern(final String keyPattern) {

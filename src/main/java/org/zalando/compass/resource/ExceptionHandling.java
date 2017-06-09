@@ -18,7 +18,7 @@ import javax.annotation.Nonnull;
 import static com.google.common.base.Throwables.getRootCause;
 
 @ControllerAdvice
-public class ExceptionHandling implements ProblemHandling, SpringAdviceTrait {
+class ExceptionHandling implements ProblemHandling, SpringAdviceTrait {
 
     @ExceptionHandler
     public ResponseEntity<Problem> handleMethodArgumentTypeMismatchException(

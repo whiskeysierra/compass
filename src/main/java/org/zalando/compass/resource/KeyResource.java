@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.KeyService;
 import org.zalando.compass.domain.model.Key;
-import org.zalando.compass.domain.model.KeyPage;
 import org.zalando.compass.domain.persistence.KeyRepository;
 
 import java.io.IOException;
@@ -24,7 +23,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 @RestController
 @RequestMapping(path = "/keys")
-public class KeyResource {
+class KeyResource {
 
     private final JsonReader reader;
     private final KeyService service;

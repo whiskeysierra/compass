@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.model.Relation;
-import org.zalando.compass.domain.model.RelationPage;
 import org.zalando.compass.domain.persistence.RelationRepository;
 
 import java.io.IOException;
@@ -14,7 +13,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @RestController
 @RequestMapping(path = "/relations")
-public class RelationResource {
+class RelationResource {
 
     private final RelationRepository repository;
 

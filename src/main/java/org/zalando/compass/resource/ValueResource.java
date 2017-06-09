@@ -11,10 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.ValueService;
-import org.zalando.compass.domain.model.Entries;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.domain.model.ValuePage;
-import org.zalando.compass.library.FilterParser;
+import org.zalando.compass.library.DuckTypingJsonParser;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -25,16 +23,15 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 // TODO drop special parameter from filter map
-// TODO find a way to transform filter map into a "typed" version, e.g. Map<String, JsonNode>
 @RestController
-public class ValueResource {
+class ValueResource {
 
-    private final FilterParser parser;
+    private final DuckTypingJsonParser parser;
     private final JsonReader reader;
     private final ValueService service;
 
     @Autowired
-    public ValueResource(final FilterParser parser, final JsonReader reader,
+    public ValueResource(final DuckTypingJsonParser parser, final JsonReader reader,
             final ValueService service) {
         this.parser = parser;
         this.reader = reader;

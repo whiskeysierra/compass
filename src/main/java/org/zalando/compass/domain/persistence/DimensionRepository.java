@@ -5,18 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.model.Dimension;
-import org.zalando.compass.domain.persistence.model.tables.pojos.DimensionRow;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static java.util.Collections.singleton;
-import static java.util.stream.Collectors.toList;
-import static org.springframework.dao.support.DataAccessUtils.singleResult;
-import static org.zalando.compass.domain.persistence.DimensionCriteria.dimensions;
 import static org.zalando.compass.domain.persistence.model.Tables.DIMENSION;
 
 @Component
@@ -44,9 +38,18 @@ public class DimensionRepository implements Repository<Dimension, String, Dimens
 
     @Override
     public Optional<Dimension> find(final String id) {
-        final List<Dimension> dimensions = findAll(dimensions(singleton(id)));
-        @Nullable final Dimension dimension = singleResult(dimensions);
-        return Optional.ofNullable(dimension);
+        return db.select()
+                .from(DIMENSION)
+                .where(DIMENSION.ID.eq(id))
+                .fetchOptionalInto(Dimension.class);
+    }
+
+    public Optional<Dimension> lock(final String id) {
+        return db.select()
+                .from(DIMENSION)
+                .where(DIMENSION.ID.eq(id))
+                .forUpdate()
+                .fetchOptionalInto(Dimension.class);
     }
 
     @Override
@@ -62,10 +65,7 @@ public class DimensionRepository implements Repository<Dimension, String, Dimens
                 .from(DIMENSION)
                 .where(DIMENSION.ID.in(dimensions))
                 .orderBy(DIMENSION.ID)
-                .fetchInto(DimensionRow.class)
-                .stream()
-                .map(this::map)
-                .collect(toList());
+                .fetchInto(Dimension.class);
     }
 
     @Override
@@ -73,14 +73,7 @@ public class DimensionRepository implements Repository<Dimension, String, Dimens
         return db.select(DIMENSION.fields())
                 .from(DIMENSION)
                 .orderBy(DIMENSION.ID)
-                .fetchInto(DimensionRow.class)
-                .stream()
-                .map(this::map)
-                .collect(toList());
-    }
-
-    private Dimension map(final DimensionRow row) {
-        return new Dimension(row.getId(), row.getSchema(), row.getRelation(), row.getDescription());
+                .fetchInto(Dimension.class);
     }
 
     @Override
@@ -96,9 +89,9 @@ public class DimensionRepository implements Repository<Dimension, String, Dimens
     }
 
     @Override
-    public void delete(final String dimension) {
+    public void delete(final String id) {
         final int deletions = db.deleteFrom(DIMENSION)
-                .where(DIMENSION.ID.eq(dimension))
+                .where(DIMENSION.ID.eq(id))
                 .execute();
 
         if (deletions == 0) {

@@ -1,4 +1,4 @@
-package org.zalando.compass.resource;
+package org.zalando.compass.library;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -20,7 +20,7 @@ import org.zalando.problem.ProblemModule;
 import static com.fasterxml.jackson.core.JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN;
 
 @Configuration
-public class JsonConfiguration {
+class JsonConfiguration {
 
     @Bean
     @Primary

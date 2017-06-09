@@ -15,12 +15,12 @@ import static org.zalando.compass.domain.persistence.ValueCriteria.byKey;
 @Service
 public class KeyService {
 
-    private final SchemaValidator validator;
+    private final ValidationService validator;
     private final KeyRepository keyRepository;
     private final ValueRepository valueRepository;
 
     @Autowired
-    public KeyService(final SchemaValidator validator, final KeyRepository keyRepository,
+    public KeyService(final ValidationService validator, final KeyRepository keyRepository,
             final ValueRepository valueRepository) {
         this.validator = validator;
         this.keyRepository = keyRepository;

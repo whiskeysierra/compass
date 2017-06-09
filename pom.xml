@@ -534,7 +534,7 @@
                             <forcedTypes>
                                 <forcedType>
                                     <userType>com.fasterxml.jackson.databind.JsonNode</userType>
-                                    <binding>org.zalando.compass.library.jooq.PostgresJsonbBinding</binding>
+                                    <binding>org.zalando.compass.library.PostgresJsonbBinding</binding>
                                     <types>JSONB</types>
                                 </forcedType>
                             </forcedTypes>

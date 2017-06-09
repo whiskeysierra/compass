@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.DecimalNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Value;
@@ -31,7 +30,7 @@ import static org.zalando.compass.domain.persistence.ValueCriteria.byKeyPattern;
 
 public class ValueServiceTest {
 
-    private final SchemaValidator validator = mock(SchemaValidator.class);
+    private final ValidationService validator = mock(ValidationService.class);
     private final RelationRepository relationRepository = new RelationRepository();
     private final DimensionRepository dimensionRepository = mock(DimensionRepository.class);
     private final KeyRepository keyRepository = mock(KeyRepository.class);

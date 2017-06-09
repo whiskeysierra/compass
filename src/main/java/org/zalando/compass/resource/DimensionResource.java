@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
-import org.zalando.compass.domain.model.DimensionPage;
 import org.zalando.compass.domain.persistence.DimensionRepository;
 
 import java.io.IOException;
@@ -25,7 +24,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 @RestController
 @RequestMapping(path = "/dimensions")
-public class DimensionResource {
+class DimensionResource {
 
     private final JsonReader reader;
     private final DimensionService service;
@@ -57,7 +56,7 @@ public class DimensionResource {
         final Dimension input = reader.read(node, Dimension.class);
         final Dimension dimension = ensureConsistentId(id, input);
 
-        if (service.createOrUpdate(dimension)) {
+        if (service.replace(dimension)) {
             return ResponseEntity.status(CREATED).body(dimension);
         } else {
             return ResponseEntity.ok(dimension);

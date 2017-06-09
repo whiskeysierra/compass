@@ -44,14 +44,14 @@ import static org.zalando.fauxpas.FauxPas.throwingFunction;
 @Service
 public class ValueService {
 
-    private final SchemaValidator validator;
+    private final ValidationService validator;
     private final RelationRepository relationRepository;
     private final DimensionRepository dimensionRepository;
     private final KeyRepository keyRepository;
     private final ValueRepository valueRepository;
 
     @Autowired
-    public ValueService(final SchemaValidator validator, final RelationRepository relationRepository,
+    public ValueService(final ValidationService validator, final RelationRepository relationRepository,
             final DimensionRepository dimensionRepository,
             final KeyRepository keyRepository, final ValueRepository valueRepository) {
         this.validator = validator;

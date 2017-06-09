@@ -14,12 +14,12 @@ import java.util.Set;
 import static java.util.Collections.singleton;
 
 @Service
-class SchemaValidator {
+public class ValidationService {
 
     private final JsonSchemaValidator validator;
 
     @Autowired
-    public SchemaValidator(final JsonSchemaValidator validator) {
+    public ValidationService(final JsonSchemaValidator validator) {
         this.validator = validator;
     }
 

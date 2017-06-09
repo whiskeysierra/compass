@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.zalando.twintip.spring.SchemaResource;
@@ -16,7 +15,7 @@ import static java.util.Arrays.asList;
 
 @Configuration
 @Import(SchemaResource.class)
-public class WebConfiguration extends WebMvcConfigurerAdapter {
+class WebConfiguration extends WebMvcConfigurerAdapter {
 
     @Override
     public void configurePathMatch(final PathMatchConfigurer configurer) {
@@ -25,10 +24,13 @@ public class WebConfiguration extends WebMvcConfigurerAdapter {
 
     @Bean
     public HttpMessageConverters messageConverters(final ObjectMapper mapper, final StringHttpMessageConverter textConverter) {
-        return new HttpMessageConverters(false, asList(
-                textConverter,
-                new MappingJackson2HttpMessageConverter(mapper),
-                new Jaxb2RootElementHttpMessageConverter()));
+        return new HttpMessageConverters(false, asList(textConverter, jsonConverter(mapper)));
+    }
+
+    private MappingJackson2HttpMessageConverter jsonConverter(final ObjectMapper mapper) {
+        final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
+        converter.setDefaultCharset(null);
+        return converter;
     }
 
 }

@@ -8,10 +8,9 @@ import org.zalando.compass.domain.model.Relation;
 import java.util.List;
 import java.util.Optional;
 
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static java.util.ServiceLoader.load;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toMap;
 
 @Component
 public class RelationRepository implements Repository<Relation, String, Void> {
@@ -19,7 +18,7 @@ public class RelationRepository implements Repository<Relation, String, Void> {
     private final ImmutableList<Relation> list = ImmutableList.copyOf(load(Relation.class));
 
     private final ImmutableMap<String, Relation> map = list.stream()
-            .collect(collectingAndThen(toMap(Relation::getId, identity()), ImmutableMap::copyOf));
+            .collect(toImmutableMap(Relation::getId, identity()));
 
     @Override
     public boolean create(final Relation relation) {

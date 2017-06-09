@@ -1,4 +1,4 @@
-package org.zalando.compass.library.jooq;
+package org.zalando.compass.library;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,7 +21,7 @@ import java.sql.Types;
 import java.util.Objects;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
-import static org.zalando.compass.resource.JsonConfiguration.jacksonObjectMapper;
+import static org.zalando.compass.library.JsonConfiguration.jacksonObjectMapper;
 
 public final class PostgresJsonbBinding implements Binding<Object, JsonNode> {
 

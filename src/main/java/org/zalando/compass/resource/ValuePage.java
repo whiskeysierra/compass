@@ -1,4 +1,6 @@
-package org.zalando.compass.domain.model;
+package org.zalando.compass.resource;
+
+import org.zalando.compass.domain.model.Value;
 
 import java.util.List;
 
