@@ -7,7 +7,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.zalando.compass.domain.logic.ValidationService;
 import org.zalando.compass.domain.logic.ValueService;
-import org.zalando.compass.domain.logic.value.DefaultValueService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.DimensionRepository;
@@ -135,8 +134,20 @@ public class DefaultValueServiceTest {
     }
 
     @Test
+    public void shouldReadWithoutExactMatch() throws IOException {
+        assertThat(unit.read("tax-rate", of("foo", text("bar"))).getValue(), is(decimal(0.25)));
+    }
+
+    @Test
     public void shouldReadAllEqualityWithFilter() throws IOException {
         assertThat(unit.readAllByKey("tax-rate", of("country", text("DE"))), contains(
+                new Value("tax-rate", of("country", text("DE")), decimal(0.19)),
+                new Value("tax-rate", of(), decimal(0.25))));
+    }
+
+    @Test
+    public void shouldReadAllEqualityWithTooBroadFilter() throws IOException {
+        assertThat(unit.readAllByKey("tax-rate", of("country", text("DE"), "foo", text("bar"))), contains(
                 new Value("tax-rate", of("country", text("DE")), decimal(0.19)),
                 new Value("tax-rate", of(), decimal(0.25))));
     }

@@ -3,7 +3,6 @@ package org.zalando.compass.domain.logic.relation;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.zalando.compass.domain.model.Relation;
 
-// TODO impose restrictions on dimension schema based on selected relation?
 public final class Prefix implements Relation {
 
     @Override

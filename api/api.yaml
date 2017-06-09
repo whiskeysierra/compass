@@ -1,9 +1,24 @@
 swagger: '2.0'
 info:
-  title: Compass Configuration Management API
-  # TODO description
+  title: Compass - Configuration Management API
   description: |
-    ...
+    Compass is a configuration service with a multi-dimensional key space. Every value is identified by at exactly one
+    key and an arbitrary number of additional dimensions. As an example it would allow to define a key `tax-rate` and
+    specify different values per country (dimension) as well as before (time dimension):
+
+    | Key      | Country | Before                    | Value |
+    |----------|---------|---------------------------|-------|
+    | tax-rate | DE      | 2007-01-01T00:00:00+02:00 | 0.16  |
+    | tax-rate | DE      |                           | 0.19  |
+    | tax-rate | AT      |                           | 0.20  |
+    | tax-rate | CH      |                           | 0.08  |
+
+    Different dimension my influence how values are queried. The `country` dimension is matched based on equality (`=`)
+    while the `after` dimension is based on inequality or to be more precise less than (`<`). That property is called
+    relation and they can't be created using this API - in contrast to keys and dimensions.
+
+    Keys can impose certain type restrictions on their values by defining a JSON schema. The same applies to dimensions
+    and their values.
   version: "0.1.0"
 schemes:
   - https
@@ -17,6 +32,7 @@ tags:
   - name: dimensions
   - name: keys
   - name: values
+  - name: value
 paths:
   /relations:
     get:
@@ -154,7 +170,10 @@ paths:
   /keys/{key}/values:
     put:
       tags: [values]
-      summary: Replace all values for the given key
+      summary: Replace all values for the given key.
+      description: |
+        If any value violates this key's schema or any dimensions values are violating their respective dimension's
+        schema then the whole update will be rejected.
       parameters:
         - $ref: '#/parameters/Key'
         - name: values
@@ -170,6 +189,9 @@ paths:
     post:
       tags: [values]
       summary: Add a value for the given key
+      description: |
+         If the value violates this key's schema or any dimensions values are violating their respective dimension's
+         schema then the update will be rejected.
       parameters:
         - $ref: '#/parameters/Key'
         - name: value
@@ -189,11 +211,13 @@ paths:
       tags: [values]
       summary: Read values for the given key and optional dimension
       description: |
-        Values are always returned in insertion order. Ordering can be changed by replacing all values.
+        Values can either be read as a whole or being filtered by dimensions:
 
         - `GET /keys/tax-rate/values`, all tax rates
         - `GET /keys/tax-rate/values?country=DE`, all tax rates for Germany
         - `GET /keys/tax-rate/values?country=DE&after=2015-09-07T16:00:00`, all tax rates for Germany that are valid after 2015-09-07T16:00:00
+
+        Values are always returned in insertion order. Ordering can be changed by replacing all values.
       parameters:
         - $ref: '#/parameters/Key'
         - $ref: '#/parameters/Filter'
@@ -203,14 +227,20 @@ paths:
           schema:
             $ref: '#/definitions/ValuePage'
   /keys/{key}/value:
-    # TODO put? (with Filter being a concrete match?)
     put:
-      tags: [values]
+      tags: [value]
       summary: Replace value of the given key
-      # TODO description
+      description: |
+        Replaces a value that is unambiguously identified by the given key and dimensions. In contrast to reading a
+        value this endpoint does not select the best match but rather requires an exact match.
+
+        Replacing a value with country: DE and after: 2015-09-07T16:17:21 will NOT replace a value that is configured
+        with the after: 2015-09-07T16:00:00, but rather create a new one.
+        Replacing country: DE and after: 2015-09-07T16:00:00 on the other would update it.
+
+        As a general statement: Reading is (or can be) fuzzy, but updates and deletes are not.
       parameters:
         - $ref: '#/parameters/Key'
-        # TODO What about dimensions? $ref: '#/parameters/Filter'
         - name: value
           in: body
           required: true
@@ -222,10 +252,18 @@ paths:
           schema:
             $ref: '#/definitions/Value'
     get:
-      tags: [values]
+      tags: [value]
       summary: Read a value of the given key and optional dimensions
       description: |
-        This endpoint is a convenience operation to select the best matching value for a given set of dimensions.
+        Reads the best matching value for the given key and dimensions:
+
+        - `GET /keys/tax-rate/value`, tax rate that applies to all country (probably none, so `404 Not Found`)
+        - `GET /keys/tax-rate/value?country=DE`, tax rate for Germany
+        - `GET /keys/tax-rate/value?country=DE&after=2015-09-07T16:00:00`, tax rate for Germany that are valid after 2015-09-07T16:00:00
+
+        Values have an explicit ordering that can be changed by replacing all values. Selecting the best value for
+        a given key and selected dimensions is based on that order. The first match will be returned. That implies
+        that values should be ordered from fine- to coarse-grained or from specific to generic.
       parameters:
         - $ref: '#/parameters/Key'
         - $ref: '#/parameters/Filter'
@@ -235,12 +273,20 @@ paths:
           schema:
             $ref: '#/definitions/Value'
     delete:
-      tags: [values]
+      tags: [value]
       summary: Delete a value
-      # TODO description
+      description: |
+        Deletes a value that is unambiguously identified by the given key and dimensions. In contrast to reading a
+        value this endpoint does not select the best match but rather requires an exact match.
+
+        `DELETE /keys/tax-rate/value?country=DE&after=2015-09-07T16:17:21` will NOT delete a value that is configured
+        with the `after=2015-09-07T16:00:00`, but `DELETE /keys/tax-rate/value?country=DE&after=2015-09-07T16:00:00`
+        would.
+
+        As a general statement: Reading is (or can be) fuzzy, but updates and deletes are not.
       parameters:
         - $ref: '#/parameters/Key'
-        - $ref: '#/parameters/Filter' # TODO concrete match
+        - $ref: '#/parameters/Filter'
       responses:
         204:
           description: No Content
@@ -248,10 +294,9 @@ paths:
     get:
       tags: [values]
       summary: Read all values and filter by key pattern
-      # TODO description
       parameters:
         - name: q
-          description: User input query string # TODO document
+          description: Key pattern
           in: query
           type: string
       responses:
@@ -289,10 +334,16 @@ parameters:
     type: string
     required: true
   Filter:
-    name: '*'
-    description:
+    name: '' # we have to specify a name here even though we support any and many of them.
+    description: |
+      A dynamic number of dimensions, e.g. `country=AT&after=2015-09-07T16:00:00`. The values have to match the schema
+      specified by their corresponding dimension. The correct JSON type is deducted based on "appearance" of the value,
+      e.g. if a value looks like a boolean it will be parsed as one. In order to prevent incorrect typing, e.g.
+      the value `true` should be parsed as a string, it needs to be wrapped in double quotes, `"true"`.
     in: query
-    type: string # TODO actually, this should be based on the dimension
+    type: array
+    items: {}
+    collectionFormat: multi
 definitions:
   RelationPage:
     type: object

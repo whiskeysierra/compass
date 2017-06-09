@@ -55,7 +55,6 @@ public class DimensionRepository implements Repository<Dimension, String, Dimens
         final Set<String> dimensions = criteria.getDimensions();
 
         if (dimensions.isEmpty()) {
-            // TODO is that correct?!
             return Collections.emptyList();
         }
 

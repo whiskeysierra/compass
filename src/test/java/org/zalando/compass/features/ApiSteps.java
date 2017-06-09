@@ -9,7 +9,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
-import org.zalando.riptide.Requester;
 import org.zalando.riptide.Rest;
 import org.zalando.riptide.capture.Capture;
 import org.zuchini.runner.tables.Datatable;
@@ -18,7 +17,6 @@ import org.zuchini.spring.ScenarioScoped;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
@@ -52,7 +50,7 @@ public class ApiSteps {
             throws IOException {
 
         final Capture<ClientHttpResponse> capture = Capture.empty();
-        final ClientHttpResponse response = select(method).apply(uri)
+        final ClientHttpResponse response = rest.execute(method, uri)
                 .dispatch(series(),
                         anySeries().call(ClientHttpResponse.class, capture))
                 .thenApply(capture)
@@ -90,7 +88,7 @@ public class ApiSteps {
     private ResponseEntity<JsonNode> request(final HttpMethod method, final String uri) {
         final Capture<ResponseEntity<JsonNode>> capture = Capture.empty();
 
-        return select(method).apply(uri)
+        return rest.execute(method, uri)
                 .dispatch(series(),
                         on(SUCCESSFUL).call(responseEntityOf(JsonNode.class), capture))
                 .thenApply(capture)
@@ -102,7 +100,7 @@ public class ApiSteps {
             final String reasonPhrase, final Datatable table) throws IOException {
 
         final Capture<ClientHttpResponse> capture = Capture.empty();
-        final ClientHttpResponse response = select(method).apply(uri)
+        final ClientHttpResponse response = rest.execute(method, uri)
                 .body(mapper.map(table).get(0))
                 .dispatch(statusCode(),
                         on(statusCode).call(ClientHttpResponse.class, capture))
@@ -118,7 +116,7 @@ public class ApiSteps {
             throws IOException {
 
         final Capture<ResponseEntity<JsonNode>> capture = Capture.empty();
-        final ResponseEntity<JsonNode> response = select(method).apply(uri)
+        final ResponseEntity<JsonNode> response = rest.execute(method, uri)
                 .body(mapper.map(table).get(0))
                 .dispatch(series(),
                         anySeries().call(responseEntityOf(JsonNode.class), capture))
@@ -141,30 +139,6 @@ public class ApiSteps {
         final Datatable actual = mapper.map(nodes, expected.getHeader());
 
         assertThat(actual, matchesTable(expected));
-    }
-
-    // TODO ues dynamic execute version
-    private Function<String, Requester> select(final HttpMethod method) {
-        switch (method) {
-            case GET:
-                return rest::get;
-            case HEAD:
-                return rest::head;
-            case POST:
-                return rest::post;
-            case PUT:
-                return rest::put;
-            case PATCH:
-                return rest::patch;
-            case DELETE:
-                return rest::delete;
-            case OPTIONS:
-                return rest::options;
-            case TRACE:
-                return rest::trace;
-            default:
-                throw new IllegalArgumentException("Unknown method: " + method);
-        }
     }
 
 }

@@ -45,7 +45,6 @@ class ReplaceDimension {
      */
     @Transactional
     public boolean replace(final Dimension dimension) {
-        // TODO require primitive dimension value type (schema)
         verifyRelationExists(dimension);
 
         @Nullable final Dimension current = repository.lock(dimension.getId()).orElse(null);
