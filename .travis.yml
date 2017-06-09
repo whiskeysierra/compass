@@ -8,8 +8,14 @@ services:
 jdk:
   - oraclejdk8
 
+cache:
+  directories:
+    - $HOME/.m2
+
+script: ./mvnw clean verify
+
 after_success:
-  - mvn clean verify coveralls:report
+  - ./mvnw coveralls:report
 
 notifications:
   email:
