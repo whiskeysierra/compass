@@ -1,0 +1,56 @@
+package org.zalando.compass.library;
+
+import com.google.common.annotations.VisibleForTesting;
+import org.hibernate.validator.HibernateValidatorConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
+
+import javax.validation.ParameterNameProvider;
+import javax.validation.ValidatorFactory;
+import javax.validation.executable.ExecutableValidator;
+import java.time.Clock;
+
+@Configuration
+@VisibleForTesting
+public class ValidatorConfiguration {
+
+    private final Clock clock;
+
+    @Autowired
+    public ValidatorConfiguration(final Clock clock) {
+        this.clock = clock;
+    }
+
+    @Bean
+    public ValidatorFactory validatorFactory() {
+        return new LocalValidatorFactoryBean() {
+
+            @Override
+            public ParameterNameProvider getParameterNameProvider() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public ExecutableValidator forExecutables() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            protected void postProcessConfiguration(final javax.validation.Configuration<?> configuration) {
+                HibernateValidatorConfiguration.class.cast(configuration).timeProvider(clock::millis);
+            }
+
+        };
+    }
+
+    @Bean
+    public MethodValidationPostProcessor methodValidationPostProcessor(final ValidatorFactory factory) {
+        final MethodValidationPostProcessor processor = new MethodValidationPostProcessor();
+        processor.setValidatorFactory(factory);
+        return processor;
+    }
+
+}

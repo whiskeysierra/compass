@@ -17,6 +17,7 @@ class DeleteDimension {
 
     @Transactional
     public void delete(final String id) {
+        // TODO transform constraint exception from database into something more usable
         repository.delete(id);
     }
 

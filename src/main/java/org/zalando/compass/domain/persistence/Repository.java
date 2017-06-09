@@ -6,7 +6,7 @@ import java.util.Optional;
 
 public interface Repository<T, K, C> {
 
-    boolean create(T entity);
+    void create(T entity);
     
     default boolean exists(final K id) {
         return find(id).isPresent();
@@ -19,11 +19,15 @@ public interface Repository<T, K, C> {
 
     Optional<T> find(K id);
 
+    Optional<T> lock(K id);
+
     List<T> findAll();
 
     List<T> findAll(C criteria);
 
-    boolean update(T entity);
+    List<T> lockAll(C criteria);
+
+    void update(T entity);
 
     void delete(K id);
 

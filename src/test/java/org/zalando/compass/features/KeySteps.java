@@ -8,6 +8,7 @@ import org.zuchini.runner.tables.Datatable;
 import org.zuchini.spring.ScenarioScoped;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 import static org.springframework.http.HttpStatus.Series.SUCCESSFUL;
 import static org.zalando.riptide.Bindings.on;
@@ -34,11 +35,12 @@ public class KeySteps {
 
     @Given("^the following keys:$")
     public void theFollowingKeys(final Datatable table) throws IOException {
-        mapper.map(table).forEach(key ->
-                rest.put("/keys/{id}", key.get("id").asText())
+        mapper.map(table).stream()
+                .map(key -> rest.put("/keys/{id}", key.get("id").asText())
                         .body(key)
                         .dispatch(series(),
-                                on(SUCCESSFUL).call(pass())).join());
+                                on(SUCCESSFUL).call(pass())))
+                .forEach(CompletableFuture::join);
     }
 
 }

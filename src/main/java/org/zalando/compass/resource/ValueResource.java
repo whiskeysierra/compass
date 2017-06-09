@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.ValueService;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.library.DuckTypingJsonParser;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -22,38 +21,37 @@ import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-// TODO drop special parameter from filter map
 @RestController
 class ValueResource {
 
-    private final DuckTypingJsonParser parser;
+    private final FilterFactory factory;
     private final JsonReader reader;
     private final ValueService service;
 
     @Autowired
-    public ValueResource(final DuckTypingJsonParser parser, final JsonReader reader,
+    public ValueResource(final FilterFactory factory, final JsonReader reader,
             final ValueService service) {
-        this.parser = parser;
+        this.factory = factory;
         this.reader = reader;
         this.service = service;
     }
 
     @RequestMapping(method = GET, path = "/keys/{id}/value")
     public Value get(@PathVariable final String id, @RequestParam final Map<String, String> query) throws IOException {
-        final Map<String, JsonNode> filter = parser.parse(query);
+        final Map<String, JsonNode> filter = factory.create(query);
         return service.read(id, filter);
     }
 
     @RequestMapping(method = GET, path = "/keys/{id}/values")
     public ValuePage getAll(@PathVariable final String id, @RequestParam final Map<String, String> query) throws IOException {
-        final Map<String, JsonNode> filter = parser.parse(query);
+        final Map<String, JsonNode> filter = factory.create(query);
         return new ValuePage(service.readAllByKey(id, filter));
     }
 
     @RequestMapping(method = POST, path = "/keys/{id}/values")
     public ResponseEntity<ValuePage> post(@PathVariable final String id, @RequestParam final Map<String, String> query,
             @RequestBody final JsonNode node) throws IOException {
-        final Map<String, JsonNode> filter = parser.parse(query);
+        final Map<String, JsonNode> filter = factory.create(query);
         final Value value = reader.read(node, Value.class).withKey(id);
 
         service.create(value);
@@ -66,7 +64,7 @@ class ValueResource {
     @RequestMapping(method = DELETE, path = "/keys/{id}/values")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable final String id, @RequestParam final Map<String, String> query) throws IOException {
-        final Map<String, JsonNode> filter = parser.parse(query);
+        final Map<String, JsonNode> filter = factory.create(query);
         service.delete(id, filter);
     }
 

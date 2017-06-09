@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,8 +14,8 @@ import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.persistence.DimensionRepository;
 
+import javax.validation.Valid;
 import java.io.IOException;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -26,8 +27,10 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 @RestController
 @RequestMapping(path = "/dimensions")
+@Validated
 class DimensionResource {
 
+    // TODO can we move this somewhere inside spring? a filter maybe?
     private final JsonReader reader;
     private final DimensionService service;
     private final DimensionRepository repository;
@@ -40,21 +43,10 @@ class DimensionResource {
         this.repository = repository;
     }
 
-    @RequestMapping(method = GET)
-    public DimensionPage getAll() {
-        return new DimensionPage(repository.findAll().stream()
-                .map(row -> new Dimension(row.getId(), row.getSchema(), row.getRelation(), row.getDescription()))
-                .collect(Collectors.toList()));
-    }
-
-    @RequestMapping(method = GET, path = "/{id}")
-    public Dimension get(@PathVariable final String id) throws IOException {
-        return repository.read(id);
-    }
-
     @RequestMapping(method = PUT, path = "/{id}")
-    public ResponseEntity<Dimension> put(@PathVariable final String id,
+    public ResponseEntity<Dimension> replace(@PathVariable @NotReserved @Valid final String id,
             @RequestBody final JsonNode node) throws IOException {
+
         final Dimension input = reader.read(node, Dimension.class);
         final Dimension dimension = ensureConsistentId(id, input);
 
@@ -67,6 +59,16 @@ class DimensionResource {
                 "If present, ID body must match with URL");
 
         return input.withId(id);
+    }
+
+    @RequestMapping(method = GET, path = "/{id}")
+    public Dimension get(@PathVariable final String id) throws IOException {
+        return repository.read(id);
+    }
+
+    @RequestMapping(method = GET)
+    public DimensionPage getAll() {
+        return new DimensionPage(repository.findAll());
     }
 
     @RequestMapping(method = DELETE, path = "/{id}")

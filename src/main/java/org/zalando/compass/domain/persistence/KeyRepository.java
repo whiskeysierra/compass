@@ -1,6 +1,9 @@
 package org.zalando.compass.domain.persistence;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectSeekStep1;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.model.Key;
@@ -24,30 +27,30 @@ public class KeyRepository implements Repository<Key, String, KeyCriteria> {
     }
 
     @Override
-    public boolean create(final Key key) {
-        final int inserts = db.insertInto(KEY)
+    public void create(final Key key) {
+        db.insertInto(KEY)
                 .columns(KEY.ID, KEY.SCHEMA, KEY.DESCRIPTION)
                 .values(key.getId(), key.getSchema(), key.getDescription())
-                .onDuplicateKeyIgnore()
                 .execute();
-
-        return inserts == 1;
-    }
-
-    @Override
-    public boolean exists(final String key) {
-        return db.fetchExists(
-                selectOne()
-                .from(KEY)
-                .where(KEY.ID.eq(key)));
     }
 
     @Override
     public Optional<Key> find(final String id) {
+        return doFind(id)
+                .fetchOptionalInto(Key.class);
+    }
+
+    @Override
+    public Optional<Key> lock(final String id) {
+        return doFind(id)
+                .forUpdate()
+                .fetchOptionalInto(Key.class);
+    }
+
+    private SelectConditionStep<Record> doFind(final String id) {
         return db.select()
                 .from(KEY)
-                .where(KEY.ID.eq(id))
-                .fetchOptionalInto(Key.class);
+                .where(KEY.ID.eq(id));
     }
 
     @Override
@@ -67,22 +70,39 @@ public class KeyRepository implements Repository<Key, String, KeyCriteria> {
             return Collections.emptyList();
         }
 
-        return db.select()
-                .from(KEY)
-                .where(KEY.ID.in(keys))
-                .orderBy(KEY.ID.asc())
+        return doFindAll(keys)
                 .fetchInto(Key.class);
     }
 
     @Override
-    public boolean update(final Key key) {
-        final int updates = db.update(KEY)
+    public List<Key> lockAll(final KeyCriteria criteria) {
+        final Set<String> keys = criteria.getKeys();
+
+        // TODO share this with findAll
+        if (keys.isEmpty()) {
+            // TODO is this actually correct?!
+            return Collections.emptyList();
+        }
+
+        return doFindAll(keys)
+                .forUpdate()
+                .fetchInto(Key.class);
+    }
+
+    private SelectSeekStep1<Record, String> doFindAll(final Set<String> keys) {
+        return db.select()
+                .from(KEY)
+                .where(KEY.ID.in(keys))
+                .orderBy(KEY.ID.asc());
+    }
+
+    @Override
+    public void update(final Key key) {
+        db.update(KEY)
                 .set(KEY.SCHEMA, key.getSchema())
                 .set(KEY.DESCRIPTION, key.getDescription())
                 .where(KEY.ID.eq(key.getId()))
                 .execute();
-
-        return updates > 0;
     }
 
     @Override
@@ -92,6 +112,7 @@ public class KeyRepository implements Repository<Key, String, KeyCriteria> {
                 .execute();
 
         if (deletes == 0) {
+            // TODO not here? needed at all?
             throw new NotFoundException();
         }
     }

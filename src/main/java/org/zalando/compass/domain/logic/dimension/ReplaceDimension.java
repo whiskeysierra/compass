@@ -50,8 +50,13 @@ class ReplaceDimension {
         @Nullable final Dimension current = repository.lock(dimension.getId()).orElse(null);
 
         if (current == null) {
-            return repository.create(dimension);
+            // TODO verify dimension id is not a reserved keyword
+            repository.create(dimension);
+            return true;
         } else {
+            // TODO detect changes and validate accordingly
+            // TODO lock values (order by id)
+
             validateDimensionValuesIfNecessary(current, dimension);
             repository.update(dimension);
             return false;

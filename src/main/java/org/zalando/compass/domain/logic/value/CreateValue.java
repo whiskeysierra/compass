@@ -39,7 +39,7 @@ class CreateValue {
     @Transactional
     public void create(final Value value) {
         // TODO lock key
-        // TODO lock dimensions
+        // TODO lock dimensions (in order)
 
         validateDimensions(value);
         validateValue(value);
@@ -48,15 +48,15 @@ class CreateValue {
     }
 
     private void validateDimensions(final Value value) {
-        final ImmutableSet<String> dimensions = value.getDimensions().keySet();
-        final List<Dimension> read = dimensionRepository.findAll(dimensions(dimensions));
+        final ImmutableSet<String> used = value.getDimensions().keySet();
+        final List<Dimension> dimensions = dimensionRepository.findAll(dimensions(used));
 
-        validator.validate(read, value);
+        validator.validate(dimensions, value);
     }
 
     private void validateValue(final Value value) {
-        final Key row = keyRepository.read(value.getKey());
-        validator.validate(row, value);
+        final Key key = keyRepository.read(value.getKey());
+        validator.validate(key, value);
     }
 
 }

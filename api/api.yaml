@@ -81,6 +81,9 @@ paths:
 
         A modification to an existing dimension's schema requires that all values that are using this dimension
         successfully validate against it. A violation of this rule will result in a rejected update.
+
+        Since dimenions are used as query parameters when reading values there are certain reserved names that are not
+        allowed.
       parameters:
         - $ref: '#/parameters/DimensionId'
         - name: dimension
@@ -399,7 +402,7 @@ definitions:
         example: country
       schema:
         description: The schema that applies to all values of this dimension across all values.
-        $ref: 'http://json-schema.org/schema#'
+        $ref: 'http://json-schema.org/schema#' # TODO copy locally
         example:
           type: string
           pattern: '^[A-Z]{2}$'
@@ -439,7 +442,7 @@ definitions:
         example: tax-rate
       schema:
         description: The schema that applies to all values of this key.
-        $ref: 'http://json-schema.org/schema#'
+        $ref: 'http://json-schema.org/schema#' # TODO copy locally
         example:
           type: number
           format: decimal

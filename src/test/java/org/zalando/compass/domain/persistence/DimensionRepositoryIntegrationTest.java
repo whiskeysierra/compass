@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,13 +47,15 @@ public class DimensionRepositoryIntegrationTest {
 
     @Test
     public void shouldCreate() throws IOException {
-        assertThat(create(), is(true));
+        create();
+
+        assertThat(unit.exists("country"), is(true));
     }
 
-    @Test
+    @Test(expected = DuplicateKeyException.class)
     public void shouldNotCreateTwice() throws IOException {
-        assertThat(create(), is(true));
-        assertThat(create(), is(false));
+        create();
+        create();
     }
 
     @Test
@@ -118,8 +121,8 @@ public class DimensionRepositoryIntegrationTest {
         assertThat(unit.find("country"), is(empty()));
     }
 
-    private boolean create() throws IOException {
-        return create(newCountry());
+    private void create() throws IOException {
+        create(newCountry());
     }
 
     private Dimension newCountry() {
@@ -137,8 +140,8 @@ public class DimensionRepositoryIntegrationTest {
                 "=", "Language");
     }
 
-    private boolean create(final Dimension dimension) throws IOException {
-        return unit.create(dimension);
+    private void create(final Dimension dimension) throws IOException {
+        unit.create(dimension);
     }
 
 }

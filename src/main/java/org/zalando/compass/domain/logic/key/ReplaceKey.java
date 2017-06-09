@@ -9,6 +9,7 @@ import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.KeyRepository;
 import org.zalando.compass.domain.persistence.ValueRepository;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 import static org.zalando.compass.domain.persistence.ValueCriteria.byKey;
@@ -17,7 +18,7 @@ import static org.zalando.compass.domain.persistence.ValueCriteria.byKey;
 class ReplaceKey {
 
     private final ValidationService validator;
-    private final KeyRepository keyRepository;
+    private final KeyRepository repository;
     private final ValueRepository valueRepository;
 
     @Autowired
@@ -26,7 +27,7 @@ class ReplaceKey {
             final KeyRepository repository,
             final ValueRepository valueRepository) {
         this.validator = validator;
-        this.keyRepository = repository;
+        this.repository = repository;
         this.valueRepository = valueRepository;
     }
 
@@ -37,18 +38,29 @@ class ReplaceKey {
      */
     @Transactional
     public boolean replace(final Key key) {
-        if (keyRepository.create(key)) {
-            return true;
-        }
 
-        validateAllValues(key);
-        keyRepository.update(key);
-        return false;
+        @Nullable final Key current = repository.lock(key.getId()).orElse(null);
+
+        if (current == null) {
+            repository.create(key);
+            return true;
+        } else {
+            // TODO detect changes and validate accordingly
+            // TODO lock values (order by id)
+
+            validateValuesIfNecessary(current, key);
+            repository.update(key);
+            return false;
+        }
     }
 
-    private void validateAllValues(final Key key) {
-        final List<Value> values = valueRepository.findAll(byKey(key.getId()));
-        validator.validate(key, values);
+    private void validateValuesIfNecessary(final Key current, final Key next) {
+        if (current.getSchema().equals(next.getSchema())) {
+            return;
+        }
+
+        final List<Value> values = valueRepository.findAll(byKey(next.getId()));
+        validator.validate(next, values);
     }
 
 }

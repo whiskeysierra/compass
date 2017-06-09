@@ -5,8 +5,10 @@ import com.google.common.collect.ImmutableMap;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Query;
+import org.jooq.Record;
 import org.jooq.Record2;
 import org.jooq.Row2;
+import org.jooq.SelectConditionStep;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +51,7 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
     }
 
     @Override
-    public boolean create(final Value value) {
+    public void create(final Value value) {
         final Long id = db.insertInto(VALUE)
                 .columns(VALUE.KEY_ID, VALUE.VALUE_)
                 .values(value.getKey(), value.getValue())
@@ -64,12 +66,15 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
                 .collect(toList());
 
         db.batch(queries).execute();
-
-        return true;
     }
 
     @Override
     public Optional<Value> find(final ValueId id) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Optional<Value> lock(final ValueId id) {
         throw new UnsupportedOperationException();
     }
 
@@ -81,15 +86,29 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
     // TODO should we have criteria on this level?
     @Override
     public List<Value> findAll(final ValueCriteria criteria) {
-        return db.select()
-                .from(VALUE)
-                .leftJoin(VALUE_DIMENSION)
-                .on(VALUE.ID.eq(VALUE_DIMENSION.VALUE_ID))
-                .where(toCondition(criteria))
+        return doFindAll(criteria)
                 .fetchGroups(ValueRecord.class, ValueDimensionRecord.class)
                 .entrySet().stream()
                 .map(this::map)
                 .collect(toList());
+    }
+
+    @Override
+    public List<Value> lockAll(final ValueCriteria criteria) {
+        return doFindAll(criteria)
+                .forUpdate().of(VALUE)
+                .fetchGroups(ValueRecord.class, ValueDimensionRecord.class)
+                .entrySet().stream()
+                .map(this::map)
+                .collect(toList());
+    }
+
+    private SelectConditionStep<Record> doFindAll(final ValueCriteria criteria) {
+        return db.select()
+                .from(VALUE)
+                .leftJoin(VALUE_DIMENSION)
+                .on(VALUE.ID.eq(VALUE_DIMENSION.VALUE_ID))
+                .where(toCondition(criteria));
     }
 
     private Condition toCondition(final ValueCriteria criteria) {
@@ -137,14 +156,12 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
     }
 
     @Override
-    public boolean update(final Value value) {
-        final int updates = db.update(VALUE)
+    public void update(final Value value) {
+        db.update(VALUE)
                 .set(VALUE.VALUE_, value.getValue())
                 .where(VALUE.KEY_ID.eq(value.getKey()))
                 .and(exactMatch(value.getDimensions()))
                 .execute();
-
-        return updates > 0;
     }
 
     // TODO replace?
@@ -172,6 +189,7 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
         }
 
         if (deletions == 0) {
+            // TODO not here? needed at all?
             throw new NotFoundException();
         }
     }

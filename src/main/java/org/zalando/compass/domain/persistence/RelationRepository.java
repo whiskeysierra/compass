@@ -21,13 +21,18 @@ public class RelationRepository implements Repository<Relation, String, Void> {
             .collect(toImmutableMap(Relation::getId, identity()));
 
     @Override
-    public boolean create(final Relation relation) {
+    public void create(final Relation relation) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public Optional<Relation> find(final String id) {
         return Optional.ofNullable(map.get(id));
+    }
+
+    @Override
+    public Optional<Relation> lock(final String id) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -41,7 +46,12 @@ public class RelationRepository implements Repository<Relation, String, Void> {
     }
 
     @Override
-    public boolean update(final Relation relation) {
+    public List<Relation> lockAll(final Void criteria) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void update(final Relation relation) {
         throw new UnsupportedOperationException();
     }
 
