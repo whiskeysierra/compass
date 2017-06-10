@@ -1,7 +1,6 @@
 package org.zalando.compass.domain.logic.dimension;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
@@ -18,9 +17,8 @@ class DefaultDimensionService implements DimensionService {
     private final ReadAllDimensions readAll;
     private final DeleteDimension delete;
 
-    // TODO break cyclic dependency with DefaultValueService
     @Autowired
-    DefaultDimensionService(@Lazy final ReplaceDimension replace, final ReadDimension readOne,
+    DefaultDimensionService(final ReplaceDimension replace, final ReadDimension readOne,
             final ReadDimensions readMany, final ReadAllDimensions readAll, final DeleteDimension delete) {
         this.replace = replace;
         this.delete = delete;

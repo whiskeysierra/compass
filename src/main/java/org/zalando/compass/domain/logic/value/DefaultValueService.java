@@ -3,7 +3,6 @@ package org.zalando.compass.domain.logic.value;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ListMultimap;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.zalando.compass.domain.logic.ValueService;
 import org.zalando.compass.domain.model.Value;
@@ -23,9 +22,8 @@ class DefaultValueService implements ValueService {
     private final ReadAllValues readAll;
     private final DeleteValue delete;
 
-    // TODO break cyclic dependency with DefaultDimensionService
     @Autowired
-    DefaultValueService(@Lazy final CreateValue create, final ReadValue readOne,
+    DefaultValueService(final CreateValue create, final ReadValue readOne,
             final ReadValuesByKeyAndFilter readManyByKeyAndFilter, final ReadValuesByKey readManyByKey,
             final ReadValuesByDimension readManyByDimension, final ReadAllValues readAll, final DeleteValue delete) {
         this.create = create;

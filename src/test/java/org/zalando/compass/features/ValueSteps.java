@@ -8,6 +8,7 @@ import org.zuchini.runner.tables.Datatable;
 import org.zuchini.spring.ScenarioScoped;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 import static org.springframework.http.HttpStatus.Series.SUCCESSFUL;
 import static org.zalando.riptide.Bindings.on;
@@ -34,11 +35,12 @@ public class ValueSteps {
 
     @Given("^the following values for key (.+):$")
     public void theFollowingValues(final String key, final Datatable table) throws IOException {
-        mapper.map(table).forEach(value ->
-                rest.post("/keys/{id}/values", key)
-                .body(value)
-                .dispatch(series(),
-                        on(SUCCESSFUL).call(pass())).join());
+        mapper.map(table).stream()
+                .map(value -> rest.post("/keys/{id}/values", key)
+                        .body(value)
+                        .dispatch(series(),
+                                on(SUCCESSFUL).call(pass())))
+                .forEach(CompletableFuture::join);
     }
 
 }

@@ -2,6 +2,7 @@ package org.zalando.compass.domain.logic.value;
 
 import com.google.common.collect.ImmutableSet;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.logic.DimensionService;
@@ -22,12 +23,13 @@ class CreateValue {
     private final DimensionService dimensionService;
     private final KeyService keyService;
 
+    // TODO break cyclic dependencies
     @Autowired
     CreateValue(
             final ValidationService validator,
             final ValueRepository valueRepository,
-            final DimensionService dimensionService,
-            final KeyService keyService) {
+            @Lazy final DimensionService dimensionService,
+            @Lazy final KeyService keyService) {
         this.validator = validator;
         this.valueRepository = valueRepository;
         this.dimensionService = dimensionService;

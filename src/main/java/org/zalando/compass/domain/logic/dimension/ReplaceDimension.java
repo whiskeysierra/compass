@@ -1,6 +1,7 @@
 package org.zalando.compass.domain.logic.dimension;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.logic.RelationService;
@@ -14,8 +15,6 @@ import org.zalando.compass.domain.persistence.NotFoundException;
 import javax.annotation.Nullable;
 import java.util.List;
 
-import static org.zalando.compass.domain.persistence.ValueCriteria.byDimension;
-
 @Component
 class ReplaceDimension {
 
@@ -24,12 +23,13 @@ class ReplaceDimension {
     private final RelationService relationService;
     private final ValueService valueService;
 
+    // TODO break cyclic dependencies
     @Autowired
     ReplaceDimension(
             final ValidationService validator,
             final DimensionRepository repository,
             final RelationService relationService,
-            final ValueService valueService) {
+            @Lazy final ValueService valueService) {
         this.validator = validator;
         this.repository = repository;
         this.relationService = relationService;

@@ -5,6 +5,7 @@ import lombok.Value;
 
 import static lombok.AccessLevel.PRIVATE;
 
+// TODO remove
 @Value
 @AllArgsConstructor(access = PRIVATE)
 public class ValueCriteria {

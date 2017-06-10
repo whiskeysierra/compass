@@ -11,7 +11,7 @@ Feature: Key update
       | id               | schema.type | schema.enum          | description                  |
       | "feature.active" | "string"    | ["mobile","desktop"] | "Lorem ipsum dolor sit amet" |
 
-  Scenario: Updating a key failed due to ID mismatch
+  Scenario: Updating a key failed due to id mismatch
     Given the following keys:
       | id         | schema.type | description |
       | "tax-rate" | "number"    | ".."        |

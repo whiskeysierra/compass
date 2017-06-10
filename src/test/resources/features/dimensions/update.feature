@@ -2,16 +2,16 @@ Feature: Dimension update
 
   Scenario: Updating a dimension
     Given the following dimensions:
-      | id       | schema.type | relation | description |
-      | "device" | "string"    | "="      | ".."        |
-    When "PUT /dimensions/device" returns "200 OK" when requested with:
-      | id       | schema.type | schema.enum          | relation | description                  |
-      | "device" | "string"    | ["mobile","desktop"] | "="      | "Lorem ipsum dolor sit amet" |
-    Then "GET /dimensions/device" returns "200 OK" with:
-      | id       | schema.type | schema.enum          | relation | description                  |
-      | "device" | "string"    | ["mobile","desktop"] | "="      | "Lorem ipsum dolor sit amet" |
+      | id        | schema.type | relation | description |
+      | "version" | "string"    | "="      | ".."        |
+    When "PUT /dimensions/version" returns "200 OK" when requested with:
+      | id        | schema.type | relation | description                  |
+      | "version" | "number"    | ">"      | "Lorem ipsum dolor sit amet" |
+    Then "GET /dimensions/version" returns "200 OK" with:
+      | id        | schema.type | relation | description                  |
+      | "version" | "number"    | ">"      | "Lorem ipsum dolor sit amet" |
 
-  Scenario: Updating a dimension failed due to ID mismatch
+  Scenario: Updating a dimension failed due to id mismatch
     Given the following dimensions:
       | id       | schema.type | relation | description |
       | "device" | "string"    | "="      | ".."        |

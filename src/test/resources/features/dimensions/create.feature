@@ -9,9 +9,16 @@ Feature: Dimension creation
       | id        | schema.type | relation | description                  |
       | "example" | "string"    | "="      | "Lorem ipsum dolor sit amet" |
 
-  # TODO dimension.id is not required
+  Scenario: Creating a new dimension without id property
+    Given "GET /dimensions/example" returns "404 Not Found"
+    When "PUT /dimensions/example" returns "201 Created" when requested with:
+      | schema.type | relation | description                  |
+      | "string"    | "="      | "Lorem ipsum dolor sit amet" |
+    Then "GET /dimensions/example" returns "200 OK" with:
+      | id        | schema.type | relation | description                  |
+      | "example" | "string"    | "="      | "Lorem ipsum dolor sit amet" |
 
-  Scenario: Creating a new dimension failed due to ID mismatch
+  Scenario: Creating a new dimension failed due to id mismatch
     Given there are no dimensions
     When "PUT /dimensions/foo" returns "400 Bad Request" when requested with:
       | id    | schema.type | relation | description                  |

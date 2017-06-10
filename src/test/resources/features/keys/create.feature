@@ -9,7 +9,7 @@ Feature: Key creation
       | id        | schema.type | description                  |
       | "example" | "string"    | "Lorem ipsum dolor sit amet" |
 
-  Scenario: Creating a new key failed due to ID mismatch
+  Scenario: Creating a new key failed due to id mismatch
     Given there are no keys
     When "PUT /keys/foo" returns "400 Bad Request" when requested with:
       | id    | schema.type | description                  |

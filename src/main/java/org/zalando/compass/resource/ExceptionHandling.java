@@ -20,6 +20,7 @@ import static com.google.common.base.Throwables.getRootCause;
 @ControllerAdvice
 class ExceptionHandling implements ProblemHandling, SpringAdviceTrait {
 
+    // TODO why is this needed?
     @ExceptionHandler
     public ResponseEntity<Problem> handleMethodArgumentTypeMismatchException(
             final MethodArgumentTypeMismatchException exception,
