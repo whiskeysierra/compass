@@ -10,7 +10,9 @@ import java.util.Map;
 
 public interface ValueService {
 
-    void create(Value value);
+    boolean replace(Value value);
+
+    void replace(List<Value> values);
 
     Value read(String key, Map<String, JsonNode> filter);
 
@@ -20,7 +22,8 @@ public interface ValueService {
 
     List<Value> readAllByDimension(String dimension);
 
+    void delete(String key, Map<String, JsonNode> filter);
+
     ListMultimap<String, Value> readAllByKeyPattern(@Nullable String keyPattern);
 
-    void delete(String key, Map<String, JsonNode> filter);
 }

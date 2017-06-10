@@ -3,6 +3,7 @@ package org.zalando.compass.domain.logic.key;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.zalando.compass.domain.logic.LockService;
 import org.zalando.compass.domain.logic.ValidationService;
 import org.zalando.compass.domain.logic.ValueService;
 import org.zalando.compass.domain.model.Key;
@@ -18,15 +19,18 @@ class ReplaceKey {
     private final ValidationService validator;
     private final KeyRepository repository;
     private final ValueService valueService;
+    private final LockService lock;
 
     @Autowired
     ReplaceKey(
             final ValidationService validator,
             final KeyRepository repository,
-            final ValueService valueService) {
+            final ValueService valueService,
+            final LockService lock) {
         this.validator = validator;
         this.repository = repository;
         this.valueService = valueService;
+        this.lock = lock;
     }
 
     /**
@@ -44,7 +48,7 @@ class ReplaceKey {
             return true;
         } else {
             // TODO detect changes and validate accordingly
-            // TODO lock values (order by id)
+            lock.onUpdate(key);
 
             validateValuesIfNecessary(current, key);
             repository.update(key);

@@ -5,7 +5,7 @@ Feature: Value creation
       | id         | schema.type | description |
       | "tax-rate" | "number"    | ".."        |
     And "GET /keys/tax-rate/values" returns "200 OK" with an empty list of values
-    When "POST /keys/tax-rate/values" returns "201 Created" when requested with:
+    When "PUT /keys/tax-rate/value" returns "201 Created" when requested with:
       | value |
       | 0.19  |
     Then "GET /keys/tax-rate/values" returns "200 OK" with a list of values:
@@ -17,7 +17,7 @@ Feature: Value creation
       | id         | schema.type | description |
       | "tax-rate" | "number"    | ".."        |
     And "GET /keys/tax-rate/values" returns "200 OK" with an empty list of values
-    When "POST /keys/tax-rate/values" returns "201 Created" when requested with:
+    When "PUT /keys/tax-rate/value" returns "201 Created" when requested with:
       | dimensions | value |
       | {}         | 0.19  |
     Then "GET /keys/tax-rate/values" returns "200 OK" with a list of values:
@@ -32,21 +32,21 @@ Feature: Value creation
     And the following keys:
       | id         | schema.type | description |
       | "tax-rate" | "number"    | ".."        |
-    When "POST /keys/tax-rate/values" when requested with:
-      | dimensions.country | dimensions.before      | value |
-      | "DE"               | "2007-01-01T00:00:00Z" | 0.16  |
+    When "PUT /keys/tax-rate/value?country=DE&before=2007-01-01T00:00:00Z" when requested with:
+      | value |
+      | 0.16  |
     Then "201 Created" was returned with headers:
       | Location                                                                         |
       | http://localhost:8080/keys/tax-rate/value?before=2007-01-01T00:00:00Z&country=DE |
 
-  # TODO verify Location header
+    # TODO verify that dimension in body have to match, if present
 
   Scenario: Creating a new value failed due to schema violation
     Given the following keys:
       | id         | schema.type | description |
       | "tax-rate" | "number"    | ".."        |
     And "GET /keys/tax-rate/values" returns "200 OK" with an empty list of values
-    When "POST /keys/tax-rate/values" when requested with:
+    When "PUT /keys/tax-rate/value" when requested with:
       | value |
       | "19%" |
     Then "400 Bad Request" was returned with a list of violations:

@@ -8,7 +8,7 @@ import org.jooq.Query;
 import org.jooq.Record;
 import org.jooq.Record2;
 import org.jooq.Row2;
-import org.jooq.SelectConditionStep;
+import org.jooq.SelectSeekStep1;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +75,12 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
 
     @Override
     public Optional<Value> lock(final ValueId id) {
-        throw new UnsupportedOperationException();
+        return db.select()
+                .from(VALUE)
+                .where(VALUE.KEY_ID.eq(id.getKey()))
+                .and(exactMatch(id.getDimensions()))
+                .forUpdate()
+                .fetchOptionalInto(Value.class);
     }
 
     @Override
@@ -103,12 +108,13 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
                 .collect(toList());
     }
 
-    private SelectConditionStep<Record> doFindAll(final ValueCriteria criteria) {
+    private SelectSeekStep1<Record, Long> doFindAll(final ValueCriteria criteria) {
         return db.select()
                 .from(VALUE)
                 .leftJoin(VALUE_DIMENSION)
                 .on(VALUE.ID.eq(VALUE_DIMENSION.VALUE_ID))
-                .where(toCondition(criteria));
+                .where(toCondition(criteria))
+                .orderBy(VALUE.ID);
     }
 
     private Condition toCondition(final ValueCriteria criteria) {

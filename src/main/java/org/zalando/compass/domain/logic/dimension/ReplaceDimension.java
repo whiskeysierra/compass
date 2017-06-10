@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.zalando.compass.domain.logic.LockService;
 import org.zalando.compass.domain.logic.RelationService;
 import org.zalando.compass.domain.logic.ValidationService;
 import org.zalando.compass.domain.logic.ValueService;
@@ -22,6 +23,7 @@ class ReplaceDimension {
     private final DimensionRepository repository;
     private final RelationService relationService;
     private final ValueService valueService;
+    private final LockService lock;
 
     // TODO break cyclic dependencies
     @Autowired
@@ -29,11 +31,13 @@ class ReplaceDimension {
             final ValidationService validator,
             final DimensionRepository repository,
             final RelationService relationService,
-            @Lazy final ValueService valueService) {
+            @Lazy final ValueService valueService,
+            final LockService lock) {
         this.validator = validator;
         this.repository = repository;
         this.relationService = relationService;
         this.valueService = valueService;
+        this.lock = lock;
     }
 
     /**
@@ -52,7 +56,7 @@ class ReplaceDimension {
             return true;
         } else {
             // TODO detect changes and validate accordingly
-            // TODO lock values (order by id)
+            lock.onUpdate(dimension);
 
             validateDimensionValuesIfNecessary(current, dimension);
             repository.update(dimension);

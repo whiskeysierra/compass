@@ -1,5 +1,6 @@
 package org.zalando.compass.features;
 
+import com.google.common.collect.ImmutableMap;
 import cucumber.api.java.en.Given;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -8,7 +9,6 @@ import org.zuchini.runner.tables.Datatable;
 import org.zuchini.spring.ScenarioScoped;
 
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
 
 import static org.springframework.http.HttpStatus.Series.SUCCESSFUL;
 import static org.zalando.riptide.Bindings.on;
@@ -35,12 +35,11 @@ public class ValueSteps {
 
     @Given("^the following values for key (.+):$")
     public void theFollowingValues(final String key, final Datatable table) throws IOException {
-        mapper.map(table).stream()
-                .map(value -> rest.post("/keys/{id}/values", key)
-                        .body(value)
+        rest.put("/keys/{id}/values", key)
+                .body(ImmutableMap.of("values", mapper.map(table)))
                         .dispatch(series(),
-                                on(SUCCESSFUL).call(pass())))
-                .forEach(CompletableFuture::join);
+                                on(SUCCESSFUL).call(pass()))
+                .join();
     }
 
 }

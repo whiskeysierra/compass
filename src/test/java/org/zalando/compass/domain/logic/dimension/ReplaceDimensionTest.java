@@ -2,6 +2,7 @@ package org.zalando.compass.domain.logic.dimension;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.Test;
+import org.zalando.compass.domain.logic.LockService;
 import org.zalando.compass.domain.logic.RelationService;
 import org.zalando.compass.domain.logic.ValidationService;
 import org.zalando.compass.domain.logic.ValueService;
@@ -22,9 +23,10 @@ public final class ReplaceDimensionTest {
     private final RelationService relationService = mock(RelationService.class);
     private final DimensionRepository dimensionRepository = mock(DimensionRepository.class);
     private final ValueService valueService = mock(ValueService.class);
+    private final LockService lockService = mock(LockService.class);
 
     private final ReplaceDimension unit = new ReplaceDimension(validator, dimensionRepository, relationService,
-            valueService);
+            valueService, lockService);
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldFailOnUnknownRelation() throws IOException {

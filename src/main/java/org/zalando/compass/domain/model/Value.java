@@ -13,10 +13,14 @@ import static com.google.common.base.MoreObjects.firstNonNull;
 @lombok.Value
 public final class Value {
 
+    // TODO remove and replace with parameter where needed
     @JsonIgnore
     @Wither
     private final String key;
+
+    @Wither
     private final ImmutableMap<String, JsonNode> dimensions;
+
     private final JsonNode value;
 
     @JsonCreator
