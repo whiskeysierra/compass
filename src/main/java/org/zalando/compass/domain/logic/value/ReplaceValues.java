@@ -22,9 +22,9 @@ class ReplaceValues {
 
     // TODO optimize this
     @Transactional
-    public void replace(final List<Value> values) {
-        values.forEach(replace::replace);
-        repository.update(values);
+    public void replace(final String key, final List<Value> values) {
+        values.forEach(value -> replace.replace(key, value));
+        repository.update(key, values);
     }
 
 }

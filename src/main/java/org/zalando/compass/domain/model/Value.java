@@ -1,22 +1,14 @@
 package org.zalando.compass.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
 import lombok.experimental.Wither;
-
-import javax.annotation.Nullable;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 
 @lombok.Value
 public final class Value {
-
-    // TODO remove and replace with parameter where needed
-    @JsonIgnore
-    @Wither
-    private final String key;
 
     @Wither
     private final ImmutableMap<String, JsonNode> dimensions;
@@ -24,20 +16,10 @@ public final class Value {
     private final JsonNode value;
 
     @JsonCreator
-    private Value(final JsonNode value) {
-        this(null, null, value);
-    }
-
-    @JsonCreator
-    private Value(final ImmutableMap<String, JsonNode> dimensions, final JsonNode value) {
-        this(null, dimensions, value);
-    }
-
-    public Value(@Nullable final String key, @Nullable final ImmutableMap<String, JsonNode> dimensions,
-            final JsonNode value) {
-        this.key = key;
+    public Value(final ImmutableMap<String, JsonNode> dimensions, final JsonNode value) {
         this.dimensions = firstNonNull(dimensions, ImmutableMap.of());
         this.value = value;
     }
+
 
 }

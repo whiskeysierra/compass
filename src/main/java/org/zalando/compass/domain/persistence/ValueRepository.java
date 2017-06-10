@@ -52,9 +52,13 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
 
     @Override
     public void create(final Value value) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void create(final String key, final Value value) {
         final Long id = db.insertInto(VALUE)
                 .columns(VALUE.KEY_ID, VALUE.VALUE_)
-                .values(value.getKey(), value.getValue())
+                .values(key, value.getValue())
                 .returning(VALUE.ID)
                 .fetchOne().getId();
 
@@ -135,18 +139,15 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
     private Value map(final Entry<ValueRecord, List<ValueDimensionRecord>> entry) {
         final ValueRecord row = entry.getKey();
 
-        final String key = row.getKeyId();
-
         final List<ValueDimensionRecord> result = entry.getValue();
         final ImmutableMap<String, JsonNode> dimensions = toMap(result);
 
         final JsonNode value = row.getValue();
 
-        return new Value(key, dimensions, value);
+        return new Value(dimensions, value);
     }
 
     private ImmutableMap<String, JsonNode> toMap(final List<ValueDimensionRecord> result) {
-
         if (result.size() == 1) {
             final ValueDimensionRecord record = result.get(0);
 
@@ -163,20 +164,23 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
 
     @Override
     public void update(final Value value) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void update(final String key, final Value value) {
         db.update(VALUE)
                 .set(VALUE.VALUE_, value.getValue())
-                .where(VALUE.KEY_ID.eq(value.getKey()))
+                .where(VALUE.KEY_ID.eq(key))
                 .and(exactMatch(value.getDimensions()))
                 .execute();
     }
 
-    // TODO replace?
-    public boolean update(final List<Value> values) {
+    public boolean update(final String key, final List<Value> values) {
         final List<Query> queries = mapWithIndex(values.stream(), (value, index) ->
                 db.update(VALUE)
                         .set(VALUE.VALUE_, value.getValue())
                         .set(VALUE.INDEX, index)
-                        .where(VALUE.KEY_ID.eq(value.getKey()))
+                        .where(VALUE.KEY_ID.eq(key))
                         .and(exactMatch(value.getDimensions())))
                 .collect(toList());
 

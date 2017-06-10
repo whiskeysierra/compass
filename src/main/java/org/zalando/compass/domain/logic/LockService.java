@@ -38,9 +38,9 @@ public class LockService {
         valueRepository.lockAll(byKey(key.getId()));
     }
 
-    public void onReplace(final Value value) {
+    public void onReplace(final String key, final Value value) {
         dimensionRepository.lockAll(value.getDimensions().keySet());
-        keyRepository.lock(value.getKey());
+        keyRepository.lock(key);
     }
 
 }

@@ -16,6 +16,7 @@ import static com.google.common.collect.Multimaps.index;
 import static org.zalando.compass.domain.persistence.ValueCriteria.byKeyPattern;
 import static org.zalando.compass.domain.persistence.ValueCriteria.withoutCriteria;
 
+// TODO test this
 @Component
 class ReadAllValues {
 
@@ -31,7 +32,8 @@ class ReadAllValues {
         final ValueCriteria criteria = keyPattern == null ? withoutCriteria() : byKeyPattern(keyPattern);
         final List<Value> values = repository.findAll(criteria);
 
-        return ArrayListMultimap.create(index(values, Value::getKey));
+        // TODO return ArrayListMultimap.create(index(values, Value::getKey));
+        throw new UnsupportedOperationException();
     }
 
 }

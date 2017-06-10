@@ -10,9 +10,9 @@ import java.util.Map;
 
 public interface ValueService {
 
-    boolean replace(Value value);
+    boolean replace(String key, Value value);
 
-    void replace(List<Value> values);
+    void replace(String key, List<Value> values);
 
     Value read(String key, Map<String, JsonNode> filter);
 

@@ -38,13 +38,13 @@ class DefaultValueService implements ValueService {
     }
 
     @Override
-    public boolean replace(final Value value) {
-        return replace.replace(value);
+    public boolean replace(final String key, final Value value) {
+        return replace.replace(key, value);
     }
 
     @Override
-    public void replace(final List<Value> values) {
-        replaceMany.replace(values);
+    public void replace(final String key, final List<Value> values) {
+        replaceMany.replace(key, values);
     }
 
     @Override

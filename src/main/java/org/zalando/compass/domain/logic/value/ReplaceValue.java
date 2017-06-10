@@ -43,20 +43,20 @@ class ReplaceValue {
     }
 
     @Transactional
-    public boolean replace(final Value value) {
-        lock.onReplace(value);
+    public boolean replace(final String key, final Value value) {
+        lock.onReplace(key, value);
 
-        final ValueId id = new ValueId(value.getKey(), value.getDimensions());
+        final ValueId id = new ValueId(key, value.getDimensions());
         @Nullable final Value current = repository.lock(id).orElse(null);
 
         validateDimensions(value);
-        validateValue(value);
+        validateValue(key, value);
 
         if (current == null) {
-            repository.create(value);
+            repository.create(key, value);
             return true;
         } else {
-            repository.update(value);
+            repository.update(key, value);
             return false;
         }
     }
@@ -68,8 +68,8 @@ class ReplaceValue {
         validator.validate(dimensions, value);
     }
 
-    private void validateValue(final Value value) {
-        final Key key = keyService.read(value.getKey());
+    private void validateValue(final String keyId, final Value value) {
+        final Key key = keyService.read(keyId);
         validator.validate(key, value);
     }
 

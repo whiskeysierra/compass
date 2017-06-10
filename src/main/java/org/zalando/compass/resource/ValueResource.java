@@ -19,10 +19,8 @@ import org.zalando.compass.domain.model.Value;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -64,11 +62,9 @@ class ValueResource {
 
     @RequestMapping(method = PUT, path = "/keys/{key}/values")
     public ValuePage replaceAll(@PathVariable final String key, @RequestBody final JsonNode node) throws IOException {
-        final List<Value> values = reader.read(node, ValuePage.class).getValues().stream()
-                .map(value -> value.withKey(key))
-                .collect(Collectors.toList());
+        final List<Value> values = reader.read(node, ValuePage.class).getValues();
 
-        service.replace(values);
+        service.replace(key, values);
 
         return new ValuePage(values);
     }
@@ -78,10 +74,10 @@ class ValueResource {
             @RequestBody final JsonNode node) throws IOException {
 
         final ImmutableMap<String, JsonNode> dimensions = factory.create(query);
-        final Value value = reader.read(node, Value.class).withKey(key).withDimensions(dimensions);
+        final Value value = reader.read(node, Value.class).withDimensions(dimensions);
         // TODO final Value value = ensureConsistentDimensions(dimensions, input);
 
-        final boolean created = service.replace(value);
+        final boolean created = service.replace(key, value);
 
         return ResponseEntity
                 .status(created ? CREATED : OK)
