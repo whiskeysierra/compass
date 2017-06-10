@@ -1,6 +1,8 @@
 package org.zalando.compass.resource;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.ImmutableSortedMap;
+import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,8 +17,11 @@ import org.zalando.compass.domain.model.Value;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Map;
 
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -36,10 +41,16 @@ class ValueResource {
         this.service = service;
     }
 
-    @RequestMapping(method = GET, path = "/keys/{id}/value")
-    public Value get(@PathVariable final String id, @RequestParam final Map<String, String> query) throws IOException {
+    @RequestMapping(method = POST, path = "/keys/{key}/values")
+    public ResponseEntity<ValuePage> post(@PathVariable final String key, @RequestParam final Map<String, String> query,
+            @RequestBody final JsonNode node) throws IOException {
         final Map<String, JsonNode> filter = factory.create(query);
-        return service.read(id, filter);
+        final Value value = reader.read(node, Value.class).withKey(key);
+
+        service.create(value);
+
+        final ValuePage page = new ValuePage(service.readAllByKey(key, filter));
+        return ResponseEntity.created(canonicalUrl(key, value)).body(page);
     }
 
     @RequestMapping(method = GET, path = "/keys/{id}/values")
@@ -48,17 +59,12 @@ class ValueResource {
         return new ValuePage(service.readAllByKey(id, filter));
     }
 
-    @RequestMapping(method = POST, path = "/keys/{id}/values")
-    public ResponseEntity<ValuePage> post(@PathVariable final String id, @RequestParam final Map<String, String> query,
-            @RequestBody final JsonNode node) throws IOException {
+    @RequestMapping(method = GET, path = "/keys/{key}/value")
+    public ResponseEntity<Value> get(@PathVariable final String key, @RequestParam final Map<String, String> query) throws IOException {
         final Map<String, JsonNode> filter = factory.create(query);
-        final Value value = reader.read(node, Value.class).withKey(id);
+        final Value value = service.read(key, filter);
 
-        service.create(value);
-
-        final ValuePage page = new ValuePage(service.readAllByKey(id, filter));
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(page);
+        return ResponseEntity.ok().location(canonicalUrl(key, value)).body(value);
     }
 
     @RequestMapping(method = DELETE, path = "/keys/{id}/values")
@@ -71,6 +77,12 @@ class ValueResource {
     @RequestMapping(method = GET, path = "/values")
     public Entries getAll(@RequestParam(name = "q", required = false) @Nullable final String query) throws IOException {
         return new Entries(service.readAllByKeyPattern(query));
+    }
+
+    private URI canonicalUrl(final String key, final Value value) throws IOException {
+        final Map<String, String> dimensions = ImmutableSortedMap.copyOf(
+                Maps.transformValues(value.getDimensions(), JsonNode::asText));
+        return linkTo(methodOn(ValueResource.class).get(key, dimensions)).toUri();
     }
 
 }

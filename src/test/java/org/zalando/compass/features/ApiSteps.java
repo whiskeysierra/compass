@@ -18,6 +18,8 @@ import org.zuchini.spring.ScenarioScoped;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
@@ -33,11 +35,12 @@ import static org.zalando.riptide.Route.call;
 import static org.zalando.riptide.Route.responseEntityOf;
 import static org.zuchini.runner.tables.DatatableMatchers.matchesTable;
 
+// TODO extract common parts into small private methods
 @Component
 @ScenarioScoped
 public class ApiSteps {
 
-    private final ThreadLocal<ResponseEntity<JsonNode>> lastResponse = new ThreadLocal<>();
+    private final ThreadLocal<CompletableFuture<ResponseEntity<JsonNode>>> lastResponse = new ThreadLocal<>();
 
     private final TableMapper mapper;
     private final Rest rest;
@@ -56,6 +59,21 @@ public class ApiSteps {
 
         assertThat(response.getStatusCodeValue(), is(statusCode));
         assertThat(response.getStatusCode().getReasonPhrase(), is(reasonPhrase));
+    }
+
+    @Given("^\"([A-Z]+) ([^ ]*)\" returns \"(\\d+) (.+)\" with headers:$")
+    public void returnsWithHeaders(final HttpMethod method, final String uri, final int statusCode,
+            final String reasonPhrase, final Datatable expected) throws IOException {
+
+        final ResponseEntity<JsonNode> response = request(method, uri);
+
+        assertThat(response.getStatusCodeValue(), is(statusCode));
+        assertThat(response.getStatusCode().getReasonPhrase(), is(reasonPhrase));
+
+        final Map<String, String> headers = response.getHeaders().toSingleValueMap();
+        final Datatable actual = Datatable.fromMaps(singletonList(headers), expected.getHeader());
+
+        assertThat(actual, matchesTable(expected));
     }
 
     @Then("^\"([A-Z]+) ([^ ]*)\" returns \"(\\d+) (.+)\" with:$")
@@ -114,16 +132,14 @@ public class ApiSteps {
     public void whenRequestedWith(final HttpMethod method, final String uri, final Datatable table)
             throws IOException {
 
-        final ResponseEntity<JsonNode> response = request(method, uri, mapper.map(table).get(0));
-
-        lastResponse.set(response);
+        lastResponse.set(requestAsync(method, uri, mapper.map(table).get(0)));
     }
 
     @Then("^\"(\\d+) (.+)\" was returned with a list of (.+):$")
-    public void returnsWithAListOf(final int statusCode, final String reasonPhrase, final String key,
+    public void wasReturnedWithAListOf(final int statusCode, final String reasonPhrase, final String key,
             final Datatable expected) throws IOException {
 
-        final ResponseEntity<JsonNode> response = lastResponse.get();
+        final ResponseEntity<JsonNode> response = lastResponse.get().join();
 
         assertThat(response.getStatusCodeValue(), is(statusCode));
         assertThat(response.getStatusCode().getReasonPhrase(), is(reasonPhrase));
@@ -134,12 +150,33 @@ public class ApiSteps {
         assertThat(actual, matchesTable(expected));
     }
 
+    @Then("^\"(\\d+) (.+)\" was returned with headers:$")
+    public void wasReturnedWithHeaders(final int statusCode, final String reasonPhrase, final Datatable expected) {
+
+        final ResponseEntity<JsonNode> response = lastResponse.get().join();
+
+        assertThat(response.getStatusCodeValue(), is(statusCode));
+        assertThat(response.getStatusCode().getReasonPhrase(), is(reasonPhrase));
+
+        final Map<String, String> headers = response.getHeaders().toSingleValueMap();
+        final Datatable actual = Datatable.fromMaps(singletonList(headers), expected.getHeader());
+
+        assertThat(actual, matchesTable(expected));
+    }
+
     private ResponseEntity<JsonNode> request(final HttpMethod method, final String uri) {
         return request(method, uri, null);
     }
 
     private ResponseEntity<JsonNode> request(final HttpMethod method, final String uri,
             final Object body) {
+
+        return requestAsync(method, uri, body).join();
+    }
+
+    private CompletableFuture<ResponseEntity<JsonNode>> requestAsync(final HttpMethod method, final String uri,
+            final Object body) {
+
         final Capture<ResponseEntity<JsonNode>> capture = Capture.empty();
         final Route route = call(responseEntityOf(JsonNode.class), capture);
 
@@ -150,8 +187,7 @@ public class ApiSteps {
                         anyStatus().dispatch(contentType(),
                                 on(APPLICATION_JSON).call(route),
                                 on(parseMediaType("application/*+json")).call(route)))
-                .thenApply(capture)
-                .join();
+                .thenApply(capture);
     }
 
 }

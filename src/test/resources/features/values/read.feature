@@ -44,7 +44,23 @@ Feature: Reading values
       | value |
       | 0.19  |
 
-  Scenario: Get value with dimension
+  Scenario: Canonical value URL
+    Given the following dimensions:
+      | id        | schema.type | relation | description          |
+      | "country" | "string"    | "="      | "ISO 3166-1 alpha-2" |
+      | "before"  | "string"    | "<"      | "ISO 8601"           |
+    And the following keys:
+      | id         | schema.type | description |
+      | "tax-rate" | "number"    | ".."        |
+    And the following values for key tax-rate:
+      | dimensions.country | dimensions.before      | value |
+      | "DE"               | "2007-01-01T00:00:00Z" | 0.16  |
+      | "DE"               | "2018-01-01T00:00:00Z" | 0.19  |
+    When "GET /keys/tax-rate/value?country=DE&before=2017-06-10T14:03:21Z" returns "200 OK" with headers:
+      | Location                                                                         |
+      | http://localhost:8080/keys/tax-rate/value?before=2018-01-01T00:00:00Z&country=DE |
+
+  Scenario: Get value
     Given the following dimensions:
       | id        | schema.type | relation | description          |
       | "country" | "string"    | "="      | "ISO 3166-1 alpha-2" |
@@ -56,5 +72,5 @@ Feature: Reading values
       | "CH"               | 0.08  |
       | "DE"               | 0.19  |
     When "GET /keys/tax-rate/value?country=DE" returns "200 OK" with:
-      | dimensions.country | value |
-      | "DE"               | 0.19  |
+      | value |
+      | 0.19  |

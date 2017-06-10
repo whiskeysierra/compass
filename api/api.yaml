@@ -202,12 +202,13 @@ paths:
           schema:
             $ref: '#/definitions/Value'
       responses:
-        200:
-          description: OK
-          schema:
-            $ref: '#/definitions/ValuePage'
         201:
           description: Created
+          headers:
+            Location:
+              description: Canonical URL of this value
+              type: string
+              format: uri
           schema:
             $ref: '#/definitions/ValuePage'
     get:
@@ -244,14 +245,21 @@ paths:
         As a general statement: Reading is (or can be) fuzzy, but updates and deletes are not.
       parameters:
         - $ref: '#/parameters/Key'
+        - $ref: '#/parameters/Filter'
         - name: value
           in: body
           required: true
           schema:
             $ref: '#/definitions/Value'
+            # TODO dimensions have to match query string, if present
       responses:
         200:
           description: OK
+          headers:
+            Location:
+              description: Canonical URL of this value
+              type: string
+              format: uri
           schema:
             $ref: '#/definitions/Value'
     get:
@@ -273,6 +281,11 @@ paths:
       responses:
         200:
           description: OK
+          headers:
+            Location:
+              description: Canonical URL of this value
+              type: string
+              format: uri
           schema:
             $ref: '#/definitions/Value'
     delete:
