@@ -65,7 +65,6 @@ public class DimensionRepository implements Repository<Dimension, String, Set<St
 
     @Override
     public List<Dimension> lockAll(final Set<String> dimensions) {
-        // TODO share this with findAll
         if (dimensions.isEmpty()) {
             return Collections.emptyList();
         }

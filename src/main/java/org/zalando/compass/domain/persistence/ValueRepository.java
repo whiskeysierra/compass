@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static com.google.common.collect.MoreCollectors.toOptional;
 import static com.google.common.collect.Streams.mapWithIndex;
 import static java.util.stream.Collectors.toList;
 import static org.jooq.impl.DSL.field;
@@ -50,6 +51,7 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
         this.db = db;
     }
 
+    @Deprecated
     @Override
     public void create(final Value value) {
         throw new UnsupportedOperationException();
@@ -72,6 +74,7 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
         db.batch(queries).execute();
     }
 
+    @Deprecated
     @Override
     public Optional<Value> find(final ValueId id) {
         throw new UnsupportedOperationException();
@@ -81,10 +84,15 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
     public Optional<Value> lock(final ValueId id) {
         return db.select()
                 .from(VALUE)
+                .leftJoin(VALUE_DIMENSION)
+                .on(VALUE.ID.eq(VALUE_DIMENSION.VALUE_ID))
                 .where(VALUE.KEY_ID.eq(id.getKey()))
                 .and(exactMatch(id.getDimensions()))
-                .forUpdate()
-                .fetchOptionalInto(Value.class);
+                .forUpdate().of(VALUE)
+                .fetchGroups(ValueRecord.class, ValueDimensionRecord.class)
+                .entrySet().stream()
+                .map(this::map)
+                .collect(toOptional());
     }
 
     @Override
@@ -162,6 +170,7 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
                 ValueDimensionRecord::getDimensionValue));
     }
 
+    @Deprecated
     @Override
     public void update(final Value value) {
         throw new UnsupportedOperationException();
@@ -193,11 +202,6 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
                 .where(VALUE.KEY_ID.eq(id.getKey()))
                 .and(exactMatch(id.getDimensions()))
                 .execute();
-
-        if (deletions > 1) {
-            // TODO needed?
-            throw new AssertionError("Expected at most 1 value to be deleted, but matched " + deletions);
-        }
 
         return deletions == 1;
     }

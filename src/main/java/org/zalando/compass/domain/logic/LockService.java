@@ -12,7 +12,6 @@ import org.zalando.compass.domain.persistence.ValueRepository;
 import static org.zalando.compass.domain.persistence.ValueCriteria.byDimension;
 import static org.zalando.compass.domain.persistence.ValueCriteria.byKey;
 
-// TODO think about which version of the entity we need to look at, the current or the next?
 @Component
 public class LockService {
 

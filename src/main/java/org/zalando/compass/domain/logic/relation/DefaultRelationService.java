@@ -19,7 +19,7 @@ import static java.util.function.Function.identity;
 @Component
 class DefaultRelationService implements RelationService {
 
-    private final ImmutableList<Relation> list = sortedCopyOf(comparing(Relation::getTitle), load(Relation.class));
+    private final ImmutableList<Relation> list = sortedCopyOf(comparing(Relation::getId), load(Relation.class));
 
     private final ImmutableMap<String, Relation> map = list.stream()
             .collect(toImmutableMap(Relation::getId, identity()));

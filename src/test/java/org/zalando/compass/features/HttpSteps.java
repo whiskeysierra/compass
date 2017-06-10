@@ -1,6 +1,7 @@
 package org.zalando.compass.features;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.ImmutableMap;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
@@ -35,10 +36,9 @@ import static org.zalando.riptide.Route.call;
 import static org.zalando.riptide.Route.responseEntityOf;
 import static org.zuchini.runner.tables.DatatableMatchers.matchesTable;
 
-// TODO extract common parts into small private methods
 @Component
 @ScenarioScoped
-public class ApiSteps {
+public class HttpSteps {
 
     private final ThreadLocal<CompletableFuture<ResponseEntity<JsonNode>>> lastResponse = new ThreadLocal<>();
 
@@ -46,7 +46,7 @@ public class ApiSteps {
     private final Rest rest;
 
     @Autowired
-    public ApiSteps(final TableMapper mapper, final Rest rest) {
+    public HttpSteps(final TableMapper mapper, final Rest rest) {
         this.mapper = mapper;
         this.rest = rest;
     }
@@ -55,10 +55,7 @@ public class ApiSteps {
     public void returns(final HttpMethod method, final String uri, final int statusCode, final String reasonPhrase)
             throws IOException {
 
-        final ResponseEntity<JsonNode> response = request(method, uri);
-
-        assertThat(response.getStatusCodeValue(), is(statusCode));
-        assertThat(response.getStatusCode().getReasonPhrase(), is(reasonPhrase));
+        verifyStatus(request(method, uri), statusCode, reasonPhrase);
     }
 
     @Given("^\"([A-Z]+) ([^ ]*)\" returns \"(\\d+) (.+)\" with headers:$")
@@ -66,43 +63,29 @@ public class ApiSteps {
             final String reasonPhrase, final Datatable expected) throws IOException {
 
         final ResponseEntity<JsonNode> response = request(method, uri);
+        verifyStatus(response, statusCode, reasonPhrase);
 
-        assertThat(response.getStatusCodeValue(), is(statusCode));
-        assertThat(response.getStatusCode().getReasonPhrase(), is(reasonPhrase));
-
-        final Map<String, String> headers = response.getHeaders().toSingleValueMap();
-        final Datatable actual = Datatable.fromMaps(singletonList(headers), expected.getHeader());
-
+        final Datatable actual = renderHeaders(response, expected);
         assertThat(actual, matchesTable(expected));
     }
 
     @Then("^\"([A-Z]+) ([^ ]*)\" returns \"(\\d+) (.+)\" with:$")
-    public void returnsWith(final HttpMethod method, final String uri, final int statusCode, final String reasonPhrase, 
+    public void returnsWith(final HttpMethod method, final String uri, final int statusCode, final String reasonPhrase,
             final Datatable expected) throws IOException {
         final ResponseEntity<JsonNode> response = request(method, uri);
+        verifyStatus(response, statusCode, reasonPhrase);
 
-        assertThat(response.getStatusCodeValue(), is(statusCode));
-        assertThat(response.getStatusCode().getReasonPhrase(), is(reasonPhrase));
-        
-        final JsonNode body = response.getBody();
-        final List<String> headers = expected.getHeader();
-        final Datatable actual = mapper.map(singletonList(body), headers);
-
+        final Datatable actual = renderBody(response, expected);
         assertThat(actual, matchesTable(expected));
     }
 
     @Then("^\"([A-Z]+) ([^ ]*)\" returns \"(\\d+) (.+)\" with a list of (.+):$")
-    public void returnWithAListOf(final HttpMethod method, final String uri, final int statusCode, 
+    public void returnWithAListOf(final HttpMethod method, final String uri, final int statusCode,
             final String reasonPhrase, final String key, final Datatable expected) throws IOException {
         final ResponseEntity<JsonNode> response = request(method, uri);
+        verifyStatus(response, statusCode, reasonPhrase);
 
-        assertThat(response.getStatusCodeValue(), is(statusCode));
-        assertThat(response.getStatusCode().getReasonPhrase(), is(reasonPhrase));
-        
-        final JsonNode body = response.getBody();
-        final ArrayList<JsonNode> nodes = newArrayList(body.get(key));
-        final Datatable actual = mapper.map(nodes, expected.getHeader());
-
+        final Datatable actual = renderList(response, key, expected);
         assertThat(actual, matchesTable(expected));
     }
 
@@ -111,9 +94,8 @@ public class ApiSteps {
             final String reasonPhrase, final String key) {
         final ResponseEntity<JsonNode> response = request(method, uri);
 
-        assertThat(response.getStatusCodeValue(), is(statusCode));
-        assertThat(response.getStatusCode().getReasonPhrase(), is(reasonPhrase));
-        
+        verifyStatus(response, statusCode, reasonPhrase);
+
         final JsonNode list = response.getBody().get(key);
         assertThat(list.size(), is(0));
     }
@@ -124,8 +106,16 @@ public class ApiSteps {
 
         final ResponseEntity<JsonNode> response = request(method, uri, mapper.map(table).get(0));
 
-        assertThat(response.getStatusCodeValue(), is(statusCode));
-        assertThat(response.getStatusCode().getReasonPhrase(), is(reasonPhrase));
+        verifyStatus(response, statusCode, reasonPhrase);
+    }
+
+    @When("^\"([A-Z]+) ([^ ]*)\" returns \"(\\d+) (.+)\" when requested with a list of (.+):$")
+    public void returnsWhenRequestedWithAListOf(final HttpMethod method, final String uri, final int statusCode,
+            final String reasonPhrase, final String key, final Datatable table) throws IOException {
+
+        final ResponseEntity<JsonNode> response = request(method, uri, ImmutableMap.of(key, mapper.map(table)));
+
+        verifyStatus(response, statusCode, reasonPhrase);
     }
 
     @When("^\"([A-Z]+) ([^ ]*)\" when requested with:$")
@@ -135,31 +125,42 @@ public class ApiSteps {
         lastResponse.set(requestAsync(method, uri, mapper.map(table).get(0)));
     }
 
+    @When("^\"([A-Z]+) ([^ ]*)\" when requested with a list of (.+):$")
+    public void whenRequestedWithAListOf(final HttpMethod method, final String uri, final String key,
+            final Datatable table) throws IOException {
+
+        lastResponse.set(requestAsync(method, uri, ImmutableMap.of(key, mapper.map(table))));
+    }
+
     @Then("^\"(\\d+) (.+)\" was returned with a list of (.+):$")
     public void wasReturnedWithAListOf(final int statusCode, final String reasonPhrase, final String key,
             final Datatable expected) throws IOException {
 
         final ResponseEntity<JsonNode> response = lastResponse.get().join();
+        verifyStatus(response, statusCode, reasonPhrase);
 
-        assertThat(response.getStatusCodeValue(), is(statusCode));
-        assertThat(response.getStatusCode().getReasonPhrase(), is(reasonPhrase));
+        final Datatable actual = renderList(response, key, expected);
+        assertThat(actual, matchesTable(expected));
+    }
 
-        final ArrayList<JsonNode> nodes = newArrayList(response.getBody().get(key));
-        final Datatable actual = mapper.map(nodes, expected.getHeader());
+    @Then("^\"(\\d+) (.+)\" was returned with:$")
+    public void wasReturnedWit(final int statusCode, final String reasonPhrase, final Datatable expected) throws IOException {
+        final ResponseEntity<JsonNode> response = lastResponse.get().join();
+
+        verifyStatus(response, statusCode, reasonPhrase);
+
+        final Datatable actual = renderBody(response, expected);
 
         assertThat(actual, matchesTable(expected));
     }
 
     @Then("^\"(\\d+) (.+)\" was returned with headers:$")
     public void wasReturnedWithHeaders(final int statusCode, final String reasonPhrase, final Datatable expected) {
-
         final ResponseEntity<JsonNode> response = lastResponse.get().join();
 
-        assertThat(response.getStatusCodeValue(), is(statusCode));
-        assertThat(response.getStatusCode().getReasonPhrase(), is(reasonPhrase));
+        verifyStatus(response, statusCode, reasonPhrase);
 
-        final Map<String, String> headers = response.getHeaders().toSingleValueMap();
-        final Datatable actual = Datatable.fromMaps(singletonList(headers), expected.getHeader());
+        final Datatable actual = renderHeaders(response, expected);
 
         assertThat(actual, matchesTable(expected));
     }
@@ -188,6 +189,28 @@ public class ApiSteps {
                                 on(APPLICATION_JSON).call(route),
                                 on(parseMediaType("application/*+json")).call(route)))
                 .thenApply(capture);
+    }
+
+    private void verifyStatus(final ResponseEntity<JsonNode> response, final int statusCode, final String reasonPhrase) {
+        assertThat(response.getStatusCodeValue(), is(statusCode));
+        assertThat(response.getStatusCode().getReasonPhrase(), is(reasonPhrase));
+    }
+
+    private Datatable renderHeaders(final ResponseEntity<JsonNode> response, final Datatable expected) {
+        final Map<String, String> headers = response.getHeaders().toSingleValueMap();
+        return Datatable.fromMaps(singletonList(headers), expected.getHeader());
+    }
+
+    private Datatable renderBody(final ResponseEntity<JsonNode> response, final Datatable expected) throws IOException {
+        final JsonNode body = response.getBody();
+        final List<String> headers = expected.getHeader();
+        return mapper.map(singletonList(body), headers);
+    }
+
+    private Datatable renderList(final ResponseEntity<JsonNode> response, final String key, final Datatable expected) throws IOException {
+        final JsonNode body = response.getBody();
+        final ArrayList<JsonNode> nodes = newArrayList(body.get(key));
+        return mapper.map(nodes, expected.getHeader());
     }
 
 }

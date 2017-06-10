@@ -60,7 +60,7 @@ public class JsonSchemaValidator {
 
     private static ThrowableProblem newProblem(final Set<ValidationMessage> messages) {
         final List<Violation> violations = messages.stream()
-                .sorted(comparing(ValidationMessage::getMessage)) // needed for testing, TODO by path + message?
+                .sorted(comparing(ValidationMessage::getPath).thenComparing(ValidationMessage::getMessage))
                 .map(message -> new Violation(message.getPath(), message.getMessage()))
                 .collect(toList());
 

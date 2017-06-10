@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.logic.KeyService;
@@ -42,7 +43,7 @@ class ReplaceValue {
         this.lock = lock;
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.SUPPORTS)
     public boolean replace(final String key, final Value value) {
         lock.onReplace(key, value);
 

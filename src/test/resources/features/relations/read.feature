@@ -3,11 +3,11 @@ Feature: Relations
   Scenario: List relations
     When "GET /relations" returns "200 OK" with a list of relations:
       | id   | title                   |
+      | "<"  | "Less than"             |
+      | "<=" | "Less than or equal"    |
       | "="  | "Equality"              |
       | ">"  | "Greater than"          |
       | ">=" | "Greater than or equal" |
-      | "<"  | "Less than"             |
-      | "<=" | "Less than or equal"    |
       | "^"  | "Prefix match"          |
       | "~"  | "Regular expression"    |
 
