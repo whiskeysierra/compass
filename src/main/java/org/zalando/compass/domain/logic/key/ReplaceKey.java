@@ -4,31 +4,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.logic.ValidationService;
+import org.zalando.compass.domain.logic.ValueService;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.KeyRepository;
-import org.zalando.compass.domain.persistence.ValueRepository;
 
 import javax.annotation.Nullable;
 import java.util.List;
-
-import static org.zalando.compass.domain.persistence.ValueCriteria.byKey;
 
 @Component
 class ReplaceKey {
 
     private final ValidationService validator;
     private final KeyRepository repository;
-    private final ValueRepository valueRepository;
+    private final ValueService valueService;
 
     @Autowired
     ReplaceKey(
             final ValidationService validator,
             final KeyRepository repository,
-            final ValueRepository valueRepository) {
+            final ValueService valueService) {
         this.validator = validator;
         this.repository = repository;
-        this.valueRepository = valueRepository;
+        this.valueService = valueService;
     }
 
     /**
@@ -59,7 +57,7 @@ class ReplaceKey {
             return;
         }
 
-        final List<Value> values = valueRepository.findAll(byKey(next.getId()));
+        final List<Value> values = valueService.readAllByKey(next.getId());
         validator.validate(next, values);
     }
 

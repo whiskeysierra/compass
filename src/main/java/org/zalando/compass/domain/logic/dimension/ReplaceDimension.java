@@ -3,17 +3,17 @@ package org.zalando.compass.domain.logic.dimension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.zalando.compass.domain.logic.RelationService;
 import org.zalando.compass.domain.logic.ValidationService;
+import org.zalando.compass.domain.logic.ValueService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.DimensionRepository;
-import org.zalando.compass.domain.persistence.RelationRepository;
-import org.zalando.compass.domain.persistence.ValueRepository;
+import org.zalando.compass.domain.persistence.NotFoundException;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.zalando.compass.domain.persistence.ValueCriteria.byDimension;
 
 @Component
@@ -21,21 +21,19 @@ class ReplaceDimension {
 
     private final ValidationService validator;
     private final DimensionRepository repository;
-
-    // TODO don't use other repos here?
-    private final RelationRepository relationRepository;
-    private final ValueRepository valueRepository;
+    private final RelationService relationService;
+    private final ValueService valueService;
 
     @Autowired
     ReplaceDimension(
             final ValidationService validator,
             final DimensionRepository repository,
-            final RelationRepository relationRepository,
-            final ValueRepository valueRepository) {
+            final RelationService relationService,
+            final ValueService valueService) {
         this.validator = validator;
         this.repository = repository;
-        this.relationRepository = relationRepository;
-        this.valueRepository = valueRepository;
+        this.relationService = relationService;
+        this.valueService = valueService;
     }
 
     /**
@@ -50,7 +48,6 @@ class ReplaceDimension {
         @Nullable final Dimension current = repository.lock(dimension.getId()).orElse(null);
 
         if (current == null) {
-            // TODO verify dimension id is not a reserved keyword
             repository.create(dimension);
             return true;
         } else {
@@ -64,9 +61,12 @@ class ReplaceDimension {
     }
 
     private void verifyRelationExists(final Dimension dimension) {
-        // TODO 400 Bad Request
-        checkArgument(relationRepository.exists(dimension.getRelation()),
-                "Unknown relation '%s'", dimension.getRelation());
+        // TODO should result in 400 Bad Request
+        try {
+            relationService.read(dimension.getRelation());
+        } catch (final NotFoundException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     private void validateDimensionValuesIfNecessary(final Dimension current, final Dimension next) {
@@ -74,7 +74,7 @@ class ReplaceDimension {
             return;
         }
 
-        final List<Value> values = valueRepository.findAll(byDimension(current.getId()));
+        final List<Value> values = valueService.readAllByDimension(current.getId());
         validator.validate(next, values);
     }
 

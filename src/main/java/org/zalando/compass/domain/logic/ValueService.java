@@ -16,8 +16,11 @@ public interface ValueService {
 
     List<Value> readAllByKey(String key, Map<String, JsonNode> filter);
 
+    List<Value> readAllByKey(String key);
+
+    List<Value> readAllByDimension(String dimension);
+
     ListMultimap<String, Value> readAllByKeyPattern(@Nullable String keyPattern);
 
     void delete(String key, Map<String, JsonNode> filter);
-
 }

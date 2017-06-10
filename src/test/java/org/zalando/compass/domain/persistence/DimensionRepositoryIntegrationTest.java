@@ -24,9 +24,10 @@ import static java.util.Optional.empty;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
-import static org.zalando.compass.domain.persistence.DimensionCriteria.dimensions;
 
+// TODO migrate to scenarios
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Component
@@ -49,7 +50,7 @@ public class DimensionRepositoryIntegrationTest {
     public void shouldCreate() throws IOException {
         create();
 
-        assertThat(unit.exists("country"), is(true));
+        assertThat(unit.find("country"), is(not(empty())));
     }
 
     @Test(expected = DuplicateKeyException.class)
@@ -65,7 +66,7 @@ public class DimensionRepositoryIntegrationTest {
         unit.update(new Dimension("country", new ObjectNode(instance).put("type", "integer"),
                 "=", "Country ID"));
 
-        final Dimension dimension = unit.read("country");
+        final Dimension dimension = unit.find("country").orElseThrow(AssertionError::new);
 
         assertThat(dimension.getSchema().get("type").asText(), is("integer"));
         assertThat(dimension.getDescription(), is("Country ID"));
@@ -75,7 +76,7 @@ public class DimensionRepositoryIntegrationTest {
     public void shouldRead() throws IOException {
         create();
 
-        final Dimension dimension = unit.read("country");
+        final Dimension dimension = unit.find("country").orElseThrow(AssertionError::new);
 
         assertThat(dimension.getId(), is("country"));
         assertThat(dimension.getSchema().size(), is(1));
@@ -86,7 +87,7 @@ public class DimensionRepositoryIntegrationTest {
 
     @Test
     public void shouldNotRead() throws IOException {
-        assertThat(unit.findAll(dimensions(emptySet())), is(emptyList()));
+        assertThat(unit.findAll(emptySet()), is(emptyList()));
     }
 
     @Test
@@ -109,7 +110,7 @@ public class DimensionRepositoryIntegrationTest {
         create(newSalesChannel());
         create(newLocale());
 
-        final List<Dimension> dimensions = unit.findAll(dimensions(newHashSet("country", "sales-channel")));
+        final List<Dimension> dimensions = unit.findAll(newHashSet("country", "sales-channel"));
         assertThat(dimensions.stream().map(Dimension::getId).collect(toList()), contains("country", "sales-channel"));
     }
 

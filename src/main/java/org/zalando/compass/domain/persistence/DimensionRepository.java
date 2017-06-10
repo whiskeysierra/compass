@@ -16,7 +16,7 @@ import java.util.Set;
 import static org.zalando.compass.domain.persistence.model.Tables.DIMENSION;
 
 @Component
-public class DimensionRepository implements Repository<Dimension, String, DimensionCriteria> {
+public class DimensionRepository implements Repository<Dimension, String, Set<String>> {
 
     private final DSLContext db;
 
@@ -54,9 +54,7 @@ public class DimensionRepository implements Repository<Dimension, String, Dimens
     }
 
     @Override
-    public List<Dimension> findAll(final DimensionCriteria criteria) {
-        final Set<String> dimensions = criteria.getDimensions();
-
+    public List<Dimension> findAll(final Set<String> dimensions) {
         if (dimensions.isEmpty()) {
             return Collections.emptyList();
         }
@@ -66,9 +64,7 @@ public class DimensionRepository implements Repository<Dimension, String, Dimens
     }
 
     @Override
-    public List<Dimension> lockAll(final DimensionCriteria criteria) {
-        final Set<String> dimensions = criteria.getDimensions();
-
+    public List<Dimension> lockAll(final Set<String> dimensions) {
         // TODO share this with findAll
         if (dimensions.isEmpty()) {
             return Collections.emptyList();
@@ -105,15 +101,12 @@ public class DimensionRepository implements Repository<Dimension, String, Dimens
     }
 
     @Override
-    public void delete(final String id) {
+    public boolean delete(final String id) {
         final int deletes = db.deleteFrom(DIMENSION)
                 .where(DIMENSION.ID.eq(id))
                 .execute();
 
-        if (deletes == 0) {
-            // TODO not here? needed at all?
-            throw new NotFoundException();
-        }
+        return deletes == 1;
     }
 
 }

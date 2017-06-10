@@ -3,6 +3,7 @@ package org.zalando.compass.domain.logic.relation;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.zalando.compass.domain.model.Relation;
 
+// TODO can this be package private?
 public final class Equality implements Relation {
 
     @Override

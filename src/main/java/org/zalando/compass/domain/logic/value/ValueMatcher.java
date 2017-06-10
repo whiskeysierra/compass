@@ -3,11 +3,11 @@ package org.zalando.compass.domain.logic.value;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.zalando.compass.domain.logic.DimensionService;
+import org.zalando.compass.domain.logic.RelationService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Relation;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.domain.persistence.DimensionRepository;
-import org.zalando.compass.domain.persistence.RelationRepository;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -19,21 +19,21 @@ import java.util.function.Predicate;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static org.zalando.compass.domain.persistence.DimensionCriteria.dimensions;
 
+// TODO introduce "RichValue", "RichDimension" that reference each other + concrete relation rather than IDs everywhere
 // TODO test in isolation?!
 @Service
 class ValueMatcher {
 
-    private final DimensionRepository dimensionRepository;
-    private final RelationRepository relationRepository;
+    private final DimensionService dimensionService;
+    private final RelationService relationService;
 
     @Autowired
     ValueMatcher(
-            final DimensionRepository dimensionRepository,
-            final RelationRepository relationRepository) {
-        this.dimensionRepository = dimensionRepository;
-        this.relationRepository = relationRepository;
+            final DimensionService dimensionService,
+            final RelationService relationService) {
+        this.dimensionService = dimensionService;
+        this.relationService = relationService;
     }
 
     List<Value> match(final List<Value> values, final Map<String, JsonNode> filter) {
@@ -65,12 +65,12 @@ class ValueMatcher {
                 .flatMap(value -> value.getDimensions().keySet().stream())
                 .collect(toSet());
 
-        return dimensionRepository.findAll(dimensions(used));
+        return dimensionService.readAll(used);
     }
 
     private Collection<Matcher> correlateWithRelations(final Collection<Dimension> dimensions) {
         return dimensions.stream()
-                .map(dimension -> new Matcher(dimension.getId(), relationRepository.read(dimension.getRelation())))
+                .map(dimension -> new Matcher(dimension.getId(), relationService.read(dimension.getRelation())))
                 .collect(toList());
     }
 

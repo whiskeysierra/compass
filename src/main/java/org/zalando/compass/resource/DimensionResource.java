@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
-import org.zalando.compass.domain.persistence.DimensionRepository;
 
 import javax.validation.Valid;
 import java.io.IOException;
@@ -33,16 +32,14 @@ class DimensionResource {
     // TODO can we move this somewhere inside spring? a filter maybe?
     private final JsonReader reader;
     private final DimensionService service;
-    private final DimensionRepository repository;
 
     @Autowired
-    public DimensionResource(final JsonReader reader, final DimensionService service,
-            final DimensionRepository repository) {
+    public DimensionResource(final JsonReader reader, final DimensionService service) {
         this.reader = reader;
         this.service = service;
-        this.repository = repository;
     }
 
+    // TODO even though the requirement for reserved keywords is motivated by the API layer, does it really belong here?
     @RequestMapping(method = PUT, path = "/{id}")
     public ResponseEntity<Dimension> replace(@PathVariable @NotReserved @Valid final String id,
             @RequestBody final JsonNode node) throws IOException {
@@ -63,12 +60,12 @@ class DimensionResource {
 
     @RequestMapping(method = GET, path = "/{id}")
     public Dimension get(@PathVariable final String id) throws IOException {
-        return repository.read(id);
+        return service.read(id);
     }
 
     @RequestMapping(method = GET)
     public DimensionPage getAll() {
-        return new DimensionPage(repository.findAll());
+        return new DimensionPage(service.readAll());
     }
 
     @RequestMapping(method = DELETE, path = "/{id}")

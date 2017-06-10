@@ -6,20 +6,25 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.collect.ImmutableList;
 import org.junit.Before;
 import org.junit.Test;
+import org.zalando.compass.domain.logic.DimensionService;
+import org.zalando.compass.domain.logic.RelationService;
 import org.zalando.compass.domain.model.Dimension;
+import org.zalando.compass.domain.model.Relation;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.domain.persistence.DimensionRepository;
-import org.zalando.compass.domain.persistence.RelationRepository;
 import org.zalando.compass.library.Schema;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static java.util.Arrays.asList;
+import static java.util.ServiceLoader.load;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.StreamSupport.stream;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -27,7 +32,8 @@ import static org.mockito.Mockito.when;
 
 public class ValueMatcherTest {
 
-    private final DimensionRepository dimensionRepository = mock(DimensionRepository.class);
+    private final DimensionService dimensionService = mock(DimensionService.class);
+    private final RelationService relationService = mock(RelationService.class);
     
     private final List<Value> values = ImmutableList.of(
             new Value("tax-rate", of("country", text("CH"), "before", text("2014-01-01T00:00:00Z")), decimal(0.05)),
@@ -48,17 +54,23 @@ public class ValueMatcherTest {
             new Value("tax-rate", of(), decimal(0.25))
     );
 
-    private final ValueMatcher unit = new ValueMatcher(dimensionRepository, new RelationRepository());
+    private final ValueMatcher unit = new ValueMatcher(dimensionService, relationService);
 
     @Before
     public void defaultBehaviour() {
-        when(dimensionRepository.findAll(any())).thenReturn(asList(
+        when(dimensionService.readAll(any())).thenReturn(asList(
                 new Dimension("after", Schema.stringSchema(), ">=", ""),
                 new Dimension("before", Schema.stringSchema(), "<=", ""),
                 new Dimension("country", Schema.stringSchema(), "=", ""),
                 new Dimension("postal-code", Schema.stringSchema(), "=", ""),
                 new Dimension("locale", Schema.stringSchema(), "^", ""),
                 new Dimension("email", Schema.stringSchema(), "~", "")));
+
+        final Map<String, Relation> relations = stream(load(Relation.class).spliterator(), false)
+                .collect(toMap(Relation::getId, identity()));
+
+        when(relationService.read(any())).thenAnswer(invocation ->
+                relations.get(invocation.<String>getArgument(0)));
     }
 
     @Test

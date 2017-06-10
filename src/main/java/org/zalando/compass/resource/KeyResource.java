@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.KeyService;
 import org.zalando.compass.domain.model.Key;
-import org.zalando.compass.domain.persistence.KeyRepository;
 
 import java.io.IOException;
 
@@ -29,23 +28,21 @@ class KeyResource {
 
     private final JsonReader reader;
     private final KeyService service;
-    private final KeyRepository repository;
 
     @Autowired
-    public KeyResource(final JsonReader reader, final KeyService service, final KeyRepository repository) {
+    public KeyResource(final JsonReader reader, final KeyService service) {
         this.reader = reader;
         this.service = service;
-        this.repository = repository;
     }
 
     @RequestMapping(method = GET)
     public KeyPage getAll() {
-        return new KeyPage(repository.findAll());
+        return new KeyPage(service.readAll());
     }
 
     @RequestMapping(method = GET, path = "/{id}")
     public Key get(@PathVariable final String id) throws IOException {
-        return repository.read(id);
+        return service.read(id);
     }
 
     @RequestMapping(method = PUT, path = "/{id}")

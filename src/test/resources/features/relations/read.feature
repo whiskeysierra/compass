@@ -8,8 +8,8 @@ Feature: Relations
       | ">=" | "Greater than or equal" |
       | "<"  | "Less than"             |
       | "<=" | "Less than or equal"    |
-      | "~"  | "Regular expression"    |
       | "^"  | "Prefix match"          |
+      | "~"  | "Regular expression"    |
 
   Scenario: Get relation
     When "GET /relations/=" returns "200 OK" with:

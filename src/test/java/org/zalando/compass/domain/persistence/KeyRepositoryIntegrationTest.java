@@ -14,19 +14,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.model.Key;
 
 import java.io.IOException;
-import java.util.List;
 
 import static com.fasterxml.jackson.databind.node.JsonNodeFactory.instance;
-import static com.google.common.collect.Sets.newHashSet;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptySet;
 import static java.util.Optional.empty;
-import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
-import static org.zalando.compass.domain.persistence.KeyCriteria.keys;
 
+// TODO migrate to scenarios
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Component
@@ -49,7 +45,7 @@ public class KeyRepositoryIntegrationTest {
     public void shouldCreate() throws IOException {
         create();
 
-        assertThat(unit.exists("country"), is(true));
+        assertThat(unit.find("country"), is(not(empty())));
     }
 
     @Test(expected = DuplicateKeyException.class)
@@ -65,7 +61,7 @@ public class KeyRepositoryIntegrationTest {
         unit.update(new Key("country", new ObjectNode(instance).put("type", "integer"),
                 "Country ID"));
 
-        final Key key = unit.read("country");
+        final Key key = unit.find("country").orElseThrow(AssertionError::new);
 
         assertThat(key.getSchema().get("type").asText(), is("integer"));
         assertThat(key.getDescription(), is("Country ID"));
@@ -75,17 +71,12 @@ public class KeyRepositoryIntegrationTest {
     public void shouldRead() throws IOException {
         create();
 
-        final Key key = unit.read("country");
+        final Key key = unit.find("country").orElseThrow(AssertionError::new);
 
         assertThat(key.getId(), is("country"));
         assertThat(key.getSchema().size(), is(1));
         assertThat(key.getSchema().get("type").asText(), is("string"));
         assertThat(key.getDescription(), is("ISO 3166-1 alpha-2 country code"));
-    }
-
-    @Test
-    public void shouldNotRead() throws IOException {
-        assertThat(unit.findAll(keys(emptySet())), is(emptyList()));
     }
 
     @Test
@@ -95,16 +86,6 @@ public class KeyRepositoryIntegrationTest {
         create(newLocale());
 
         assertThat(unit.findAll(), contains(newCountry(), newLocale(), newSalesChannel()));
-    }
-
-    @Test
-    public void shouldFindTwoOutOfThree() throws IOException {
-        create(newCountry());
-        create(newSalesChannel());
-        create(newLocale());
-
-        final List<Key> keys = unit.findAll(keys(newHashSet("country", "sales-channel")));
-        assertThat(keys.stream().map(Key::getId).collect(toList()), contains("country", "sales-channel"));
     }
 
     @Test

@@ -3,6 +3,7 @@ package org.zalando.compass.domain.logic.value;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ListMultimap;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.zalando.compass.domain.logic.ValueService;
 import org.zalando.compass.domain.model.Value;
@@ -16,17 +17,22 @@ class DefaultValueService implements ValueService {
 
     private final CreateValue create;
     private final ReadValue readOne;
-    private final ReadValues readMany;
+    private final ReadValuesByKeyAndFilter readManyByKeyAndFilter;
+    private final ReadValuesByKey readManyByKey;
+    private final ReadValuesByDimension readManyByDimension;
     private final ReadAllValues readAll;
     private final DeleteValue delete;
 
+    // TODO break cyclic dependency with DefaultDimensionService
     @Autowired
-    DefaultValueService(final CreateValue create, final ReadValue readOne,
-            final ReadValues readMany, final ReadAllValues readAll,
-            final DeleteValue delete) {
+    DefaultValueService(@Lazy final CreateValue create, final ReadValue readOne,
+            final ReadValuesByKeyAndFilter readManyByKeyAndFilter, final ReadValuesByKey readManyByKey,
+            final ReadValuesByDimension readManyByDimension, final ReadAllValues readAll, final DeleteValue delete) {
         this.create = create;
         this.readOne = readOne;
-        this.readMany = readMany;
+        this.readManyByKeyAndFilter = readManyByKeyAndFilter;
+        this.readManyByKey = readManyByKey;
+        this.readManyByDimension = readManyByDimension;
         this.readAll = readAll;
         this.delete = delete;
     }
@@ -45,7 +51,17 @@ class DefaultValueService implements ValueService {
 
     @Override
     public List<Value> readAllByKey(final String key, final Map<String, JsonNode> filter) {
-        return readMany.read(key, filter);
+        return readManyByKeyAndFilter.read(key, filter);
+    }
+
+    @Override
+    public List<Value> readAllByKey(final String key) {
+        return readManyByKey.read(key);
+    }
+
+    @Override
+    public List<Value> readAllByDimension(final String dimension) {
+        return readManyByDimension.read(dimension);
     }
 
     @Override

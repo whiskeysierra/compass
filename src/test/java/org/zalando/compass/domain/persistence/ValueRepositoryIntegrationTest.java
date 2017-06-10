@@ -36,6 +36,7 @@ import static org.zalando.compass.domain.persistence.ValueCriteria.byKey;
 import static org.zalando.compass.library.Schema.schema;
 import static org.zalando.compass.library.Schema.stringSchema;
 
+// TODO migrate to scenarios
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Component
@@ -124,7 +125,7 @@ public class ValueRepositoryIntegrationTest {
         assertThat(unit.findAll(byKey("two")), is(empty()));
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void shouldNotDelete() {
         keys.create(new Key("one", new ObjectNode(JsonNodeFactory.instance), ""));
         dimensions.create(new Dimension("foo", schema("boolean"), "=", ""));
@@ -132,17 +133,21 @@ public class ValueRepositoryIntegrationTest {
 
         assertThat(unit.findAll(byKey("one")), hasSize(1));
 
-        unit.delete(new ValueId("one", of("unknown", new TextNode("foo"))));
+        final boolean deleted = unit.delete(new ValueId("one", of("unknown", new TextNode("foo"))));
+
+        assertThat(deleted, is(false));
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void shouldNotDeleteWithoutDimensions() {
         keys.create(new Key("one", new ObjectNode(JsonNodeFactory.instance), ""));
         unit.create(new Value("one", of(), TRUE));
 
         assertThat(unit.findAll(byKey("one")), hasSize(1));
 
-        unit.delete(new ValueId("one", of("unknown", new TextNode("foo"))));
+        final boolean deleted = unit.delete(new ValueId("one", of("unknown", new TextNode("foo"))));
+
+        assertThat(deleted, is(false));
     }
 
 }

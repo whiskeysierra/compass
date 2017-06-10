@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.model.ValueId;
+import org.zalando.compass.domain.persistence.NotFoundException;
 import org.zalando.compass.domain.persistence.ValueRepository;
 
 import java.util.Map;
@@ -21,7 +22,9 @@ class DeleteValue {
 
     @Transactional
     public void delete(final String key, final Map<String, JsonNode> filter) {
-        repository.delete(new ValueId(key, filter));
+        if (!repository.delete(new ValueId(key, filter))) {
+            throw new NotFoundException();
+        }
     }
 
 }

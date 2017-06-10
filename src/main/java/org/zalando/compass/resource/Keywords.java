@@ -2,7 +2,6 @@ package org.zalando.compass.resource;
 
 import com.google.common.collect.ImmutableSet;
 
-// TODO use the same logic to validate new dimensions
 final class Keywords {
 
     static final ImmutableSet<String> RESERVED = ImmutableSet.of(

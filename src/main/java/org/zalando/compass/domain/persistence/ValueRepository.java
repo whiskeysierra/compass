@@ -178,20 +178,18 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
     }
 
     @Override
-    public void delete(final ValueId id) {
+    public boolean delete(final ValueId id) {
         final int deletions = db.deleteFrom(VALUE)
                 .where(VALUE.KEY_ID.eq(id.getKey()))
                 .and(exactMatch(id.getDimensions()))
                 .execute();
 
         if (deletions > 1) {
+            // TODO needed?
             throw new AssertionError("Expected at most 1 value to be deleted, but matched " + deletions);
         }
 
-        if (deletions == 0) {
-            // TODO not here? needed at all?
-            throw new NotFoundException();
-        }
+        return deletions == 1;
     }
 
     private Condition exactMatch(final Map<String, JsonNode> dimensions) {
