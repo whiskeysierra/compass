@@ -1,13 +1,11 @@
 package org.zalando.compass.domain.logic.dimension;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.zalando.compass.domain.logic.LockService;
+import org.zalando.compass.domain.logic.Locking;
 import org.zalando.compass.domain.logic.RelationService;
 import org.zalando.compass.domain.logic.ValidationService;
-import org.zalando.compass.domain.logic.ValueService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.DimensionRepository;
@@ -22,22 +20,18 @@ class ReplaceDimension {
     private final ValidationService validator;
     private final DimensionRepository repository;
     private final RelationService relationService;
-    private final ValueService valueService;
-    private final LockService lock;
+    private final Locking locking;
 
-    // TODO break cyclic dependencies
     @Autowired
     ReplaceDimension(
             final ValidationService validator,
             final DimensionRepository repository,
             final RelationService relationService,
-            @Lazy final ValueService valueService,
-            final LockService lock) {
+            final Locking locking) {
         this.validator = validator;
         this.repository = repository;
         this.relationService = relationService;
-        this.valueService = valueService;
-        this.lock = lock;
+        this.locking = locking;
     }
 
     /**
@@ -48,17 +42,17 @@ class ReplaceDimension {
     @Transactional
     public boolean replace(final Dimension dimension) {
         verifyRelationExists(dimension);
-
-        @Nullable final Dimension current = repository.lock(dimension.getId()).orElse(null);
+        final Locking.DimensionLock lock = locking.lock(dimension);
+        @Nullable final Dimension current = lock.getDimension();
 
         if (current == null) {
             repository.create(dimension);
             return true;
         } else {
             // TODO detect changes and validate accordingly
-            lock.onUpdate(dimension);
+            final List<Value> values = lock.getValues();
 
-            validateDimensionValuesIfNecessary(current, dimension);
+            validateDimensionValuesIfNecessary(current, dimension, values);
             repository.update(dimension);
             return false;
         }
@@ -73,12 +67,12 @@ class ReplaceDimension {
         }
     }
 
-    private void validateDimensionValuesIfNecessary(final Dimension current, final Dimension next) {
+    private void validateDimensionValuesIfNecessary(final Dimension current, final Dimension next,
+            final List<Value> values) {
         if (current.getSchema().equals(next.getSchema())) {
             return;
         }
 
-        final List<Value> values = valueService.readAllByDimension(current.getId());
         validator.validate(next, values);
     }
 

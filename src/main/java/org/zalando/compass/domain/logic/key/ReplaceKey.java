@@ -3,9 +3,8 @@ package org.zalando.compass.domain.logic.key;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.zalando.compass.domain.logic.LockService;
+import org.zalando.compass.domain.logic.Locking;
 import org.zalando.compass.domain.logic.ValidationService;
-import org.zalando.compass.domain.logic.ValueService;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.KeyRepository;
@@ -18,19 +17,16 @@ class ReplaceKey {
 
     private final ValidationService validator;
     private final KeyRepository repository;
-    private final ValueService valueService;
-    private final LockService lock;
+    private final Locking locking;
 
     @Autowired
     ReplaceKey(
             final ValidationService validator,
             final KeyRepository repository,
-            final ValueService valueService,
-            final LockService lock) {
+            final Locking locking) {
         this.validator = validator;
         this.repository = repository;
-        this.valueService = valueService;
-        this.lock = lock;
+        this.locking = locking;
     }
 
     /**
@@ -40,28 +36,28 @@ class ReplaceKey {
      */
     @Transactional
     public boolean replace(final Key key) {
+        final Locking.KeyLock lock = locking.lock(key);
 
-        @Nullable final Key current = repository.lock(key.getId()).orElse(null);
+        @Nullable final Key current = lock.getKey();
 
         if (current == null) {
             repository.create(key);
             return true;
         } else {
             // TODO detect changes and validate accordingly
-            lock.onUpdate(key);
+            final List<Value> values = lock.getValues();
 
-            validateValuesIfNecessary(current, key);
+            validateValuesIfNecessary(current, key, values);
             repository.update(key);
             return false;
         }
     }
 
-    private void validateValuesIfNecessary(final Key current, final Key next) {
+    private void validateValuesIfNecessary(final Key current, final Key next, final List<Value> values) {
         if (current.getSchema().equals(next.getSchema())) {
             return;
         }
 
-        final List<Value> values = valueService.readAllByKey(next.getId());
         validator.validate(next, values);
     }
 

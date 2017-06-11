@@ -13,7 +13,7 @@ import java.util.Optional;
 import static org.zalando.compass.domain.persistence.model.Tables.KEY;
 
 @Component
-public class KeyRepository implements Repository<Key, String, Void> {
+public class KeyRepository {
 
     private final DSLContext db;
 
@@ -22,7 +22,6 @@ public class KeyRepository implements Repository<Key, String, Void> {
         this.db = db;
     }
 
-    @Override
     public void create(final Key key) {
         db.insertInto(KEY)
                 .columns(KEY.ID, KEY.SCHEMA, KEY.DESCRIPTION)
@@ -30,13 +29,11 @@ public class KeyRepository implements Repository<Key, String, Void> {
                 .execute();
     }
 
-    @Override
     public Optional<Key> find(final String id) {
         return doFind(id)
                 .fetchOptionalInto(Key.class);
     }
 
-    @Override
     public Optional<Key> lock(final String id) {
         return doFind(id)
                 .forUpdate()
@@ -49,7 +46,6 @@ public class KeyRepository implements Repository<Key, String, Void> {
                 .where(KEY.ID.eq(id));
     }
 
-    @Override
     public List<Key> findAll() {
         return db.select()
                 .from(KEY)
@@ -57,17 +53,6 @@ public class KeyRepository implements Repository<Key, String, Void> {
                 .fetchInto(Key.class);
     }
 
-    @Override
-    public List<Key> findAll(final Void criteria) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public List<Key> lockAll(final Void criteria) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void update(final Key key) {
         db.update(KEY)
                 .set(KEY.SCHEMA, key.getSchema())
@@ -76,7 +61,6 @@ public class KeyRepository implements Repository<Key, String, Void> {
                 .execute();
     }
 
-    @Override
     public boolean delete(final String key) {
         final int deletes = db.deleteFrom(KEY)
                 .where(KEY.ID.eq(key))

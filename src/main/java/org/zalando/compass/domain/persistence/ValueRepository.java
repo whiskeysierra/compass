@@ -42,19 +42,13 @@ import static org.zalando.compass.domain.persistence.model.Tables.VALUE;
 import static org.zalando.compass.domain.persistence.model.Tables.VALUE_DIMENSION;
 
 @Component
-public class ValueRepository implements Repository<Value, ValueId, ValueCriteria> {
+public class ValueRepository{
 
     private final DSLContext db;
 
     @Autowired
     public ValueRepository(final DSLContext db) {
         this.db = db;
-    }
-
-    @Deprecated
-    @Override
-    public void create(final Value value) {
-        throw new UnsupportedOperationException();
     }
 
     public void create(final String key, final Value value) {
@@ -74,13 +68,6 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
         db.batch(queries).execute();
     }
 
-    @Deprecated
-    @Override
-    public Optional<Value> find(final ValueId id) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Optional<Value> lock(final ValueId id) {
         return db.select()
                 .from(VALUE)
@@ -95,13 +82,10 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
                 .collect(toOptional());
     }
 
-    @Override
     public List<Value> findAll() {
         return findAll(withoutCriteria());
     }
 
-    // TODO should we have criteria on this level?
-    @Override
     public List<Value> findAll(final ValueCriteria criteria) {
         return doFindAll(criteria)
                 .fetchGroups(ValueRecord.class, ValueDimensionRecord.class)
@@ -110,7 +94,6 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
                 .collect(toList());
     }
 
-    @Override
     public List<Value> lockAll(final ValueCriteria criteria) {
         return doFindAll(criteria)
                 .forUpdate().of(VALUE)
@@ -170,12 +153,6 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
                 ValueDimensionRecord::getDimensionValue));
     }
 
-    @Deprecated
-    @Override
-    public void update(final Value value) {
-        throw new UnsupportedOperationException();
-    }
-
     public void update(final String key, final Value value) {
         db.update(VALUE)
                 .set(VALUE.VALUE_, value.getValue())
@@ -196,7 +173,6 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
         return IntStream.of(db.batch(queries).execute()).sum() > 0;
     }
 
-    @Override
     public boolean delete(final ValueId id) {
         final int deletions = db.deleteFrom(VALUE)
                 .where(VALUE.KEY_ID.eq(id.getKey()))
@@ -214,7 +190,7 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
         } else {
 
             return notExists(selectOne()
-                    .from(asTable(dimensions).as("expected", "dimension_id", "dimension_value"))
+                    .from(table(dimensions).as("expected", "dimension_id", "dimension_value"))
                     .fullOuterJoin(select(VALUE_DIMENSION.DIMENSION_ID, VALUE_DIMENSION.DIMENSION_VALUE)
                             .from(VALUE_DIMENSION)
                             .where(VALUE_DIMENSION.VALUE_ID.eq(VALUE.ID))
@@ -226,7 +202,7 @@ public class ValueRepository implements Repository<Value, ValueId, ValueCriteria
         }
     }
 
-    private Table<Record2<String, JsonNode>> asTable(final Map<String, JsonNode> dimensions) {
+    private Table<Record2<String, JsonNode>> table(final Map<String, JsonNode> dimensions) {
         final List<Row2<String, JsonNode>> rows = new ArrayList<>(dimensions.size());
 
         dimensions.forEach((id, value) ->

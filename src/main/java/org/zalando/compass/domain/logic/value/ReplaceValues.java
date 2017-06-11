@@ -23,9 +23,11 @@ class ReplaceValues {
 
     @Transactional
     public void replace(final String key, final List<Value> values) {
+        // TODO repository.delete(byKey(key));
         values.forEach(value ->
             repository.delete(new ValueId(key, value.getDimensions())));
 
+        // TODO batch create
         values.forEach(value ->
             replace.replace(key, value));
     }

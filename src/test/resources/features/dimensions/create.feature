@@ -24,6 +24,12 @@ Feature: Dimension creation
       | id    | schema.type | relation | description                  |
       | "bar" | "string"    | "="      | "Lorem ipsum dolor sit amet" |
 
+  Scenario: Creating a new dimension failed due to unknown relation
+    Given there are no dimensions
+    When "PUT /dimensions/example" returns "400 Bad Request" when requested with:
+      | id        | schema.type | relation | description                  |
+      | "example" | "string"    | "?"      | "Lorem ipsum dolor sit amet" |
+
   Scenario: Creating a new dimension failed due to schema violation
     Given there are no dimensions
     When "PUT /dimensions/foo" when requested with:

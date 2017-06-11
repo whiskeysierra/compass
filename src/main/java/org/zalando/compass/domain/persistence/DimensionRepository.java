@@ -16,7 +16,7 @@ import java.util.Set;
 import static org.zalando.compass.domain.persistence.model.Tables.DIMENSION;
 
 @Component
-public class DimensionRepository implements Repository<Dimension, String, Set<String>> {
+public class DimensionRepository {
 
     private final DSLContext db;
 
@@ -25,7 +25,6 @@ public class DimensionRepository implements Repository<Dimension, String, Set<St
         this.db = db;
     }
 
-    @Override
     public void create(final Dimension dimension) {
         db.insertInto(DIMENSION)
                 .columns(DIMENSION.ID, DIMENSION.SCHEMA, DIMENSION.RELATION, DIMENSION.DESCRIPTION)
@@ -34,13 +33,11 @@ public class DimensionRepository implements Repository<Dimension, String, Set<St
                 .execute();
     }
 
-    @Override
     public Optional<Dimension> find(final String id) {
         return doFind(id)
                 .fetchOptionalInto(Dimension.class);
     }
 
-    @Override
     public Optional<Dimension> lock(final String id) {
         return doFind(id)
                 .forUpdate()
@@ -53,7 +50,6 @@ public class DimensionRepository implements Repository<Dimension, String, Set<St
                 .where(DIMENSION.ID.eq(id));
     }
 
-    @Override
     public List<Dimension> findAll(final Set<String> dimensions) {
         if (dimensions.isEmpty()) {
             return Collections.emptyList();
@@ -63,7 +59,6 @@ public class DimensionRepository implements Repository<Dimension, String, Set<St
                 .fetchInto(Dimension.class);
     }
 
-    @Override
     public List<Dimension> lockAll(final Set<String> dimensions) {
         if (dimensions.isEmpty()) {
             return Collections.emptyList();
@@ -81,7 +76,6 @@ public class DimensionRepository implements Repository<Dimension, String, Set<St
                 .orderBy(DIMENSION.ID.asc());
     }
 
-    @Override
     public List<Dimension> findAll() {
         return db.select(DIMENSION.fields())
                 .from(DIMENSION)
@@ -89,7 +83,6 @@ public class DimensionRepository implements Repository<Dimension, String, Set<St
                 .fetchInto(Dimension.class);
     }
 
-    @Override
     public void update(final Dimension dimension) {
         db.update(DIMENSION)
                 .set(DIMENSION.SCHEMA, dimension.getSchema())
@@ -99,7 +92,6 @@ public class DimensionRepository implements Repository<Dimension, String, Set<St
                 .execute();
     }
 
-    @Override
     public boolean delete(final String id) {
         final int deletes = db.deleteFrom(DIMENSION)
                 .where(DIMENSION.ID.eq(id))

@@ -78,11 +78,6 @@ public final class PrimitiveJsonNodeComparatorTest {
         test(nullNode(), nullNode(), equal());
     }
 
-    @Test
-    public void shouldNotCompareMismatch() {
-
-    }
-
     private void test(final JsonNode left, final JsonNode right, final Matcher<Integer> matcher) {
         assertThat(unit.compare(left, right), matcher);
     }
