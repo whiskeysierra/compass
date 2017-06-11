@@ -1,9 +1,11 @@
 package org.zalando.compass.domain.logic.relation;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import lombok.EqualsAndHashCode;
 import org.zalando.compass.domain.model.Relation;
 
-public final class Prefix implements Relation {
+@EqualsAndHashCode(callSuper = false)
+public final class PrefixMatch implements Relation {
 
     @Override
     public String getId() {

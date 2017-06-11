@@ -16,12 +16,12 @@ import static org.zalando.compass.domain.persistence.ValueCriteria.byKey;
 class ReadValuesByKeyAndFilter {
 
     private final ValueRepository repository;
-    private final ValueMatcher matcher;
+    private final ValueSelector selector;
 
     @Autowired
-    ReadValuesByKeyAndFilter(final ValueRepository repository, final ValueMatcher matcher) {
+    ReadValuesByKeyAndFilter(final ValueRepository repository, final ValueSelector selector) {
         this.repository = repository;
-        this.matcher = matcher;
+        this.selector = selector;
     }
 
     @Transactional(readOnly = true)
@@ -33,7 +33,7 @@ class ReadValuesByKeyAndFilter {
             return values;
         }
 
-        return matcher.match(values, filter);
+        return selector.select(values, filter);
     }
 
 }

@@ -18,21 +18,17 @@ class DefaultValueService implements ValueService {
     private final ReplaceValues replaceMany;
     private final ReadValue readOne;
     private final ReadValuesByKeyAndFilter readManyByKeyAndFilter;
-    private final ReadValuesByKey readManyByKey;
-    private final ReadValuesByDimension readManyByDimension;
     private final ReadAllValues readAll;
     private final DeleteValue delete;
 
     @Autowired
     DefaultValueService(final ReplaceValue replace, final ReplaceValues replaceMany, final ReadValue readOne,
-            final ReadValuesByKeyAndFilter readManyByKeyAndFilter, final ReadValuesByKey readManyByKey,
-            final ReadValuesByDimension readManyByDimension, final ReadAllValues readAll, final DeleteValue delete) {
+            final ReadValuesByKeyAndFilter readManyByKeyAndFilter, final ReadAllValues readAll,
+            final DeleteValue delete) {
         this.replace = replace;
         this.replaceMany = replaceMany;
         this.readOne = readOne;
         this.readManyByKeyAndFilter = readManyByKeyAndFilter;
-        this.readManyByKey = readManyByKey;
-        this.readManyByDimension = readManyByDimension;
         this.readAll = readAll;
         this.delete = delete;
     }
@@ -55,16 +51,6 @@ class DefaultValueService implements ValueService {
     @Override
     public List<Value> readAllByKey(final String key, final Map<String, JsonNode> filter) {
         return readManyByKeyAndFilter.read(key, filter);
-    }
-
-    @Override
-    public List<Value> readAllByKey(final String key) {
-        return readManyByKey.read(key);
-    }
-
-    @Override
-    public List<Value> readAllByDimension(final String dimension) {
-        return readManyByDimension.read(dimension);
     }
 
     @Override

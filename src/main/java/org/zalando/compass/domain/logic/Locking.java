@@ -9,12 +9,13 @@ import org.zalando.compass.domain.model.ValueId;
 import org.zalando.compass.domain.persistence.DimensionRepository;
 import org.zalando.compass.domain.persistence.KeyRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
+import org.zalando.compass.domain.persistence.ValueCriteria;
 import org.zalando.compass.domain.persistence.ValueRepository;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Optional;
 
+import static java.util.stream.Collectors.toSet;
 import static org.zalando.compass.domain.persistence.ValueCriteria.byDimension;
 import static org.zalando.compass.domain.persistence.ValueCriteria.byKey;
 
@@ -58,6 +59,16 @@ public class Locking {
         return new ValueLock(dimensions, key, current);
     }
 
+    public ValuesLock lock(final String keyId, final List<Value> values) {
+        final List<Dimension> dimensions = dimensionRepository.lockAll(values.stream()
+                .flatMap(value -> value.getDimensions().keySet().stream())
+                .collect(toSet()));
+        final Key key = keyRepository.lock(keyId).orElseThrow(NotFoundException::new);
+        final List<Value> current = valueRepository.lockAll(byKey(keyId));
+
+        return new ValuesLock(dimensions, key, current);
+    }
+
     @lombok.Value
     public static class DimensionLock {
         @Nullable Dimension dimension;
@@ -75,6 +86,13 @@ public class Locking {
         List<Dimension> dimensions;
         Key key;
         @Nullable Value value;
+    }
+
+    @lombok.Value
+    public static class ValuesLock {
+        List<Dimension> dimensions;
+        Key key;
+        List<Value> values;
     }
 
 }

@@ -11,9 +11,9 @@ import static com.google.common.base.MoreObjects.firstNonNull;
 public final class Value {
 
     @Wither
-    private final ImmutableMap<String, JsonNode> dimensions;
+    ImmutableMap<String, JsonNode> dimensions;
 
-    private final JsonNode value;
+    JsonNode value;
 
     @JsonCreator
     public Value(final ImmutableMap<String, JsonNode> dimensions, final JsonNode value) {

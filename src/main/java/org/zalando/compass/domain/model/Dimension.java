@@ -7,9 +7,9 @@ import lombok.experimental.Wither;
 public final class Dimension {
 
     @Wither
-    private final String id;
-    private final JsonNode schema;
-    private final String relation;
-    private final String description;
+    String id;
+    JsonNode schema;
+    String relation;
+    String description;
 
 }

@@ -1,9 +1,11 @@
 package org.zalando.compass.domain.logic.relation;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import lombok.EqualsAndHashCode;
 import org.zalando.compass.domain.model.Relation;
 
 // TODO can this be package private?
+@EqualsAndHashCode
 public final class Equality implements Relation {
 
     @Override
@@ -24,6 +26,11 @@ public final class Equality implements Relation {
     @Override
     public boolean test(final JsonNode configured, final JsonNode requested) {
         return configured.equals(requested);
+    }
+
+    @Override
+    public String toString() {
+        return getId();
     }
 
 }

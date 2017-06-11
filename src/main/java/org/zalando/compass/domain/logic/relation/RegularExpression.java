@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Function;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
+import lombok.EqualsAndHashCode;
 import org.zalando.compass.domain.model.Relation;
 
 import java.util.regex.Pattern;
 
 import static com.google.common.cache.CacheLoader.from;
 
+@EqualsAndHashCode(callSuper = false, exclude = "cache")
 public final class RegularExpression implements Relation {
 
     private final LoadingCache<String, Pattern> cache = CacheBuilder.newBuilder()

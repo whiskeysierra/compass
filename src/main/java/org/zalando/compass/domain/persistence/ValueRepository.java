@@ -82,6 +82,7 @@ public class ValueRepository{
                 .collect(toOptional());
     }
 
+    // TODO use
     public List<Value> findAll() {
         return findAll(withoutCriteria());
     }
@@ -180,6 +181,12 @@ public class ValueRepository{
                 .execute();
 
         return deletions == 1;
+    }
+
+    public void deleteByKey(final String key) {
+        db.deleteFrom(VALUE)
+                .where(VALUE.KEY_ID.eq(key))
+                .execute();
     }
 
     private Condition exactMatch(final Map<String, JsonNode> dimensions) {

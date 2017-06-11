@@ -49,13 +49,16 @@ public class JsonSchemaValidator {
     }
 
     private void validate(final JsonValidator validator, final JsonNode node, final String... path) {
-        final Set<ValidationMessage> messages = validator.validate(node, node,
-                stream(path).collect(collectingAndThen(joining("."),
-                        result -> result.isEmpty() ? "$" : "$." + result)));
+        final Set<ValidationMessage> messages = validator.validate(node, node, join(path));
 
         if (!messages.isEmpty()) {
             throw newProblem(messages);
         }
+    }
+
+    private String join(final String... properties) {
+        return stream(properties).collect(collectingAndThen(joining("."),
+                result -> result.isEmpty() ? "$" : "$." + result));
     }
 
     private static ThrowableProblem newProblem(final Set<ValidationMessage> messages) {

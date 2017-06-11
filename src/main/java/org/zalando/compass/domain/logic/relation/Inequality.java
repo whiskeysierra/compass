@@ -14,4 +14,9 @@ abstract class Inequality implements Relation, Comparator<JsonNode> {
         return comparator.compare(left, right);
     }
 
+    @Override
+    public String toString() {
+        return getId();
+    }
+
 }

@@ -7,8 +7,8 @@ import lombok.experimental.Wither;
 public final class Key {
 
     @Wither
-    private final String id;
-    private final JsonNode schema;
-    private final String description;
+    String id;
+    JsonNode schema;
+    String description;
 
 }

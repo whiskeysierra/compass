@@ -1,6 +1,5 @@
 package org.zalando.compass.domain.logic.value;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -12,11 +11,9 @@ import org.zalando.compass.domain.persistence.ValueRepository;
 import javax.annotation.Nullable;
 import java.util.List;
 
-import static com.google.common.collect.Multimaps.index;
 import static org.zalando.compass.domain.persistence.ValueCriteria.byKeyPattern;
 import static org.zalando.compass.domain.persistence.ValueCriteria.withoutCriteria;
 
-// TODO test this
 @Component
 class ReadAllValues {
 

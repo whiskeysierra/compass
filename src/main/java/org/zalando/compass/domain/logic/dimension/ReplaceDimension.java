@@ -13,6 +13,7 @@ import org.zalando.compass.domain.persistence.NotFoundException;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.function.Function;
 
 @Component
 class ReplaceDimension {
@@ -41,24 +42,31 @@ class ReplaceDimension {
      */
     @Transactional
     public boolean replace(final Dimension dimension) {
-        verifyRelationExists(dimension);
+
         final Locking.DimensionLock lock = locking.lock(dimension);
         @Nullable final Dimension current = lock.getDimension();
 
         if (current == null) {
+            validateRelation(dimension);
+
             repository.create(dimension);
             return true;
         } else {
-            // TODO detect changes and validate accordingly
-            final List<Value> values = lock.getValues();
+            if (changed(Dimension::getSchema, current, dimension)) {
+                final List<Value> values = lock.getValues();
+                validator.validate(dimension, values);
+            }
 
-            validateDimensionValuesIfNecessary(current, dimension, values);
+            if (changed(Dimension::getRelation, current, dimension)) {
+                validateRelation(dimension);
+            }
+
             repository.update(dimension);
             return false;
         }
     }
 
-    private void verifyRelationExists(final Dimension dimension) {
+    private void validateRelation(final Dimension dimension) {
         // TODO should result in 400 Bad Request
         try {
             relationService.read(dimension.getRelation());
@@ -67,13 +75,8 @@ class ReplaceDimension {
         }
     }
 
-    private void validateDimensionValuesIfNecessary(final Dimension current, final Dimension next,
-            final List<Value> values) {
-        if (current.getSchema().equals(next.getSchema())) {
-            return;
-        }
-
-        validator.validate(next, values);
+    private <T> boolean changed(final Function<Dimension, T> function, final Dimension previous, final Dimension next) {
+        return !function.apply(previous).equals(function.apply(next));
     }
 
 }

@@ -74,3 +74,5 @@ Feature: Reading values
     When "GET /keys/tax-rate/value?country=DE" returns "200 OK" with:
       | value |
       | 0.19  |
+
+  # TODO filter by dimension id alone, without value

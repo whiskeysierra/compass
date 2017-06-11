@@ -17,18 +17,18 @@ import static org.zalando.compass.domain.persistence.ValueCriteria.byKey;
 class ReadValue {
 
     private final ValueRepository repository;
-    private final ValueMatcher matcher;
+    private final ValueSelector selector;
 
     @Autowired
-    ReadValue(final ValueRepository repository, final ValueMatcher matcher) {
+    ReadValue(final ValueRepository repository,final ValueSelector selector) {
         this.repository = repository;
-        this.matcher = matcher;
+        this.selector = selector;
     }
 
     @Transactional(readOnly = true)
     public Value read(final String key, final Map<String, JsonNode> filter) {
         final List<Value> values = repository.findAll(byKey(key));
-        final List<Value> matched = matcher.match(values, filter);
+        final List<Value> matched = selector.select(values, filter);
 
         return matched.stream()
                 .findFirst().orElseThrow(NotFoundException::new);

@@ -4,4 +4,4 @@ org.zalando.compass.domain.logic.relation.GreaterThanOrEqual
 org.zalando.compass.domain.logic.relation.LessThan
 org.zalando.compass.domain.logic.relation.LessThanOrEqual
 org.zalando.compass.domain.logic.relation.RegularExpression
-org.zalando.compass.domain.logic.relation.Prefix
+org.zalando.compass.domain.logic.relation.PrefixMatch

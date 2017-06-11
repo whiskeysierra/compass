@@ -8,6 +8,7 @@ import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.library.JsonSchemaValidator;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Set;
 
@@ -28,10 +29,20 @@ public class ValidationService {
         values.forEach(value -> validate(dimensions, value));
     }
 
+    public void validate(final Collection<Dimension> dimensions, final Collection<Value> values) {
+        values.forEach(value -> validate(dimensions, value));
+    }
+
     public void validate(final Collection<Dimension> dimensions, final Value value) {
         for (final Dimension dimension : dimensions) {
             final JsonNode schema = dimension.getSchema();
-            final JsonNode node = value.getDimensions().get(dimension.getId());
+            @Nullable final JsonNode node = value.getDimensions().get(dimension.getId());
+
+            if (node == null) {
+                // TODO test this
+                continue;
+            }
+
             validator.validate(schema, node, "dimensions", dimension.getId());
         }
     }
