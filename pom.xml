@@ -425,7 +425,7 @@
                 <configuration>
                     <images>
                         <image>
-                            <name>postgres:9.6</name>
+                            <name>postgres:alpine</name>
                             <run>
                                 <ports>
                                     <port>2345:5432</port>
@@ -460,11 +460,40 @@
             </plugin>
 
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>sql-maven-plugin</artifactId>
+                <version>1.5</version>
+                <configuration>
+                    <driver>org.postgresql.Driver</driver>
+                    <url>jdbc:postgresql://localhost:2345/postgres</url>
+                    <username>postgres</username>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <sqlCommand>CREATE SCHEMA compass</sqlCommand>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.postgresql</groupId>
+                        <artifactId>postgresql</artifactId>
+                        <version>${postgres.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <plugin>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
                 <version>4.2.0</version>
                 <configuration>
-                    <url>jdbc:postgresql://localhost:2345/postgres</url>
+                    <url>jdbc:postgresql://localhost:2345/postgres?currentSchema=compass</url>
                     <user>postgres</user>
                 </configuration>
                 <executions>
@@ -493,8 +522,7 @@
                             <name>org.jooq.util.postgres.PostgresDatabase</name>
                             <includes>.*</includes>
                             <excludes>schema_version</excludes>
-                            <!-- TODO custom schema -->
-                            <inputSchema>public</inputSchema>
+                            <inputSchema>compass</inputSchema>
                             <forcedTypes>
                                 <forcedType>
                                     <userType>com.fasterxml.jackson.databind.JsonNode</userType>
