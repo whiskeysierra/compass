@@ -2,32 +2,37 @@ package org.zalando.compass.domain.persistence;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Query;
 import org.jooq.Record;
 import org.jooq.Record2;
+import org.jooq.Result;
 import org.jooq.Row2;
 import org.jooq.SelectSeekStep1;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueId;
 import org.zalando.compass.domain.persistence.model.tables.records.ValueDimensionRecord;
 import org.zalando.compass.domain.persistence.model.tables.records.ValueRecord;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.stream.IntStream;
 
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.collect.MoreCollectors.toOptional;
-import static com.google.common.collect.Streams.mapWithIndex;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.notExists;
@@ -37,7 +42,7 @@ import static org.jooq.impl.DSL.selectOne;
 import static org.jooq.impl.DSL.trueCondition;
 import static org.jooq.impl.DSL.val;
 import static org.jooq.impl.DSL.values;
-import static org.zalando.compass.domain.persistence.ValueCriteria.withoutCriteria;
+import static org.zalando.compass.domain.persistence.model.Tables.KEY;
 import static org.zalando.compass.domain.persistence.model.Tables.VALUE;
 import static org.zalando.compass.domain.persistence.model.Tables.VALUE_DIMENSION;
 
@@ -82,11 +87,6 @@ public class ValueRepository{
                 .collect(toOptional());
     }
 
-    // TODO use
-    public List<Value> findAll() {
-        return findAll(withoutCriteria());
-    }
-
     public List<Value> findAll(final ValueCriteria criteria) {
         return doFindAll(criteria)
                 .fetchGroups(ValueRecord.class, ValueDimensionRecord.class)
@@ -104,6 +104,26 @@ public class ValueRepository{
                 .collect(toList());
     }
 
+    public Map<Key, List<Value>> listAll(@Nullable final String keyPattern) {
+        final Map<Key, Result<Record>> groups = db.select()
+                .from(KEY)
+                .join(VALUE)
+                .on(KEY.ID.eq(VALUE.KEY_ID))
+                .leftJoin(VALUE_DIMENSION)
+                .on(VALUE.ID.eq(VALUE_DIMENSION.VALUE_ID))
+                // TODO index
+                .where(keyPattern == null ? emptySet() : singleton(KEY.ID.likeIgnoreCase("%" + keyPattern + "%")))
+                .orderBy(KEY.ID, VALUE.ID)
+                .fetchGroups(r -> r.into(KEY).into(Key.class));
+
+        return ImmutableMap.copyOf(
+                Maps.transformValues(groups, (@Nonnull Result<Record> result) ->
+                        result.intoGroups(ValueRecord.class, ValueDimensionRecord.class)
+                                .entrySet().stream()
+                                .map(this::map)
+                                .collect(toList())));
+    }
+
     private SelectSeekStep1<Record, Long> doFindAll(final ValueCriteria criteria) {
         return db.select()
                 .from(VALUE)
@@ -116,8 +136,6 @@ public class ValueRepository{
     private Condition toCondition(final ValueCriteria criteria) {
         if (criteria.getKey() != null) {
             return VALUE.KEY_ID.eq(criteria.getKey());
-        } else if (criteria.getKeyPattern() != null) {
-            return VALUE.KEY_ID.likeIgnoreCase(criteria.getKeyPattern());
         } else if (criteria.getDimension() != null) {
             return DSL.exists(selectOne()
                     .from(VALUE_DIMENSION)
@@ -162,18 +180,6 @@ public class ValueRepository{
                 .execute();
     }
 
-    public boolean update(final String key, final List<Value> values) {
-        final List<Query> queries = mapWithIndex(values.stream(), (value, index) ->
-                db.update(VALUE)
-                        .set(VALUE.VALUE_, value.getValue())
-                        .set(VALUE.INDEX, index)
-                        .where(VALUE.KEY_ID.eq(key))
-                        .and(exactMatch(value.getDimensions())))
-                .collect(toList());
-
-        return IntStream.of(db.batch(queries).execute()).sum() > 0;
-    }
-
     public boolean delete(final ValueId id) {
         final int deletions = db.deleteFrom(VALUE)
                 .where(VALUE.KEY_ID.eq(id.getKey()))
@@ -195,7 +201,6 @@ public class ValueRepository{
                     .from(VALUE_DIMENSION)
                     .where(VALUE_DIMENSION.VALUE_ID.eq(VALUE.ID)));
         } else {
-
             return notExists(selectOne()
                     .from(table(dimensions).as("expected", "dimension_id", "dimension_value"))
                     .fullOuterJoin(select(VALUE_DIMENSION.DIMENSION_ID, VALUE_DIMENSION.DIMENSION_VALUE)

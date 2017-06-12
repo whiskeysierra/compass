@@ -7,6 +7,6 @@ import java.util.List;
 @lombok.Value
 public final class RelationPage {
 
-    private final List<Relation> relations;
+    List<Relation> relations;
 
 }

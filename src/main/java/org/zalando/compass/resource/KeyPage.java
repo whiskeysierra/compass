@@ -7,6 +7,6 @@ import java.util.List;
 @lombok.Value
 public class KeyPage {
 
-    private final List<Key> keys;
+    List<Key> keys;
 
 }

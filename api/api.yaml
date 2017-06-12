@@ -299,23 +299,28 @@ paths:
           schema:
             type: object
             additionalProperties:
-              type: array
-              items:
-                $ref: '#/definitions/Value'
+              type: object
+              properties:
+                values:
+                  type: array
+                  items:
+                    $ref: '#/definitions/Value'
             example:
               active:
-                - dimensions:
-                    email: '.*@qa-example.com'
-                    value: true
-                - dimensions:
-                  value: false
+                values:
+                  - dimensions:
+                      email: '.*@qa-example.com'
+                      value: true
+                  - dimensions:
+                    value: false
               tax-rate:
-                - dimension:
-                    country: DE
-                  value: 0.19
-                - dimension:
-                    country: CH
-                  value: 0.08
+                values:
+                  - dimension:
+                      country: DE
+                    value: 0.19
+                  - dimension:
+                      country: CH
+                    value: 0.08
 parameters:
   DimensionId:
     name: dimension

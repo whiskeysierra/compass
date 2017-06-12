@@ -60,7 +60,7 @@ Feature: Reading values
       | Location                                                                         |
       | http://localhost:8080/keys/tax-rate/value?before=2018-01-01T00:00:00Z&country=DE |
 
-  Scenario: Get value
+  Scenario: Get value with dimension
     Given the following dimensions:
       | id        | schema.type | relation | description          |
       | "country" | "string"    | "="      | "ISO 3166-1 alpha-2" |
@@ -76,3 +76,52 @@ Feature: Reading values
       | 0.19  |
 
   # TODO filter by dimension id alone, without value
+  # TODO parse dimension types in query correctly
+
+  Scenario: Get all values
+    Given the following keys:
+      | id    | schema.type | relation | description |
+      | "foo" | "string"    | "="      | "."         |
+      | "bar" | "string"    | "="      | "."         |
+      | "baz" | "string"    | "="      | "."         |
+    And the following values for key foo:
+      | value |
+      | "foo" |
+    And the following values for key bar:
+      | value |
+      | "bar" |
+    And the following values for key baz:
+      | value |
+      | "baz" |
+    When "GET /values" returns "200 OK" with a list of entries/foo/values:
+      | value |
+      | "foo" |
+    And "GET /values" returns "200 OK" with a list of entries/bar/values:
+      | value |
+      | "bar" |
+    And "GET /values" returns "200 OK" with a list of entries/baz/values:
+      | value |
+      | "baz" |
+
+  Scenario: Get all values by key pattern
+    Given the following keys:
+      | id    | schema.type | relation | description |
+      | "foo" | "string"    | "="      | "."         |
+      | "bar" | "string"    | "="      | "."         |
+      | "baz" | "string"    | "="      | "."         |
+    And the following values for key foo:
+      | value |
+      | "foo" |
+    And the following values for key bar:
+      | value |
+      | "bar" |
+    And the following values for key baz:
+      | value |
+      | "baz" |
+    When "GET /values?q=a" returns "200 OK" with an empty list of entries/foo/values
+    And "GET /values?q=a" returns "200 OK" with a list of entries/bar/values:
+      | value |
+      | "bar" |
+    And "GET /values?q=a" returns "200 OK" with a list of entries/baz/values:
+      | value |
+      | "baz" |

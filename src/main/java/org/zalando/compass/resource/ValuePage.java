@@ -7,6 +7,6 @@ import java.util.List;
 @lombok.Value
 public final class ValuePage {
 
-    private final List<Value> values;
+    List<Value> values;
 
 }

@@ -1,11 +1,18 @@
 package org.zalando.compass.resource;
 
-import com.google.common.collect.Multimap;
+import com.google.common.collect.ImmutableMap;
 import org.zalando.compass.domain.model.Value;
+
+import java.util.List;
 
 @lombok.Value
 public class Entries {
 
-    private final Multimap<String, Value> entries;
+    ImmutableMap<String, Entry> entries;
+
+    @lombok.Value
+    public static class Entry {
+        List<Value> values;
+    }
 
 }

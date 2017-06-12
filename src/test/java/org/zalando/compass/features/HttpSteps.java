@@ -81,11 +81,11 @@ public class HttpSteps {
 
     @Then("^\"([A-Z]+) ([^ ]*)\" returns \"(\\d+) (.+)\" with a list of (.+):$")
     public void returnWithAListOf(final HttpMethod method, final String uri, final int statusCode,
-            final String reasonPhrase, final String key, final Datatable expected) throws IOException {
+            final String reasonPhrase, final String path, final Datatable expected) throws IOException {
         final ResponseEntity<JsonNode> response = request(method, uri);
         verifyStatus(response, statusCode, reasonPhrase);
 
-        final Datatable actual = renderList(response, key, expected);
+        final Datatable actual = renderList(response, path, expected);
         assertThat(actual, matchesTable(expected));
     }
 
@@ -96,7 +96,7 @@ public class HttpSteps {
 
         verifyStatus(response, statusCode, reasonPhrase);
 
-        final JsonNode list = response.getBody().get(key);
+        final JsonNode list = response.getBody().at("/" + key);
         assertThat(list.size(), is(0));
     }
 
@@ -133,13 +133,13 @@ public class HttpSteps {
     }
 
     @Then("^\"(\\d+) (.+)\" was returned with a list of (.+):$")
-    public void wasReturnedWithAListOf(final int statusCode, final String reasonPhrase, final String key,
+    public void wasReturnedWithAListOf(final int statusCode, final String reasonPhrase, final String path,
             final Datatable expected) throws IOException {
 
         final ResponseEntity<JsonNode> response = lastResponse.get().join();
         verifyStatus(response, statusCode, reasonPhrase);
 
-        final Datatable actual = renderList(response, key, expected);
+        final Datatable actual = renderList(response, path, expected);
         assertThat(actual, matchesTable(expected));
     }
 
@@ -207,9 +207,9 @@ public class HttpSteps {
         return mapper.map(singletonList(body), headers);
     }
 
-    private Datatable renderList(final ResponseEntity<JsonNode> response, final String key, final Datatable expected) throws IOException {
+    private Datatable renderList(final ResponseEntity<JsonNode> response, final String path, final Datatable expected) throws IOException {
         final JsonNode body = response.getBody();
-        final ArrayList<JsonNode> nodes = newArrayList(body.get(key));
+        final ArrayList<JsonNode> nodes = newArrayList(body.at("/" + path));
         return mapper.map(nodes, expected.getHeader());
     }
 

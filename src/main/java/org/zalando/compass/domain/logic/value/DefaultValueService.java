@@ -1,10 +1,10 @@
 package org.zalando.compass.domain.logic.value;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.ListMultimap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.zalando.compass.domain.logic.ValueService;
+import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Value;
 
 import javax.annotation.Nullable;
@@ -54,7 +54,7 @@ class DefaultValueService implements ValueService {
     }
 
     @Override
-    public ListMultimap<String, Value> readAllByKeyPattern(@Nullable final String keyPattern) {
+    public Map<Key, List<Value>> readAllByKeyPattern(@Nullable final String keyPattern) {
         return readAll.readAll(keyPattern);
     }
 

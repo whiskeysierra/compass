@@ -17,5 +17,4 @@ Feature: Relations
       | "=" | "Equality" | "Matches values where the requested dimension values are equal to the configured ones." |
 
   Scenario: Get unknown relation
-    Given there are no dimensions
     Then "GET /relations/unknown" returns "404 Not Found"

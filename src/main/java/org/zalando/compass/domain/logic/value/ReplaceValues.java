@@ -38,6 +38,7 @@ class ReplaceValues {
         validator.validate(lock.getDimensions(), values);
         validator.validate(lock.getKey(), values);
 
+        // TODO batch create
         values.forEach(value ->
                 repository.create(key, value));
     }

@@ -15,14 +15,18 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.ValueService;
 import org.zalando.compass.domain.model.Value;
+import org.zalando.compass.resource.Entries.Entry;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -62,7 +66,9 @@ class ValueResource {
 
     @RequestMapping(method = PUT, path = "/keys/{key}/values")
     public ValuePage replaceAll(@PathVariable final String key, @RequestBody final JsonNode node) throws IOException {
-        final List<Value> values = reader.read(node, ValuePage.class).getValues();
+        final List<Value> values = reader.read(node, ValuePage.class).getValues().stream()
+                .map(value -> value.getDimensions() == null ? value.withDimensions(ImmutableMap.of()) : value)
+                .collect(toList());
 
         service.replace(key, values);
 
@@ -74,8 +80,8 @@ class ValueResource {
             @RequestBody final JsonNode node) throws IOException {
 
         final ImmutableMap<String, JsonNode> dimensions = factory.create(query);
-        final Value value = reader.read(node, Value.class).withDimensions(dimensions);
-        // TODO final Value value = ensureConsistentDimensions(dimensions, input);
+        final Value input = reader.read(node, Value.class);
+        final Value value = ensureConsistentDimensions(dimensions, input);
 
         final boolean created = service.replace(key, value);
 
@@ -100,8 +106,9 @@ class ValueResource {
     }
 
     @RequestMapping(method = GET, path = "/values")
-    public Entries readAll(@RequestParam(name = "q", required = false) @Nullable final String query) {
-        return new Entries(service.readAllByKeyPattern(query));
+    public Entries readAll(@RequestParam(name = "q", required = false) @Nullable final String q) {
+        return new Entries(service.readAllByKeyPattern(q).entrySet().stream()
+            .collect(toImmutableMap(e -> e.getKey().getId(), e -> new Entry(e.getValue()))));
     }
 
     private URI canonicalUrl(final String key, final Value value) {

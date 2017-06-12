@@ -1,7 +1,7 @@
 package org.zalando.compass.domain.logic;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.ListMultimap;
+import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Value;
 
 import javax.annotation.Nullable;
@@ -20,6 +20,6 @@ public interface ValueService {
 
     void delete(String key, Map<String, JsonNode> filter);
 
-    ListMultimap<String, Value> readAllByKeyPattern(@Nullable String keyPattern);
+    Map<Key, List<Value>> readAllByKeyPattern(@Nullable String keyPattern);
 
 }

@@ -10,24 +10,15 @@ import static lombok.AccessLevel.PRIVATE;
 @AllArgsConstructor(access = PRIVATE)
 public class ValueCriteria {
 
-    private String key;
-    private String keyPattern;
-    private String dimension;
+    String key;
+    String dimension;
 
     public static ValueCriteria byKey(final String key) {
-        return new ValueCriteria(key, null, null);
-    }
-
-    public static ValueCriteria byKeyPattern(final String keyPattern) {
-        return new ValueCriteria(null, keyPattern, null);
+        return new ValueCriteria(key, null);
     }
 
     public static ValueCriteria byDimension(final String dimension) {
-        return new ValueCriteria(null, null, dimension);
-    }
-
-    public static ValueCriteria withoutCriteria() {
-        return new ValueCriteria(null, null, null);
+        return new ValueCriteria(null, dimension);
     }
 
 }
