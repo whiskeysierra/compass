@@ -4,9 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Function;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
+import com.networknt.schema.JsonType;
 import lombok.EqualsAndHashCode;
 import org.zalando.compass.domain.model.Relation;
 
+import java.util.Collections;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import static com.google.common.cache.CacheLoader.from;
@@ -34,12 +37,22 @@ public final class RegularExpression implements Relation {
     }
 
     @Override
+    public Set<JsonType> supports() {
+        return Collections.singleton(JsonType.STRING);
+    }
+
+    @Override
     public boolean test(final JsonNode configured, final JsonNode requested) {
         return compile(configured.asText()).matcher(requested.asText()).matches();
     }
 
     private Pattern compile(final String pattern) {
         return cache.getUnchecked(pattern);
+    }
+
+    @Override
+    public String toString() {
+        return getId();
     }
 
 }

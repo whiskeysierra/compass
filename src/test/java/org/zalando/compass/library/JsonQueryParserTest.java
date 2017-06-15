@@ -1,24 +1,31 @@
 package org.zalando.compass.library;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.BigIntegerNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.DecimalNode;
+import com.fasterxml.jackson.databind.node.NullNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import org.junit.Test;
+import org.zalando.compass.resource.JsonQueryParser;
 
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Map;
 
+import static com.fasterxml.jackson.databind.node.JsonNodeFactory.instance;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.zalando.compass.library.JsonConfiguration.yamlObjectMapper;
+import static org.zalando.compass.library.JsonConfiguration.jacksonObjectMapper;
 
-public final class DuckTypingJsonParserTest {
+public final class JsonQueryParserTest {
 
-    private final DuckTypingJsonParser unit = new DuckTypingJsonParser(yamlObjectMapper());
+    private final JsonQueryParser unit = new JsonQueryParser(jacksonObjectMapper());
 
     @Test
     public void shouldParseEmpty() {
@@ -55,7 +62,34 @@ public final class DuckTypingJsonParserTest {
         assertThat(unit.parse(map("active", "true")), is(map("active", BooleanNode.TRUE)));
     }
 
-    private <K, V> Map<K, V> map(final K key, final V value) {
+    @Test
+    public void shouldParseObjects() {
+        assertThat(unit.parse(map("price", "{\"amount\":25.0}")), is(map("price", new ObjectNode(instance,
+                map("amount", new DecimalNode(new BigDecimal(25.0)))))));
+    }
+
+    @Test
+    public void shouldParseArrays() {
+        assertThat(unit.parse(map("users", "[\"alice\",\"bob\"]")), is(map("users", new ArrayNode(instance,
+                Arrays.asList(new TextNode("alice"), new TextNode("bob"))))));
+    }
+
+    @Test
+    public void shouldParseEmptyStringsAsNull() {
+        assertThat(unit.parse(map("country", "")), is(map("country", NullNode.getInstance())));
+    }
+
+    @Test
+    public void shouldParseBlankStringsAsNull() {
+        assertThat(unit.parse(map("country", " ")), is(map("country", NullNode.getInstance())));
+    }
+
+    @Test
+    public void shouldParseNulls() {
+        assertThat(unit.parse(map("country", null)), is(map("country", NullNode.getInstance())));
+    }
+
+    private <K, V> Map<K, V> map(final K key, @Nullable final V value) {
         return singletonMap(key, value);
     }
 

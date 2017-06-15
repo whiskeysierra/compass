@@ -1,4 +1,4 @@
-Feature: Value deletion
+Feature: Delete a value
 
   Scenario: Delete value without dimensions
     Given the following keys:

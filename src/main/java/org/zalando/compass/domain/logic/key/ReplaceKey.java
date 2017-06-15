@@ -11,6 +11,9 @@ import org.zalando.compass.domain.persistence.KeyRepository;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.function.Function;
+
+import static org.zalando.compass.library.Changed.changed;
 
 @Component
 class ReplaceKey {
@@ -44,21 +47,14 @@ class ReplaceKey {
             repository.create(key);
             return true;
         } else {
-            // TODO detect changes and validate accordingly
-            final List<Value> values = lock.getValues();
+            if (changed(Key::getSchema, current, key)) {
+                final List<Value> values = lock.getValues();
+                validator.validate(key, values);
+            }
 
-            validateValuesIfNecessary(current, key, values);
             repository.update(key);
             return false;
         }
-    }
-
-    private void validateValuesIfNecessary(final Key current, final Key next, final List<Value> values) {
-        if (current.getSchema().equals(next.getSchema())) {
-            return;
-        }
-
-        validator.validate(next, values);
     }
 
 }

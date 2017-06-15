@@ -11,8 +11,6 @@ public interface DimensionService {
 
     Dimension read(String id);
 
-    List<Dimension> readAll(Set<String> ids);
-
     List<Dimension> readAll();
 
     void delete(String id);

@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
@@ -38,27 +37,27 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 @RestController
 class ValueResource {
 
-    private final FilterFactory factory;
+    private final JsonQueryParser parser;
     private final JsonReader reader;
     private final ValueService service;
 
     @Autowired
-    public ValueResource(final FilterFactory factory, final JsonReader reader,
+    public ValueResource(final JsonQueryParser parser, final JsonReader reader,
             final ValueService service) {
-        this.factory = factory;
+        this.parser = parser;
         this.reader = reader;
         this.service = service;
     }
 
     @RequestMapping(method = GET, path = "/keys/{key}/values")
     public ValuePage readAll(@PathVariable final String key, @RequestParam final Map<String, String> query) {
-        final Map<String, JsonNode> filter = factory.create(query);
+        final Map<String, JsonNode> filter = parser.parse(query);
         return new ValuePage(service.readAllByKey(key, filter));
     }
 
     @RequestMapping(method = GET, path = "/keys/{key}/value")
     public ResponseEntity<Value> read(@PathVariable final String key, @RequestParam final Map<String, String> query) {
-        final Map<String, JsonNode> filter = factory.create(query);
+        final Map<String, JsonNode> filter = parser.parse(query);
         final Value value = service.read(key, filter);
 
         return ResponseEntity.ok().location(canonicalUrl(key, value)).body(value);
@@ -79,7 +78,7 @@ class ValueResource {
     public ResponseEntity<Value> replace(@PathVariable final String key, @RequestParam final Map<String, String> query,
             @RequestBody final JsonNode node) throws IOException {
 
-        final ImmutableMap<String, JsonNode> dimensions = factory.create(query);
+        final ImmutableMap<String, JsonNode> dimensions = parser.parse(query);
         final Value input = reader.read(node, Value.class);
         final Value value = ensureConsistentDimensions(dimensions, input);
 
@@ -101,7 +100,7 @@ class ValueResource {
     @RequestMapping(method = DELETE, path = "/keys/{key}/values")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable final String key, @RequestParam final Map<String, String> query) {
-        final Map<String, JsonNode> filter = factory.create(query);
+        final Map<String, JsonNode> filter = parser.parse(query);
         service.delete(key, filter);
     }
 

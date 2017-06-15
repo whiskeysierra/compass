@@ -2,6 +2,7 @@ package org.zalando.compass.domain.logic.value;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.DecimalNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.collect.ImmutableList;
 import org.junit.Test;
@@ -144,12 +145,25 @@ public class ValueMatcherTest {
                 new RichValue(of(), decimal(0.25))));
     }
 
+    @Test
+    public void shouldMatchWithoutDimensionValues() {
+        assertThat(unit.match(values, of(country, nullNode(), after, nullNode())), contains(
+                new RichValue(of(country, text("CH"), after, text("2018-01-01T00:00:00Z")), decimal(0.09)),
+                new RichValue(of(country, text("CH"), after, text("2017-01-01T00:00:00Z")), decimal(0.08)),
+                new RichValue(of(country, text("DE"), after, text("2018-01-01T00:00:00Z")), decimal(0.22)),
+                new RichValue(of(country, text("DE"), after, text("2017-01-01T00:00:00Z")), decimal(0.2))));
+    }
+
     private JsonNode text(final String text) {
         return new TextNode(text);
     }
 
     private JsonNode decimal(final double v) {
         return new DecimalNode(new BigDecimal(v));
+    }
+
+    private JsonNode nullNode() {
+        return NullNode.getInstance();
     }
 
 }

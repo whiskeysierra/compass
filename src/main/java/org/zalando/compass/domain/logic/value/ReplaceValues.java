@@ -29,16 +29,13 @@ class ReplaceValues {
 
     @Transactional
     public void replace(final String key, final List<Value> values) {
-        // TODO does it make sense to split this up into create, update + delete?
-
-        repository.deleteByKey(key);
-
         final Locking.ValuesLock lock = locking.lock(key, values);
 
         validator.validate(lock.getDimensions(), values);
         validator.validate(lock.getKey(), values);
 
-        // TODO batch create
+        repository.deleteByKey(key);
+
         values.forEach(value ->
                 repository.create(key, value));
     }

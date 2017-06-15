@@ -39,7 +39,6 @@ class DimensionResource {
         this.service = service;
     }
 
-    // TODO even though the requirement for reserved keywords is motivated by the API layer, does it really belong here?
     @RequestMapping(method = PUT, path = "/{id}")
     public ResponseEntity<Dimension> replace(@PathVariable @NotReserved @Valid final String id,
             @RequestBody final JsonNode node) throws IOException {

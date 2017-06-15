@@ -13,13 +13,13 @@ import java.util.Map;
 import static org.zalando.compass.domain.persistence.ValueCriteria.byKey;
 
 @Component
-class ReadValuesByKeyAndFilter {
+class ReadValues {
 
     private final ValueRepository repository;
     private final ValueSelector selector;
 
     @Autowired
-    ReadValuesByKeyAndFilter(final ValueRepository repository, final ValueSelector selector) {
+    ReadValues(final ValueRepository repository, final ValueSelector selector) {
         this.repository = repository;
         this.selector = selector;
     }

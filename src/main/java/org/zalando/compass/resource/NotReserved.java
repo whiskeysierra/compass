@@ -1,5 +1,7 @@
 package org.zalando.compass.resource;
 
+import com.google.common.collect.ImmutableSet;
+
 import javax.validation.Constraint;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -23,6 +25,30 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @ReportAsSingleViolation
 public @interface NotReserved {
 
+    ImmutableSet<String> RESERVED = ImmutableSet.of(
+            // Zalando REST API Guidelines
+            // http://zalando.github.io/restful-api-guidelines/naming/Naming.html#may-use-conventional-query-strings
+            "q", // default query parameter
+            "limit", // to restrict the number of entries
+            "cursor", //key-based page start
+            "offset", // numeric offset page start
+            "sort", //comma-separated list of fields to sort
+            "fields", //to retrieve a subset of fields
+            "embed", // to expand embedded entFities
+
+            // Google Cloud Platform: API Design Guide
+            // https://cloud.google.com/apis/design/standard_fields
+            "filter",
+            "query",
+            "page_token",
+            "page_size",
+            "order_by",
+            "show_deleted",
+
+            // Compass specific
+            "key"
+    );
+
     String message() default "may not be a reserved keyword";
 
     Class<?>[] groups() default {};
@@ -38,7 +64,7 @@ public @interface NotReserved {
 
         @Override
         public boolean isValid(final String value, final ConstraintValidatorContext context) {
-            return !Keywords.RESERVED.contains(value);
+            return !RESERVED.contains(value);
         }
     }
 

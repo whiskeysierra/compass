@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.InsertResultStep;
 import org.jooq.Query;
 import org.jooq.Record;
 import org.jooq.Record2;
@@ -24,6 +25,7 @@ import org.zalando.compass.domain.persistence.model.tables.records.ValueRecord;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -111,7 +113,6 @@ public class ValueRepository{
                 .on(KEY.ID.eq(VALUE.KEY_ID))
                 .leftJoin(VALUE_DIMENSION)
                 .on(VALUE.ID.eq(VALUE_DIMENSION.VALUE_ID))
-                // TODO index
                 .where(keyPattern == null ? emptySet() : singleton(KEY.ID.likeIgnoreCase("%" + keyPattern + "%")))
                 .orderBy(KEY.ID, VALUE.ID)
                 .fetchGroups(r -> r.into(KEY).into(Key.class));

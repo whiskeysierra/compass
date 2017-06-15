@@ -1,8 +1,12 @@
 package org.zalando.compass.domain.logic.relation;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.networknt.schema.JsonType;
 import lombok.EqualsAndHashCode;
 import org.zalando.compass.domain.model.Relation;
+
+import java.util.Collections;
+import java.util.Set;
 
 @EqualsAndHashCode(callSuper = false)
 public final class PrefixMatch implements Relation {
@@ -25,8 +29,18 @@ public final class PrefixMatch implements Relation {
     }
 
     @Override
+    public Set<JsonType> supports() {
+        return Collections.singleton(JsonType.STRING);
+    }
+
+    @Override
     public boolean test(final JsonNode configured, final JsonNode requested) {
         return requested.asText().startsWith(configured.asText());
+    }
+
+    @Override
+    public String toString() {
+        return getId();
     }
 
 }
