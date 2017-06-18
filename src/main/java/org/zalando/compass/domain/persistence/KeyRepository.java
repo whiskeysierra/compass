@@ -7,9 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.model.Key;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
 import static org.zalando.compass.domain.persistence.model.Tables.KEY;
 
 @Component
@@ -46,9 +49,10 @@ public class KeyRepository {
                 .where(KEY.ID.eq(id));
     }
 
-    public List<Key> findAll() {
+    public List<Key> findAll(@Nullable final String keyPattern) {
         return db.select()
                 .from(KEY)
+                .where(keyPattern == null ? emptySet() : singleton(KEY.ID.likeIgnoreCase("%" + keyPattern + "%")))
                 .orderBy(KEY.ID.asc())
                 .fetchInto(Key.class);
     }

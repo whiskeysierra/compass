@@ -2,7 +2,7 @@ package org.zalando.compass.domain.logic;
 
 import org.zalando.compass.domain.model.Key;
 
-import java.io.IOException;
+import javax.annotation.Nullable;
 import java.util.List;
 
 public interface KeyService {
@@ -11,7 +11,7 @@ public interface KeyService {
 
     Key read(String id);
 
-    List<Key> readAll();
+    List<Key> readAllByKeyPattern(@Nullable String keyPattern);
 
     void delete(String id);
 

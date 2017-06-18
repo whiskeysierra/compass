@@ -7,11 +7,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.KeyService;
 import org.zalando.compass.domain.model.Key;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -36,8 +38,8 @@ class KeyResource {
     }
 
     @RequestMapping(method = GET)
-    public KeyPage getAll() {
-        return new KeyPage(service.readAll());
+    public KeyPage getAll(@RequestParam(name = "q", required = false) @Nullable final String q) {
+        return new KeyPage(service.readAllByKeyPattern(q));
     }
 
     @RequestMapping(method = GET, path = "/{id}")

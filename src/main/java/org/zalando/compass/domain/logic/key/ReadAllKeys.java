@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.persistence.KeyRepository;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 @Component
@@ -19,8 +20,8 @@ class ReadAllKeys {
     }
 
     @Transactional(readOnly = true)
-    List<Key> read() {
-        return repository.findAll();
+    List<Key> read(@Nullable final String keyPattern) {
+        return repository.findAll(keyPattern);
     }
 
 }

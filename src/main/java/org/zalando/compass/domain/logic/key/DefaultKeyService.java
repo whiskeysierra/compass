@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.zalando.compass.domain.logic.KeyService;
 import org.zalando.compass.domain.model.Key;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 @Service
@@ -35,8 +36,8 @@ class DefaultKeyService implements KeyService {
     }
 
     @Override
-    public List<Key> readAll() {
-        return readAll.read();
+    public List<Key> readAllByKeyPattern(@Nullable final String keyPattern) {
+        return readAll.read(keyPattern);
     }
 
     @Override

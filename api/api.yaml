@@ -121,7 +121,12 @@ paths:
   /keys:
     get:
       tags: [keys]
-      summary: Read all keys
+      summary: Read all keys and optionally filter by key pattern
+      parameters:
+        - name: q
+          description: Key pattern
+          in: query
+          type: string
       responses:
         200:
           description: OK
@@ -287,7 +292,7 @@ paths:
   /values:
     get:
       tags: [values]
-      summary: Read all values and filter by key pattern
+      summary: Read all values and optionally filter by key pattern
       parameters:
         - name: q
           description: Key pattern
