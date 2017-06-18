@@ -66,3 +66,12 @@ Feature: Dimension creation
       | query        |
       | show_deleted |
       | sort         |
+
+  Scenario: Creating a new dimension fails due to unsupported schema type
+    Given there are no dimensions
+    When "PUT /dimensions/example" when requested with:
+      | schema.type | relation | description |
+      | "number"    | "~"      | ".."        |
+    Then "400 Bad Request" was returned with:
+      | detail                                            |
+      | "'number' is not among supported types: [string]" |

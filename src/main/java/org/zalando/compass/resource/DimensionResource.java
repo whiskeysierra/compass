@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
 
-import javax.validation.Valid;
 import java.io.IOException;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -26,7 +24,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 @RestController
 @RequestMapping(path = "/dimensions")
-@Validated
 class DimensionResource {
 
     // TODO can we move this somewhere inside spring? a filter maybe?
@@ -40,7 +37,7 @@ class DimensionResource {
     }
 
     @RequestMapping(method = PUT, path = "/{id}")
-    public ResponseEntity<Dimension> replace(@PathVariable @NotReserved @Valid final String id,
+    public ResponseEntity<Dimension> replace(@PathVariable final String id,
             @RequestBody final JsonNode node) throws IOException {
 
         final Dimension input = reader.read(node, Dimension.class);

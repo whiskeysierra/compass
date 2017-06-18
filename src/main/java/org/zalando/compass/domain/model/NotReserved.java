@@ -1,4 +1,4 @@
-package org.zalando.compass.resource;
+package org.zalando.compass.domain.model;
 
 import com.google.common.collect.ImmutableSet;
 

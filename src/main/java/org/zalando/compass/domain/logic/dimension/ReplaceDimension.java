@@ -1,10 +1,9 @@
 package org.zalando.compass.domain.logic.dimension;
 
-import com.networknt.schema.JsonType;
-import com.networknt.schema.TypeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.zalando.compass.domain.logic.Locking;
 import org.zalando.compass.domain.logic.RelationService;
 import org.zalando.compass.domain.logic.ValidationService;
@@ -15,12 +14,12 @@ import org.zalando.compass.domain.persistence.DimensionRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
 
 import javax.annotation.Nullable;
+import javax.validation.Valid;
 import java.util.List;
-import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.zalando.compass.library.Changed.changed;
 
+@Validated
 @Component
 class ReplaceDimension {
 
@@ -47,7 +46,7 @@ class ReplaceDimension {
      * @return true if dimension was created, false if an existing one was updated
      */
     @Transactional
-    public boolean replace(final Dimension dimension) {
+    public boolean replace(@Valid final Dimension dimension) {
 
         final Locking.DimensionLock lock = locking.lock(dimension);
         @Nullable final Dimension current = lock.getDimension();
@@ -74,12 +73,7 @@ class ReplaceDimension {
 
     private void validateRelation(final Dimension dimension) {
         final Relation relation = readRelation(dimension);
-
-        final Set<JsonType> types = relation.supports();
-        // TODO move this somewhere else?
-        final JsonType type = TypeFactory.getSchemaNodeType(dimension.getSchema().get("type"));
-
-        checkArgument(types.contains(type), "Relation '%s' only supports %s", relation, types);
+        validator.validate(dimension, relation);
     }
 
     private Relation readRelation(final Dimension dimension) {

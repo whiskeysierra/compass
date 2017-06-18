@@ -6,8 +6,10 @@ import lombok.experimental.Wither;
 @lombok.Value
 public final class Dimension {
 
+    @NotReserved
     @Wither
     String id;
+
     JsonNode schema;
     String relation;
     String description;

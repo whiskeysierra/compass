@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Key;
+import org.zalando.compass.domain.model.Relation;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.library.JsonSchemaValidator;
 
@@ -22,6 +23,10 @@ public class ValidationService {
     @Autowired
     public ValidationService(final JsonSchemaValidator validator) {
         this.validator = validator;
+    }
+
+    public void validate(final Dimension dimension, final Relation relation) {
+        validator.validate(relation.supports(), dimension.getSchema());
     }
 
     public void validate(final Dimension dimension, final Collection<Value> values) {

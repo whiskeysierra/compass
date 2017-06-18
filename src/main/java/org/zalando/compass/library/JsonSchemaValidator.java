@@ -7,24 +7,25 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
+import com.networknt.schema.JsonType;
 import com.networknt.schema.JsonValidator;
+import com.networknt.schema.TypeFactory;
 import com.networknt.schema.ValidationMessage;
 import org.springframework.stereotype.Component;
-import org.zalando.problem.Problem;
 import org.zalando.problem.ThrowableProblem;
 import org.zalando.problem.spring.web.advice.validation.ConstraintViolationProblem;
 import org.zalando.problem.spring.web.advice.validation.Violation;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.URI;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.io.Resources.getResource;
 import static java.util.Arrays.stream;
 import static java.util.Comparator.comparing;
@@ -39,6 +40,11 @@ public class JsonSchemaValidator {
     private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
     private final JsonSchemaFactory factory = new JsonSchemaFactory(mapper);
     private final LoadingCache<String, JsonSchema> schemas = CacheBuilder.newBuilder().build(new SchemaLoader(mapper, factory));
+
+    public void validate(final Collection<JsonType> types, final JsonNode schema) {
+        final JsonType type = TypeFactory.getSchemaNodeType(schema.path("type"));
+        checkArgument(types.contains(type), "'%s' is not among supported types: %s", type, types);
+    }
 
     public void validate(final String name, final JsonNode node) {
         validate(schemas.getUnchecked(name), node);
