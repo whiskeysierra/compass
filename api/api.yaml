@@ -398,7 +398,7 @@ definitions:
         example: country
       schema:
         description: The schema that applies to all values of this dimension across all values.
-        $ref: 'http://json-schema.org/schema#' # TODO copy locally
+        $ref: 'api/json-schema.json#'
         example:
           type: string
           pattern: '^[A-Z]{2}$'
@@ -438,7 +438,7 @@ definitions:
         example: tax-rate
       schema:
         description: The schema that applies to all values of this key.
-        $ref: 'http://json-schema.org/schema#' # TODO copy locally
+        $ref: 'api/json-schema.json#'
         example:
           type: number
           format: decimal
