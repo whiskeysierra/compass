@@ -60,7 +60,7 @@ Feature: Read value
       | "DE"               | "2007-01-01T00:00:00Z" | 0.16  |
       | "DE"               | "2018-01-01T00:00:00Z" | 0.19  |
     When "GET /keys/tax-rate/value?country=DE&before=2017-06-10T14:03:21Z" returns "200 OK" with headers:
-      | Location                                                                         |
+      | Content-Location                                                                 |
       | http://localhost:8080/keys/tax-rate/value?before=2018-01-01T00:00:00Z&country=DE |
 
   Scenario: Get all values

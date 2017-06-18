@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,7 +61,9 @@ class ValueResource {
         final Map<String, JsonNode> filter = parser.parse(query);
         final Value value = service.read(key, filter);
 
-        return ResponseEntity.ok().location(canonicalUrl(key, value)).body(value);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_LOCATION, canonicalUrl(key, value).toASCIIString())
+                .body(value);
     }
 
     @RequestMapping(method = PUT, path = "/keys/{key}/values")

@@ -253,7 +253,7 @@ paths:
 
         - `GET /keys/tax-rate/value`, tax rate that applies to all country (probably none, so `404 Not Found`)
         - `GET /keys/tax-rate/value?country=DE`, tax rate for Germany
-        - `GET /keys/tax-rate/value?country=DE&after=2015-09-07T16:00:00`, tax rate for Germany that are valid after 2015-09-07T16:00:00
+        - `GET /keys/tax-rate/value?country=DE&after=2015-09-07T16:00:00`, tax rate for Germany that is valid after 2015-09-07T16:00:00
 
         Values have an explicit ordering that can be changed by replacing all values. Selecting the best value for
         a given key and selected dimensions is based on that order. The first match will be returned. That implies
@@ -265,7 +265,7 @@ paths:
         200:
           description: OK
           headers:
-            Location:
+            Content-Location:
               description: Canonical URL of this value
               type: string
               format: uri
