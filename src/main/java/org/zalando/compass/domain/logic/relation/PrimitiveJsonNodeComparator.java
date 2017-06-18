@@ -1,17 +1,15 @@
 package org.zalando.compass.domain.logic.relation;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.ComparisonChain;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.Iterators;
 import com.google.common.collect.Ordering;
 import com.google.common.primitives.Booleans;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.List;
 
-// TODO library?
+import static com.google.common.collect.Lists.newArrayList;
+
 final class PrimitiveJsonNodeComparator extends Ordering<JsonNode> {
 
     @Override
@@ -27,40 +25,70 @@ final class PrimitiveJsonNodeComparator extends Ordering<JsonNode> {
         return compareNonNull(left, right);
     }
 
+    private static boolean isNull(@Nullable final JsonNode node) {
+        return node == null || node.isNull();
+    }
+
     private int compareNonNull(final JsonNode left, final JsonNode right) {
         if (left.getNodeType() == right.getNodeType()) {
             switch (left.getNodeType()) {
                 case ARRAY:
-                    return lexicographical().compare(left, right);
+                    return compareArrays(left, right);
                 case BOOLEAN:
-                    return Booleans.compare(left.booleanValue(), right.booleanValue());
+                    return compareBooleans(left, right);
                 case NUMBER:
-                    return left.decimalValue().compareTo(right.decimalValue());
+                    return compareNumbers(left, right);
                 case OBJECT:
-                    final List<String> leftNames = ImmutableList.sortedCopyOf(left::fieldNames);
-                    final List<String> rightNames = ImmutableList.sortedCopyOf(right::fieldNames);
-
-                    final ComparisonChain comparison = ComparisonChain.start()
-                            .compare(leftNames, rightNames, natural().lexicographical());
-
-                    return leftNames.stream()
-                            .reduce(comparison,
-                                    (chain, field) -> chain.compare(left.get(field), right.get(field), this),
-                                    (a, b) -> {
-                                        // TODO combine two chains
-                                        throw new UnsupportedOperationException();
-                                    })
-                            .result();
+                    return compareObjects(left, right);
                 case STRING:
-                    return left.asText().compareTo(right.asText());
+                    return compareStrings(left, right);
             }
         }
 
-        return left.getNodeType().compareTo(right.getNodeType());
+        throw new UnsupportedOperationException(
+                "Unsupported types: " + left.getNodeType() + " and " + right.getNodeType());
     }
 
-    private static boolean isNull(@Nullable final JsonNode node) {
-        return node == null || node.isNull();
+    private int compareArrays(final JsonNode left, final JsonNode right) {
+        return lexicographical().compare(left, right);
+    }
+
+    private int compareBooleans(final JsonNode left, final JsonNode right) {
+        return Booleans.compare(left.booleanValue(), right.booleanValue());
+    }
+
+    private int compareNumbers(final JsonNode left, final JsonNode right) {
+        return left.decimalValue().compareTo(right.decimalValue());
+    }
+
+    private int compareObjects(final JsonNode left, final JsonNode right) {
+        final List<String> leftNames = sortedFieldNames(left);
+        final List<String> rightNames = sortedFieldNames(right);
+
+        final int result = Ordering.<String>natural().lexicographical()
+                .compare(leftNames, rightNames);
+
+        if (result != 0) {
+            return result;
+        }
+
+        for (final String name : leftNames) {
+            if (compare(left.get(name), right.get(name)) != 0) {
+                return 0;
+            }
+        }
+
+        return 0;
+    }
+
+    private int compareStrings(final JsonNode left, final JsonNode right) {
+        return left.asText().compareTo(right.asText());
+    }
+
+    private List<String> sortedFieldNames(final JsonNode node) {
+        final List<String> fieldNames = newArrayList(node.fieldNames());
+        Collections.sort(fieldNames);
+        return fieldNames;
     }
 
 }

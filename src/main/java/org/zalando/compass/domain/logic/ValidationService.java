@@ -44,7 +44,6 @@ public class ValidationService {
             @Nullable final JsonNode node = value.getDimensions().get(dimension.getId());
 
             if (node == null) {
-                // TODO test this
                 continue;
             }
 

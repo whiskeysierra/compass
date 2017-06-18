@@ -26,7 +26,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 @RequestMapping(path = "/dimensions")
 class DimensionResource {
 
-    // TODO can we move this somewhere inside spring? a filter maybe?
     private final JsonReader reader;
     private final DimensionService service;
 
@@ -43,8 +42,11 @@ class DimensionResource {
         final Dimension input = reader.read(node, Dimension.class);
         final Dimension dimension = ensureConsistentId(id, input);
 
-        final HttpStatus status = service.replace(dimension) ? CREATED : OK;
-        return ResponseEntity.status(status).body(dimension);
+        final boolean created = service.replace(dimension);
+
+        return ResponseEntity
+                .status(created ? CREATED : OK)
+                .body(dimension);
     }
 
     private Dimension ensureConsistentId(@PathVariable final String id, final Dimension input) {

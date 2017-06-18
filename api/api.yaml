@@ -230,11 +230,11 @@ paths:
         - $ref: '#/parameters/Key'
         - $ref: '#/parameters/Filter'
         - name: value
+          description: If dimensions are present in the body they have to match the query parameters.
           in: body
           required: true
           schema:
             $ref: '#/definitions/Value'
-            # TODO dimensions have to match query string, if present
       responses:
         200:
           description: OK

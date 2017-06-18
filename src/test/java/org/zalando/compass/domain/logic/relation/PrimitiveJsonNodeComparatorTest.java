@@ -26,18 +26,24 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertThat;
 
-// TODO verify type match
 public final class PrimitiveJsonNodeComparatorTest {
 
     private final Comparator<JsonNode> unit = new PrimitiveJsonNodeComparator();
 
     @Test
-    public void shouldCompareStrings() {
-        test(textNode("a"), textNode("b"), less());
-        test(textNode("a"), textNode("a"), equal());
-        test(textNode("b"), textNode("a"), greater());
-        test(textNode("a"), nullNode(), greater());
-        test(nullNode(), textNode("a"), less());
+    public void shouldCompareNulls() {
+        test(nullNode(), nullNode(), equal());
+    }
+
+    // TODO array
+
+    @Test
+    public void shouldCompareBoolean() {
+        test(falseNode(), trueNode(), less());
+        test(trueNode(), trueNode(), equal());
+        test(trueNode(), falseNode(), greater());
+        test(trueNode(), nullNode(), greater());
+        test(nullNode(), trueNode(), less());
     }
 
     @Test
@@ -64,23 +70,19 @@ public final class PrimitiveJsonNodeComparatorTest {
                 new DecimalNode(BigDecimal.valueOf(value)));
     }
 
-    @Test
-    public void shouldCompareBoolean() {
-        test(falseNode(), trueNode(), less());
-        test(trueNode(), trueNode(), equal());
-        test(trueNode(), falseNode(), greater());
-        test(trueNode(), nullNode(), greater());
-        test(nullNode(), trueNode(), less());
-    }
+    // TODO objects
 
     @Test
-    public void shouldCompareNulls() {
-        test(nullNode(), nullNode(), equal());
+    public void shouldCompareStrings() {
+        test(textNode("a"), textNode("b"), less());
+        test(textNode("a"), textNode("a"), equal());
+        test(textNode("b"), textNode("a"), greater());
+        test(textNode("a"), nullNode(), greater());
+        test(nullNode(), textNode("a"), less());
     }
 
-    private void test(final JsonNode left, final JsonNode right, final Matcher<Integer> matcher) {
-        assertThat(unit.compare(left, right), matcher);
-    }
+    // TODO type mismatch
+    // TODO unsupported types
 
     private Matcher<Integer> less() {
         return lessThan(0);
@@ -97,7 +99,7 @@ public final class PrimitiveJsonNodeComparatorTest {
     private JsonNode textNode(final String text) {
         return new TextNode(text);
     }
-    
+
     private JsonNode trueNode() {
         return BooleanNode.TRUE;
     }
@@ -108,6 +110,10 @@ public final class PrimitiveJsonNodeComparatorTest {
 
     private JsonNode nullNode() {
         return NullNode.getInstance();
+    }
+
+    private void test(final JsonNode left, final JsonNode right, final Matcher<Integer> matcher) {
+        assertThat(unit.compare(left, right), matcher);
     }
 
 }

@@ -19,7 +19,17 @@ import static java.util.stream.Collectors.toSet;
 import static org.zalando.compass.domain.persistence.ValueCriteria.byDimension;
 import static org.zalando.compass.domain.persistence.ValueCriteria.byKey;
 
-// TODO document locking order: dimensions, keys and values all ordered by id
+/**
+ * Centralizes locking of entities. In order to avoid deadlocks we ensure the following order of locks:
+ *
+ * <ol>
+ *     <li>Dimensions</li>
+ *     <li>Keys</li>
+ *     <li>Values</li>
+ * </ol>
+ *
+ * All ordered by id, respectively.
+ */
 @Component
 public class Locking {
 

@@ -80,7 +80,6 @@ class ReplaceDimension {
         try {
             return relationService.read(dimension.getRelation());
         } catch (final NotFoundException e) {
-            // TODO should result in 400 Bad Request
             throw new IllegalArgumentException(e);
         }
     }

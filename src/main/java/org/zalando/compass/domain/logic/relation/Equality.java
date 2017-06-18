@@ -8,7 +8,6 @@ import org.zalando.compass.domain.model.Relation;
 import java.util.EnumSet;
 import java.util.Set;
 
-// TODO can this be package private?
 @EqualsAndHashCode
 public final class Equality implements Relation {
 

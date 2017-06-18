@@ -53,8 +53,11 @@ class KeyResource {
         final Key input = reader.read(node, Key.class);
         final Key key = ensureConsistentId(id, input);
 
-        final HttpStatus status = service.replace(key) ? CREATED : OK;
-        return ResponseEntity.status(status).body(key);
+        final boolean created = service.replace(key);
+
+        return ResponseEntity
+                .status(created ? CREATED : OK)
+                .body(key);
     }
 
     private Key ensureConsistentId(@PathVariable final String id, final Key input) {
