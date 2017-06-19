@@ -382,7 +382,7 @@ definitions:
       - description
   ID:
     type: string
-    pattern: '^([a-z0-9]+(-[a-z0-9]+)*)(\.([a-z0-9]+(-[a-z0-9]+)*))*$'
+    pattern: '^([a-z0-9]+(-[a-z0-9]+)*)([.]([a-z0-9]+(-[a-z0-9]+)*))*$'
     example: country
   DimensionPage:
     type: object
@@ -447,8 +447,8 @@ definitions:
         example:
           type: number
           format: decimal
-          min: 0.0
-          max: 1.0
+          minimum: 0.0
+          maximum: 1.0
       description:
         type: string
         description: |

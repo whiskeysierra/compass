@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+import org.zalando.compass.domain.logic.BadArgumentException;
 import org.zalando.compass.domain.logic.Locking;
 import org.zalando.compass.domain.logic.RelationService;
 import org.zalando.compass.domain.logic.ValidationService;
@@ -80,7 +81,7 @@ class ReplaceDimension {
         try {
             return relationService.read(dimension.getRelation());
         } catch (final NotFoundException e) {
-            throw new IllegalArgumentException(e);
+            throw new BadArgumentException(e);
         }
     }
 

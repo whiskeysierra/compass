@@ -32,12 +32,13 @@ Feature: Dimension creation
 
   Scenario: Creating a new dimension failed due to schema violation
     Given there are no dimensions
-    When "PUT /dimensions/foo" when requested with:
+    When "PUT /dimensions/FOO" when requested with:
       | schema.type | relation | description |
       | "any"       | 17       | false       |
     Then "400 Bad Request" was returned with a list of violations:
       | field           | message                                                                                                           |
       | "$.description" | "$.description: boolean found, string expected"                                                                   |
+      | "$.id"          | "$.id: does not match the regex pattern ^([a-z0-9]+(-[a-z0-9]+)*)([.]([a-z0-9]+(-[a-z0-9]+)*))*$"                 |
       | "$.relation"    | "$.relation: integer found, string expected"                                                                      |
       | "$.schema.type" | "$.schema.type: does not have a value in the enumeration [array, boolean, integer, null, number, object, string]" |
       | "$.schema.type" | "$.schema.type: string found, array expected"                                                                     |
@@ -59,12 +60,8 @@ Feature: Dimension creation
       | key          |
       | limit        |
       | offset       |
-      | order_by     |
-      | page_size    |
-      | page_token   |
       | q            |
       | query        |
-      | show_deleted |
       | sort         |
 
   Scenario: Creating a new dimension fails due to unsupported schema type
@@ -72,6 +69,6 @@ Feature: Dimension creation
     When "PUT /dimensions/example" when requested with:
       | schema.type | relation | description |
       | "number"    | "~"      | ".."        |
-    Then "400 Bad Request" was returned with:
-      | detail                                            |
+    Then "400 Bad Request" was returned with a list of violations:
+      | message                                           |
       | "'number' is not among supported types: [string]" |

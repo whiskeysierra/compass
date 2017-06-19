@@ -1,8 +1,8 @@
 package org.zalando.compass.resource;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,13 +16,13 @@ import org.zalando.compass.domain.model.Key;
 import javax.annotation.Nullable;
 import java.io.IOException;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
+import static org.zalando.compass.domain.logic.BadArgumentException.checkArgument;
 
 @RestController
 @RequestMapping(path = "/keys")
@@ -49,9 +49,9 @@ class KeyResource {
 
     @RequestMapping(method = PUT, path = "/{id}")
     public ResponseEntity<Key> put(@PathVariable final String id,
-            @RequestBody final JsonNode node) throws IOException {
-        final Key input = reader.read(node, Key.class);
-        final Key key = ensureConsistentId(id, input);
+            @RequestBody final ObjectNode node) throws IOException {
+        ensureConsistentId(id, node);
+        final Key key = reader.read(node, Key.class);
 
         final boolean created = service.replace(key);
 
@@ -60,11 +60,11 @@ class KeyResource {
                 .body(key);
     }
 
-    private Key ensureConsistentId(@PathVariable final String id, final Key input) {
-        checkArgument(input.getId() == null || id.equals(input.getId()),
-                "If present, ID body must match with URL");
+    private void ensureConsistentId(@PathVariable final String id, final ObjectNode node) {
+        final JsonNode idInBody = node.get("id");
+        checkArgument(idInBody == null || id.equals(idInBody.asText()), "If present, ID body must match with URL");
 
-        return input.withId(id);
+        node.put("id", id);
     }
 
     @RequestMapping(method = DELETE, path = "/{id}")

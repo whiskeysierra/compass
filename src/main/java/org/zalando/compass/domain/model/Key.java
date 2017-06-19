@@ -8,6 +8,7 @@ public final class Key {
 
     @Wither
     String id;
+
     JsonNode schema;
     String description;
 

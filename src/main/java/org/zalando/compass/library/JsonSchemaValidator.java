@@ -22,10 +22,10 @@ import org.zalando.problem.spring.web.advice.validation.Violation;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.io.Resources.getResource;
 import static java.util.Arrays.stream;
 import static java.util.Comparator.comparing;
@@ -43,7 +43,12 @@ public class JsonSchemaValidator {
 
     public void validate(final Collection<JsonType> types, final JsonNode schema) {
         final JsonType type = TypeFactory.getSchemaNodeType(schema.path("type"));
-        checkArgument(types.contains(type), "'%s' is not among supported types: %s", type, types);
+
+        if (!types.contains(type)) {
+            throw new ConstraintViolationProblem(BAD_REQUEST, Collections.singletonList(
+                    new Violation("$.schema", String.format("'%s' is not among supported types: %s", type, types))
+            ));
+        }
     }
 
     public void validate(final String name, final JsonNode node) {
