@@ -1,6 +1,8 @@
 package org.zalando.compass.features;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableMap;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
@@ -22,12 +24,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import static com.fasterxml.jackson.databind.node.JsonNodeFactory.instance;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.parseMediaType;
+import static org.zalando.compass.library.JsonPointerMod.putAt;
 import static org.zalando.riptide.Bindings.anyStatus;
 import static org.zalando.riptide.Bindings.on;
 import static org.zalando.riptide.Navigators.contentType;
@@ -111,9 +115,12 @@ public class HttpSteps {
 
     @When("^\"([A-Z]+) ([^ ]*)\" returns \"(\\d+) (.+)\" when requested with a list of (.+):$")
     public void returnsWhenRequestedWithAListOf(final HttpMethod method, final String uri, final int statusCode,
-            final String reasonPhrase, final String key, final Datatable table) throws IOException {
+            final String reasonPhrase, final String path, final Datatable table) throws IOException {
 
-        final ResponseEntity<JsonNode> response = request(method, uri, ImmutableMap.of(key, mapper.map(table)));
+        final ObjectNode body = new ObjectNode(instance);
+        putAt(body, path, new ArrayNode(instance).addAll(mapper.map(table)));
+
+        final ResponseEntity<JsonNode> response = request(method, uri, body);
 
         verifyStatus(response, statusCode, reasonPhrase);
     }
@@ -126,10 +133,13 @@ public class HttpSteps {
     }
 
     @When("^\"([A-Z]+) ([^ ]*)\" when requested with a list of (.+):$")
-    public void whenRequestedWithAListOf(final HttpMethod method, final String uri, final String key,
+    public void whenRequestedWithAListOf(final HttpMethod method, final String uri, final String path,
             final Datatable table) throws IOException {
 
-        lastResponse.set(requestAsync(method, uri, ImmutableMap.of(key, mapper.map(table))));
+        final ObjectNode body = new ObjectNode(instance);
+        putAt(body, path, new ArrayNode(instance).addAll(mapper.map(table)));
+
+        lastResponse.set(requestAsync(method, uri, body));
     }
 
     @Then("^\"(\\d+) (.+)\" was returned with a list of (.+):$")
@@ -209,7 +219,7 @@ public class HttpSteps {
 
     private Datatable renderList(final ResponseEntity<JsonNode> response, final String path, final Datatable expected) throws IOException {
         final JsonNode body = response.getBody();
-        final ArrayList<JsonNode> nodes = newArrayList(body.at("/" + path));
+        final ArrayList<JsonNode> nodes = newArrayList(body.at(path));
         return mapper.map(nodes, expected.getHeader());
     }
 
