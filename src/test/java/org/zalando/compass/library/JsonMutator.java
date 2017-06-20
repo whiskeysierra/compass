@@ -7,19 +7,19 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import static com.fasterxml.jackson.databind.node.JsonNodeFactory.instance;
 
-public final class JsonPointerMod {
+public final class JsonMutator {
 
-    public static void putAt(final JsonNode node, final String pointer, final JsonNode value) {
-        putAt(node, JsonPointer.compile(pointer), value);
+    public static void setAt(final JsonNode node, final String pointer, final JsonNode value) {
+        setAt(node, JsonPointer.compile(pointer), value);
     }
 
-    public static void putAt(final JsonNode node, final JsonPointer pointer, final JsonNode value) {
+    public static void setAt(final JsonNode node, final JsonPointer pointer, final JsonNode value) {
         if (value.isMissingNode()) {
             return;
         }
 
         final JsonNode parent = createParents(node, pointer);
-        setAt(parent, pointer.last(), value);
+        set(parent, pointer.last(), value);
     }
 
     private static JsonNode createParents(final JsonNode node, final JsonPointer pointer) {
@@ -27,13 +27,13 @@ public final class JsonPointerMod {
 
         if (node.at(head).isMissingNode()) {
             createParents(node, head);
-            setAt(node, head, pointer.mayMatchProperty() ? new ObjectNode(instance) : new ArrayNode(instance));
+            set(node, head, pointer.mayMatchProperty() ? new ObjectNode(instance) : new ArrayNode(instance));
         }
 
         return node.at(head);
     }
 
-    private static void setAt(final JsonNode node, final JsonPointer pointer, final JsonNode value) {
+    private static void set(final JsonNode node, final JsonPointer pointer, final JsonNode value) {
         if (pointer.mayMatchProperty()) {
             ObjectNode.class.cast(node).set(pointer.getMatchingProperty(), value);
         } else if (pointer.mayMatchElement()) {

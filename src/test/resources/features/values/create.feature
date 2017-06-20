@@ -4,7 +4,7 @@ Feature: Value update
     Given the following keys:
       | /id        | /schema/type | /description |
       | "tax-rate" | "number"     | ".."         |
-    And "GET /keys/tax-rate/values" returns "200 OK" with an empty list of values
+    And "GET /keys/tax-rate/values" returns "200 OK" with an empty list of /values
     When "PUT /keys/tax-rate/value" returns "201 Created" when requested with:
       | /value |
       | 0.19   |
@@ -16,7 +16,7 @@ Feature: Value update
     Given the following keys:
       | /id        | /schema/type | /description |
       | "tax-rate" | "number"     | ".."         |
-    And "GET /keys/tax-rate/values" returns "200 OK" with an empty list of values
+    And "GET /keys/tax-rate/values" returns "200 OK" with an empty list of /values
     When "PUT /keys/tax-rate/value" returns "201 Created" when requested with:
       | /dimensions | /value |
       | {}          | 0.19   |
@@ -79,7 +79,7 @@ Feature: Value update
     Given the following keys:
       | /id        | /schema/type | /description |
       | "tax-rate" | "number"     | ".."         |
-    And "GET /keys/tax-rate/values" returns "200 OK" with an empty list of values
+    And "GET /keys/tax-rate/values" returns "200 OK" with an empty list of /values
     When "PUT /keys/tax-rate/value" when requested with:
       | /value |
       | "19%"  |

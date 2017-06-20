@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.zuchini.runner.tables.Datatable;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +17,7 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static org.zalando.compass.library.JsonPointerMod.putAt;
+import static org.zalando.compass.library.JsonMutator.setAt;
 import static org.zalando.fauxpas.FauxPas.throwingConsumer;
 import static org.zalando.fauxpas.FauxPas.throwingFunction;
 
@@ -57,7 +56,7 @@ public class TableMapper {
             final String cell = row.get(header);
             final JsonNode value = cell.isEmpty() ? MissingNode.getInstance() : mapper.readTree(cell);
 
-            putAt(node, pointer, value);
+            setAt(node, pointer, value);
         }));
 
         return node;

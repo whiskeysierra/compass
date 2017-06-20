@@ -2,8 +2,8 @@ package org.zalando.compass.features;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.collect.ImmutableMap;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
@@ -27,11 +27,13 @@ import java.util.concurrent.CompletableFuture;
 import static com.fasterxml.jackson.databind.node.JsonNodeFactory.instance;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.parseMediaType;
-import static org.zalando.compass.library.JsonPointerMod.putAt;
+import static org.zalando.compass.library.JsonMutator.setAt;
 import static org.zalando.riptide.Bindings.anyStatus;
 import static org.zalando.riptide.Bindings.on;
 import static org.zalando.riptide.Navigators.contentType;
@@ -93,14 +95,19 @@ public class HttpSteps {
         assertThat(actual, matchesTable(expected));
     }
 
-    @Then("^\"([A-Z]+) ([^ ]*)\" returns \"(\\d+) (.+)\" with an empty list of (.+)$")
-    public void returnsWithAnEmptyListOf(final HttpMethod method, final String uri, final int statusCode,
-            final String reasonPhrase, final String key) {
+    @Then("^\"([A-Z]+) ([^ ]*)\" returns \"(\\d+) (.+)\" with an (absent|empty) list of (.+)$")
+    public void returnsWithAnAbsentOrEmptyListOf(final HttpMethod method, final String uri, final int statusCode,
+            final String reasonPhrase, final String type, final String key) {
         final ResponseEntity<JsonNode> response = request(method, uri);
 
         verifyStatus(response, statusCode, reasonPhrase);
 
-        final JsonNode list = response.getBody().at("/" + key);
+        final JsonNode list = response.getBody().at(key);
+
+        if (type.equals("empty")) {
+            assertThat(list, is(not(instanceOf(MissingNode.class))));
+        }
+
         assertThat(list.size(), is(0));
     }
 
@@ -118,7 +125,7 @@ public class HttpSteps {
             final String reasonPhrase, final String path, final Datatable table) throws IOException {
 
         final ObjectNode body = new ObjectNode(instance);
-        putAt(body, path, new ArrayNode(instance).addAll(mapper.map(table)));
+        setAt(body, path, new ArrayNode(instance).addAll(mapper.map(table)));
 
         final ResponseEntity<JsonNode> response = request(method, uri, body);
 
@@ -137,7 +144,7 @@ public class HttpSteps {
             final Datatable table) throws IOException {
 
         final ObjectNode body = new ObjectNode(instance);
-        putAt(body, path, new ArrayNode(instance).addAll(mapper.map(table)));
+        setAt(body, path, new ArrayNode(instance).addAll(mapper.map(table)));
 
         lastResponse.set(requestAsync(method, uri, body));
     }

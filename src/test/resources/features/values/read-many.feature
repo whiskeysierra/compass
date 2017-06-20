@@ -5,7 +5,7 @@ Feature: Read values
       | /id        | /schema/type | /description |
       | "tax-rate" | "number"     | ".."         |
     And there are no values
-    Then "GET /keys/tax-rate/values" returns "200 OK" with an empty list of values
+    Then "GET /keys/tax-rate/values" returns "200 OK" with an empty list of /values
 
   Scenario: List values
     Given the following keys:
@@ -51,7 +51,7 @@ Feature: Read values
     And the following values for key tax-rate:
       | /dimensions/country | /value |
       | "DE"                | 0.19   |
-    Then "GET /keys/tax-rate/values?country&before" returns "200 OK" with an empty list of values
+    Then "GET /keys/tax-rate/values?country&before" returns "200 OK" with an empty list of /values
     Then "GET /keys/tax-rate/values?country" returns "200 OK" with a list of /values:
       | /dimensions/country | /value |
       | "DE"                | 0.19   |

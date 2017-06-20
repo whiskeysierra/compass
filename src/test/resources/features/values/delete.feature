@@ -12,7 +12,7 @@ Feature: Delete a value
       | /value |
       | true   |
     When "DELETE /keys/tax-rate/values" returns "204 No Content"
-    Then "GET /keys/tax-rate/values" returns "200 OK" with an empty list of values
+    Then "GET /keys/tax-rate/values" returns "200 OK" with an empty list of /values
     And "GET /keys/feature.active/values" returns "200 OK" with a list of /values:
       | /value |
       | true   |

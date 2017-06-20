@@ -40,7 +40,7 @@ Feature: Read all values
     And the following values for key baz:
       | /value |
       | "baz"  |
-    When "GET /values?q=a" returns "200 OK" with an empty list of entries/foo/values
+    When "GET /values?q=a" returns "200 OK" with an absent list of /entries/foo/values
     And "GET /values?q=a" returns "200 OK" with a list of /entries/bar/values:
       | /value |
       | "bar"  |
