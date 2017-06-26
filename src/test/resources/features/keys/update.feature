@@ -11,6 +11,17 @@ Feature: Key update
       | /id              | /schema/type | /schema/enum         | /description                 |
       | "feature.active" | "string"     | ["mobile","desktop"] | "Lorem ipsum dolor sit amet" |
 
+  Scenario: Update description alone
+    Given the following keys:
+      | /id              | /schema/type | /description |
+      | "feature.active" | "boolean"    | ".."         |
+    When "PUT /keys/feature.active" returns "200 OK" when requested with:
+      | /id              | /schema/type | /description                 |
+      | "feature.active" | "boolean"    | "Lorem ipsum dolor sit amet" |
+    Then "GET /keys/feature.active" returns "200 OK" with:
+      | /id              | /schema/type | /description                 |
+      | "feature.active" | "boolean"    | "Lorem ipsum dolor sit amet" |
+
   Scenario: Updating a key failed due to id mismatch
     Given the following keys:
       | /id        | /schema/type | /description |
@@ -31,3 +42,5 @@ Feature: Key update
       | "$.description" | "$.description: boolean found, string expected"                                                                   |
       | "$.schema.type" | "$.schema.type: does not have a value in the enumeration [array, boolean, integer, null, number, object, string]" |
       | "$.schema.type" | "$.schema.type: string found, array expected"                                                                     |
+
+  # TODO update should fail if existing values violate new schema

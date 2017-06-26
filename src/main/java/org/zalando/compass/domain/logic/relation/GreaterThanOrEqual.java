@@ -1,9 +1,7 @@
 package org.zalando.compass.domain.logic.relation;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.EqualsAndHashCode;
 
-@EqualsAndHashCode(callSuper = false)
 public final class GreaterThanOrEqual extends Inequality {
 
     @Override

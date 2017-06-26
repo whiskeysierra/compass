@@ -1,15 +1,14 @@
-package org.zalando.compass.resource;
+package org.zalando.compass.domain.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.zalando.compass.domain.model.Dimension;
 
 import java.util.List;
 
 @Getter
 @AllArgsConstructor
-class DimensionPage {
-
+public class ValuesLock {
     private final List<Dimension> dimensions;
-
+    private final Key key;
+    private final List<Value> values;
 }

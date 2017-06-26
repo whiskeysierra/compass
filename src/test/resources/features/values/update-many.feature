@@ -46,23 +46,43 @@ Feature: Value update
       | "AT"                | 0.2    |
       | "CH"                | 0.08   |
 
-  Scenario: Replacing values should delete
+  Scenario: Replacing values should create, update and delete
     Given the following dimensions:
       | /id       | /schema/type | /relation | /description         |
       | "country" | "string"     | "="       | "ISO 3166-1 alpha-2" |
+      | "after"   | "string"     | ">="      | "ISO 8601"           |
     And the following keys:
       | /id        | /schema/type | /description |
       | "tax-rate" | "number"     | ".."         |
     And the following values for key tax-rate:
-      | /dimensions/country | /value |
-      | "AT"                | 0.2    |
-      | "CH"                | 0.08   |
-      | "DE"                | 0.19   |
+      | /dimensions/country | /dimensions/after      | /value |
+      | "AT"                |                        | 0.2    |
+      | "CH"                |                        | 0.08   |
+      | "DE"                |                        | 0.16   |
+      | "DE"                | "2007-01-01T00:00:00Z" | 0.18   |
     When "PUT /keys/tax-rate/values" when requested with a list of /values:
-      | /dimensions/country | /value |
-      | "CH"                | 0.08   |
-      | "DE"                | 0.19   |
+      | /dimensions/country | /dimensions/after      | /value |
+      | "CH"                |                        | 0.08   |
+      | "DE"                |                        | 0.16   |
+      | "DE"                | "2007-01-01T00:00:00Z" | 0.19   |
+      | "FR"                |                        | 0.2    |
     Then "200 OK" was returned with a list of /values:
-      | /dimensions/country | /value |
-      | "CH"                | 0.08   |
-      | "DE"                | 0.19   |
+      | /dimensions/country | /dimensions/after      | /value |
+      | "CH"                |                        | 0.08   |
+      | "DE"                |                        | 0.16   |
+      | "DE"                | "2007-01-01T00:00:00Z" | 0.19   |
+      | "FR"                |                        | 0.2    |
+
+  Scenario: Replacing values without dimensions
+    Given the following keys:
+      | /id        | /schema/type | /description |
+      | "tax-rate" | "number"     | ".."         |
+    And the following values for key tax-rate:
+      | /value |
+      | 0.16   |
+    When "PUT /keys/tax-rate/values" when requested with a list of /values:
+      | /value |
+      | 0.19   |
+    Then "200 OK" was returned with a list of /values:
+      | /value |
+      | 0.19   |

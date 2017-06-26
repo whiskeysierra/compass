@@ -24,7 +24,9 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -69,12 +71,12 @@ class ValueResource {
     @RequestMapping(method = PUT, path = "/keys/{key}/values")
     public ValuePage replaceAll(@PathVariable final String key, @RequestBody final JsonNode node) throws IOException {
         final List<Value> values = reader.read(node, ValuePage.class).getValues().stream()
-                .map(value -> value.getDimensions() == null ? value.withDimensions(ImmutableMap.of()) : value)
+                .map(value -> value.withDimensions(firstNonNull(value.getDimensions(), ImmutableMap.of())))
                 .collect(toList());
 
         service.replace(key, values);
 
-        return new ValuePage(values);
+        return readAll(key, emptyMap());
     }
 
     @RequestMapping(method = PUT, path = "/keys/{key}/value")

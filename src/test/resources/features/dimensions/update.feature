@@ -11,6 +11,17 @@ Feature: Dimension update
       | /id       | /schema/type | /relation | /description                 |
       | "version" | "number"     | ">"       | "Lorem ipsum dolor sit amet" |
 
+  Scenario: Update description alone
+    Given the following dimensions:
+      | /id       | /schema/type | /relation | /description |
+      | "version" | "string"     | "="       | ".."         |
+    When "PUT /dimensions/version" returns "200 OK" when requested with:
+      | /id       | /schema/type | /relation | /description                 |
+      | "version" | "string"     | "="       | "Lorem ipsum dolor sit amet" |
+    Then "GET /dimensions/version" returns "200 OK" with:
+      | /id       | /schema/type | /relation | /description                 |
+      | "version" | "string"     | "="       | "Lorem ipsum dolor sit amet" |
+
   Scenario: Updating a dimension failed due to id mismatch
     Given the following dimensions:
       | /id      | /schema/type | /relation | /description |
@@ -32,3 +43,21 @@ Feature: Dimension update
       | "$.relation"    | "$.relation: integer found, string expected"                                                                      |
       | "$.schema.type" | "$.schema.type: does not have a value in the enumeration [array, boolean, integer, null, number, object, string]" |
       | "$.schema.type" | "$.schema.type: string found, array expected"                                                                     |
+
+  Scenario: Update dimension with values
+    Given the following dimensions:
+      | /id       | /schema/type | /relation | /description         |
+      | "country" | "string"     | "="       | "ISO 3166-1 alpha-2" |
+    And the following keys:
+      | /id        | /schema/type | /description |
+      | "tax-rate" | "number"     | ".."         |
+    And the following values for key tax-rate:
+      | /dimensions/country | /value |
+      | "AT"                | 0.2    |
+      | "CH"                | 0.08   |
+      | "DE"                | 0.19   |
+    Then "PUT /dimensions/country" returns "200 OK" when requested with:
+      | /schema/type | /schema/pattern | /relation | /description         |
+      | "string"     | "[A-Z]{2}"      | "="       | "ISO 3166-1 alpha-2" |
+
+  # TODO update should fail if existing dimension values violate new schema

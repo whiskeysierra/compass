@@ -7,9 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
-import javax.validation.ParameterNameProvider;
 import javax.validation.ValidatorFactory;
-import javax.validation.executable.ExecutableValidator;
 import java.time.Clock;
 
 @Configuration
@@ -25,16 +23,6 @@ class ValidatorConfiguration {
     @Bean
     public ValidatorFactory validatorFactory() {
         return new LocalValidatorFactoryBean() {
-
-            @Override
-            public ParameterNameProvider getParameterNameProvider() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public ExecutableValidator forExecutables() {
-                throw new UnsupportedOperationException();
-            }
 
             @Override
             protected void postProcessConfiguration(final javax.validation.Configuration<?> configuration) {

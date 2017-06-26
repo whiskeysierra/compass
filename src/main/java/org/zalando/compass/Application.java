@@ -18,11 +18,6 @@ import java.time.Clock;
 @EnableTransactionManagement
 public class Application {
 
-    @Bean
-    public Clock clock() {
-        return Clock.systemUTC();
-    }
-
     public static void main(final String[] args) {
         SpringApplication.run(Application.class, args);
     }

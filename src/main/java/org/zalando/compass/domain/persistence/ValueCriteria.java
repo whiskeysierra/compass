@@ -1,16 +1,16 @@
 package org.zalando.compass.domain.persistence;
 
 import lombok.AllArgsConstructor;
-import lombok.Value;
+import lombok.Getter;
 
 import static lombok.AccessLevel.PRIVATE;
 
-@Value
 @AllArgsConstructor(access = PRIVATE)
+@Getter
 public class ValueCriteria {
 
-    String key;
-    String dimension;
+    private final String key;
+    private final String dimension;
 
     public static ValueCriteria byKey(final String key) {
         return new ValueCriteria(key, null);

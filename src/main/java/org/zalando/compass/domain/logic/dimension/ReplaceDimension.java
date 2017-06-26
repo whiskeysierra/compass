@@ -1,5 +1,6 @@
 package org.zalando.compass.domain.logic.dimension;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +10,7 @@ import org.zalando.compass.domain.logic.Locking;
 import org.zalando.compass.domain.logic.RelationService;
 import org.zalando.compass.domain.logic.ValidationService;
 import org.zalando.compass.domain.model.Dimension;
+import org.zalando.compass.domain.model.DimensionLock;
 import org.zalando.compass.domain.model.Relation;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.DimensionRepository;
@@ -20,6 +22,7 @@ import java.util.List;
 
 import static org.zalando.compass.library.Changed.changed;
 
+@Slf4j
 @Validated
 @Component
 class ReplaceDimension {
@@ -49,13 +52,15 @@ class ReplaceDimension {
     @Transactional
     public boolean replace(@Valid final Dimension dimension) {
 
-        final Locking.DimensionLock lock = locking.lock(dimension);
+        final DimensionLock lock = locking.lock(dimension);
         @Nullable final Dimension current = lock.getDimension();
 
         if (current == null) {
             validateRelation(dimension);
 
             repository.create(dimension);
+            log.info("Created dimension [{}]", dimension);
+
             return true;
         } else {
             if (changed(Dimension::getSchema, current, dimension)) {
@@ -68,6 +73,8 @@ class ReplaceDimension {
             }
 
             repository.update(dimension);
+            log.info("Updated dimension [{}]", dimension);
+
             return false;
         }
     }

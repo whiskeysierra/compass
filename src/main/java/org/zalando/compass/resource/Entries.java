@@ -1,18 +1,22 @@
 package org.zalando.compass.resource;
 
 import com.google.common.collect.ImmutableMap;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.zalando.compass.domain.model.Value;
 
 import java.util.List;
 
-@lombok.Value
-public class Entries {
+@Getter
+@AllArgsConstructor
+class Entries {
 
-    ImmutableMap<String, Entry> entries;
+    private final ImmutableMap<String, Entry> entries;
 
-    @lombok.Value
+    @Getter
+    @AllArgsConstructor
     public static class Entry {
-        List<Value> values;
+        private final List<Value> values;
     }
 
 }

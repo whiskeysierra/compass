@@ -29,7 +29,7 @@
         <put-it-to-rest.version>0.12.0</put-it-to-rest.version>
         <logbook.version>1.2.5</logbook.version>
         <stups-oauth2.version>1.0.15-GH-44</stups-oauth2.version>
-        <zuchini.version>0.1.0</zuchini.version>
+        <zuchini.version>0.2.0</zuchini.version>
         <jooq.version>3.9.3</jooq.version>
     </properties>
 
@@ -186,6 +186,20 @@
             </exclusions>
         </dependency>
 
+        <!-- Required to make hacky patch for HV-1184 work -->
+        <dependency>
+          <groupId>org.jboss.logging</groupId>
+          <artifactId>jboss-logging</artifactId>
+          <version>3.3.1.Final</version>
+          <scope>provided</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.jboss.logging</groupId>
+          <artifactId>jboss-logging-processor</artifactId>
+          <version>2.0.2.Final</version>
+          <scope>provided</scope>
+        </dependency>
+
         <!-- Problem -->
         <dependency>
             <groupId>org.zalando</groupId>
@@ -280,6 +294,12 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>nl.jqno.equalsverifier</groupId>
+            <artifactId>equalsverifier</artifactId>
+            <version>2.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <!-- see https://github.com/spring-projects/spring-boot/issues/6520, use 2.0.93-beta -->
@@ -361,10 +381,8 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
     <build>
         <finalName>application</finalName>
-
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -375,7 +393,6 @@
                 <targetPath>${project.build.outputDirectory}/api</targetPath>
             </resource>
         </resources>
-
         <plugins>
             <plugin>
                 <groupId>com.ning.maven.plugins</groupId>
@@ -397,18 +414,11 @@
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>2.7</version>
-                <configuration>
-                    <delimiters>
-                        <delimiter>@</delimiter>
-                    </delimiters>
-                </configuration>
             </plugin>
-
             <plugin>
                 <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
@@ -449,7 +459,6 @@
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>sql-maven-plugin</artifactId>
@@ -478,7 +487,6 @@
                     </dependency>
                 </dependencies>
             </plugin>
-
             <plugin>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
@@ -497,7 +505,6 @@
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>org.jooq</groupId>
                 <artifactId>jooq-codegen-maven</artifactId>
@@ -558,7 +565,6 @@
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -572,21 +578,6 @@
                     </compilerArgs>
                 </configuration>
             </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.0</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -595,48 +586,68 @@
                     <parallel>classes</parallel>
                     <threadCount>1</threadCount>
                     <perCoreThreadCount>true</perCoreThreadCount>
-                    <excludes>
-                        <exclude>**/*IntegrationTest.java</exclude>
-                        <exclude>**/*ComponentTest.java</exclude>
-                        <exclude>**/*ContractTest.java</exclude>
-                    </excludes>
                     <trimStackTrace>false</trimStackTrace>
                 </configuration>
             </plugin>
-
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <!-- https://github.com/spring-projects/spring-boot/issues/6254 -->
-                <version>2.18.1</version>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.7.6.201602180812</version>
                 <configuration>
-                    <parallel>classes</parallel>
-                    <threadCount>1</threadCount>
-                    <perCoreThreadCount>true</perCoreThreadCount>
-                    <includes>
-                        <include>**/*IntegrationTest.java</include>
-                        <include>**/*ComponentTest.java</include>
-                        <include>**/*ContractTest.java</include>
-                    </includes>
+                    <excludes>
+                        <!-- generated by jOOQ -->
+                        <exclude>org/zalando/compass/domain/persistence/model/**/*</exclude>
+
+                        <!-- contains a main method that is impossible to cover -->
+                        <exclude>org/zalando/compass/Application.class</exclude>
+
+                        <!-- copied to fix HV-1184 -->
+                        <exclude>org/hibernate/validator/internal/metadata/descriptor/ConstraintDescriptorImpl*.class</exclude>
+
+                        <!-- TODO cover the following-->
+                        <exclude>org/zalando/compass/library/PostgresJsonbBinding*.class</exclude>
+                    </excludes>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>integration-test</id>
-                        <phase>integration-test</phase>
+                        <id>prepare-agent</id>
                         <goals>
-                            <goal>integration-test</goal>
+                            <goal>prepare-agent</goal>
                         </goals>
                     </execution>
                     <execution>
-                        <id>verify</id>
-                        <phase>verify</phase>
+                        <id>report</id>
                         <goals>
-                            <goal>verify</goal>
+                            <goal>report</goal>
                         </goals>
+                    </execution>
+                    <execution>
+                        <id>check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>CLASS</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>1.0</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>1.0</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -652,37 +663,96 @@
                     <mainClass>${start-class}</mainClass>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.eluder.coveralls</groupId>
+                <artifactId>coveralls-maven-plugin</artifactId>
+                <version>4.1.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <generateBackupPoms>false</generateBackupPoms>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-scm-plugin</artifactId>
+                <version>1.9.4</version>
+                <configuration>
+                    <pushChanges>false</pushChanges>
+                    <tag>${project.version}</tag>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
     <profiles>
         <profile>
-            <id>coverage</id>
+            <id>release</id>
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>0.7.6.201602180812</version>
-                        <configuration>
-                            <excludes>
-                                <exclude>org/zalando/compass/domain/model/**/*</exclude>
-                            </excludes>
-                        </configuration>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.0.0</version>
                         <executions>
                             <execution>
-                                <id>default-prepare-agent</id>
+                                <id>attach-sources</id>
                                 <goals>
-                                    <goal>prepare-agent</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>default-prepare-agent-integration</id>
-                                <goals>
-                                    <goal>prepare-agent-integration</goal>
+                                    <goal>jar-no-fork</goal>
                                 </goals>
                             </execution>
                         </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.10.3</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>1.6.7</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>

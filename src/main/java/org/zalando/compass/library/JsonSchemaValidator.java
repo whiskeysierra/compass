@@ -20,7 +20,6 @@ import org.zalando.problem.spring.web.advice.validation.ConstraintViolationProbl
 import org.zalando.problem.spring.web.advice.validation.Violation;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -40,6 +39,10 @@ public class JsonSchemaValidator {
     private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
     private final JsonSchemaFactory factory = new JsonSchemaFactory(mapper);
     private final LoadingCache<String, JsonSchema> schemas = CacheBuilder.newBuilder().build(new SchemaLoader(mapper, factory));
+
+    public JsonSchemaValidator() throws IOException {
+        // needed because SchemaLoader#new throws IOException
+    }
 
     public void validate(final Collection<JsonType> types, final JsonNode schema) {
         final JsonType type = TypeFactory.getSchemaNodeType(schema.path("type"));
@@ -89,13 +92,9 @@ public class JsonSchemaValidator {
         private final JsonSchemaFactory factory;
         private final JsonNode definitions;
 
-        public SchemaLoader(final ObjectMapper mapper, final JsonSchemaFactory factory) {
+        public SchemaLoader(final ObjectMapper mapper, final JsonSchemaFactory factory) throws IOException {
             this.factory = factory;
-            try {
-                this.definitions = filter(mapper.readTree(getResource("api/api.yaml")));
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
-            }
+            this.definitions = filter(mapper.readTree(getResource("api/api.yaml")));
         }
 
         private static JsonNode filter(final JsonNode node) {
@@ -110,10 +109,8 @@ public class JsonSchemaValidator {
         private static JsonNode filter(final String key, final JsonNode node) {
             if (node.isObject() && key.equals("properties")) {
                 node.fields().forEachRemaining(field -> {
-                    if (field.getValue().isObject()) {
-                        final ObjectNode value = (ObjectNode) field.getValue();
-                        value.remove(filter);
-                    }
+                    final ObjectNode value = (ObjectNode) field.getValue();
+                    value.without(filter);
                 });
                 return node;
             }

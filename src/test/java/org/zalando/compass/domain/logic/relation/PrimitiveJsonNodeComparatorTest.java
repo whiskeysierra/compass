@@ -1,22 +1,32 @@
 package org.zalando.compass.domain.logic.relation;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.BigIntegerNode;
+import com.fasterxml.jackson.databind.node.BinaryNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.DecimalNode;
 import com.fasterxml.jackson.databind.node.DoubleNode;
 import com.fasterxml.jackson.databind.node.FloatNode;
 import com.fasterxml.jackson.databind.node.IntNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.LongNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.NullNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.POJONode;
 import com.fasterxml.jackson.databind.node.ShortNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import org.hamcrest.Matcher;
 import org.junit.Test;
 
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -32,10 +42,21 @@ public final class PrimitiveJsonNodeComparatorTest {
 
     @Test
     public void shouldCompareNulls() {
+        test(null, nullNode(), equal());
         test(nullNode(), nullNode(), equal());
+        test(nullNode(), null, equal());
+        test(null, null, equal());
     }
 
-    // TODO array
+    @Test
+    public void shouldCompareArrays() {
+        test(arrayNode(), arrayNode(), equal());
+        test(arrayNode(), arrayNode(textNode("A")), less());
+        test(arrayNode(textNode("A")), arrayNode(textNode("B")), less());
+        test(arrayNode(textNode("B")), arrayNode(textNode("B")), equal());
+        test(arrayNode(textNode("A")), arrayNode(textNode("A"), textNode("B")), less());
+        test(arrayNode(textNode("C")), arrayNode(textNode("A"), textNode("B")), greater());
+    }
 
     @Test
     public void shouldCompareBoolean() {
@@ -62,7 +83,7 @@ public final class PrimitiveJsonNodeComparatorTest {
     private List<JsonNode> numbers(final int value) {
         return ImmutableList.of(
                 new ShortNode((short) value),
-                new IntNode(value),
+                intNode(value),
                 new LongNode(value),
                 new BigIntegerNode(BigInteger.valueOf(value)),
                 new FloatNode(value),
@@ -70,7 +91,16 @@ public final class PrimitiveJsonNodeComparatorTest {
                 new DecimalNode(BigDecimal.valueOf(value)));
     }
 
-    // TODO objects
+    @Test
+    public void shouldCompareObjects() {
+        test(objectNode(), objectNode(), equal());
+        test(objectNode(), objectNode("name", textNode("alice")), less());
+        test(objectNode("name", textNode("alice")), objectNode("name", textNode("alice")), equal());
+        test(objectNode("name", textNode("alice")), objectNode("name", textNode("bob")), less());
+        test(objectNode("name", textNode("charlie")), objectNode("name", textNode("bob")), greater());
+        test(objectNode("age", intNode(17)), objectNode("name", textNode("alice"), "age", intNode(17)), less());
+        test(objectNode("name", textNode("alice")), objectNode("name", textNode("alice"), "age", intNode(17)), greater());
+    }
 
     @Test
     public void shouldCompareStrings() {
@@ -81,8 +111,29 @@ public final class PrimitiveJsonNodeComparatorTest {
         test(nullNode(), textNode("a"), less());
     }
 
-    // TODO type mismatch
-    // TODO unsupported types
+    @Test
+    public void shouldCompareMismatchingTypes() {
+        test(arrayNode(), trueNode(), less());
+        test(trueNode(), intNode(17), less());
+        test(intNode(17), objectNode(), less());
+        test(objectNode(), textNode(""), less());
+        test(textNode(""), arrayNode(), greater());
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void shouldFailOnBinary() {
+        unit.compare(new BinaryNode(new byte[0]), textNode(""));
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void shouldFailOnMissing() {
+        unit.compare(MissingNode.getInstance(), textNode(""));
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void shouldFailOnPojo() {
+        unit.compare(new POJONode(new Object()), textNode(""));
+    }
 
     private Matcher<Integer> less() {
         return lessThan(0);
@@ -96,8 +147,8 @@ public final class PrimitiveJsonNodeComparatorTest {
         return greaterThan(0);
     }
 
-    private JsonNode textNode(final String text) {
-        return new TextNode(text);
+    private JsonNode arrayNode(final JsonNode... elements) {
+        return new ArrayNode(JsonNodeFactory.instance, Arrays.asList(elements));
     }
 
     private JsonNode trueNode() {
@@ -108,11 +159,31 @@ public final class PrimitiveJsonNodeComparatorTest {
         return BooleanNode.FALSE;
     }
 
+    private JsonNode intNode(final int value) {
+        return new IntNode(value);
+    }
+
+    private JsonNode objectNode() {
+        return new ObjectNode(JsonNodeFactory.instance);
+    }
+
+    private JsonNode objectNode(final String key, final JsonNode value) {
+        return new ObjectNode(JsonNodeFactory.instance, Collections.singletonMap(key, value));
+    }
+
+    private JsonNode objectNode(final String key1, final JsonNode value1, final String key2, final JsonNode value2) {
+        return new ObjectNode(JsonNodeFactory.instance, ImmutableMap.of(key1, value1, key2, value2));
+    }
+
+    private JsonNode textNode(final String text) {
+        return new TextNode(text);
+    }
+
     private JsonNode nullNode() {
         return NullNode.getInstance();
     }
 
-    private void test(final JsonNode left, final JsonNode right, final Matcher<Integer> matcher) {
+    private void test(@Nullable final JsonNode left, @Nullable final JsonNode right, final Matcher<Integer> matcher) {
         assertThat(unit.compare(left, right), matcher);
     }
 

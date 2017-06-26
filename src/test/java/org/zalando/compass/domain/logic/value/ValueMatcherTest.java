@@ -145,15 +145,6 @@ public class ValueMatcherTest {
                 new RichValue(of(), decimal(0.25))));
     }
 
-    @Test
-    public void shouldMatchWithoutDimensionValues() {
-        assertThat(unit.match(values, of(country, nullNode(), after, nullNode())), contains(
-                new RichValue(of(country, text("CH"), after, text("2018-01-01T00:00:00Z")), decimal(0.09)),
-                new RichValue(of(country, text("CH"), after, text("2017-01-01T00:00:00Z")), decimal(0.08)),
-                new RichValue(of(country, text("DE"), after, text("2018-01-01T00:00:00Z")), decimal(0.22)),
-                new RichValue(of(country, text("DE"), after, text("2017-01-01T00:00:00Z")), decimal(0.2))));
-    }
-
     private JsonNode text(final String text) {
         return new TextNode(text);
     }

@@ -1,20 +1,22 @@
 package org.zalando.compass.domain.logic.key;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.logic.Locking;
 import org.zalando.compass.domain.logic.ValidationService;
 import org.zalando.compass.domain.model.Key;
+import org.zalando.compass.domain.model.KeyLock;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.KeyRepository;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.function.Function;
 
 import static org.zalando.compass.library.Changed.changed;
 
+@Slf4j
 @Component
 class ReplaceKey {
 
@@ -39,12 +41,14 @@ class ReplaceKey {
      */
     @Transactional
     public boolean replace(final Key key) {
-        final Locking.KeyLock lock = locking.lock(key);
+        final KeyLock lock = locking.lock(key);
 
         @Nullable final Key current = lock.getKey();
 
         if (current == null) {
             repository.create(key);
+            log.info("Created key [{}]", key);
+
             return true;
         } else {
             if (changed(Key::getSchema, current, key)) {
@@ -53,6 +57,8 @@ class ReplaceKey {
             }
 
             repository.update(key);
+            log.info("Updated key [{}]", key);
+
             return false;
         }
     }

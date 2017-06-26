@@ -2,7 +2,7 @@ package org.zalando.compass.library;
 
 import java.util.function.Function;
 
-public class Changed {
+public final class Changed {
 
     public static <T, P> boolean changed(final Function<T, P> function, final T previous, final T next) {
         return !function.apply(previous).equals(function.apply(next));

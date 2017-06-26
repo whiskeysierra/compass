@@ -1,12 +1,15 @@
 package org.zalando.compass.resource;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.zalando.compass.domain.model.Relation;
 
 import java.util.List;
 
-@lombok.Value
-public final class RelationPage {
+@Getter
+@AllArgsConstructor
+final class RelationPage {
 
-    List<Relation> relations;
+    private final List<Relation> relations;
 
 }

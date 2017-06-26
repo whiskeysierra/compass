@@ -3,13 +3,15 @@ package org.zalando.compass.domain.logic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.model.Dimension;
+import org.zalando.compass.domain.model.DimensionLock;
 import org.zalando.compass.domain.model.Key;
+import org.zalando.compass.domain.model.KeyLock;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.domain.model.ValueId;
+import org.zalando.compass.domain.model.ValueLock;
+import org.zalando.compass.domain.model.ValuesLock;
 import org.zalando.compass.domain.persistence.DimensionRepository;
 import org.zalando.compass.domain.persistence.KeyRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
-import org.zalando.compass.domain.persistence.ValueCriteria;
 import org.zalando.compass.domain.persistence.ValueRepository;
 
 import javax.annotation.Nullable;
@@ -64,7 +66,7 @@ public class Locking {
     public ValueLock lock(final String keyId, final Value value) {
         final List<Dimension> dimensions = dimensionRepository.lockAll(value.getDimensions().keySet());
         final Key key = keyRepository.lock(keyId).orElseThrow(NotFoundException::new);
-        @Nullable final Value current = valueRepository.lock(new ValueId(keyId, value.getDimensions())).orElse(null);
+        @Nullable final Value current = valueRepository.lock(keyId, value.getDimensions()).orElse(null);
 
         return new ValueLock(dimensions, key, current);
     }
@@ -77,32 +79,6 @@ public class Locking {
         final List<Value> current = valueRepository.lockAll(byKey(keyId));
 
         return new ValuesLock(dimensions, key, current);
-    }
-
-    @lombok.Value
-    public static class DimensionLock {
-        @Nullable Dimension dimension;
-        List<Value> values;
-    }
-
-    @lombok.Value
-    public static class KeyLock {
-        @Nullable Key key;
-        List<Value> values;
-    }
-
-    @lombok.Value
-    public static class ValueLock {
-        List<Dimension> dimensions;
-        Key key;
-        @Nullable Value value;
-    }
-
-    @lombok.Value
-    public static class ValuesLock {
-        List<Dimension> dimensions;
-        Key key;
-        List<Value> values;
     }
 
 }

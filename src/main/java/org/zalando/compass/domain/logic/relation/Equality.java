@@ -2,13 +2,11 @@ package org.zalando.compass.domain.logic.relation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.networknt.schema.JsonType;
-import lombok.EqualsAndHashCode;
 import org.zalando.compass.domain.model.Relation;
 
 import java.util.EnumSet;
 import java.util.Set;
 
-@EqualsAndHashCode
 public final class Equality implements Relation {
 
     @Override

@@ -1,5 +1,6 @@
 package org.zalando.compass.library;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.BigIntegerNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
@@ -7,7 +8,9 @@ import com.fasterxml.jackson.databind.node.DecimalNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.zalando.compass.resource.JsonQueryParser;
 
 import javax.annotation.Nullable;
@@ -24,6 +27,9 @@ import static org.junit.Assert.assertThat;
 import static org.zalando.compass.library.JsonConfiguration.jacksonObjectMapper;
 
 public final class JsonQueryParserTest {
+
+    @Rule
+    public final ExpectedException exception = ExpectedException.none();
 
     private final JsonQueryParser unit = new JsonQueryParser(jacksonObjectMapper());
 
@@ -87,6 +93,14 @@ public final class JsonQueryParserTest {
     @Test
     public void shouldParseNulls() {
         assertThat(unit.parse(map("country", null)), is(map("country", NullNode.getInstance())));
+    }
+
+    @Test
+    public void shouldThrowOriginalExceptionIfFallbackToStringDidntWork() {
+        exception.expect(JsonParseException.class);
+        exception.expectMessage("Unrecognized token 'A'");
+
+        unit.parse(map("test", "A\tB"));
     }
 
     private <K, V> Map<K, V> map(final K key, @Nullable final V value) {

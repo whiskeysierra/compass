@@ -19,7 +19,7 @@ class ReadAllDimensions {
         this.repository = repository;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     List<Dimension> read() {
         return repository.findAll();
     }

@@ -1,12 +1,15 @@
 package org.zalando.compass.resource;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.zalando.compass.domain.model.Key;
 
 import java.util.List;
 
-@lombok.Value
-public class KeyPage {
+@Getter
+@AllArgsConstructor
+class KeyPage {
 
-    List<Key> keys;
+    private final List<Key> keys;
 
 }

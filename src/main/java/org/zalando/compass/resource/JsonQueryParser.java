@@ -10,11 +10,10 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.Map;
 
 import static com.google.common.base.CharMatcher.whitespace;
-import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static org.zalando.fauxpas.FauxPas.throwingBiConsumer;
 
 /**
  * A parser that takes a raw {@code Map<String, String>} usually passed as a query string, e.g.
@@ -36,22 +35,23 @@ public class JsonQueryParser {
     }
 
     public ImmutableMap<String, JsonNode> parse(final Map<String, String> filter) {
-        return filter.isEmpty() ?
-                ImmutableMap.of() :
-                filter.entrySet().stream()
-                    .collect(toImmutableMap(Map.Entry::getKey, e -> fromJson(e.getValue())));
+        final ImmutableMap.Builder<String, JsonNode> parsed = ImmutableMap.builder();
+        filter.forEach(throwingBiConsumer((key, value) -> parsed.put(key, fromJson(value))));
+        return parsed.build();
     }
 
-    private JsonNode fromJson(@Nullable final String value)  {
+    private JsonNode fromJson(@Nullable final String value) throws IOException {
         if (value == null || whitespace().matchesAllOf(value)) {
             return NullNode.getInstance();
         } else {
             try {
                 return mapper.readTree(value);
             } catch (final JsonParseException e) {
-                return fromJson("\"" + value + "\"");
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
+                try {
+                    return mapper.readTree("\"" + value + "\"");
+                } catch (final JsonParseException ignored) {
+                    throw e;
+                }
             }
         }
     }
