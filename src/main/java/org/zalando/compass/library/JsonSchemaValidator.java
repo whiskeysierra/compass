@@ -15,7 +15,6 @@ import com.networknt.schema.JsonValidator;
 import com.networknt.schema.TypeFactory;
 import com.networknt.schema.ValidationMessage;
 import org.springframework.stereotype.Component;
-import org.zalando.problem.ThrowableProblem;
 import org.zalando.problem.spring.web.advice.validation.ConstraintViolationProblem;
 import org.zalando.problem.spring.web.advice.validation.Violation;
 
@@ -41,12 +40,13 @@ public class JsonSchemaValidator {
     private final LoadingCache<String, JsonSchema> schemas = CacheBuilder.newBuilder().build(new SchemaLoader(mapper, factory));
 
     public JsonSchemaValidator() throws IOException {
-        // needed because SchemaLoader#new throws IOException
+        // needed because field assignment throws IOException
     }
 
-    public void validate(final Collection<JsonType> types, final JsonNode schema) {
+    public void check(final Collection<JsonType> types, final JsonNode schema) {
         final JsonType type = TypeFactory.getSchemaNodeType(schema.path("type"));
 
+        // TODO support more complex type definitions here, e.g. union types (i.e. arrays)
         if (!types.contains(type)) {
             throw new ConstraintViolationProblem(BAD_REQUEST, Collections.singletonList(
                     new Violation("$.schema", String.format("'%s' is not among supported types: %s", type, types))
@@ -54,20 +54,29 @@ public class JsonSchemaValidator {
         }
     }
 
-    public void validate(final String name, final JsonNode node) {
-        validate(schemas.getUnchecked(name), node);
+    public void check(final String name, final JsonNode node) {
+        throwIfNotEmpty(validate(name, node));
     }
 
-    public void validate(final JsonNode schema, final JsonNode node, final String... path) {
-        validate(factory.getSchema(schema), node, path);
+    public List<Violation> validate(final String name, final JsonNode node) {
+        return validate(schemas.getUnchecked(name), node);
     }
 
-    private void validate(final JsonValidator validator, final JsonNode node, final String... path) {
+    public void check(final JsonNode schema, final JsonNode node, final String... path) {
+        throwIfNotEmpty(validate(schema, node, path));
+    }
+
+    public List<Violation> validate(final JsonNode schema, final JsonNode node, final String... path) {
+        return validate(factory.getSchema(schema), node, path);
+    }
+
+    private List<Violation> validate(final JsonValidator validator, final JsonNode node, final String... path) {
         final Set<ValidationMessage> messages = validator.validate(node, node, join(path));
 
-        if (!messages.isEmpty()) {
-            throw newProblem(messages);
-        }
+        return messages.stream()
+                .sorted(comparing(ValidationMessage::getPath).thenComparing(ValidationMessage::getMessage))
+                .map(message -> new Violation(message.getPath(), message.getMessage()))
+                .collect(toList());
     }
 
     private String join(final String... properties) {
@@ -75,13 +84,10 @@ public class JsonSchemaValidator {
                 result -> result.isEmpty() ? "$" : "$." + result));
     }
 
-    private static ThrowableProblem newProblem(final Set<ValidationMessage> messages) {
-        final List<Violation> violations = messages.stream()
-                .sorted(comparing(ValidationMessage::getPath).thenComparing(ValidationMessage::getMessage))
-                .map(message -> new Violation(message.getPath(), message.getMessage()))
-                .collect(toList());
-
-        return new ConstraintViolationProblem(BAD_REQUEST, violations);
+    public void throwIfNotEmpty(final List<Violation> violations) {
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationProblem(BAD_REQUEST, violations);
+        }
     }
 
     private static final class SchemaLoader extends CacheLoader<String, JsonSchema> {

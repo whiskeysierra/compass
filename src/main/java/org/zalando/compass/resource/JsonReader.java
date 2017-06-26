@@ -25,7 +25,7 @@ class JsonReader {
     }
 
     private <T> T read(final String name, final JsonNode node, final Class<T> type) throws IOException {
-        validator.validate(name, node);
+        validator.check(name, node);
         return mapper.treeToValue(node, type);
     }
 

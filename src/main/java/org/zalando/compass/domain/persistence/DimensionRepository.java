@@ -92,12 +92,10 @@ public class DimensionRepository {
                 .execute();
     }
 
-    public boolean delete(final String id) {
-        final int deletes = db.deleteFrom(DIMENSION)
+    public void delete(final String id) {
+        db.deleteFrom(DIMENSION)
                 .where(DIMENSION.ID.eq(id))
                 .execute();
-
-        return deletes == 1;
     }
 
 }

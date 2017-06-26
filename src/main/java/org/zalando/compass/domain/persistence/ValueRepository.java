@@ -196,13 +196,11 @@ public class ValueRepository{
         db.batch(queries).execute();
     }
 
-    public boolean delete(final String key, final Map<String, JsonNode> dimensions) {
-        final int deletions = db.deleteFrom(VALUE)
+    public void delete(final String key, final Map<String, JsonNode> dimensions) {
+        db.deleteFrom(VALUE)
                 .where(VALUE.KEY_ID.eq(key))
                 .and(exactMatch(dimensions))
                 .execute();
-
-        return deletions == 1;
     }
 
     private Condition exactMatch(final Map<String, JsonNode> dimensions) {

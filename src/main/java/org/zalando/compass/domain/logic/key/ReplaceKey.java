@@ -39,10 +39,11 @@ class ReplaceKey {
      * @return true if key was created, false if an existing one was updated
      */
     public boolean replace(final Key key) {
-        final KeyLock lock = locking.lock(key);
+        final KeyLock lock = locking.lockKey(key.getId());
 
         @Nullable final Key current = lock.getKey();
 
+        // TODO make sure this is transactional
         if (current == null) {
             repository.create(key);
             log.info("Created key [{}]", key);
@@ -51,7 +52,7 @@ class ReplaceKey {
         } else {
             if (changed(Key::getSchema, current, key)) {
                 final List<Value> values = lock.getValues();
-                validator.validate(key, values);
+                validator.check(key, values);
             }
 
             repository.update(key);

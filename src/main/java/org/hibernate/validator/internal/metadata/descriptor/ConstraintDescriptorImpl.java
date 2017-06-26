@@ -523,7 +523,6 @@ public class ConstraintDescriptorImpl<T extends Annotation> implements Constrain
         Set<Class<? extends Payload>> payloadSet = newHashSet();
         Class<Payload>[] payloadFromAnnotation;
         try {
-            //TODO be extra safe and make sure this is an array of Payload
             payloadFromAnnotation = run(
                     GetAnnotationParameter.action( annotation, ConstraintHelper.PAYLOAD, Class[].class )
             );

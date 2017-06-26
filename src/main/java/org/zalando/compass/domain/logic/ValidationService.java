@@ -8,12 +8,15 @@ import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Relation;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.library.JsonSchemaValidator;
+import org.zalando.problem.spring.web.advice.validation.Violation;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Set;
+import java.util.List;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class ValidationService {
@@ -25,40 +28,51 @@ public class ValidationService {
         this.validator = validator;
     }
 
-    public void validate(final Dimension dimension, final Relation relation) {
-        validator.validate(relation.supports(), dimension.getSchema());
+    public void check(final Dimension dimension, final Relation relation) {
+        validator.check(relation.supports(), dimension.getSchema());
     }
 
     public void validate(final Dimension dimension, final Collection<Value> values) {
-        final Set<Dimension> dimensions = singleton(dimension);
-        values.forEach(value -> validate(dimensions, value));
+        check(singleton(dimension), values);
     }
 
-    public void validate(final Collection<Dimension> dimensions, final Collection<Value> values) {
-        values.forEach(value -> validate(dimensions, value));
+    public void check(final Collection<Dimension> dimensions, final Collection<Value> values) {
+        validator.throwIfNotEmpty(values.stream()
+                .flatMap(value -> validate(dimensions, value).stream())
+                .collect(toList()));
     }
 
-    public void validate(final Collection<Dimension> dimensions, final Value value) {
-        for (final Dimension dimension : dimensions) {
-            final JsonNode schema = dimension.getSchema();
-            @Nullable final JsonNode node = value.getDimensions().get(dimension.getId());
+    public void check(final Collection<Dimension> dimensions, final Value value) {
+        validator.throwIfNotEmpty(validate(dimensions, value));
+    }
 
-            if (node == null) {
-                continue;
-            }
+    private List<Violation> validate(final Collection<Dimension> dimensions, final Value value) {
+        return dimensions.stream()
+                .flatMap(dimension -> validate(dimension, value).stream())
+                .collect(toList());
+    }
 
-            validator.validate(schema, node, "dimensions", dimension.getId());
+    private List<Violation> validate(final Dimension dimension, final Value value) {
+        @Nullable final JsonNode node = value.getDimensions().get(dimension.getId());
+
+        if (node == null) {
+            return emptyList();
         }
+
+        final JsonNode schema = dimension.getSchema();
+        return validator.validate(schema, node, "dimensions", dimension.getId());
     }
 
-    public void validate(final Key key, final Collection<Value> values) {
-        values.forEach(value -> validate(key, value));
+    public void check(final Key key, final Collection<Value> values) {
+        validator.throwIfNotEmpty(values.stream()
+                .flatMap(value -> validator.validate(key.getSchema(), value.getValue(), "value").stream())
+                .collect(toList()));
     }
 
-    public void validate(final Key key, final Value value) {
+    public void check(final Key key, final Value value) {
         final JsonNode schema = key.getSchema();
         final JsonNode node = value.getValue();
-        validator.validate(schema, node, "value");
+        validator.check(schema, node, "value");
     }
 
 }

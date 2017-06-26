@@ -42,8 +42,8 @@ class ReplaceValues {
 
         final ValuesLock lock = locking.lock(key, values);
 
-        validator.validate(lock.getDimensions(), values);
-        validator.validate(lock.getKey(), values);
+        validator.check(lock.getDimensions(), values);
+        validator.check(lock.getKey(), values);
 
         final Set<Wrapper<Value>> before = wrap(lock.getValues());
         final Set<Wrapper<Value>> after = wrap(values);

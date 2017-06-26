@@ -49,10 +49,10 @@ class ReplaceDimension {
      * @return true if dimension was created, false if an existing one was updated
      */
     public boolean replace(@Valid final Dimension dimension) {
-
-        final DimensionLock lock = locking.lock(dimension);
+        final DimensionLock lock = locking.lockDimensions(dimension.getId());
         @Nullable final Dimension current = lock.getDimension();
 
+        // TODO make sure this is transactional
         if (current == null) {
             validateRelation(dimension);
 
@@ -79,7 +79,7 @@ class ReplaceDimension {
 
     private void validateRelation(final Dimension dimension) {
         final Relation relation = readRelation(dimension);
-        validator.validate(dimension, relation);
+        validator.check(dimension, relation);
     }
 
     private Relation readRelation(final Dimension dimension) {

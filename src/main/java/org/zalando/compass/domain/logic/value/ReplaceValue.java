@@ -30,12 +30,13 @@ class ReplaceValue {
     }
 
     public boolean replace(final String key, final Value value) {
-        final ValueLock lock = locking.lock(key, value);
+        final ValueLock lock = locking.lockValue(key, value.getDimensions());
         @Nullable final Value current = lock.getValue();
 
-        validator.validate(lock.getDimensions(), value);
-        validator.validate(lock.getKey(), value);
+        validator.check(lock.getDimensions(), value);
+        validator.check(lock.getKey(), value);
 
+        // TODO make sure this is transactional
         if (current == null) {
             repository.create(key, value);
             log.info("Created value for key [{}]: [{}]", key, value);

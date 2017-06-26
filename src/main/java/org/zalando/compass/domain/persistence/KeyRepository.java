@@ -65,12 +65,10 @@ public class KeyRepository {
                 .execute();
     }
 
-    public boolean delete(final String key) {
-        final int deletes = db.deleteFrom(KEY)
+    public void delete(final String key) {
+        db.deleteFrom(KEY)
                 .where(KEY.ID.eq(key))
                 .execute();
-
-        return deletes == 1;
     }
 
 }

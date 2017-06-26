@@ -60,4 +60,23 @@ Feature: Dimension update
       | /schema/type | /schema/pattern | /relation | /description         |
       | "string"     | "[A-Z]{2}"      | "="       | "ISO 3166-1 alpha-2" |
 
-  # TODO update should fail if existing dimension values violate new schema
+  Scenario: Updating a dimension's schema should fail if at least one value violates it
+    Given the following dimensions:
+      | /id       | /schema/type | /relation | /description |
+      | "country" | "string"     | "="       | ".."         |
+    And the following keys:
+      | /id        | /schema/type | /description |
+      | "tax-rate" | "number"     | ".."         |
+    And the following values for key tax-rate:
+      | /dimensions/country | /value |
+      | "AT"                | 0.2    |
+      | "CH"                | 0.08   |
+      | "DE"                | 0.19   |
+    Then "PUT /dimensions/country" when requested with:
+      | /schema/type | /schema/pattern | /relation | /description |
+      | "string"     | "[a-z]{2}"      | "="       | ".."         |
+    And "400 Bad Request" was returned with a list of /violations:
+      | /message                                                          |
+      | "$.dimensions.country: does not match the regex pattern [a-z]{2}" |
+      | "$.dimensions.country: does not match the regex pattern [a-z]{2}" |
+      | "$.dimensions.country: does not match the regex pattern [a-z]{2}" |
