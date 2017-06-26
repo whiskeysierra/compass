@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableSet;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.logic.Locking;
 import org.zalando.compass.domain.logic.ValidationService;
 import org.zalando.compass.domain.model.Value;
@@ -38,7 +37,6 @@ class ReplaceValues {
         this.locking = locking;
     }
 
-    @Transactional
     public void replace(final String key, final List<Value> values) {
         log.info("Replacing values of key [{}]", key);
 

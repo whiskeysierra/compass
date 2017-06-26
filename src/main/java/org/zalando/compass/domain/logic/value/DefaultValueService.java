@@ -3,6 +3,7 @@ package org.zalando.compass.domain.logic.value;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.logic.ValueService;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Value;
@@ -32,11 +33,13 @@ class DefaultValueService implements ValueService {
         this.readAll = readAll;
     }
 
+    @Transactional
     @Override
     public boolean replace(final String key, final Value value) {
         return replace.replace(key, value);
     }
 
+    @Transactional
     @Override
     public void replace(final String key, final List<Value> values) {
         replaceMany.replace(key, values);
@@ -52,6 +55,7 @@ class DefaultValueService implements ValueService {
         return readMany.read(key, filter);
     }
 
+    @Transactional
     @Override
     public void delete(final String key, final Map<String, JsonNode> filter) {
         delete.delete(key, filter);

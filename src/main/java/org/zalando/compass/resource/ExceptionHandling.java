@@ -34,6 +34,8 @@ class ExceptionHandling implements ProblemHandling, SpringAdviceTrait {
         return create(HttpStatus.NOT_FOUND, exception, request);
     }
 
+    // TODO Conflict for unique constraint?
+
     @Override
     public String formatFieldName(@Nonnull final String fieldName) {
         return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);

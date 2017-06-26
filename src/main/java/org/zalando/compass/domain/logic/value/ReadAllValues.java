@@ -2,7 +2,6 @@ package org.zalando.compass.domain.logic.value;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.ValueRepository;
@@ -21,7 +20,6 @@ class ReadAllValues {
         this.repository = repository;
     }
 
-    @Transactional(readOnly = true)
     public Map<Key, List<Value>> readAll(@Nullable final String keyPattern) {
         return repository.listAll(keyPattern);
     }

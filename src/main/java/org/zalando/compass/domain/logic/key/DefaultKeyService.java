@@ -2,6 +2,7 @@ package org.zalando.compass.domain.logic.key;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.logic.KeyService;
 import org.zalando.compass.domain.model.Key;
 
@@ -25,6 +26,7 @@ class DefaultKeyService implements KeyService {
         this.delete = delete;
     }
 
+    @Transactional
     @Override
     public boolean replace(final Key key) {
         return replace.replace(key);
@@ -40,6 +42,7 @@ class DefaultKeyService implements KeyService {
         return readAll.read(keyPattern);
     }
 
+    @Transactional
     @Override
     public void delete(final String id) {
         delete.delete(id);

@@ -2,6 +2,7 @@ package org.zalando.compass.domain.logic.dimension;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
 
@@ -25,6 +26,7 @@ class DefaultDimensionService implements DimensionService {
         this.readAll = readAll;
     }
 
+    @Transactional
     @Override
     public boolean replace(final Dimension dimension) {
         return replace.replace(dimension);
@@ -40,6 +42,7 @@ class DefaultDimensionService implements DimensionService {
         return readAll.read();
     }
 
+    @Transactional
     @Override
     public void delete(final String id) {
         delete.delete(id);

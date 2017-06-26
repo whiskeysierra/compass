@@ -3,8 +3,9 @@ package org.zalando.compass.domain.logic.value;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.model.Value;
+import org.zalando.compass.domain.persistence.KeyRepository;
+import org.zalando.compass.domain.persistence.NotFoundException;
 import org.zalando.compass.domain.persistence.ValueRepository;
 
 import java.util.List;
@@ -15,18 +16,26 @@ import static org.zalando.compass.domain.persistence.ValueCriteria.byKey;
 @Component
 class ReadValues {
 
-    private final ValueRepository repository;
+    private final KeyRepository keyRepository;
+    private final ValueRepository valueRepository;
     private final ValueSelector selector;
 
     @Autowired
-    ReadValues(final ValueRepository repository, final ValueSelector selector) {
-        this.repository = repository;
+    ReadValues(final KeyRepository keyRepository, final ValueRepository valueRepository,
+            final ValueSelector selector) {
+        this.keyRepository = keyRepository;
+        this.valueRepository = valueRepository;
         this.selector = selector;
     }
 
-    @Transactional(readOnly = true)
     public List<Value> read(final String key, final Map<String, JsonNode> filter) {
-        final List<Value> values = repository.findAll(byKey(key));
+        final List<Value> values = valueRepository.findAll(byKey(key));
+
+        if (values.isEmpty()) {
+            // the fact that we can delay this check (foreign key constraint) should not be known to this layer...
+            keyRepository.find(key).orElseThrow(NotFoundException::new);
+            return values;
+        }
 
         if (filter.isEmpty()) {
             // special case, just for read many values

@@ -11,6 +11,9 @@ spring:
     url: jdbc:postgresql://${DATASOURCE_HOST:localhost}/postgres?currentSchema=compass
     username: postgres
     password: postgres
+    tomcat:
+      default-auto-commit: false
+      default-transaction-isolation: 2 # TRANSACTION_READ_COMMITTED
   jooq:
     sql-dialect: postgres
 

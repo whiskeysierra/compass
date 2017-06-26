@@ -3,7 +3,6 @@ package org.zalando.compass.domain.logic.key;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.logic.Locking;
 import org.zalando.compass.domain.logic.ValidationService;
 import org.zalando.compass.domain.model.Key;
@@ -39,7 +38,6 @@ class ReplaceKey {
      * @param key the key to replace
      * @return true if key was created, false if an existing one was updated
      */
-    @Transactional
     public boolean replace(final Key key) {
         final KeyLock lock = locking.lock(key);
 

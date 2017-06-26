@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.persistence.NotFoundException;
 import org.zalando.compass.domain.persistence.ValueRepository;
 
@@ -21,7 +20,6 @@ class DeleteValue {
         this.repository = repository;
     }
 
-    @Transactional
     public void delete(final String key, final Map<String, JsonNode> filter) {
         if (repository.delete(key, filter)) {
             log.info("Deleted value [{}, {}]", key, filter);

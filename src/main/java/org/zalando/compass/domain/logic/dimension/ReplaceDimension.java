@@ -3,7 +3,6 @@ package org.zalando.compass.domain.logic.dimension;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.zalando.compass.domain.logic.BadArgumentException;
 import org.zalando.compass.domain.logic.Locking;
@@ -49,7 +48,6 @@ class ReplaceDimension {
      * @param dimension the dimension to replace
      * @return true if dimension was created, false if an existing one was updated
      */
-    @Transactional
     public boolean replace(@Valid final Dimension dimension) {
 
         final DimensionLock lock = locking.lock(dimension);

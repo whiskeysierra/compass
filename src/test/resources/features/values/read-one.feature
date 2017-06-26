@@ -45,3 +45,6 @@ Feature: Read value
     Then "GET /keys/income-tax/value?before=2017-06-22T00:07:23Z&income=82000" returns "200 OK" with headers:
       | Content-Location                                                                      |
       | http://localhost:8080/keys/income-tax/value?before=2018-01-01T00:00:00Z&income=256303 |
+
+  Scenario: Read value from non-existing key should fail
+    Then "GET /keys/tax-rate/value" returns "404 Not Found"

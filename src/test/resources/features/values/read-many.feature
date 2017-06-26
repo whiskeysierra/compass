@@ -35,5 +35,7 @@ Feature: Read values
       | /dimensions/country | /dimensions/active | /dimensions/age | /value |
       | "DE"                | true               | 32              | 0.19   |
 
-  # TODO make it clear how matching values work, e.g. that we ignore additional filters when matching
+  Scenario: Read values from non-existing key should fail
+    Then "GET /keys/tax-rate/values" returns "404 Not Found"
 
+  # TODO make it clear how matching values work, e.g. that we ignore additional filters when matching

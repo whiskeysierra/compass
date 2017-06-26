@@ -3,7 +3,6 @@ package org.zalando.compass.domain.logic.value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.logic.Locking;
 import org.zalando.compass.domain.logic.ValidationService;
 import org.zalando.compass.domain.model.Value;
@@ -30,7 +29,6 @@ class ReplaceValue {
         this.locking = locking;
     }
 
-    @Transactional
     public boolean replace(final String key, final Value value) {
         final ValueLock lock = locking.lock(key, value);
         @Nullable final Value current = lock.getValue();
