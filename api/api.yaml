@@ -289,43 +289,6 @@ paths:
       responses:
         204:
           description: No Content
-  /values:
-    get:
-      tags: [values]
-      summary: Read all values and optionally filter by key pattern
-      parameters:
-        - name: q
-          description: Key pattern
-          in: query
-          type: string
-      responses:
-        200:
-          description: OK
-          schema:
-            type: object
-            additionalProperties:
-              type: object
-              properties:
-                values:
-                  type: array
-                  items:
-                    $ref: '#/definitions/Value'
-            example:
-              active:
-                values:
-                  - dimensions:
-                      email: '.*@qa-example.com'
-                      value: true
-                  - dimensions:
-                    value: false
-              tax-rate:
-                values:
-                  - dimension:
-                      country: DE
-                    value: 0.19
-                  - dimension:
-                      country: CH
-                    value: 0.08
 parameters:
   DimensionId:
     name: dimension

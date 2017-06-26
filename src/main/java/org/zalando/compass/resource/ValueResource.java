@@ -16,16 +16,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.ValueService;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.resource.Entries.Entry;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
-import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -38,6 +35,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 import static org.zalando.compass.domain.logic.BadArgumentException.checkArgument;
 
 @RestController
+@RequestMapping(path = "/keys/{key}")
 class ValueResource {
 
     private final JsonQueryParser parser;
@@ -52,13 +50,13 @@ class ValueResource {
         this.service = service;
     }
 
-    @RequestMapping(method = GET, path = "/keys/{key}/values")
+    @RequestMapping(method = GET, path = "/values")
     public ValuePage readAll(@PathVariable final String key, @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = parser.parse(query);
         return new ValuePage(service.readAllByKey(key, filter));
     }
 
-    @RequestMapping(method = GET, path = "/keys/{key}/value")
+    @RequestMapping(method = GET, path = "/value")
     public ResponseEntity<Value> read(@PathVariable final String key, @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = parser.parse(query);
         final Value value = service.read(key, filter);
@@ -68,7 +66,7 @@ class ValueResource {
                 .body(value);
     }
 
-    @RequestMapping(method = PUT, path = "/keys/{key}/values")
+    @RequestMapping(method = PUT, path = "/values")
     public ValuePage replaceAll(@PathVariable final String key, @RequestBody final JsonNode node) throws IOException {
         final List<Value> values = reader.read(node, ValuePage.class).getValues().stream()
                 .map(value -> value.withDimensions(firstNonNull(value.getDimensions(), ImmutableMap.of())))
@@ -79,7 +77,7 @@ class ValueResource {
         return readAll(key, emptyMap());
     }
 
-    @RequestMapping(method = PUT, path = "/keys/{key}/value")
+    @RequestMapping(method = PUT, path = "/value")
     public ResponseEntity<Value> replace(@PathVariable final String key, @RequestParam final Map<String, String> query,
             @RequestBody final JsonNode node) throws IOException {
 
@@ -102,17 +100,11 @@ class ValueResource {
         return input.withDimensions(dimensions);
     }
 
-    @RequestMapping(method = DELETE, path = "/keys/{key}/values")
+    @RequestMapping(method = DELETE, path = "/values")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable final String key, @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = parser.parse(query);
         service.delete(key, filter);
-    }
-
-    @RequestMapping(method = GET, path = "/values")
-    public Entries readAll(@RequestParam(name = "q", required = false) @Nullable final String q) {
-        return new Entries(service.readAllByKeyPattern(q).entrySet().stream()
-            .collect(toImmutableMap(e -> e.getKey().getId(), e -> new Entry(e.getValue()))));
     }
 
     private URI canonicalUrl(final String key, final Value value) {

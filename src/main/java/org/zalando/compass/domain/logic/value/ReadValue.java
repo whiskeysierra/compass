@@ -12,6 +12,7 @@ import java.util.Map;
 
 import static org.zalando.compass.domain.persistence.ValueCriteria.byKey;
 
+// TODO merge with ReadValues
 @Component
 class ReadValue {
 
