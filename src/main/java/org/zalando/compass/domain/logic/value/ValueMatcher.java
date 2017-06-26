@@ -18,9 +18,9 @@ class ValueMatcher {
     }
 
     private Predicate<RichValue> matcher(final Map<RichDimension, JsonNode> filter) {
-        return value -> value.getDimensions().entrySet().stream().allMatch(e -> {
-            final RichDimension dimension = e.getKey();
-            final JsonNode configured = e.getValue();
+        return value -> value.getDimensions().entrySet().stream().allMatch(entry -> {
+            final RichDimension dimension = entry.getKey();
+            final JsonNode configured = entry.getValue();
 
             @Nullable final JsonNode requested = filter.get(dimension);
             return requested != null && dimension.getRelation().test(configured, requested);

@@ -6,6 +6,9 @@ import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.persistence.KeyRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
 
+import javax.annotation.Nullable;
+import java.util.List;
+
 @Component
 class ReadKey {
 
@@ -18,6 +21,10 @@ class ReadKey {
 
     Key read(final String id) {
         return repository.find(id).orElseThrow(NotFoundException::new);
+    }
+
+    List<Key> readAll(@Nullable final String keyPattern) {
+        return repository.findAll(keyPattern);
     }
 
 }

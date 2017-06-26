@@ -7,23 +7,19 @@ import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 class DefaultDimensionService implements DimensionService {
 
     private final ReplaceDimension replace;
-    private final ReadDimension readOne;
-    private final ReadAllDimensions readAll;
+    private final ReadDimension read;
     private final DeleteDimension delete;
 
     @Autowired
-    DefaultDimensionService(final ReplaceDimension replace, final ReadDimension readOne,
-            final ReadAllDimensions readAll, final DeleteDimension delete) {
+    DefaultDimensionService(final ReplaceDimension replace, final ReadDimension read, final DeleteDimension delete) {
         this.replace = replace;
         this.delete = delete;
-        this.readOne = readOne;
-        this.readAll = readAll;
+        this.read = read;
     }
 
     @Transactional
@@ -34,12 +30,12 @@ class DefaultDimensionService implements DimensionService {
 
     @Override
     public Dimension read(final String id) {
-        return readOne.read(id);
+        return read.read(id);
     }
 
     @Override
     public List<Dimension> readAll() {
-        return readAll.read();
+        return read.readAll();
     }
 
     @Transactional

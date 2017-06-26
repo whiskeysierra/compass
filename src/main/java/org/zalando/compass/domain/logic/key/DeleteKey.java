@@ -21,7 +21,7 @@ class DeleteKey {
         this.repository = repository;
     }
 
-    public void delete(final String id) {
+    void delete(final String id) {
         final KeyLock lock = locking.lockKey(id);
 
         if (lock.getKey() == null) {

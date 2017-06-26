@@ -24,7 +24,7 @@ class DeleteValue {
         this.repository = repository;
     }
 
-    public void delete(final String key, final Map<String, JsonNode> filter) {
+    void delete(final String key, final Map<String, JsonNode> filter) {
         final ValueLock lock = locking.lockValue(key, filter);
 
         if (lock.getValue() == null) {

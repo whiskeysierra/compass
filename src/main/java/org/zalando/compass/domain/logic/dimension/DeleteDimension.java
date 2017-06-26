@@ -23,7 +23,7 @@ class DeleteDimension {
         this.locking = locking;
     }
 
-    public void delete(final String id) {
+    void delete(final String id) {
         final DimensionLock lock = locking.lockDimensions(id);
 
         if (lock.getDimension() == null) {

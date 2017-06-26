@@ -48,7 +48,7 @@ class ReplaceDimension {
      * @param dimension the dimension to replace
      * @return true if dimension was created, false if an existing one was updated
      */
-    public boolean replace(@Valid final Dimension dimension) {
+    boolean replace(@Valid final Dimension dimension) {
         final DimensionLock lock = locking.lockDimensions(dimension.getId());
         @Nullable final Dimension current = lock.getDimension();
 

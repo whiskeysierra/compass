@@ -14,18 +14,13 @@ import java.util.Map;
 class DefaultValueService implements ValueService {
 
     private final ReplaceValue replace;
-    private final ReplaceValues replaceMany;
-    private final ReadValue readOne;
-    private final ReadValues readMany;
+    private final ReadValue read;
     private final DeleteValue delete;
 
     @Autowired
-    DefaultValueService(final ReplaceValue replace, final ReplaceValues replaceMany, final ReadValue readOne,
-            final ReadValues readMany, final DeleteValue delete) {
+    DefaultValueService(final ReplaceValue replace, final ReadValue read, final DeleteValue delete) {
         this.replace = replace;
-        this.replaceMany = replaceMany;
-        this.readOne = readOne;
-        this.readMany = readMany;
+        this.read = read;
         this.delete = delete;
     }
 
@@ -38,17 +33,17 @@ class DefaultValueService implements ValueService {
     @Transactional
     @Override
     public void replace(final String key, final List<Value> values) {
-        replaceMany.replace(key, values);
+        replace.replace(key, values);
     }
 
     @Override
     public Value read(final String key, final Map<String, JsonNode> filter) {
-        return readOne.read(key, filter);
+        return read.read(key, filter);
     }
 
     @Override
     public List<Value> readAllByKey(final String key, final Map<String, JsonNode> filter) {
-        return readMany.read(key, filter);
+        return read.readAll(key, filter);
     }
 
     @Transactional

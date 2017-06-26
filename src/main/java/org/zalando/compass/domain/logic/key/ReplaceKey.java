@@ -38,7 +38,7 @@ class ReplaceKey {
      * @param key the key to replace
      * @return true if key was created, false if an existing one was updated
      */
-    public boolean replace(final Key key) {
+    boolean replace(final Key key) {
         final KeyLock lock = locking.lockKey(key.getId());
 
         @Nullable final Key current = lock.getKey();

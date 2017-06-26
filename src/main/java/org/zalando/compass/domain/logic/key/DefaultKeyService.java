@@ -14,15 +14,12 @@ class DefaultKeyService implements KeyService {
 
     private final ReplaceKey replace;
     private final ReadKey read;
-    private final ReadAllKeys readAll;
     private final DeleteKey delete;
 
     @Autowired
-    DefaultKeyService(final ReplaceKey replace, final ReadKey read, final ReadAllKeys readAll,
-            final DeleteKey delete) {
+    DefaultKeyService(final ReplaceKey replace, final ReadKey read, final DeleteKey delete) {
         this.replace = replace;
         this.read = read;
-        this.readAll = readAll;
         this.delete = delete;
     }
 
@@ -39,7 +36,7 @@ class DefaultKeyService implements KeyService {
 
     @Override
     public List<Key> readAllByKeyPattern(@Nullable final String keyPattern) {
-        return readAll.read(keyPattern);
+        return read.readAll(keyPattern);
     }
 
     @Transactional
