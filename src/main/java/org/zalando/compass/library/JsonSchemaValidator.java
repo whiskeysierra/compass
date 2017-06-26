@@ -62,10 +62,6 @@ public class JsonSchemaValidator {
         return validate(schemas.getUnchecked(name), node);
     }
 
-    public void check(final JsonNode schema, final JsonNode node, final String... path) {
-        throwIfNotEmpty(validate(schema, node, path));
-    }
-
     public List<Violation> validate(final JsonNode schema, final JsonNode node, final String... path) {
         return validate(factory.getSchema(schema), node, path);
     }

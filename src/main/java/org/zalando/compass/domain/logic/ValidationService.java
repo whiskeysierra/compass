@@ -65,14 +65,18 @@ public class ValidationService {
 
     public void check(final Key key, final Collection<Value> values) {
         validator.throwIfNotEmpty(values.stream()
-                .flatMap(value -> validator.validate(key.getSchema(), value.getValue(), "value").stream())
+                .flatMap(value -> validate(key, value).stream())
                 .collect(toList()));
     }
 
     public void check(final Key key, final Value value) {
+        validator.throwIfNotEmpty(validate(key, value));
+    }
+
+    private List<Violation> validate(final Key key, final Value value) {
         final JsonNode schema = key.getSchema();
         final JsonNode node = value.getValue();
-        validator.check(schema, node, "value");
+        return validator.validate(schema, node, "value");
     }
 
 }
