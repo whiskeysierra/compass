@@ -1,5 +1,6 @@
 package org.zalando.compass.domain.persistence;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectConditionStep;
@@ -11,8 +12,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.Collections.emptySet;
-import static java.util.Collections.singleton;
+import static org.jooq.impl.DSL.trueCondition;
 import static org.zalando.compass.domain.persistence.model.Tables.KEY;
 
 @Component
@@ -52,9 +52,18 @@ public class KeyRepository {
     public List<Key> findAll(@Nullable final String term) {
         return db.select()
                 .from(KEY)
-                .where(term == null ? emptySet() : singleton(KEY.ID.likeIgnoreCase("%" + term + "%")))
+                .where(toCondition(term))
                 .orderBy(KEY.ID.asc())
                 .fetchInto(Key.class);
+    }
+
+    private Condition toCondition(@Nullable final String term) {
+        if (term == null) {
+            return trueCondition();
+        }
+
+        return KEY.ID.likeIgnoreCase("%" + term + "%")
+                .or(KEY.DESCRIPTION.likeIgnoreCase("%" + term + "%"));
     }
 
     public void update(final Key key) {

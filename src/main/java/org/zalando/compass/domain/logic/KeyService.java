@@ -11,7 +11,7 @@ public interface KeyService {
 
     Key read(String id);
 
-    List<Key> readAllByKeyPattern(@Nullable String keyPattern);
+    List<Key> readAll(@Nullable String term);
 
     void delete(String id);
 

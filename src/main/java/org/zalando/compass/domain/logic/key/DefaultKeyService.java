@@ -35,8 +35,8 @@ class DefaultKeyService implements KeyService {
     }
 
     @Override
-    public List<Key> readAllByKeyPattern(@Nullable final String keyPattern) {
-        return read.readAll(keyPattern);
+    public List<Key> readAll(@Nullable final String term) {
+        return read.readAll(term);
     }
 
     @Transactional

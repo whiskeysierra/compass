@@ -39,7 +39,7 @@ class KeyResource {
 
     @RequestMapping(method = GET)
     public KeyPage getAll(@RequestParam(name = "q", required = false) @Nullable final String q) {
-        return new KeyPage(service.readAllByKeyPattern(q));
+        return new KeyPage(service.readAll(q));
     }
 
     @RequestMapping(method = GET, path = "/{id}")
