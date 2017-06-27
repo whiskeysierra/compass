@@ -70,5 +70,5 @@ Feature: Dimension creation
       | /schema/type | /relation | /description |
       | "number"     | "~"       | ".."         |
     Then "400 Bad Request" was returned with a list of /violations:
-      | /message                                          |
-      | "'number' is not among supported types: [string]" |
+      | /message                                       |
+      | "[number] not among supported types: [string]" |

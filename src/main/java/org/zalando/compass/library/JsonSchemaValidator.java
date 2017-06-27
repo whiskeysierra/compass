@@ -7,7 +7,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.JsonType;
@@ -15,22 +15,24 @@ import com.networknt.schema.JsonValidator;
 import com.networknt.schema.TypeFactory;
 import com.networknt.schema.ValidationMessage;
 import org.springframework.stereotype.Component;
-import org.zalando.problem.spring.web.advice.validation.ConstraintViolationProblem;
 import org.zalando.problem.spring.web.advice.validation.Violation;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.collect.Streams.stream;
 import static com.google.common.io.Resources.getResource;
+import static java.lang.String.format;
 import static java.util.Arrays.stream;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singleton;
+import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static java.util.stream.Collectors.toSet;
 
 @Component
 public class JsonSchemaValidator {
@@ -43,19 +45,28 @@ public class JsonSchemaValidator {
         // needed because field assignment throws IOException
     }
 
-    public void check(final Collection<JsonType> types, final JsonNode schema) {
-        final JsonType type = TypeFactory.getSchemaNodeType(schema.path("type"));
+    public List<Violation> check(final Set<JsonType> allowed, final JsonNode schema) {
+        final Set<JsonType> types = deriveTypes(schema);
+        final Set<JsonType> rejected = Sets.difference(types, allowed);
 
-        // TODO support more complex type definitions here, e.g. union types (i.e. arrays)
-        if (!types.contains(type)) {
-            throw new ConstraintViolationProblem(BAD_REQUEST, Collections.singletonList(
-                    new Violation("$.schema", String.format("'%s' is not among supported types: %s", type, types))
-            ));
+        if (rejected.isEmpty()) {
+            return emptyList();
         }
+
+        return singletonList(new Violation("$.schema", format("%s not among supported types: %s", rejected, allowed)));
     }
 
-    public void check(final String name, final JsonNode node) {
-        throwIfNotEmpty(validate(name, node));
+    private Set<JsonType> deriveTypes(final JsonNode schema) {
+        final JsonNode node = schema.path("type");
+        final JsonType type = TypeFactory.getSchemaNodeType(node);
+
+        if (type == JsonType.UNION) {
+            return stream(node.elements())
+                    .map(TypeFactory::getSchemaNodeType)
+                    .collect(toSet());
+        } else {
+            return singleton(type);
+        }
     }
 
     public List<Violation> validate(final String name, final JsonNode node) {
@@ -80,43 +91,18 @@ public class JsonSchemaValidator {
                 result -> result.isEmpty() ? "$" : "$." + result));
     }
 
-    public void throwIfNotEmpty(final List<Violation> violations) {
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationProblem(BAD_REQUEST, violations);
-        }
-    }
-
     private static final class SchemaLoader extends CacheLoader<String, JsonSchema> {
-
-        private static final Set<String> filter =
-                ImmutableSet.of("example", "deprecated", "readOnly", "x-extensible-enum");
 
         private final JsonSchemaFactory factory;
         private final JsonNode definitions;
 
         public SchemaLoader(final ObjectMapper mapper, final JsonSchemaFactory factory) throws IOException {
             this.factory = factory;
-            this.definitions = filter(mapper.readTree(getResource("api/api.yaml")));
-        }
+            this.definitions = mapper.readTree(getResource("api/api.yaml"));
 
-        private static JsonNode filter(final JsonNode node) {
-            if (node.isObject()) {
-                node.fields().forEachRemaining(field -> filter(field.getKey(), field.getValue()));
-            } else if (node.isArray()) {
-                node.elements().forEachRemaining(SchemaLoader::filter);
-            }
-            return node;
-        }
-
-        private static JsonNode filter(final String key, final JsonNode node) {
-            if (node.isObject() && key.equals("properties")) {
-                node.fields().forEachRemaining(field -> {
-                    final ObjectNode value = (ObjectNode) field.getValue();
-                    value.without(filter);
-                });
-                return node;
-            }
-            return filter(node);
+            final Set<String> ignored = Sets.newHashSet(definitions.fieldNames());
+            ignored.remove("definitions");
+            ObjectNode.class.cast(definitions).without(ignored);
         }
 
         @Override

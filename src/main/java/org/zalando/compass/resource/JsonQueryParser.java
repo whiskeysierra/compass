@@ -3,7 +3,7 @@ package org.zalando.compass.resource;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.NullNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
 import com.google.common.collect.ImmutableMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -42,7 +42,7 @@ public class JsonQueryParser {
 
     private JsonNode fromJson(@Nullable final String value) throws IOException {
         if (value == null || whitespace().matchesAllOf(value)) {
-            return NullNode.getInstance();
+            return MissingNode.getInstance();
         } else {
             try {
                 return mapper.readTree(value);

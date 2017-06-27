@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.zalando.jackson.module.unknownproperty.UnknownPropertyModule;
 import org.zalando.problem.ProblemModule;
+import org.zalando.problem.validation.ConstraintViolationProblemModule;
 
 import static com.fasterxml.jackson.core.JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN;
 
@@ -47,6 +48,7 @@ class JsonConfiguration {
         mapper.registerModule(new Jdk8Module());
         mapper.registerModule(new ParameterNamesModule());
         mapper.registerModule(new ProblemModule());
+        mapper.registerModule(new ConstraintViolationProblemModule());
         mapper.registerModule(new UnknownPropertyModule());
 
         mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);

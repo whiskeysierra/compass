@@ -32,13 +32,13 @@ public final class PostgresJsonbBinding implements Binding<Object, JsonNode> {
         @Override
         @SneakyThrows
         public JsonNode from(final Object value) {
-            return mapper.readTree(Objects.toString(value, "null"));
+            return value == null ? null : mapper.readTree(value.toString());
         }
 
         @Override
         @SneakyThrows
         public Object to(final JsonNode node) {
-            return mapper.writeValueAsString(firstNonNull(node, NullNode.getInstance()));
+            return node == null ? null : mapper.writeValueAsString(node);
         }
 
         @Override

@@ -12,24 +12,16 @@ import java.util.Comparator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Comparator.comparing;
 
 final class PrimitiveJsonNodeComparator extends Ordering<JsonNode> {
 
+    private final Comparator<JsonNode> comparator = Comparator.nullsFirst(
+            comparing(JsonNode::isNull).reversed().thenComparing(this::compareNonNull));
+
     @Override
     public int compare(@Nullable final JsonNode left, @Nullable final JsonNode right) {
-        if (isNull(left) && isNull(right)) {
-            return 0;
-        } else if (isNull(left)) {
-            return -1;
-        } else if (isNull(right)) {
-            return 1;
-        }
-
-        return compareNonNull(left, right);
-    }
-
-    private static boolean isNull(@Nullable final JsonNode node) {
-        return node == null || node.isNull();
+        return comparator.compare(left, right);
     }
 
     private int compareNonNull(final JsonNode left, final JsonNode right) {

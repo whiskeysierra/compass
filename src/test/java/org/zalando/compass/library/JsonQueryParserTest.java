@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.BigIntegerNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.DecimalNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
@@ -81,18 +82,23 @@ public final class JsonQueryParserTest {
     }
 
     @Test
-    public void shouldParseEmptyStringsAsNull() {
-        assertThat(unit.parse(map("country", "")), is(map("country", NullNode.getInstance())));
+    public void shouldParseEmptyStringsAsMissing() {
+        assertThat(unit.parse(map("country", "")), is(map("country", MissingNode.getInstance())));
     }
 
     @Test
-    public void shouldParseBlankStringsAsNull() {
-        assertThat(unit.parse(map("country", " ")), is(map("country", NullNode.getInstance())));
+    public void shouldParseBlankStringsAsMissing() {
+        assertThat(unit.parse(map("country", " ")), is(map("country", MissingNode.getInstance())));
+    }
+
+    @Test
+    public void shouldParseAbsentAsMissing() {
+        assertThat(unit.parse(map("country", null)), is(map("country", MissingNode.getInstance())));
     }
 
     @Test
     public void shouldParseNulls() {
-        assertThat(unit.parse(map("country", null)), is(map("country", NullNode.getInstance())));
+        assertThat(unit.parse(map("country", "null")), is(map("country", NullNode.getInstance())));
     }
 
     @Test

@@ -86,3 +86,25 @@ Feature: Value update
     Then "400 Bad Request" was returned with a list of /violations:
       | /field    | /message                                 |
       | "$.value" | "$.value: string found, number expected" |
+
+  Scenario: Values and dimensions should support unions and null
+    Given "PUT /dimensions/country" returns successfully when requested with:
+      | /schema/type/0 | /schema/type/1 | /relation | /description |
+      | "string"       | "null"         | "="       | ".."         |
+    And "PUT /keys/tax-rate" returns successfully when requested with:
+      | /schema/type/0 | /schema/type/1 | /description |
+      | "number"       | "null"         | ".."         |
+    When "PUT /keys/tax-rate/values" returns "200 OK" when requested with a list of /values:
+      | /dimensions/country | /value |
+      | "DE"                | 0.19   |
+      | null                | null   |
+      |                     | 0      |
+    Then "GET /keys/tax-rate/values" returns "200 OK" with a list of /values:
+      | /dimensions/country | /value |
+      | "DE"                | 0.19   |
+      | null                | null   |
+      |                     | 0      |
+    And "GET /keys/tax-rate/values?country=null" returns "200 OK" with a list of /values:
+      | /dimensions/country | /value |
+      | null                | null   |
+      |                     | 0      |

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import static com.fasterxml.jackson.databind.node.JsonNodeFactory.instance;
+import static java.util.Collections.nCopies;
 
 public final class JsonMutator {
 
@@ -18,26 +19,40 @@ public final class JsonMutator {
             return;
         }
 
-        final JsonNode parent = createParents(node, pointer);
+        final JsonNode parent = createAncestors(node, pointer);
         set(parent, pointer.last(), value);
     }
 
-    private static JsonNode createParents(final JsonNode node, final JsonPointer pointer) {
+    private static JsonNode createAncestors(final JsonNode node, final JsonPointer pointer) {
         final JsonPointer head = pointer.head();
 
-        if (node.at(head).isMissingNode()) {
-            createParents(node, head);
-            set(node, head, pointer.mayMatchProperty() ? new ObjectNode(instance) : new ArrayNode(instance));
+        final boolean parentIsAbsent = node.at(head).isMissingNode();
+
+        if (parentIsAbsent) {
+            final JsonNode grandParent = createAncestors(node, head);
+            final JsonPointer me = pointer.last();
+            final JsonNode parent = me.mayMatchElement() ? new ArrayNode(instance) : new ObjectNode(instance);
+
+            set(grandParent, head.last(), parent);
         }
 
         return node.at(head);
     }
 
     private static void set(final JsonNode node, final JsonPointer pointer, final JsonNode value) {
-        if (pointer.mayMatchProperty()) {
+        if (pointer.mayMatchElement()) {
+            final ArrayNode array = ArrayNode.class.cast(node);
+            final int index = pointer.getMatchingIndex();
+            if (array.has(index)) {
+                array.set(index, value);
+            } else if (index > array.size()) {
+                array.addAll(nCopies(index - array.size(), array.nullNode()));
+                array.add(value);
+            } else {
+                array.insert(index, value);
+            }
+        } else if (pointer.mayMatchProperty()) {
             ObjectNode.class.cast(node).set(pointer.getMatchingProperty(), value);
-        } else if (pointer.mayMatchElement()) {
-            ArrayNode.class.cast(node).set(pointer.getMatchingIndex(), value);
         }
     }
 

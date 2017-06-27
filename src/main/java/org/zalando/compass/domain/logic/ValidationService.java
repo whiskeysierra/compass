@@ -8,6 +8,7 @@ import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Relation;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.library.JsonSchemaValidator;
+import org.zalando.problem.spring.web.advice.validation.ConstraintViolationProblem;
 import org.zalando.problem.spring.web.advice.validation.Violation;
 
 import javax.annotation.Nullable;
@@ -17,6 +18,7 @@ import java.util.List;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 
 @Service
 public class ValidationService {
@@ -29,7 +31,7 @@ public class ValidationService {
     }
 
     public void check(final Dimension dimension, final Relation relation) {
-        validator.check(relation.supports(), dimension.getSchema());
+        throwIfNotEmpty(validator.check(relation.supports(), dimension.getSchema()));
     }
 
     public void validate(final Dimension dimension, final Collection<Value> values) {
@@ -37,13 +39,13 @@ public class ValidationService {
     }
 
     public void check(final Collection<Dimension> dimensions, final Collection<Value> values) {
-        validator.throwIfNotEmpty(values.stream()
+        throwIfNotEmpty(values.stream()
                 .flatMap(value -> validate(dimensions, value).stream())
                 .collect(toList()));
     }
 
     public void check(final Collection<Dimension> dimensions, final Value value) {
-        validator.throwIfNotEmpty(validate(dimensions, value));
+        throwIfNotEmpty(validate(dimensions, value));
     }
 
     private List<Violation> validate(final Collection<Dimension> dimensions, final Value value) {
@@ -64,19 +66,25 @@ public class ValidationService {
     }
 
     public void check(final Key key, final Collection<Value> values) {
-        validator.throwIfNotEmpty(values.stream()
+        throwIfNotEmpty(values.stream()
                 .flatMap(value -> validate(key, value).stream())
                 .collect(toList()));
     }
 
     public void check(final Key key, final Value value) {
-        validator.throwIfNotEmpty(validate(key, value));
+        throwIfNotEmpty(validate(key, value));
     }
 
     private List<Violation> validate(final Key key, final Value value) {
         final JsonNode schema = key.getSchema();
         final JsonNode node = value.getValue();
         return validator.validate(schema, node, "value");
+    }
+
+    private void throwIfNotEmpty(final List<Violation> violations) {
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationProblem(BAD_REQUEST, violations);
+        }
     }
 
 }

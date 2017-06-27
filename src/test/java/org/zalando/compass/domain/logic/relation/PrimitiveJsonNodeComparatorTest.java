@@ -42,9 +42,9 @@ public final class PrimitiveJsonNodeComparatorTest {
 
     @Test
     public void shouldCompareNulls() {
-        test(null, nullNode(), equal());
+        test(null, nullNode(), less());
         test(nullNode(), nullNode(), equal());
-        test(nullNode(), null, equal());
+        test(nullNode(), null, greater());
         test(null, null, equal());
     }
 
