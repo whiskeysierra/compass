@@ -1,5 +1,6 @@
 package org.zalando.compass.domain.persistence;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectConditionStep;
@@ -8,11 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.model.Dimension;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.jooq.impl.DSL.trueCondition;
 import static org.zalando.compass.domain.persistence.model.Tables.DIMENSION;
 
 @Component
@@ -76,11 +79,21 @@ public class DimensionRepository {
                 .orderBy(DIMENSION.ID.asc());
     }
 
-    public List<Dimension> findAll() {
+    public List<Dimension> findAll(@Nullable final String term) {
         return db.select(DIMENSION.fields())
                 .from(DIMENSION)
+                .where(toCondition(term))
                 .orderBy(DIMENSION.ID)
                 .fetchInto(Dimension.class);
+    }
+
+    private Condition toCondition(@Nullable final String term) {
+        if (term == null) {
+            return trueCondition();
+        }
+
+        return DIMENSION.ID.likeIgnoreCase("%" + term + "%")
+                .or(DIMENSION.DESCRIPTION.likeIgnoreCase("%" + term + "%"));
     }
 
     public void update(final Dimension dimension) {

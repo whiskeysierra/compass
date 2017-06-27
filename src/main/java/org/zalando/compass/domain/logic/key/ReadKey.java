@@ -23,8 +23,8 @@ class ReadKey {
         return repository.find(id).orElseThrow(NotFoundException::new);
     }
 
-    List<Key> readAll(@Nullable final String keyPattern) {
-        return repository.findAll(keyPattern);
+    List<Key> readAll(@Nullable final String term) {
+        return repository.findAll(term);
     }
 
 }

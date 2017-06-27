@@ -6,6 +6,7 @@ import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.persistence.DimensionRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 @Component
@@ -22,8 +23,8 @@ class ReadDimension {
         return repository.find(id).orElseThrow(NotFoundException::new);
     }
 
-    List<Dimension> readAll() {
-        return repository.findAll();
+    List<Dimension> readAll(@Nullable final String term) {
+        return repository.findAll(term);
     }
 
 }

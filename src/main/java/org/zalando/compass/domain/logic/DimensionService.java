@@ -2,8 +2,8 @@ package org.zalando.compass.domain.logic;
 
 import org.zalando.compass.domain.model.Dimension;
 
+import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Set;
 
 public interface DimensionService {
 
@@ -11,7 +11,7 @@ public interface DimensionService {
 
     Dimension read(String id);
 
-    List<Dimension> readAll();
+    List<Dimension> readAll(@Nullable String term);
 
     void delete(String id);
 

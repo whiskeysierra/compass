@@ -7,11 +7,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 
 import static org.springframework.http.HttpStatus.CREATED;
@@ -62,8 +64,8 @@ class DimensionResource {
     }
 
     @RequestMapping(method = GET)
-    public DimensionPage getAll() {
-        return new DimensionPage(service.readAll());
+    public DimensionPage getAll(@RequestParam(name = "q", required = false) @Nullable final String q) {
+        return new DimensionPage(service.readAll(q));
     }
 
     @RequestMapping(method = DELETE, path = "/{id}")

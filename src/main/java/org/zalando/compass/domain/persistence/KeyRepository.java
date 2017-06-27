@@ -49,10 +49,10 @@ public class KeyRepository {
                 .where(KEY.ID.eq(id));
     }
 
-    public List<Key> findAll(@Nullable final String keyPattern) {
+    public List<Key> findAll(@Nullable final String term) {
         return db.select()
                 .from(KEY)
-                .where(keyPattern == null ? emptySet() : singleton(KEY.ID.likeIgnoreCase("%" + keyPattern + "%")))
+                .where(term == null ? emptySet() : singleton(KEY.ID.likeIgnoreCase("%" + term + "%")))
                 .orderBy(KEY.ID.asc())
                 .fetchInto(Key.class);
     }

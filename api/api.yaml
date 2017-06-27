@@ -64,7 +64,12 @@ paths:
   /dimensions:
     get:
       tags: [dimensions]
-      summary: Read all dimensions
+      summary: Read all dimensions and optionally filter by search term
+      parameters:
+        - name: q
+          description: Search term
+          in: query
+          type: string
       description: |
         Read the complete list of all dimensions currently defined. This is intended to be used for display purposes.
       responses:
@@ -121,10 +126,10 @@ paths:
   /keys:
     get:
       tags: [keys]
-      summary: Read all keys and optionally filter by key pattern
+      summary: Read all keys and optionally filter by search term
       parameters:
         - name: q
-          description: Key pattern
+          description: Search term
           in: query
           type: string
       responses:
