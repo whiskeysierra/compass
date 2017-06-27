@@ -1,13 +1,13 @@
 Feature: Matching values
 
   Scenario Outline: Match values
-    Given the following dimensions:
-      | /id      | /schema/type | /relation    | /description |
-      | "before" | "string"     | "<relation>" | "ISO 8601"   |
-    And the following keys:
-      | /id        | /schema/type | /description |
-      | "tax-rate" | "number"     | ".."         |
-    And the following values for key tax-rate:
+    Given "PUT /dimensions/before" returns successfully when requested with:
+      | /schema/type | /relation    | /description |
+      | "string"     | "<relation>" | ".."         |
+    And "PUT /keys/tax-rate" returns successfully when requested with:
+      | /schema/type | /description |
+      | "number"     | ".."         |
+    And "PUT /keys/tax-rate/values" returns "200 OK" when requested with a list of /values:
       | /dimensions/before     | /value |
       | "2007-01-01T00:00:00Z" | 0.19   |
       |                        | 0.16   |

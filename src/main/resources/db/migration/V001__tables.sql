@@ -16,12 +16,12 @@ CREATE TABLE value (
   key_id TEXT NOT NULL REFERENCES key(id) ON DELETE CASCADE,
   index BIGSERIAL NOT NULL,
   value JSONB NOT NULL, -- adheres to key.schema
-  UNIQUE (key_id, index) DEFERRABLE
+  UNIQUE (key_id, index) DEFERRABLE INITIALLY DEFERRED
 );
 
 CREATE TABLE value_dimension (
   value_id BIGINT NOT NULL REFERENCES value(id) ON DELETE CASCADE,
   dimension_id TEXT NOT NULL REFERENCES dimension(id),
   dimension_value JSONB NOT NULL, -- adheres to dimension.schema,
-  UNIQUE (value_id, dimension_id) DEFERRABLE
+  UNIQUE (value_id, dimension_id) DEFERRABLE INITIALLY DEFERRED
 );

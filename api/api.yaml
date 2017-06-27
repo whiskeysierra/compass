@@ -194,6 +194,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/ValuePage'
+        # TODO 201, if at least one was created?
     get:
       tags: [values]
       summary: Read values for the given key and optional dimension

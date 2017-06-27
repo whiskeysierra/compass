@@ -1,14 +1,14 @@
 Feature: Delete a value
 
   Scenario: Delete value without dimensions
-    Given the following keys:
+    Given "PUT /keys/{id}" (using /id) always returns "201 Created" when requested individually with:
       | /id              | /schema/type | /description |
       | "tax-rate"       | "number"     | ".."         |
       | "feature.active" | "boolean"    | ".."         |
-    And the following values for key tax-rate:
+    And "PUT /keys/tax-rate/values" returns "200 OK" when requested with a list of /values:
       | /value |
       | 0.19   |
-    And the following values for key feature.active:
+    And "PUT /keys/feature.active/values" returns "200 OK" when requested with a list of /values:
       | /value |
       | true   |
     When "DELETE /keys/tax-rate/values" returns "204 No Content"
@@ -18,18 +18,18 @@ Feature: Delete a value
       | true   |
 
   Scenario: Delete value with dimension
-    Given the following dimensions:
-      | /id       | /schema/type | /relation | /description         |
-      | "country" | "string"     | "="       | "ISO 3166-1 alpha-2" |
-    And the following keys:
+    Given "PUT /dimensions/country" returns successfully when requested with:
+      | /schema/type | /relation | /description         |
+      | "string"     | "="       | "ISO 3166-1 alpha-2" |
+    And "PUT /keys/{id}" (using /id) always returns "201 Created" when requested individually with:
       | /id              | /schema/type | /description |
       | "tax-rate"       | "number"     | ".."         |
       | "feature.active" | "boolean"    | ".."         |
-    And the following values for key tax-rate:
+    And "PUT /keys/tax-rate/values" returns "200 OK" when requested with a list of /values:
       | /dimensions/country | /value |
       | "CH"                | 0.08   |
       | "DE"                | 0.19   |
-    And the following values for key feature.active:
+    And "PUT /keys/feature.active/values" returns "200 OK" when requested with a list of /values:
       | /value |
       | true   |
     When "DELETE /keys/tax-rate/values?country=CH" returns "204 No Content"
@@ -41,23 +41,23 @@ Feature: Delete a value
       | true   |
 
   Scenario: Delete value without matching dimensions should fail
-    Given the following dimensions:
-      | /id      | /schema/type | /schema/format | /relation | /description |
-      | "before" | "string"     | "date-time"    | "<"       | "ISO 8601"   |
-    And the following keys:
-      | /id        | /schema/type | /description |
-      | "tax-rate" | "number"     | ".."         |
-    And the following values for key tax-rate:
+    Given "PUT /dimensions/before" returns successfully when requested with:
+      | /schema/type | /relation | /description         |
+      | "string"     | "<"       | "ISO 3166-1 alpha-2" |
+    Given "PUT /keys/tax-rate" returns successfully when requested with:
+      | /schema/type | /description |
+      | "number"     | ".."         |
+    And "PUT /keys/tax-rate/values" returns "200 OK" when requested with a list of /values:
       | /dimensions/before          | /value |
       | "2007-01-01T00:00:00+02:00" | 0.16   |
     And "GET /keys/tax-rate/values?after=2006-12-31T23:59:59+01:00" returns "200 OK"
     When "DELETE /keys/tax-rate/values?after=2006-12-31T23:59:59+01:00" returns "404 Not Found"
 
   Scenario: Delete value with unknown dimension should fail
-    Given the following keys:
-      | /id        | /schema/type | /description |
-      | "tax-rate" | "number"     | ".."         |
-    And the following values for key tax-rate:
+    Given "PUT /keys/tax-rate" returns successfully when requested with:
+      | /schema/type | /description |
+      | "number"     | ".."         |
+    And "PUT /keys/tax-rate/values" returns "200 OK" when requested with a list of /values:
       | /value |
       | 0.19   |
     When "DELETE /keys/tax-rate/values?foo=bar" returns "404 Not Found"

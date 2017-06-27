@@ -1,7 +1,7 @@
 Feature: Key deletion
 
   Scenario: Delete key
-    Given the following keys:
+    Given "PUT /keys/{id}" (using /id) always returns "201 Created" when requested individually with:
       | /id              | /schema/type | /schema/format | /description |
       | "feature.active" | "boolean"    |                | ".."         |
       | "tax-rate"       | "number"     | "double"       | ".."         |
@@ -11,14 +11,14 @@ Feature: Key deletion
       | "tax-rate" | "number"     | "double"       | ".."         |
 
   Scenario: Deleting unknown key fails
-    Given there are no keys
+    Given "GET /keys/example" returns "404 Not Found"
     Then "DELETE /keys/example" returns "404 Not Found"
 
   Scenario: Delete used key
-    Given the following keys:
-      | /id        | /schema/type | /description |
-      | "tax-rate" | "number"     | ".."         |
-    And the following values for key tax-rate:
+    Given "PUT /keys/tax-rate" returns successfully when requested with:
+      | /schema/type | /description |
+      | "number"     | ".."         |
+    And "PUT /keys/tax-rate/values" returns "200 OK" when requested with a list of /values:
       | /value |
       | 0.16   |
     Then "DELETE /keys/tax-rate" returns "204 No Content"

@@ -1,20 +1,23 @@
 Feature: Dimension update
 
   Scenario: Updating a dimension
-    Given the following dimensions:
-      | /id       | /schema/type | /relation | /description |
-      | "version" | "string"     | "="       | ".."         |
-    When "PUT /dimensions/version" returns "200 OK" when requested with:
+    Given "PUT /dimensions/version" returns successfully when requested with:
+      | /schema/type | /relation | /description |
+      | "string"     | "="       | ".."         |
+    When "PUT /dimensions/version" when requested with:
       | /id       | /schema/type | /relation | /description                 |
       | "version" | "number"     | ">"       | "Lorem ipsum dolor sit amet" |
-    Then "GET /dimensions/version" returns "200 OK" with:
+    Then "200 OK" was returned with:
+      | /id       | /schema/type | /relation | /description                 |
+      | "version" | "number"     | ">"       | "Lorem ipsum dolor sit amet" |
+    And "GET /dimensions/version" returns "200 OK" with:
       | /id       | /schema/type | /relation | /description                 |
       | "version" | "number"     | ">"       | "Lorem ipsum dolor sit amet" |
 
   Scenario: Update description alone
-    Given the following dimensions:
-      | /id       | /schema/type | /relation | /description |
-      | "version" | "string"     | "="       | ".."         |
+    Given "PUT /dimensions/version" returns successfully when requested with:
+      | /schema/type | /relation | /description |
+      | "string"     | "="       | ".."         |
     When "PUT /dimensions/version" returns "200 OK" when requested with:
       | /id       | /schema/type | /relation | /description                 |
       | "version" | "string"     | "="       | "Lorem ipsum dolor sit amet" |
@@ -23,17 +26,17 @@ Feature: Dimension update
       | "version" | "string"     | "="       | "Lorem ipsum dolor sit amet" |
 
   Scenario: Updating a dimension failed due to id mismatch
-    Given the following dimensions:
-      | /id      | /schema/type | /relation | /description |
-      | "device" | "string"     | "="       | ".."         |
+    Given "PUT /dimensions/device" returns successfully when requested with:
+      | /schema/type | /relation | /description |
+      | "string"     | "="       | ".."         |
     When "PUT /dimensions/device" returns "400 Bad Request" when requested with:
       | /id   | /schema/type | /relation | /description                 |
       | "bar" | "string"     | "="       | "Lorem ipsum dolor sit amet" |
 
   Scenario: Updating a dimension failed due to schema violation
-    Given the following dimensions:
-      | /id      | /schema/type | /relation | /description |
-      | "device" | "string"     | "="       | ".."         |
+    Given "PUT /dimensions/device" returns successfully when requested with:
+      | /schema/type | /relation | /description |
+      | "string"     | "="       | ".."         |
     When "PUT /dimensions/device" when requested with:
       | /id      | /schema/type | /relation | /description |
       | "device" | "any"        | 17        | false        |
@@ -45,13 +48,13 @@ Feature: Dimension update
       | "$.schema.type" | "$.schema.type: string found, array expected"                                                                     |
 
   Scenario: Update dimension with values
-    Given the following dimensions:
-      | /id       | /schema/type | /relation | /description         |
-      | "country" | "string"     | "="       | "ISO 3166-1 alpha-2" |
-    And the following keys:
-      | /id        | /schema/type | /description |
-      | "tax-rate" | "number"     | ".."         |
-    And the following values for key tax-rate:
+    Given "PUT /dimensions/country" returns successfully when requested with:
+      | /schema/type | /relation | /description |
+      | "string"     | "<="      | "ISO 8601"   |
+    And "PUT /keys/tax-rate" returns successfully when requested with:
+      | /schema/type | /description |
+      | "number"     | ".."         |
+    And "PUT /keys/tax-rate/values" returns "200 OK" when requested with a list of /values:
       | /dimensions/country | /value |
       | "AT"                | 0.2    |
       | "CH"                | 0.08   |
@@ -61,21 +64,21 @@ Feature: Dimension update
       | "string"     | "[A-Z]{2}"      | "="       | "ISO 3166-1 alpha-2" |
 
   Scenario: Updating a dimension's schema should fail if at least one value violates it
-    Given the following dimensions:
-      | /id       | /schema/type | /relation | /description |
-      | "country" | "string"     | "="       | ".."         |
-    And the following keys:
-      | /id        | /schema/type | /description |
-      | "tax-rate" | "number"     | ".."         |
-    And the following values for key tax-rate:
+    Given "PUT /dimensions/country" returns successfully when requested with:
+      | /schema/type | /relation | /description |
+      | "string"     | "<="      | "ISO 8601"   |
+    And "PUT /keys/tax-rate" returns successfully when requested with:
+      | /schema/type | /description |
+      | "number"     | ".."         |
+    And "PUT /keys/tax-rate/values" returns "200 OK" when requested with a list of /values:
       | /dimensions/country | /value |
       | "AT"                | 0.2    |
       | "CH"                | 0.08   |
       | "DE"                | 0.19   |
-    Then "PUT /dimensions/country" when requested with:
+    When "PUT /dimensions/country" when requested with:
       | /schema/type | /schema/pattern | /relation | /description |
       | "string"     | "[a-z]{2}"      | "="       | ".."         |
-    And "400 Bad Request" was returned with a list of /violations:
+    Then "400 Bad Request" was returned with a list of /violations:
       | /message                                                          |
       | "$.dimensions.country: does not match the regex pattern [a-z]{2}" |
       | "$.dimensions.country: does not match the regex pattern [a-z]{2}" |

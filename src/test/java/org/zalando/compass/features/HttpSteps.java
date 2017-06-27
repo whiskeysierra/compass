@@ -12,6 +12,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.zalando.riptide.Requester;
 import org.zalando.riptide.Rest;
 import org.zalando.riptide.Route;
 import org.zalando.riptide.capture.Capture;
@@ -111,6 +112,15 @@ public class HttpSteps {
         assertThat(list.size(), is(0));
     }
 
+    @When("^\"([A-Z]+) ([^ ]*)\" returns successfully when requested with:$")
+    public void returnsSuccessfullyWhenRequestedWith(final HttpMethod method, final String uri, final Datatable table)
+            throws IOException {
+
+        final ResponseEntity<JsonNode> response = request(method, uri, mapper.map(table).get(0));
+
+        verifyStatus(response, HttpStatus.Series.SUCCESSFUL);
+    }
+
     @When("^\"([A-Z]+) ([^ ]*)\" returns \"(\\d+) (.+)\" when requested with:$")
     public void returnsWhenRequestedWith(final HttpMethod method, final String uri, final int statusCode,
             final String reasonPhrase, final Datatable table) throws IOException {
@@ -130,6 +140,16 @@ public class HttpSteps {
         final ResponseEntity<JsonNode> response = request(method, uri, body);
 
         verifyStatus(response, statusCode, reasonPhrase);
+    }
+
+    @When("^\"([A-Z]+) ([^ ]*)\" \\(using (.+)\\) always returns \"(\\d+) (.+)\" when requested individually with:$")
+    public void usingAlwaysReturnsWhenRequestedIndividuallyWith(final HttpMethod method, final String uriTemplate,
+            final String path, final int statusCode, final String reasonPhrase, final Datatable table) throws IOException {
+
+        mapper.map(table).stream()
+                .map(node -> requestAsync(rest.execute(method, uriTemplate, node.at(path).asText()), node))
+                .map(CompletableFuture::join)
+                .forEach(response -> verifyStatus(response, statusCode, reasonPhrase));
     }
 
     @When("^\"([A-Z]+) ([^ ]*)\" when requested with:$")
@@ -195,10 +215,14 @@ public class HttpSteps {
     private CompletableFuture<ResponseEntity<JsonNode>> requestAsync(final HttpMethod method, final String uri,
             final Object body) {
 
+        return requestAsync(rest.execute(method, uri), body);
+    }
+
+    private CompletableFuture<ResponseEntity<JsonNode>> requestAsync(final Requester requester, final Object body) {
         final Capture<ResponseEntity<JsonNode>> capture = Capture.empty();
         final Route route = call(responseEntityOf(JsonNode.class), capture);
 
-        return rest.execute(method, uri)
+        return requester
                 .body(body)
                 .dispatch(status(),
                         on(HttpStatus.NO_CONTENT).call(route),
@@ -211,6 +235,10 @@ public class HttpSteps {
     private void verifyStatus(final ResponseEntity<JsonNode> response, final int statusCode, final String reasonPhrase) {
         assertThat(response.getStatusCodeValue(), is(statusCode));
         assertThat(response.getStatusCode().getReasonPhrase(), is(reasonPhrase));
+    }
+
+    private void verifyStatus(final ResponseEntity<JsonNode> response, final HttpStatus.Series series) {
+        assertThat(response.getStatusCode().series(), is(series));
     }
 
     private Datatable renderHeaders(final ResponseEntity<JsonNode> response, final Datatable expected) {

@@ -1,7 +1,7 @@
 Feature: Reading dimensions
 
   Scenario: List dimensions
-    Given the following dimensions:
+    Given "PUT /dimensions/{id}" (using /id) always returns "201 Created" when requested individually with:
       | /id        | /schema/type | /schema/format | /relation | /description |
       | "device"   | "string"     |                | "="       | ".."         |
       | "language" | "string"     | "bcp47"        | "^"       | ".."         |
@@ -19,13 +19,12 @@ Feature: Reading dimensions
       | "location" | "string"     | "geohash"      | "^"       | ".."         |
 
   Scenario: List empty dimensions
-    Given there are no dimensions
     Then "GET /dimensions" returns "200 OK" with an empty list of /dimensions
 
   Scenario: Get dimension
-    Given "PUT /dimensions/device" returns "201 Created" when requested with:
-      | /id      | /schema/type | /relation | /description |
-      | "device" | "string"     | "="       | ".."         |
+    Given "PUT /dimensions/device" returns successfully when requested with:
+      | /schema/type | /relation | /description |
+      | "string"     | "="       | ".."         |
     When "GET /dimensions/device" returns "200 OK" with:
       | /id      | /schema/type | /relation | /description |
       | "device" | "string"     | "="       | ".."         |

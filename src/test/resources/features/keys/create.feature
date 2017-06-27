@@ -2,21 +2,23 @@ Feature: Key creation
 
   Scenario: Creating a new key
     Given "GET /keys/example" returns "404 Not Found"
-    When "PUT /keys/example" returns "201 Created" when requested with:
+    When "PUT /keys/example" when requested with:
       | /id       | /schema/type | /description                 |
       | "example" | "string"     | "Lorem ipsum dolor sit amet" |
-    Then "GET /keys/example" returns "200 OK" with:
+    Then "201 Created" was returned with:
+      | /id       | /schema/type | /description                 |
+      | "example" | "string"     | "Lorem ipsum dolor sit amet" |
+    And "GET /keys/example" returns "200 OK" with:
       | /id       | /schema/type | /description                 |
       | "example" | "string"     | "Lorem ipsum dolor sit amet" |
 
   Scenario: Creating a new key failed due to id mismatch
-    Given there are no keys
-    When "PUT /keys/foo" returns "400 Bad Request" when requested with:
+    Given "GET /keys/foo" returns "404 Not Found"
+    Then "PUT /keys/foo" returns "400 Bad Request" when requested with:
       | /id   | /schema/type | /description                 |
       | "bar" | "string"     | "Lorem ipsum dolor sit amet" |
 
   Scenario: Creating a new key failed due to schema violation
-    Given there are no keys
     When "PUT /keys/FOO" when requested with:
       | /schema/type | /description |
       | "any"        | false        |

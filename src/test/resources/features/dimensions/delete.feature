@@ -1,7 +1,7 @@
 Feature: Dimension deletion
 
   Scenario: Delete dimension
-    Given the following dimensions:
+    Given "PUT /dimensions/{id}" (using /id) always returns "201 Created" when requested individually with:
       | /id        | /schema/type | /schema/format | /relation | /description |
       | "device"   | "string"     |                | "="       | ".."         |
       | "language" | "string"     | "bcp47"        | "^"       | ".."         |
@@ -13,17 +13,17 @@ Feature: Dimension deletion
       | "location" | "string"     | "geohash"      | "^"       | ".."         |
 
   Scenario: Deleting unknown dimension fails
-    Given there are no dimensions
+    Given "GET /dimensions/example" returns "404 Not Found"
     Then "DELETE /dimensions/example" returns "404 Not Found"
 
   Scenario: Delete used dimension
-    Given the following dimensions:
-      | /id      | /schema/type | /relation | /description |
-      | "before" | "string"     | "<="      | "ISO 8601"   |
-    And the following keys:
-      | /id        | /schema/type | /description |
-      | "tax-rate" | "number"     | ".."         |
-    And the following values for key tax-rate:
+    Given "PUT /dimensions/before" returns successfully when requested with:
+      | /schema/type | /relation | /description |
+      | "string"     | "<="      | "ISO 8601"   |
+    Given "PUT /keys/tax-rate" returns successfully when requested with:
+      | /schema/type | /description |
+      | "number"     | ".."         |
+    And "PUT /keys/tax-rate/values" returns "200 OK" when requested with a list of /values:
       | /dimensions/before     | /value |
       | "2007-01-01T00:00:00Z" | 0.19   |
       |                        | 0.16   |

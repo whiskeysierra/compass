@@ -19,6 +19,7 @@ import java.util.Set;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Sets.difference;
+import static com.google.common.collect.Sets.intersection;
 
 @Slf4j
 @Component
@@ -61,6 +62,7 @@ class ReplaceValue {
 
         final ValuesLock lock = locking.lock(key, values);
 
+        // TODO combine both into one set of violations
         validator.check(lock.getDimensions(), values);
         validator.check(lock.getKey(), values);
 
@@ -68,16 +70,19 @@ class ReplaceValue {
         final Set<Equivalence.Wrapper<Value>> after = wrap(values);
 
         final Collection<Value> creations = unwrap(difference(after, before));
+        final Collection<Value> updates = unwrap(intersection(after, before));
         final Collection<Value> deletions = unwrap(difference(before, after));
 
         creations.forEach(value ->
                 repository.create(key, value));
 
+        updates.forEach(value ->
+                repository.update(key, value));
+
         deletions.forEach(value ->
                 repository.delete(key, value.getDimensions()));
 
-        // performs updates and assigns correct index values (for order by)
-        repository.update(key, values);
+        repository.reorder(key, values);
 
         log.info("Replaced values of key [{}] with [{}]", key, values);
     }

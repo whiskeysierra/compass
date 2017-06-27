@@ -157,14 +157,13 @@ public class ValueRepository{
                 .execute();
     }
 
-    public void update(final String key, final List<Value> values) {
-        final Collection<Query> queries = Streams.mapWithIndex(values.stream(), (value, index) -> {
-            return db.update(VALUE)
-                    .set(VALUE.VALUE_, value.getValue())
-                    .set(VALUE.INDEX, index)
-                    .where(VALUE.KEY_ID.eq(key))
-                    .and(exactMatch(value.getDimensions()));
-        }).collect(toList());
+    public void reorder(final String key, final List<Value> values) {
+        final Collection<Query> queries = Streams.mapWithIndex(values.stream(), (value, index) ->
+                db.update(VALUE)
+                        .set(VALUE.INDEX, index)
+                        .where(VALUE.KEY_ID.eq(key))
+                        .and(exactMatch(value.getDimensions())))
+                .collect(toList());
 
         db.batch(queries).execute();
     }

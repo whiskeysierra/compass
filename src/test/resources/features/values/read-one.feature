@@ -1,14 +1,14 @@
 Feature: Read value
 
   Background: Income tax configuration
-    Given the following dimensions:
+    Given "PUT /dimensions/{id}" (using /id) always returns "201 Created" when requested individually with:
       | /id      | /schema/type | /relation | /description |
       | "before" | "string"     | "<"       | "ISO 8601"   |
       | "income" | "number"     | "<="      | ".."         |
-    And the following keys:
-      | /id          | /schema/type | /description |
-      | "income-tax" | "number"     | ".."         |
-    And the following values for key income-tax:
+    And "PUT /keys/income-tax" returns successfully when requested with:
+      | /schema/type | /description |
+      | "number"     | ".."         |
+    And "PUT /keys/income-tax/values" returns "200 OK" when requested with a list of /values:
       | /dimensions/before     | /dimensions/income | /value |
       | "2017-01-01T00:00:00Z" | 8652               | 0      |
       | "2017-01-01T00:00:00Z" | 53665              | 0.14   |
@@ -21,10 +21,10 @@ Feature: Read value
       |                        |                    | 1      |
 
   Scenario: Get value without any dimensions
-    Given the following keys:
-      | /id        | /schema/type | /description |
-      | "tax-rate" | "number"     | ".."         |
-    And the following values for key tax-rate:
+    Given "PUT /keys/tax-rate" returns successfully when requested with:
+      | /schema/type | /description |
+      | "number"     | ".."         |
+    And "PUT /keys/tax-rate/values" returns "200 OK" when requested with a list of /values:
       | /value |
       | 0.19   |
     Then "GET /keys/tax-rate/value" returns "200 OK" with:
