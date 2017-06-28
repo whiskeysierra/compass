@@ -1,14 +1,14 @@
 Feature: Read value
 
   Background: Income tax configuration
-    Given "PUT /dimensions/{id}" (using /id) always returns "201 Created" when requested individually with:
+    Given "PUT /dimensions/{id}" (using /id) always responds "201 Created" when requested individually with:
       | /id      | /schema/type | /relation | /description |
       | "before" | "string"     | "<"       | "ISO 8601"   |
       | "income" | "number"     | "<="      | ".."         |
-    And "PUT /keys/income-tax" returns successfully when requested with:
+    And "PUT /keys/income-tax" responds successfully when requested with:
       | /schema/type | /description |
       | "number"     | ".."         |
-    And "PUT /keys/income-tax/values" returns "200 OK" when requested with a list of /values:
+    And "PUT /keys/income-tax/values" responds "200 OK" when requested with an array at "/values":
       | /dimensions/before     | /dimensions/income | /value |
       | "2017-01-01T00:00:00Z" | 8652               | 0      |
       | "2017-01-01T00:00:00Z" | 53665              | 0.14   |
@@ -21,30 +21,30 @@ Feature: Read value
       |                        |                    | 1      |
 
   Scenario: Get value without any dimensions
-    Given "PUT /keys/tax-rate" returns successfully when requested with:
+    Given "PUT /keys/tax-rate" responds successfully when requested with:
       | /schema/type | /description |
       | "number"     | ".."         |
-    And "PUT /keys/tax-rate/values" returns "200 OK" when requested with a list of /values:
+    And "PUT /keys/tax-rate/values" responds "200 OK" when requested with an array at "/values":
       | /value |
       | 0.19   |
-    Then "GET /keys/tax-rate/value" returns "200 OK" with:
+    Then "GET /keys/tax-rate/value" responds "200 OK" with:
       | /value |
       | 0.19   |
 
   Scenario: Get fallback value
-    Then "GET /keys/income-tax/value" returns "200 OK" with:
+    Then "GET /keys/income-tax/value" responds "200 OK" with:
       | /value |
       | 1      |
 
   Scenario: Get value with dimensions
-    Then "GET /keys/income-tax/value?before=2017-06-22T00:07:23Z&income=82000" returns "200 OK" with:
+    Then "GET /keys/income-tax/value?before=2017-06-22T00:07:23Z&income=82000" responds "200 OK" with:
       | /value |
       | 0.42   |
 
   Scenario: Canonical value URL
-    Then "GET /keys/income-tax/value?before=2017-06-22T00:07:23Z&income=82000" returns "200 OK" with headers:
+    Then "GET /keys/income-tax/value?before=2017-06-22T00:07:23Z&income=82000" responds "200 OK" with headers:
       | Content-Location                                                                      |
       | http://localhost:8080/keys/income-tax/value?before=2018-01-01T00:00:00Z&income=256303 |
 
   Scenario: Read value from non-existing key should fail
-    Then "GET /keys/tax-rate/value" returns "404 Not Found"
+    Then "GET /keys/tax-rate/value" responds "404 Not Found"

@@ -1,77 +1,144 @@
 package org.zalando.compass.library;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import org.junit.Test;
 
 import static com.fasterxml.jackson.databind.node.JsonNodeFactory.instance;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasToString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
-import static org.zalando.compass.library.JsonMutator.setAt;
+import static org.zalando.compass.library.JsonMutator.withAt;
 
 public class JsonMutatorTest {
 
     @Test
-    public void shouldSetRootLevelProperty() {
+    public void shouldCreateObject() {
+        final JsonNode created = withAt(null, "/a", new TextNode(""));
 
+        assertThat(created, hasToString("{\"a\":\"\"}"));
+    }
+
+    @Test
+    public void shouldCreateArray() {
+        final JsonNode created = withAt(null, "/0", new TextNode(""));
+
+        assertThat(created, hasToString("[\"\"]"));
+    }
+
+    @Test
+    public void shouldCreateTextNode() {
+        final JsonNode created = withAt("", new TextNode("..."));
+
+        assertThat(created, hasToString("\"...\""));
+    }
+
+    @Test
+    public void shouldSetRootLevelProperty() {
+        final JsonNode original = new ObjectNode(instance);
+        final JsonNode modified = withAt(original, "/a", new TextNode(""));
+
+        assertThat(original, hasToString("{}"));
+        assertThat(modified, hasToString("{\"a\":\"\"}"));
     }
 
     @Test
     public void shouldSetRootLevelElement() {
+        final JsonNode node = new ArrayNode(instance);
+        final JsonNode modified = withAt(node, "/0", new TextNode(""));
 
+        assertThat(node, hasToString("[]"));
+        assertThat(modified, hasToString("[\"\"]"));
+    }
+
+    @Test
+    public void shouldReplaceRootLevelProperty() {
+        final JsonNode original = new ObjectNode(instance);
+        final JsonNode modified = withAt(original, "", BooleanNode.TRUE);
+
+        assertThat(original, hasToString("{}"));
+        assertThat(modified, hasToString("true"));
+    }
+
+    @Test
+    public void shouldReplaceRootLevelElement() {
+        final JsonNode original = new ArrayNode(instance);
+        final JsonNode modified = withAt(original, "", BooleanNode.TRUE);
+
+        assertThat(original, hasToString("[]"));
+        assertThat(modified, hasToString("true"));
+    }
+
+    @Test
+    public void shouldReplaceRootLevelWithImmutableCopy() {
+        final JsonNode root = new ObjectNode(instance);
+        final ArrayNode original = new ArrayNode(instance);
+
+        final JsonNode modified = withAt(root, "", original);
+
+        assertThat(modified, equalTo(original));
+        assertThat(modified, not(sameInstance(original)));
     }
 
     @Test
     public void shouldCreateDeepProperty() {
-        final ObjectNode node = new ObjectNode(instance);
-        setAt(node, "/a/b/c", new TextNode(""));
+        final JsonNode original = new ObjectNode(instance);
+        final JsonNode modified = withAt(original, "/a/b/c", new TextNode(""));
 
-        assertThat(node, hasToString("{\"a\":{\"b\":{\"c\":\"\"}}}"));
+        assertThat(original, hasToString("{}"));
+        assertThat(modified, hasToString("{\"a\":{\"b\":{\"c\":\"\"}}}"));
     }
 
     @Test
     public void shouldCreateDeepElement() {
-        final ArrayNode node = new ArrayNode(instance);
-        setAt(node, "/0/0/0", new TextNode(""));
+        final JsonNode original = new ArrayNode(instance);
+        final JsonNode modified = withAt(original, "/0/0/0", new TextNode(""));
 
-        assertThat(node, hasToString("[[[\"\"]]]"));
+        assertThat(original, hasToString("[]"));
+        assertThat(modified, hasToString("[[[\"\"]]]"));
     }
 
     @Test
     public void shouldCreateDeepElementAtArbitraryIndices() {
-        final ArrayNode node = new ArrayNode(instance);
-        setAt(node, "/0/1/2", new TextNode(""));
+        final JsonNode original = new ArrayNode(instance);
+        final JsonNode modified = withAt(original, "/0/1/2", new TextNode(""));
 
-        assertThat(node, hasToString("[[null,[null,null,\"\"]]]"));
+        assertThat(original, hasToString("[]"));
+        assertThat(modified, hasToString("[[null,[null,null,\"\"]]]"));
     }
 
     @Test
     public void shouldCreateNestedPropertiesAndElements() {
-        final ObjectNode node = new ObjectNode(instance);
-        setAt(node, "/a/b/0", new TextNode(""));
+        final JsonNode original = new ObjectNode(instance);
+        final JsonNode modified = withAt(original, "/a/b/0", new TextNode(""));
 
-        assertThat(node, hasToString("{\"a\":{\"b\":[\"\"]}}"));
+        assertThat(original, hasToString("{}"));
+        assertThat(modified, hasToString("{\"a\":{\"b\":[\"\"]}}"));
     }
 
     @Test
     public void shouldUpdateProperty() {
-        final ObjectNode node = new ObjectNode(instance);
-        node.putObject("a").putObject("b").put("c", "...");
-        setAt(node, "/a/b/c", new TextNode(""));
+        final ObjectNode original = new ObjectNode(instance);
+        original.putObject("a").putObject("b").put("c", "...");
+        final JsonNode modified = withAt(original, "/a/b/c", new TextNode(""));
 
-        assertThat(node, hasToString("{\"a\":{\"b\":{\"c\":\"\"}}}"));
+        assertThat(original, hasToString("{\"a\":{\"b\":{\"c\":\"...\"}}}"));
+        assertThat(modified, hasToString("{\"a\":{\"b\":{\"c\":\"\"}}}"));
     }
 
     @Test
     public void shouldUpdateElement() {
-        final ArrayNode node = new ArrayNode(instance);
-        node.addArray().addArray().add("...");
-        setAt(node, "/0/0/0", new TextNode(""));
+        final ArrayNode original = new ArrayNode(instance);
+        original.addArray().addArray().add("...");
+        final JsonNode modified = withAt(original, "/0/0/0", new TextNode(""));
 
-        assertThat(node, hasToString("[[[\"\"]]]"));
+        assertThat(original, hasToString("[[[\"...\"]]]"));
+        assertThat(modified, hasToString("[[[\"\"]]]"));
     }
-
-    // TODO should update
 
 }

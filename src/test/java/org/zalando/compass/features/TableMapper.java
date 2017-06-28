@@ -1,12 +1,12 @@
 package org.zalando.compass.features;
 
-import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.zalando.fauxpas.ThrowingBiFunction;
 import org.zuchini.runner.tables.Datatable;
 
 import java.io.IOException;
@@ -17,8 +17,7 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static org.zalando.compass.library.JsonMutator.setAt;
-import static org.zalando.fauxpas.FauxPas.throwingConsumer;
+import static org.zalando.compass.library.JsonMutator.withAt;
 import static org.zalando.fauxpas.FauxPas.throwingFunction;
 
 @Component
@@ -48,18 +47,21 @@ public class TableMapper {
                 .collect(toList());
     }
 
-    private ObjectNode map(final Map<String, String> row) throws IOException {
-        final ObjectNode node = mapper.createObjectNode();
+    private JsonNode map(final Map<String, String> row) throws IOException {
+        return row.keySet().stream()
+                .reduce(null, withCell(row), (a, b) -> {
+                    throw new UnsupportedOperationException();
+                });
+    }
 
-        row.keySet().forEach(throwingConsumer(header -> {
-            final JsonPointer pointer = JsonPointer.compile(header);
+    private ThrowingBiFunction<JsonNode, String, JsonNode, IOException> withCell(final Map<String, String> row) {
+        return (node, header) -> {
             final String cell = row.get(header);
             final JsonNode value = cell.isEmpty() ? MissingNode.getInstance() : mapper.readTree(cell);
 
-            setAt(node, pointer, value);
-        }));
-
-        return node;
+            // treats header as JSON Pointer
+            return withAt(node, header, value);
+        };
     }
 
 }

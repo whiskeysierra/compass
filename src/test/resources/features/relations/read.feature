@@ -1,7 +1,7 @@
 Feature: Relations
 
   Scenario: List relations
-    When "GET /relations" returns "200 OK" with a list of /relations:
+    When "GET /relations" responds "200 OK" with an array at "/relations":
       | /id  | /title                  |
       | "<"  | "Less than"             |
       | "<=" | "Less than or equal"    |
@@ -12,9 +12,9 @@ Feature: Relations
       | "~"  | "Regular expression"    |
 
   Scenario: Get relation
-    When "GET /relations/=" returns "200 OK" with:
+    When "GET /relations/=" responds "200 OK" with:
       | /id | /title     | /description                                                                            |
       | "=" | "Equality" | "Matches values where the requested dimension values are equal to the configured ones." |
 
   Scenario: Get unknown relation
-    Then "GET /relations/unknown" returns "404 Not Found"
+    Then "GET /relations/unknown" responds "404 Not Found"

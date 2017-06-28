@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.node.DecimalNode;
 import com.fasterxml.jackson.databind.node.DoubleNode;
 import com.fasterxml.jackson.databind.node.FloatNode;
 import com.fasterxml.jackson.databind.node.IntNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.LongNode;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.NullNode;
@@ -30,6 +29,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import static com.fasterxml.jackson.databind.node.JsonNodeFactory.instance;
 import static com.google.common.collect.Lists.cartesianProduct;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
@@ -148,7 +148,7 @@ public final class PrimitiveJsonNodeComparatorTest {
     }
 
     private JsonNode arrayNode(final JsonNode... elements) {
-        return new ArrayNode(JsonNodeFactory.instance, Arrays.asList(elements));
+        return new ArrayNode(instance, Arrays.asList(elements));
     }
 
     private JsonNode trueNode() {
@@ -164,15 +164,15 @@ public final class PrimitiveJsonNodeComparatorTest {
     }
 
     private JsonNode objectNode() {
-        return new ObjectNode(JsonNodeFactory.instance);
+        return new ObjectNode(instance);
     }
 
     private JsonNode objectNode(final String key, final JsonNode value) {
-        return new ObjectNode(JsonNodeFactory.instance, Collections.singletonMap(key, value));
+        return new ObjectNode(instance, Collections.singletonMap(key, value));
     }
 
     private JsonNode objectNode(final String key1, final JsonNode value1, final String key2, final JsonNode value2) {
-        return new ObjectNode(JsonNodeFactory.instance, ImmutableMap.of(key1, value1, key2, value2));
+        return new ObjectNode(instance, ImmutableMap.of(key1, value1, key2, value2));
     }
 
     private JsonNode textNode(final String text) {

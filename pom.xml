@@ -185,6 +185,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>com.github.fge</groupId>
+            <artifactId>json-patch</artifactId>
+            <version>1.9</version>
+        </dependency>
 
         <!-- Required to make hacky patch for HV-1184 work -->
         <dependency>

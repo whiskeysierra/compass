@@ -1,20 +1,20 @@
 Feature: Key creation
 
   Scenario: Creating a new key
-    Given "GET /keys/example" returns "404 Not Found"
+    Given "GET /keys/example" responds "404 Not Found"
     When "PUT /keys/example" when requested with:
       | /id       | /schema/type | /description                 |
       | "example" | "string"     | "Lorem ipsum dolor sit amet" |
-    Then "201 Created" was returned with:
+    Then "201 Created" was responded with:
       | /id       | /schema/type | /description                 |
       | "example" | "string"     | "Lorem ipsum dolor sit amet" |
-    And "GET /keys/example" returns "200 OK" with:
+    And "GET /keys/example" responds "200 OK" with:
       | /id       | /schema/type | /description                 |
       | "example" | "string"     | "Lorem ipsum dolor sit amet" |
 
   Scenario: Creating a new key failed due to id mismatch
-    Given "GET /keys/foo" returns "404 Not Found"
-    Then "PUT /keys/foo" returns "400 Bad Request" when requested with:
+    Given "GET /keys/foo" responds "404 Not Found"
+    Then "PUT /keys/foo" responds "400 Bad Request" when requested with:
       | /id   | /schema/type | /description                 |
       | "bar" | "string"     | "Lorem ipsum dolor sit amet" |
 
@@ -22,7 +22,7 @@ Feature: Key creation
     When "PUT /keys/FOO" when requested with:
       | /schema/type | /description |
       | "any"        | false        |
-    Then "400 Bad Request" was returned with a list of /violations:
+    Then "400 Bad Request" was responded with an array at "/violations":
       | /field          | /message                                                                                                          |
       | "$.description" | "$.description: boolean found, string expected"                                                                   |
       | "$.id"          | "$.id: does not match the regex pattern ^([a-z0-9]+(-[a-z0-9]+)*)([.]([a-z0-9]+(-[a-z0-9]+)*))*$"                 |

@@ -1,17 +1,17 @@
 Feature: Matching values
 
   Scenario Outline: Match values
-    Given "PUT /dimensions/before" returns successfully when requested with:
+    Given "PUT /dimensions/before" responds successfully when requested with:
       | /schema/type | /relation    | /description |
       | "string"     | "<relation>" | ".."         |
-    And "PUT /keys/tax-rate" returns successfully when requested with:
+    And "PUT /keys/tax-rate" responds successfully when requested with:
       | /schema/type | /description |
       | "number"     | ".."         |
-    And "PUT /keys/tax-rate/values" returns "200 OK" when requested with a list of /values:
+    And "PUT /keys/tax-rate/values" responds "200 OK" when requested with an array at "/values":
       | /dimensions/before     | /value |
       | "2007-01-01T00:00:00Z" | 0.19   |
       |                        | 0.16   |
-    Then "GET /keys/tax-rate/value?before=<value>" returns "200 OK" with:
+    Then "GET /keys/tax-rate/value?before=<value>" responds "200 OK" with:
       | /value     |
       | <expected> |
     Examples:
