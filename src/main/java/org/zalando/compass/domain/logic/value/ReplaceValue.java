@@ -1,5 +1,6 @@
 package org.zalando.compass.domain.logic.value;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Equivalence;
 import com.google.common.collect.ImmutableSet;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import org.zalando.compass.domain.persistence.ValueRepository;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
@@ -36,8 +38,8 @@ class ReplaceValue {
         this.locking = locking;
     }
 
-    boolean replace(final String key, final Value value) {
-        final ValueLock lock = locking.lockValue(key, value.getDimensions());
+    boolean replace(final String key, final Map<String, JsonNode> dimensions, final Value value) {
+        final ValueLock lock = locking.lockValue(key, dimensions);
         @Nullable final Value current = lock.getValue();
 
         validator.check(lock.getDimensions(), value);
@@ -50,7 +52,7 @@ class ReplaceValue {
 
             return true;
         } else {
-            repository.update(key, value);
+            repository.update(key, dimensions, value);
             log.info("Updated value for key [{}]: [{}]", key, value);
 
             return false;
@@ -77,7 +79,7 @@ class ReplaceValue {
                 repository.create(key, value));
 
         updates.forEach(value ->
-                repository.update(key, value));
+                repository.update(key, value.getDimensions(), value));
 
         deletions.forEach(value ->
                 repository.delete(key, value.getDimensions()));

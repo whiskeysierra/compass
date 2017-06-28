@@ -98,8 +98,10 @@ class DimensionResource {
     public ResponseEntity<Dimension> update(@PathVariable final String id,
             @RequestBody final ArrayNode patch) throws IOException, JsonPatchException {
 
+        // TODO validate JsonPatch schema?
+
         final Dimension dimension = service.read(id);
-        final ObjectNode node = mapper.valueToTree(dimension);
+        final JsonNode node = mapper.valueToTree(dimension);
 
         final JsonPatch jsonPatch = JsonPatch.fromJson(patch);
         final JsonNode patched = jsonPatch.apply(node);

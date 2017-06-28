@@ -114,6 +114,24 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/Dimension'
+    patch:
+      tags: [dimensions]
+      summary: Update a dimension
+      consumes:
+        - application/json
+        - application/merge-patch+json
+        - application/json-patch+json
+      parameters:
+        - $ref: '#/parameters/DimensionId'
+        - name: dimension
+          in: body
+          schema:
+            $ref: '#/definitions/Dimension'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Dimension'
     delete:
       tags: [dimensions]
       summary: Delete a dimension
@@ -171,6 +189,24 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/Key'
+    patch:
+      tags: [keys]
+      summary: Update a key
+      consumes:
+        - application/json
+        - application/merge-patch+json
+        - application/json-patch+json
+      parameters:
+        - $ref: '#/parameters/Key'
+        - name: key
+          in: body
+          schema:
+            $ref: '#/definitions/Key'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Key'
     delete:
       tags: [keys]
       summary: Delete a key
@@ -202,7 +238,7 @@ paths:
         # TODO 201, if at least one was created?
     get:
       tags: [values]
-      summary: Read values for the given key and optional dimension
+      summary: Read values for the given key and optional dimensions.
       description: |
         Values can either be read as a whole or being filtered by dimensions:
 
@@ -214,6 +250,23 @@ paths:
       parameters:
         - $ref: '#/parameters/Key'
         - $ref: '#/parameters/Filter'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ValuePage'
+    patch:
+      summary: Update values for the given key.
+      consumes:
+        - application/json
+        - application/json-patch+json
+      parameters:
+        - $ref: '#/parameters/Key'
+        - name: values
+          in: body
+          required: true
+          schema:
+            $ref: 'api/json-patch.json#'
       responses:
         200:
           description: OK
@@ -264,6 +317,25 @@ paths:
         Values have an explicit ordering that can be changed by replacing all values. Selecting the best value for
         a given key and selected dimensions is based on that order. The first match will be returned. That implies
         that values should be ordered from fine- to coarse-grained or from specific to generic.
+      parameters:
+        - $ref: '#/parameters/Key'
+        - $ref: '#/parameters/Filter'
+      responses:
+        200:
+          description: OK
+          headers:
+            Content-Location:
+              description: Canonical URL of this value
+              type: string
+              format: uri
+          schema:
+            $ref: '#/definitions/Value'
+    patch:
+      summary: Update a value
+      consumes:
+        - application/json
+        - application/merge-patch+json
+        - application/json-patch+json
       parameters:
         - $ref: '#/parameters/Key'
         - $ref: '#/parameters/Filter'

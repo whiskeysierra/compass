@@ -26,8 +26,8 @@ class DefaultValueService implements ValueService {
 
     @Transactional
     @Override
-    public boolean replace(final String key, final Value value) {
-        return replace.replace(key, value);
+    public boolean replace(final String key, final Map<String, JsonNode> dimensions, final Value value) {
+        return replace.replace(key, dimensions, value);
     }
 
     @Transactional
@@ -42,7 +42,7 @@ class DefaultValueService implements ValueService {
     }
 
     @Override
-    public List<Value> readAllByKey(final String key, final Map<String, JsonNode> filter) {
+    public List<Value> readAll(final String key, final Map<String, JsonNode> filter) {
         return read.readAll(key, filter);
     }
 

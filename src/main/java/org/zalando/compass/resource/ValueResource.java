@@ -1,6 +1,12 @@
 package org.zalando.compass.resource;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
+import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Maps;
@@ -29,10 +35,14 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.PATCH;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 import static org.zalando.compass.domain.logic.BadArgumentException.checkArgument;
+import static org.zalando.compass.resource.MediaTypes.JSON_MERGE_PATCH_VALUE;
+import static org.zalando.compass.resource.MediaTypes.JSON_PATCH_VALUE;
 
 @RestController
 @RequestMapping(path = "/keys/{key}")
@@ -40,30 +50,39 @@ class ValueResource {
 
     private final JsonQueryParser parser;
     private final JsonReader reader;
+    private final ObjectMapper mapper;
     private final ValueService service;
 
     @Autowired
-    public ValueResource(final JsonQueryParser parser, final JsonReader reader,
+    public ValueResource(final JsonQueryParser parser, final JsonReader reader, final ObjectMapper mapper,
             final ValueService service) {
         this.parser = parser;
         this.reader = reader;
+        this.mapper = mapper;
         this.service = service;
     }
 
-    @RequestMapping(method = GET, path = "/values")
-    public ValuePage readAll(@PathVariable final String key, @RequestParam final Map<String, String> query) {
-        final Map<String, JsonNode> filter = parser.parse(query);
-        return new ValuePage(service.readAllByKey(key, filter));
+    @RequestMapping(method = PUT, path = "/value")
+    public ResponseEntity<Value> replace(@PathVariable final String key, @RequestParam final Map<String, String> query,
+            @RequestBody final JsonNode node) throws IOException {
+
+        final ImmutableMap<String, JsonNode> dimensions = parser.parse(query);
+        final Value input = reader.read(node, Value.class);
+        final Value value = input.withDimensions(firstNonNull(input.getDimensions(), dimensions));
+
+        final boolean created = service.replace(key, dimensions, value);
+
+        return ResponseEntity
+                .status(created ? CREATED : OK)
+                .location(canonicalUrl(key, value))
+                .body(value);
     }
 
-    @RequestMapping(method = GET, path = "/value")
-    public ResponseEntity<Value> read(@PathVariable final String key, @RequestParam final Map<String, String> query) {
-        final Map<String, JsonNode> filter = parser.parse(query);
-        final Value value = service.read(key, filter);
+    private Value ensureConsistentDimensions(final ImmutableMap<String, JsonNode> dimensions, final Value input) {
+        checkArgument(input.getDimensions() == null || dimensions.equals(input.getDimensions()),
+                "If present, dimensions must match with URL");
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_LOCATION, canonicalUrl(key, value).toASCIIString())
-                .body(value);
+        return input.withDimensions(dimensions);
     }
 
     @RequestMapping(method = PUT, path = "/values")
@@ -77,27 +96,64 @@ class ValueResource {
         return readAll(key, emptyMap());
     }
 
-    @RequestMapping(method = PUT, path = "/value")
-    public ResponseEntity<Value> replace(@PathVariable final String key, @RequestParam final Map<String, String> query,
-            @RequestBody final JsonNode node) throws IOException {
+    @RequestMapping(method = GET, path = "/value")
+    public ResponseEntity<Value> read(@PathVariable final String key, @RequestParam final Map<String, String> query) {
+        final Map<String, JsonNode> filter = parser.parse(query);
+        final Value value = service.read(key, filter);
 
-        final ImmutableMap<String, JsonNode> dimensions = parser.parse(query);
-        final Value input = reader.read(node, Value.class);
-        final Value value = ensureConsistentDimensions(dimensions, input);
-
-        final boolean created = service.replace(key, value);
-
-        return ResponseEntity
-                .status(created ? CREATED : OK)
-                .location(canonicalUrl(key, value))
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_LOCATION, canonicalUrl(key, value).toASCIIString())
                 .body(value);
     }
 
-    private Value ensureConsistentDimensions(final ImmutableMap<String, JsonNode> dimensions, final Value input) {
-        checkArgument(input.getDimensions() == null || dimensions.equals(input.getDimensions()),
-                "If present, dimensions must match with URL");
+    @RequestMapping(method = GET, path = "/values")
+    public ValuePage readAll(@PathVariable final String key, @RequestParam final Map<String, String> query) {
+        final Map<String, JsonNode> filter = parser.parse(query);
+        return new ValuePage(service.readAll(key, filter));
+    }
 
-        return input.withDimensions(dimensions);
+    @RequestMapping(method = PATCH, path = "/{id}", consumes = {APPLICATION_JSON_VALUE, JSON_MERGE_PATCH_VALUE})
+    public ResponseEntity<Value> update(@PathVariable final String key, @RequestParam final Map<String, String> query,
+            @RequestBody final ObjectNode patch) throws IOException, JsonPatchException {
+
+        final Map<String, JsonNode> filter = parser.parse(query);
+        final Value value = service.read(key, filter);
+        final JsonNode node = mapper.valueToTree(value);
+
+        final JsonMergePatch jsonPatch = JsonMergePatch.fromJson(patch);
+        final JsonNode patched = jsonPatch.apply(node);
+        return replace(key, query, patched);
+    }
+
+    @RequestMapping(method = PATCH, path = "/{id}", consumes = JSON_PATCH_VALUE)
+    public ResponseEntity<Value> update(@PathVariable final String key, @RequestParam final Map<String, String> query,
+            @RequestBody final ArrayNode patch) throws IOException, JsonPatchException {
+
+        // TODO validate JsonPatch schema?
+
+        final Map<String, JsonNode> filter = parser.parse(query);
+        final Value value = service.read(key, filter);
+        final JsonNode node = mapper.valueToTree(value);
+
+        final JsonPatch jsonPatch = JsonPatch.fromJson(patch);
+        final JsonNode patched = jsonPatch.apply(node);
+        return replace(key, query, patched);
+    }
+
+    // TODO PATCH /key/{id}/value that also allows to modify the dimensions? (basically already allowed with PATCH values)
+
+    @RequestMapping(method = PATCH, path = "/values", consumes = {APPLICATION_JSON_VALUE, JSON_PATCH_VALUE})
+    public ValuePage updateAll(@PathVariable final String key,
+            @RequestBody final ArrayNode patch) throws IOException, JsonPatchException {
+
+        // TODO validate JsonPatch schema?
+
+        final ValuePage values = readAll(key, emptyMap());
+        final JsonNode node = mapper.valueToTree(values);
+
+        final JsonPatch jsonPatch = JsonPatch.fromJson(patch);
+        final JsonNode patched = jsonPatch.apply(node);
+        return replaceAll(key, patched);
     }
 
     @RequestMapping(method = DELETE, path = "/values")

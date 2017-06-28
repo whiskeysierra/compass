@@ -12,8 +12,8 @@ Feature: Key partial update
       | "string"     | "Lorem ipsum dolor sit amet" |
     Examples:
       | content-type                 |
-      | application/merge-patch+json |
       | application/json             |
+      | application/merge-patch+json |
 
   Scenario: Partially updating a key (JSON Patch)
     Given "PUT /keys/version" responds successfully when requested with:

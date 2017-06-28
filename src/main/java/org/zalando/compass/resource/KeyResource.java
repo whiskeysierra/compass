@@ -98,8 +98,10 @@ class KeyResource {
     public ResponseEntity<Key> update(@PathVariable final String id,
             @RequestBody final ArrayNode patch) throws IOException, JsonPatchException {
 
-        final Key dimension = service.read(id);
-        final ObjectNode node = mapper.valueToTree(dimension);
+        // TODO validate JsonPatch schema?
+
+        final Key key = service.read(id);
+        final JsonNode node = mapper.valueToTree(key);
 
         final JsonPatch jsonPatch = JsonPatch.fromJson(patch);
         final JsonNode patched = jsonPatch.apply(node);

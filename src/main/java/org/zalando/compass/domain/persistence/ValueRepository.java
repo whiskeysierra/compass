@@ -56,14 +56,7 @@ public class ValueRepository{
                 .returning(VALUE.ID)
                 .fetchOne().getId();
 
-        final List<Query> queries = value.getDimensions().entrySet().stream()
-                .map(e -> db.insertInto(VALUE_DIMENSION)
-                        .columns(VALUE_DIMENSION.VALUE_ID, VALUE_DIMENSION.DIMENSION_ID,
-                                VALUE_DIMENSION.DIMENSION_VALUE)
-                        .values(id, e.getKey(), e.getValue()))
-                .collect(toList());
-
-        db.batch(queries).execute();
+        createDimensions(id, value.getDimensions());
     }
 
     public Optional<Value> lock(final String key, final Map<String, JsonNode> dimensions) {
@@ -149,12 +142,34 @@ public class ValueRepository{
                 ValueDimensionRecord::getDimensionValue));
     }
 
-    public void update(final String key, final Value value) {
-        db.update(VALUE)
+    public void update(final String key, final Map<String, JsonNode> dimensions, final Value value) {
+        final Long id = db.update(VALUE)
                 .set(VALUE.VALUE_, value.getValue())
                 .where(VALUE.KEY_ID.eq(key))
-                .and(exactMatch(value.getDimensions()))
+                .and(exactMatch(dimensions))
+                .returning(VALUE.ID)
+                .fetchOne().getId();
+
+        if (dimensions.equals(value.getDimensions())) {
+            return;
+        }
+
+        db.deleteFrom(VALUE_DIMENSION)
+                .where(VALUE_DIMENSION.VALUE_ID.eq(id))
                 .execute();
+
+        createDimensions(id, value.getDimensions());
+    }
+
+    private void createDimensions(final Long valueId, final Map<String, JsonNode> dimensions) {
+        final List<Query> queries = dimensions.entrySet().stream()
+                .map(e -> db.insertInto(VALUE_DIMENSION)
+                        .columns(VALUE_DIMENSION.VALUE_ID, VALUE_DIMENSION.DIMENSION_ID,
+                                VALUE_DIMENSION.DIMENSION_VALUE)
+                        .values(valueId, e.getKey(), e.getValue()))
+                .collect(toList());
+
+        db.batch(queries).execute();
     }
 
     public void reorder(final String key, final List<Value> values) {

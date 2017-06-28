@@ -12,8 +12,8 @@ Feature: Value update
       | /value |
       | 0.16   |
     When "PUT /keys/tax-rate/value?country=DE&before=2007-01-01T00:00:00Z" responds "200 OK" when requested with:
-      | /value |
-      | 0.19   |
+      | /dimensions/country | /value |
+      | "AT"                | 0.2    |
     Then "GET /keys/tax-rate/values" responds "200 OK" with an array at "/values":
-      | /value |
-      | 0.19   |
+      | /dimensions/country | /value |
+      | "AT"                | 0.2    |

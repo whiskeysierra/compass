@@ -48,18 +48,6 @@ Feature: Value update
       | /dimension/country | /dimension/before      | /value |
       | "DE"               | "2007-01-01T00:00:00Z" | 0.16   |
 
-  Scenario: Creating a value with dimensions in body should fail if mismatch
-    Given "PUT /dimensions/{id}" (using /id) always responds "201 Created" when requested individually with:
-      | /id       | /schema/type | /relation | /description         |
-      | "country" | "string"     | "="       | "ISO 3166-1 alpha-2" |
-      | "before"  | "string"     | "<"       | "ISO 8601"           |
-    Given "PUT /keys/tax-rate" responds successfully when requested with:
-      | /schema/type | /description |
-      | "number"     | ".."         |
-    When "PUT /keys/tax-rate/value?country=DE&before=2007-01-01T00:00:00Z" responds "400 Bad Request" when requested with:
-      | /dimensions/country | /dimensions/before     | /value |
-      | "CH"                | "2007-01-01T00:00:00Z" | 0.16   |
-
   Scenario: Creating a value should expose canonical value URL
     Given "PUT /dimensions/{id}" (using /id) always responds "201 Created" when requested individually with:
       | /id       | /schema/type | /relation | /description         |
