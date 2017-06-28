@@ -40,7 +40,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.PATCH;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
-import static org.zalando.compass.domain.logic.BadArgumentException.checkArgument;
 import static org.zalando.compass.resource.MediaTypes.JSON_MERGE_PATCH_VALUE;
 import static org.zalando.compass.resource.MediaTypes.JSON_PATCH_VALUE;
 
@@ -76,13 +75,6 @@ class ValueResource {
                 .status(created ? CREATED : OK)
                 .location(canonicalUrl(key, value))
                 .body(value);
-    }
-
-    private Value ensureConsistentDimensions(final ImmutableMap<String, JsonNode> dimensions, final Value input) {
-        checkArgument(input.getDimensions() == null || dimensions.equals(input.getDimensions()),
-                "If present, dimensions must match with URL");
-
-        return input.withDimensions(dimensions);
     }
 
     @RequestMapping(method = PUT, path = "/values")
