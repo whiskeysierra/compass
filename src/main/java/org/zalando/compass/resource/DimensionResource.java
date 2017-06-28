@@ -62,6 +62,26 @@ class DimensionResource {
                 .body(dimension);
     }
 
+    private void ensureConsistentId(@PathVariable final String inUrl, final JsonNode node) {
+        final JsonNode inBody = node.path("id");
+
+        if (inBody.isMissingNode()) {
+            ObjectNode.class.cast(node).put("id", inUrl);
+        } else {
+            checkArgument(inUrl.equals(inBody.asText()), "If present, ID in body must match with URL");
+        }
+    }
+
+    @RequestMapping(method = GET, path = "/{id}")
+    public Dimension get(@PathVariable final String id) {
+        return service.read(id);
+    }
+
+    @RequestMapping(method = GET)
+    public DimensionPage getAll(@RequestParam(name = "q", required = false) @Nullable final String q) {
+        return new DimensionPage(service.readAll(q));
+    }
+
     @RequestMapping(method = PATCH, path = "/{id}", consumes = {APPLICATION_JSON_VALUE, JSON_MERGE_PATCH_VALUE})
     public ResponseEntity<Dimension> update(@PathVariable final String id,
             @RequestBody final ObjectNode patch) throws IOException, JsonPatchException {
@@ -86,29 +106,9 @@ class DimensionResource {
         return replace(id, patched);
     }
 
-    private void ensureConsistentId(@PathVariable final String inUrl, final JsonNode node) {
-        final JsonNode inBody = node.path("id");
-
-        if (inBody.isMissingNode()) {
-            ObjectNode.class.cast(node).put("id", inUrl);
-        } else {
-            checkArgument(inUrl.equals(inBody.asText()), "If present, ID in body must match with URL");
-        }
-    }
-
-    @RequestMapping(method = GET, path = "/{id}")
-    public Dimension get(@PathVariable final String id) throws IOException {
-        return service.read(id);
-    }
-
-    @RequestMapping(method = GET)
-    public DimensionPage getAll(@RequestParam(name = "q", required = false) @Nullable final String q) {
-        return new DimensionPage(service.readAll(q));
-    }
-
     @RequestMapping(method = DELETE, path = "/{id}")
     @ResponseStatus(NO_CONTENT)
-    public void delete(@PathVariable final String id) throws IOException {
+    public void delete(@PathVariable final String id) {
         service.delete(id);
     }
 
