@@ -25,12 +25,12 @@ class ReadDimension {
         this.revisionRepository = revisionRepository;
     }
 
-    Dimension read(final String id) {
-        return repository.find(id).orElseThrow(NotFoundException::new);
-    }
-
     List<Dimension> readAll(@Nullable final String term) {
         return repository.findAll(term);
+    }
+
+    Dimension read(final String id) {
+        return repository.find(id).orElseThrow(NotFoundException::new);
     }
 
     public Page<DimensionRevision> readRevisions(final String id, final int limit, @Nullable final Long after) {

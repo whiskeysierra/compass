@@ -70,6 +70,7 @@ class KeyResource {
                 .body(key);
     }
 
+    // TODO allow to change id?
     private void ensureConsistentId(@PathVariable final String inUrl, final JsonNode node) {
         final JsonNode inBody = node.path("id");
 
@@ -78,6 +79,12 @@ class KeyResource {
         } else {
             checkArgument(inUrl.equals(inBody.asText()), "If present, ID in body must match with URL");
         }
+    }
+
+    // TODO order by relevance? pagination?
+    @RequestMapping(method = GET)
+    public KeyPage getAll(@RequestParam(name = "q", required = false) @Nullable final String q) {
+        return new KeyPage(service.readAll(q));
     }
 
     @RequestMapping(method = GET, path = "/{id}")
@@ -120,11 +127,6 @@ class KeyResource {
     @RequestMapping(method = GET, path = "/{id}/revisions/{revision}")
     public ResponseEntity<KeyRevision> getRevision(@PathVariable final String id, @PathVariable final long revision) {
         return ResponseEntity.ok(service.readRevision(id, revision));
-    }
-
-    @RequestMapping(method = GET)
-    public KeyPage getAll(@RequestParam(name = "q", required = false) @Nullable final String q) {
-        return new KeyPage(service.readAll(q));
     }
 
     @RequestMapping(method = PATCH, path = "/{id}", consumes = {APPLICATION_JSON_VALUE, JSON_MERGE_PATCH_VALUE})

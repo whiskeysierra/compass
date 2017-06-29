@@ -17,6 +17,7 @@ import java.util.Optional;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static org.zalando.compass.domain.persistence.model.Tables.DIMENSION_REVISION;
 import static org.zalando.compass.domain.persistence.model.Tables.REVISION;
+import static org.zalando.compass.library.Enums.translate;
 
 @Repository
 public class DimensionRevisionRepository {
@@ -38,7 +39,7 @@ public class DimensionRevisionRepository {
                         DIMENSION_REVISION.DESCRIPTION)
                 .values(dimension.getId(),
                         revision.getId(),
-                        map(revision.getType(), RevisionType.class),
+                        translate(revision.getType(), RevisionType.class),
                         dimension.getSchema(),
                         dimension.getRelation(),
                         dimension.getDescription())
@@ -83,7 +84,7 @@ public class DimensionRevisionRepository {
                 new Revision(
                         record.get(REVISION.ID),
                         record.get(REVISION.TIMESTAMP),
-                        map(record.get(DIMENSION_REVISION.REVISION_TYPE), Revision.Type.class),
+                        translate(record.get(DIMENSION_REVISION.REVISION_TYPE), Revision.Type.class),
                         record.get(REVISION.USER),
                         record.get(REVISION.COMMENT)
                 ),
@@ -91,10 +92,6 @@ public class DimensionRevisionRepository {
                 record.get(DIMENSION_REVISION.RELATION),
                 record.get(DIMENSION_REVISION.DESCRIPTION)
         );
-    }
-
-    private <A extends Enum<A>, B extends Enum<B>> B map(final A value, final Class<B> type) {
-        return Enum.valueOf(type, value.name());
     }
 
 }

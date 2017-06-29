@@ -37,13 +37,13 @@ class DefaultValueService implements ValueService {
     }
 
     @Override
-    public Value read(final String key, final Map<String, JsonNode> filter) {
-        return read.read(key, filter);
+    public List<Value> readAll(final String key, final Map<String, JsonNode> filter) {
+        return read.readAll(key, filter);
     }
 
     @Override
-    public List<Value> readAll(final String key, final Map<String, JsonNode> filter) {
-        return read.readAll(key, filter);
+    public Value read(final String key, final Map<String, JsonNode> filter) {
+        return read.read(key, filter);
     }
 
     @Transactional

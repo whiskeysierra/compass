@@ -6,8 +6,8 @@ import java.util.List;
 
 public interface RelationService {
 
-    Relation read(String id);
-
     List<Relation> readAll();
+
+    Relation read(String id);
 
 }

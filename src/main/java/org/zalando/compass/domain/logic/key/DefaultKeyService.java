@@ -37,6 +37,11 @@ class DefaultKeyService implements KeyService {
     }
 
     @Override
+    public List<Key> readAll(@Nullable final String term) {
+        return read.readAll(term);
+    }
+
+    @Override
     public Page<KeyRevision> readRevisions(final String id, final int limit, @Nullable final Long after) {
         return read.readRevisions(id, limit, after);
     }
@@ -44,11 +49,6 @@ class DefaultKeyService implements KeyService {
     @Override
     public KeyRevision readRevision(final String id, final long revision) {
         return read.readRevision(id, revision);
-    }
-
-    @Override
-    public List<Key> readAll(@Nullable final String term) {
-        return read.readAll(term);
     }
 
     @Transactional

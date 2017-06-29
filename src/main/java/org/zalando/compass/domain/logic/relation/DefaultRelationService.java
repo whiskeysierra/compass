@@ -25,14 +25,14 @@ class DefaultRelationService implements RelationService {
             .collect(toImmutableMap(Relation::getId, identity()));
 
     @Override
-    public Relation read(final String id) {
-        return Optional.ofNullable(map.get(id))
-                .orElseThrow(NotFoundException::new);
+    public List<Relation> readAll() {
+        return list;
     }
 
     @Override
-    public List<Relation> readAll() {
-        return list;
+    public Relation read(final String id) {
+        return Optional.ofNullable(map.get(id))
+                .orElseThrow(NotFoundException::new);
     }
 
 }

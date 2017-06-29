@@ -61,6 +61,17 @@ class ValueResource {
         this.service = service;
     }
 
+    @RequestMapping(method = PUT, path = "/values")
+    public ValuePage replaceAll(@PathVariable final String key, @RequestBody final JsonNode node) throws IOException {
+        final List<Value> values = reader.read(node, ValuePage.class).getValues().stream()
+                .map(value -> value.withDimensions(firstNonNull(value.getDimensions(), ImmutableMap.of())))
+                .collect(toList());
+
+        service.replace(key, values);
+
+        return readAll(key, emptyMap());
+    }
+
     @RequestMapping(method = PUT, path = "/value")
     public ResponseEntity<Value> replace(@PathVariable final String key, @RequestParam final Map<String, String> query,
             @RequestBody final JsonNode node) throws IOException {
@@ -77,15 +88,10 @@ class ValueResource {
                 .body(value);
     }
 
-    @RequestMapping(method = PUT, path = "/values")
-    public ValuePage replaceAll(@PathVariable final String key, @RequestBody final JsonNode node) throws IOException {
-        final List<Value> values = reader.read(node, ValuePage.class).getValues().stream()
-                .map(value -> value.withDimensions(firstNonNull(value.getDimensions(), ImmutableMap.of())))
-                .collect(toList());
-
-        service.replace(key, values);
-
-        return readAll(key, emptyMap());
+    @RequestMapping(method = GET, path = "/values")
+    public ValuePage readAll(@PathVariable final String key, @RequestParam final Map<String, String> query) {
+        final Map<String, JsonNode> filter = parser.parse(query);
+        return new ValuePage(service.readAll(key, filter));
     }
 
     @RequestMapping(method = GET, path = "/value")
@@ -98,10 +104,18 @@ class ValueResource {
                 .body(value);
     }
 
-    @RequestMapping(method = GET, path = "/values")
-    public ValuePage readAll(@PathVariable final String key, @RequestParam final Map<String, String> query) {
-        final Map<String, JsonNode> filter = parser.parse(query);
-        return new ValuePage(service.readAll(key, filter));
+    @RequestMapping(method = PATCH, path = "/values", consumes = {APPLICATION_JSON_VALUE, JSON_PATCH_VALUE})
+    public ValuePage updateAll(@PathVariable final String key,
+            @RequestBody final ArrayNode patch) throws IOException, JsonPatchException {
+
+        // TODO validate JsonPatch schema?
+
+        final ValuePage values = readAll(key, emptyMap());
+        final JsonNode node = mapper.valueToTree(values);
+
+        final JsonPatch jsonPatch = JsonPatch.fromJson(patch);
+        final JsonNode patched = jsonPatch.apply(node);
+        return replaceAll(key, patched);
     }
 
     @RequestMapping(method = PATCH, path = "/{id}", consumes = {APPLICATION_JSON_VALUE, JSON_MERGE_PATCH_VALUE})
@@ -130,22 +144,6 @@ class ValueResource {
         final JsonPatch jsonPatch = JsonPatch.fromJson(patch);
         final JsonNode patched = jsonPatch.apply(node);
         return replace(key, query, patched);
-    }
-
-    // TODO PATCH /key/{id}/value that also allows to modify the dimensions? (basically already allowed with PATCH values)
-
-    @RequestMapping(method = PATCH, path = "/values", consumes = {APPLICATION_JSON_VALUE, JSON_PATCH_VALUE})
-    public ValuePage updateAll(@PathVariable final String key,
-            @RequestBody final ArrayNode patch) throws IOException, JsonPatchException {
-
-        // TODO validate JsonPatch schema?
-
-        final ValuePage values = readAll(key, emptyMap());
-        final JsonNode node = mapper.valueToTree(values);
-
-        final JsonPatch jsonPatch = JsonPatch.fromJson(patch);
-        final JsonNode patched = jsonPatch.apply(node);
-        return replaceAll(key, patched);
     }
 
     @RequestMapping(method = DELETE, path = "/values")

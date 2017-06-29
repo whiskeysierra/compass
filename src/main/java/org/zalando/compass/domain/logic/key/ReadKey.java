@@ -25,12 +25,12 @@ class ReadKey {
         this.revisionRepository = revisionRepository;
     }
 
-    Key read(final String id) {
-        return repository.find(id).orElseThrow(NotFoundException::new);
-    }
-
     List<Key> readAll(@Nullable final String term) {
         return repository.findAll(term);
+    }
+
+    Key read(final String id) {
+        return repository.find(id).orElseThrow(NotFoundException::new);
     }
 
     public Page<KeyRevision> readRevisions(final String id, final int limit, @Nullable final Long after) {
