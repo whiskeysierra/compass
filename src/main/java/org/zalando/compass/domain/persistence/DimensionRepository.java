@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionRevision;
+import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.model.enums.RevisionType;
 
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static org.jooq.impl.DSL.trueCondition;
 import static org.zalando.compass.domain.persistence.model.Tables.DIMENSION;
 import static org.zalando.compass.domain.persistence.model.Tables.DIMENSION_REVISION;
@@ -103,14 +105,24 @@ public class DimensionRepository {
                 .where(DIMENSION.ID.eq(id));
     }
 
-    public List<DimensionRevision> findAllRevisions(final String id) {
-        return db.select(DIMENSION_REVISION.fields())
+    public Page<DimensionRevision> findAllRevisions(final String id, final int limit, @Nullable final Long last) {
+        final List<DimensionRevision> revisions = db.select(DIMENSION_REVISION.fields())
                 .select(REVISION.fields())
                 .from(DIMENSION_REVISION)
                 .join(REVISION).on(REVISION.ID.eq(DIMENSION_REVISION.REVISION))
                 .where(DIMENSION_REVISION.ID.eq(id))
                 .orderBy(REVISION.ID.desc())
+                .seekAfter(firstNonNull(last, Long.MAX_VALUE)) // TODO find a better way
+                .limit(limit + 1)
                 .fetch().map(this::mapRevision);
+
+        if (revisions.size() > limit) {
+            final List<DimensionRevision> items = revisions.subList(0, limit);
+            final DimensionRevision next = items.get(items.size() - 1);
+            return new Page<>(items, next);
+        } else {
+            return new Page<>(revisions, null);
+        }
     }
 
     public Optional<DimensionRevision> findRevision(final String id, final long revision) {

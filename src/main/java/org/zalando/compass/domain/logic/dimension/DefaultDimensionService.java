@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionRevision;
+import org.zalando.compass.domain.model.Page;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -41,8 +42,8 @@ class DefaultDimensionService implements DimensionService {
     }
 
     @Override
-    public List<DimensionRevision> readRevisions(final String id) {
-        return read.readRevisions(id);
+    public Page<DimensionRevision> readRevisions(final String id, final int limit, @Nullable final Long last) {
+        return read.readRevisions(id, limit, last);
     }
 
     @Override

@@ -8,7 +8,6 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,12 +18,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionRevision;
+import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.persistence.NotFoundException;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 
+import static com.google.common.collect.Iterables.getOnlyElement;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -84,14 +85,13 @@ class DimensionResource {
         try {
             return ResponseEntity.ok(service.read(id));
         } catch (final NotFoundException e) {
-            // TODO limit 1 or service.readLatestRevision?
-            final List<DimensionRevision> revisions = service.readRevisions(id);
+            final List<DimensionRevision> revisions = service.readRevisions(id, 1, null).getElements();
 
             if (revisions.isEmpty()) {
                 throw e;
             }
 
-            final Long revision = revisions.get(0).getRevision().getId();
+            final Long revision = getOnlyElement(revisions).getRevision().getId();
 
             return ResponseEntity
                     .status(GONE)
@@ -100,9 +100,21 @@ class DimensionResource {
         }
     }
 
-    @RequestMapping(method = GET, path = "/{id}/revisions")
-    public DimensionRevisionPage getRevisions(@PathVariable final String id) {
-        return new DimensionRevisionPage(service.readRevisions(id));
+    @RequestMapping(method = GET, path = "/{dimension}/revisions")
+    public DimensionRevisionPage getRevisions(@PathVariable final String dimension,
+            @RequestParam(required = false, defaultValue = "25") final int limit,
+            @Nullable @RequestParam(name = "id", required = false) final Long id) {
+
+        final Page<DimensionRevision> page = service.readRevisions(dimension, limit, id);
+        final DimensionRevision next = page.getNext();
+        final List<DimensionRevision> revisions = page.getElements();
+
+        final Link link = next == null ?
+                null :
+                new Link(linkTo(methodOn(DimensionResource.class)
+                        .getRevisions(dimension, limit, next.getRevision().getId())).toUri());
+
+        return new DimensionRevisionPage(link, revisions);
     }
 
     @RequestMapping(method = GET, path = "/{id}/revisions/{revision}")

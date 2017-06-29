@@ -10,6 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 class DimensionRevisionPage {
 
+    private final Link next;
     private final List<DimensionRevision> dimensions;
 
 }

@@ -4,11 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionRevision;
+import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.persistence.DimensionRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -29,8 +29,8 @@ class ReadDimension {
         return repository.findAll(term);
     }
 
-    public List<DimensionRevision> readRevisions(final String id) {
-        return repository.findAllRevisions(id);
+    public Page<DimensionRevision> readRevisions(final String id, final int limit, final Long last) {
+        return repository.findAllRevisions(id, limit, last);
     }
 
     public DimensionRevision readRevision(final String id, final long revision) {

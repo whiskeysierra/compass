@@ -10,22 +10,37 @@ Feature: Dimension revisions
     And "DELETE /dimensions/device" responds successfully
 
   Scenario: Read dimension revisions
-    Then "GET /dimensions/device/revisions" responds "200 OK" with an array at "/dimensions":
+    Then "GET /dimensions/device/revisions" responds successfully with an array at "/dimensions":
       | /id      | /revision/id | /revision/type | /revision/user | /revision/comment | /schema/type | /relation | /description               |
       | "device" | 3            | "delete"       | "anonymous"    | ".."              | "string"     | "~"       | "Client Device Identifier" |
       | "device" | 2            | "update"       | "anonymous"    | ".."              | "string"     | "~"       | "Client Device Identifier" |
       | "device" | 1            | "create"       | "anonymous"    | ".."              | "string"     | "="       | ".."                       |
 
-  # TODO pagination
+  Scenario: Read dimension revisions should support limit
+    Then "GET /dimensions/device/revisions?limit=2" responds successfully with an array at "/dimensions":
+      | /id      | /revision/id | /revision/type | /revision/user | /revision/comment | /schema/type | /relation | /description               |
+      | "device" | 3            | "delete"       | "anonymous"    | ".."              | "string"     | "~"       | "Client Device Identifier" |
+      | "device" | 2            | "update"       | "anonymous"    | ".."              | "string"     | "~"       | "Client Device Identifier" |
 
-  Scenario: Read dimension revision
-    Then "GET /dimensions/device/revisions/1" responds "200 OK" with:
+  Scenario: Read dimension revisions should paginate
+    Then "GET /dimensions/device/revisions?limit=2" responds successfully with:
+      | /next/href                                                       |
+      | "http://localhost:8080/dimensions/device/revisions?limit=2&id=2" |
+    And "GET /dimensions/device/revisions?limit=2&id=2" responds successfully with an array at "/dimensions":
       | /id      | /revision/id | /revision/type | /revision/user | /revision/comment | /schema/type | /relation | /description |
       | "device" | 1            | "create"       | "anonymous"    | ".."              | "string"     | "="       | ".."         |
-    And "GET /dimensions/device/revisions/2" responds "200 OK" with:
+    Then "GET /dimensions/device/revisions?limit=2&id=2" responds successfully with:
+      | /next/href |
+      |            |
+
+  Scenario: Read dimension revision
+    Then "GET /dimensions/device/revisions/1" responds successfully with:
+      | /id      | /revision/id | /revision/type | /revision/user | /revision/comment | /schema/type | /relation | /description |
+      | "device" | 1            | "create"       | "anonymous"    | ".."              | "string"     | "="       | ".."         |
+    And "GET /dimensions/device/revisions/2" responds successfully with:
       | /id      | /revision/id | /revision/type | /revision/user | /revision/comment | /schema/type | /relation | /description               |
       | "device" | 2            | "update"       | "anonymous"    | ".."              | "string"     | "~"       | "Client Device Identifier" |
-    And "GET /dimensions/device/revisions/3" responds "200 OK" with:
+    And "GET /dimensions/device/revisions/3" responds successfully with:
       | /id      | /revision/id | /revision/type | /revision/user | /revision/comment | /schema/type | /relation | /description               |
       | "device" | 3            | "delete"       | "anonymous"    | ".."              | "string"     | "~"       | "Client Device Identifier" |
 
