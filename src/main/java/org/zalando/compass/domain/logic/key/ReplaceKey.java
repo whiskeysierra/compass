@@ -8,6 +8,7 @@ import org.zalando.compass.domain.logic.RevisionService;
 import org.zalando.compass.domain.logic.ValidationService;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.KeyLock;
+import org.zalando.compass.domain.model.KeyRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.KeyRepository;
@@ -60,11 +61,12 @@ class ReplaceKey {
         if (current == null) {
 
             repository.create(key);
-
-            final Revision revision = revisionService.create(CREATE, comment);
-            revisionRepository.create(key, revision);
-
             log.info("Created key [{}]", key);
+
+            final Revision rev = revisionService.create(CREATE, comment);
+            final KeyRevision revision = key.toRevision(rev);
+            revisionRepository.create(revision);
+            log.info("Created key revision [{}]", revision);
 
             return true;
         } else {
@@ -74,11 +76,12 @@ class ReplaceKey {
             }
 
             repository.update(key);
-
-            final Revision revision = revisionService.create(UPDATE, comment);
-            revisionRepository.create(key, revision);
-
             log.info("Updated key [{}]", key);
+
+            final Revision rev = revisionService.create(UPDATE, comment);
+            final KeyRevision revision = key.toRevision(rev);
+            revisionRepository.create(revision);
+            log.info("Created key revision [{}]", revision);
 
             return false;
         }

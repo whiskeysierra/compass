@@ -1,7 +1,6 @@
 package org.zalando.compass.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import lombok.experimental.Wither;
 
 import java.time.LocalDateTime;
 
@@ -20,9 +19,7 @@ public final class Revision {
 
     }
 
-    @Wither
     Long id;
-
     LocalDateTime timestamp;
     Type type;
     String user;

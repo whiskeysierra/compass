@@ -29,7 +29,7 @@ public class KeyRevisionRepository {
         this.db = db;
     }
 
-    public void create(final Key key, final Revision revision) {
+    public void create(final KeyRevision key) {
         db.insertInto(KEY_REVISION)
                 .columns(KEY_REVISION.ID,
                         KEY_REVISION.REVISION,
@@ -37,8 +37,8 @@ public class KeyRevisionRepository {
                         KEY_REVISION.SCHEMA,
                         KEY_REVISION.DESCRIPTION)
                 .values(key.getId(),
-                        revision.getId(),
-                        translate(revision.getType(), RevisionType.class),
+                        key.getRevision().getId(),
+                        translate(key.getRevision().getType(), RevisionType.class),
                         key.getSchema(),
                         key.getDescription())
                 .execute();

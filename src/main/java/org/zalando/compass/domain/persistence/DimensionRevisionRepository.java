@@ -4,7 +4,6 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionRevision;
 import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.model.Revision;
@@ -29,7 +28,7 @@ public class DimensionRevisionRepository {
         this.db = db;
     }
 
-    public void create(final Dimension dimension, final Revision revision) {
+    public void create(final DimensionRevision dimension) {
         db.insertInto(DIMENSION_REVISION)
                 .columns(DIMENSION_REVISION.ID,
                         DIMENSION_REVISION.REVISION,
@@ -38,8 +37,8 @@ public class DimensionRevisionRepository {
                         DIMENSION_REVISION.RELATION,
                         DIMENSION_REVISION.DESCRIPTION)
                 .values(dimension.getId(),
-                        revision.getId(),
-                        translate(revision.getType(), RevisionType.class),
+                        dimension.getRevision().getId(),
+                        translate(dimension.getRevision().getType(), RevisionType.class),
                         dimension.getSchema(),
                         dimension.getRelation(),
                         dimension.getDescription())

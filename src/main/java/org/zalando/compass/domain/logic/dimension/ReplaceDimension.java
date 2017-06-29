@@ -11,6 +11,7 @@ import org.zalando.compass.domain.logic.RevisionService;
 import org.zalando.compass.domain.logic.ValidationService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionLock;
+import org.zalando.compass.domain.model.DimensionRevision;
 import org.zalando.compass.domain.model.Relation;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
@@ -71,11 +72,12 @@ class ReplaceDimension {
             validateRelation(dimension);
 
             repository.create(dimension);
-
-            final Revision revision = revisionService.create(CREATE, comment);
-            revisionRepository.create(dimension, revision);
-
             log.info("Created dimension [{}]", dimension);
+
+            final Revision rev = revisionService.create(CREATE, comment);
+            final DimensionRevision revision = dimension.toRevision(rev);
+            revisionRepository.create(revision);
+            log.info("Created dimension revision [{}]", revision);
 
             return true;
         } else {
@@ -89,11 +91,12 @@ class ReplaceDimension {
             }
 
             repository.update(dimension);
-
-            final Revision revision = revisionService.create(UPDATE, comment);
-            revisionRepository.create(dimension, revision);
-
             log.info("Updated dimension [{}]", dimension);
+
+            final Revision rev = revisionService.create(UPDATE, comment);
+            final DimensionRevision revision = dimension.toRevision(rev);
+            revisionRepository.create(revision);
+            log.info("Created dimension revision [{}]", revision);
 
             return false;
         }

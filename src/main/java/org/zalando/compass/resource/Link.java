@@ -1,10 +1,12 @@
 package org.zalando.compass.resource;
 
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.net.URI;
 
-@Value
+@Getter
+@AllArgsConstructor
 public class Link {
 
     URI href;

@@ -22,8 +22,12 @@ public final class DomainModelEqualsTest<T> {
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][] {
                 {Dimension.class},
+                {DimensionRevision.class},
                 {Key.class},
+                {KeyRevision.class},
                 {Value.class},
+                {Revision.class},
+                {Page.class},
         });
     }
 

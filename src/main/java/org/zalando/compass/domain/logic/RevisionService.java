@@ -1,16 +1,18 @@
 package org.zalando.compass.domain.logic;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.RevisionRepository;
 
-import javax.annotation.Nullable;
+import java.security.Principal;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
+@Slf4j
 @Repository
 public class RevisionService {
 
@@ -27,13 +29,15 @@ public class RevisionService {
         final LocalDateTime timestamp = LocalDateTime.now(clock);
 
         // TODO introduce proper dependency
-        @Nullable final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        final String user = authentication == null ? "anonymous" : authentication.getName();
+        final String user = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
+                .map(Principal::getName).orElse("anonymous");
 
-        final Revision revision = new Revision(null, timestamp, type, user, comment);
-        final long id = repository.create(revision);
+        final Revision input = new Revision(null, timestamp, type, user, comment);
+        final long id = repository.create(input);
 
-        return revision.withId(id);
+        final Revision revision = new Revision(id, timestamp, type, user, comment);
+        log.info("Created revision [{}].", revision);
+        return revision;
     }
 
 }

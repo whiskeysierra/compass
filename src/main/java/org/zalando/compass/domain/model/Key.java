@@ -9,4 +9,8 @@ public final class Key {
     JsonNode schema;
     String description;
 
+    public KeyRevision toRevision(final Revision revision) {
+        return new KeyRevision(id, revision, schema, description);
+    }
+
 }

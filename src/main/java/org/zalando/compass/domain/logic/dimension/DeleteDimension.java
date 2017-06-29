@@ -7,6 +7,7 @@ import org.zalando.compass.domain.logic.Locking;
 import org.zalando.compass.domain.logic.RevisionService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionLock;
+import org.zalando.compass.domain.model.DimensionRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.DimensionRepository;
 import org.zalando.compass.domain.persistence.DimensionRevisionRepository;
@@ -50,12 +51,13 @@ class DeleteDimension {
         checkArgument(lock.getValues().isEmpty(), "Dimension [%s] is still in use", id);
 
         repository.delete(dimension);
+        log.info("Deleted dimension [{}]", id);
 
         // TODO expect comment
-        final Revision revision = revisionService.create(DELETE, "..");
-        revisionRepository.create(dimension, revision);
-
-        log.info("Deleted dimension [{}]", id);
+        final Revision rev = revisionService.create(DELETE, "..");
+        final DimensionRevision revision = dimension.toRevision(rev);
+        revisionRepository.create(revision);
+        log.info("Created dimension revision [{}]", revision);
     }
 
 }

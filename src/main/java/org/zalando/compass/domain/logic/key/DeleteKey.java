@@ -7,6 +7,7 @@ import org.zalando.compass.domain.logic.Locking;
 import org.zalando.compass.domain.logic.RevisionService;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.KeyLock;
+import org.zalando.compass.domain.model.KeyRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.KeyRepository;
 import org.zalando.compass.domain.persistence.KeyRevisionRepository;
@@ -47,12 +48,13 @@ class DeleteKey {
         }
 
         repository.delete(id);
+        log.info("Deleted key [{}]", id);
 
         // TODO expect comment
-        final Revision revision = revisionService.create(DELETE, "..");
-        revisionRepository.create(key, revision);
-
-        log.info("Deleted key [{}]", id);
+        final Revision rev = revisionService.create(DELETE, "..");
+        final KeyRevision revision = key.toRevision(rev);
+        revisionRepository.create(revision);
+        log.info("Created key revision [{}]", revision);
     }
 
 }

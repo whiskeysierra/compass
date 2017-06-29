@@ -12,4 +12,8 @@ public final class Dimension {
     String relation;
     String description;
 
+    public DimensionRevision toRevision(final Revision revision) {
+        return new DimensionRevision(id, revision, schema, relation, description);
+    }
+
 }
