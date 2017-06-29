@@ -15,6 +15,7 @@ import org.zalando.compass.domain.model.Relation;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.DimensionRepository;
+import org.zalando.compass.domain.persistence.DimensionRevisionRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
 
 import javax.annotation.Nullable;
@@ -33,21 +34,24 @@ class ReplaceDimension {
     private final Locking locking;
     private final RelationService relationService;
     private final ValidationService validator;
-    private final RevisionService revisionService;
     private final DimensionRepository repository;
+    private final RevisionService revisionService;
+    private final DimensionRevisionRepository revisionRepository;
 
     @Autowired
     ReplaceDimension(
             final Locking locking,
             final RelationService relationService,
             final ValidationService validator,
+            final DimensionRepository repository,
             final RevisionService revisionService,
-            final DimensionRepository repository) {
+            final DimensionRevisionRepository revisionRepository) {
+        this.locking = locking;
+        this.relationService = relationService;
         this.validator = validator;
         this.repository = repository;
-        this.relationService = relationService;
-        this.locking = locking;
         this.revisionService = revisionService;
+        this.revisionRepository = revisionRepository;
     }
 
     /**
@@ -66,8 +70,11 @@ class ReplaceDimension {
         if (current == null) {
             validateRelation(dimension);
 
+            repository.create(dimension);
+
             final Revision revision = revisionService.create(CREATE, comment);
-            repository.create(dimension, revision);
+            revisionRepository.create(dimension, revision);
+
             log.info("Created dimension [{}]", dimension);
 
             return true;
@@ -81,8 +88,11 @@ class ReplaceDimension {
                 validateRelation(dimension);
             }
 
+            repository.update(dimension);
+
             final Revision revision = revisionService.create(UPDATE, comment);
-            repository.update(dimension, revision);
+            revisionRepository.create(dimension, revision);
+
             log.info("Updated dimension [{}]", dimension);
 
             return false;

@@ -42,8 +42,8 @@ class DefaultDimensionService implements DimensionService {
     }
 
     @Override
-    public Page<DimensionRevision> readRevisions(final String id, final int limit, @Nullable final Long last) {
-        return read.readRevisions(id, limit, last);
+    public Page<DimensionRevision> readRevisions(final String id, final int limit, @Nullable final Long after) {
+        return read.readRevisions(id, limit, after);
     }
 
     @Override

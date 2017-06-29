@@ -22,17 +22,6 @@ Feature: Dimension revisions
       | "device" | 3            | "delete"       | "anonymous"    | ".."              | "string"     | "~"       | "Client Device Identifier" |
       | "device" | 2            | "update"       | "anonymous"    | ".."              | "string"     | "~"       | "Client Device Identifier" |
 
-  Scenario: Read dimension revisions should paginate
-    Then "GET /dimensions/device/revisions?limit=2" responds successfully with:
-      | /next/href                                                       |
-      | "http://localhost:8080/dimensions/device/revisions?limit=2&id=2" |
-    And "GET /dimensions/device/revisions?limit=2&id=2" responds successfully with an array at "/dimensions":
-      | /id      | /revision/id | /revision/type | /revision/user | /revision/comment | /schema/type | /relation | /description |
-      | "device" | 1            | "create"       | "anonymous"    | ".."              | "string"     | "="       | ".."         |
-    Then "GET /dimensions/device/revisions?limit=2&id=2" responds successfully with:
-      | /next/href |
-      |            |
-
   Scenario: Read dimension revision
     Then "GET /dimensions/device/revisions/1" responds successfully with:
       | /id      | /revision/id | /revision/type | /revision/user | /revision/comment | /schema/type | /relation | /description |
@@ -44,6 +33,7 @@ Feature: Dimension revisions
       | /id      | /revision/id | /revision/type | /revision/user | /revision/comment | /schema/type | /relation | /description               |
       | "device" | 3            | "delete"       | "anonymous"    | ".."              | "string"     | "~"       | "Client Device Identifier" |
 
+  # TODO does this belong here?
   Scenario: Read deleted dimension
     Then "GET /dimensions/device" responds "410 Gone" with headers:
       | Location                                            |

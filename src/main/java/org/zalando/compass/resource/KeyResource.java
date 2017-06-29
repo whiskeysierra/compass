@@ -17,11 +17,19 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.KeyService;
 import org.zalando.compass.domain.model.Key;
+import org.zalando.compass.domain.model.KeyRevision;
+import org.zalando.compass.domain.model.Page;
+import org.zalando.compass.domain.persistence.NotFoundException;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.util.List;
 
+import static com.google.common.collect.Iterables.getOnlyElement;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.GONE;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -73,8 +81,45 @@ class KeyResource {
     }
 
     @RequestMapping(method = GET, path = "/{id}")
-    public Key get(@PathVariable final String id) {
-        return service.read(id);
+    public ResponseEntity<Key> get(@PathVariable final String id) {
+        try {
+            return ResponseEntity.ok(service.read(id));
+        } catch (final NotFoundException e) {
+            final List<KeyRevision> revisions = service.readRevisions(id, 1, null).getElements();
+
+            if (revisions.isEmpty()) {
+                throw e;
+            }
+
+            final long revision = getOnlyElement(revisions).getRevision().getId();
+
+            return ResponseEntity
+                    .status(GONE)
+                    .location(linkTo(methodOn(KeyResource.class).getRevision(id, revision)).toUri())
+                    .build();
+        }
+    }
+
+    @RequestMapping(method = GET, path = "/{id}/revisions")
+    public KeyRevisionPage getRevisions(@PathVariable final String id,
+            @RequestParam(required = false, defaultValue = "25") final int limit,
+            @Nullable @RequestParam(required = false) final Long after) {
+
+        final Page<KeyRevision> page = service.readRevisions(id, limit, after);
+        final KeyRevision next = page.getNext();
+        final List<KeyRevision> revisions = page.getElements();
+
+        final Link link = next == null ?
+                null :
+                new Link(linkTo(methodOn(KeyResource.class)
+                        .getRevisions(id, limit, next.getRevision().getId())).toUri());
+
+        return new KeyRevisionPage(link, revisions);
+    }
+
+    @RequestMapping(method = GET, path = "/{id}/revisions/{revision}")
+    public ResponseEntity<KeyRevision> getRevision(@PathVariable final String id, @PathVariable final long revision) {
+        return ResponseEntity.ok(service.readRevision(id, revision));
     }
 
     @RequestMapping(method = GET)

@@ -4,33 +4,44 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.logic.Locking;
+import org.zalando.compass.domain.logic.RevisionService;
 import org.zalando.compass.domain.logic.ValidationService;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.KeyLock;
+import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.KeyRepository;
+import org.zalando.compass.domain.persistence.KeyRevisionRepository;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
+import static org.zalando.compass.domain.model.Revision.Type.CREATE;
+import static org.zalando.compass.domain.model.Revision.Type.UPDATE;
 import static org.zalando.compass.library.Changed.changed;
 
 @Slf4j
 @Component
 class ReplaceKey {
 
+    private final Locking locking;
     private final ValidationService validator;
     private final KeyRepository repository;
-    private final Locking locking;
+    private final RevisionService revisionService;
+    private final KeyRevisionRepository revisionRepository;
 
     @Autowired
     ReplaceKey(
+            final Locking locking,
             final ValidationService validator,
             final KeyRepository repository,
-            final Locking locking) {
+            final RevisionService revisionService,
+            final KeyRevisionRepository revisionRepository) {
+        this.locking = locking;
         this.validator = validator;
         this.repository = repository;
-        this.locking = locking;
+        this.revisionService = revisionService;
+        this.revisionRepository = revisionRepository;
     }
 
     /**
@@ -40,12 +51,19 @@ class ReplaceKey {
      */
     boolean replace(final Key key) {
         final KeyLock lock = locking.lockKey(key.getId());
-
         @Nullable final Key current = lock.getKey();
+
+        // TODO expect comment
+        final String comment = "..";
 
         // TODO make sure this is transactional
         if (current == null) {
+
             repository.create(key);
+
+            final Revision revision = revisionService.create(CREATE, comment);
+            revisionRepository.create(key, revision);
+
             log.info("Created key [{}]", key);
 
             return true;
@@ -56,6 +74,10 @@ class ReplaceKey {
             }
 
             repository.update(key);
+
+            final Revision revision = revisionService.create(UPDATE, comment);
+            revisionRepository.create(key, revision);
+
             log.info("Updated key [{}]", key);
 
             return false;

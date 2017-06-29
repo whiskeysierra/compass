@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.logic.KeyService;
 import org.zalando.compass.domain.model.Key;
+import org.zalando.compass.domain.model.KeyRevision;
+import org.zalando.compass.domain.model.Page;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -32,6 +34,16 @@ class DefaultKeyService implements KeyService {
     @Override
     public Key read(final String id) {
         return read.read(id);
+    }
+
+    @Override
+    public Page<KeyRevision> readRevisions(final String id, final int limit, @Nullable final Long after) {
+        return read.readRevisions(id, limit, after);
+    }
+
+    @Override
+    public KeyRevision readRevision(final String id, final long revision) {
+        return read.readRevision(id, revision);
     }
 
     @Override

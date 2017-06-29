@@ -3,7 +3,10 @@ package org.zalando.compass.domain.logic.key;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.model.Key;
+import org.zalando.compass.domain.model.KeyRevision;
+import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.persistence.KeyRepository;
+import org.zalando.compass.domain.persistence.KeyRevisionRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
 
 import javax.annotation.Nullable;
@@ -13,10 +16,13 @@ import java.util.List;
 class ReadKey {
 
     private final KeyRepository repository;
+    private final KeyRevisionRepository revisionRepository;
 
     @Autowired
-    ReadKey(final KeyRepository repository) {
+    ReadKey(final KeyRepository repository,
+            final KeyRevisionRepository revisionRepository) {
         this.repository = repository;
+        this.revisionRepository = revisionRepository;
     }
 
     Key read(final String id) {
@@ -25,6 +31,14 @@ class ReadKey {
 
     List<Key> readAll(@Nullable final String term) {
         return repository.findAll(term);
+    }
+
+    public Page<KeyRevision> readRevisions(final String id, final int limit, @Nullable final Long after) {
+        return revisionRepository.findAll(id, limit, after);
+    }
+
+    public KeyRevision readRevision(final String id, final long revision) {
+        return revisionRepository.find(id, revision).orElseThrow(NotFoundException::new);
     }
 
 }

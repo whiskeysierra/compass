@@ -91,7 +91,7 @@ class DimensionResource {
                 throw e;
             }
 
-            final Long revision = getOnlyElement(revisions).getRevision().getId();
+            final long revision = getOnlyElement(revisions).getRevision().getId();
 
             return ResponseEntity
                     .status(GONE)
@@ -100,19 +100,19 @@ class DimensionResource {
         }
     }
 
-    @RequestMapping(method = GET, path = "/{dimension}/revisions")
-    public DimensionRevisionPage getRevisions(@PathVariable final String dimension,
+    @RequestMapping(method = GET, path = "/{id}/revisions")
+    public DimensionRevisionPage getRevisions(@PathVariable final String id,
             @RequestParam(required = false, defaultValue = "25") final int limit,
-            @Nullable @RequestParam(name = "id", required = false) final Long id) {
+            @Nullable @RequestParam(required = false) final Long after) {
 
-        final Page<DimensionRevision> page = service.readRevisions(dimension, limit, id);
+        final Page<DimensionRevision> page = service.readRevisions(id, limit, after);
         final DimensionRevision next = page.getNext();
         final List<DimensionRevision> revisions = page.getElements();
 
         final Link link = next == null ?
                 null :
                 new Link(linkTo(methodOn(DimensionResource.class)
-                        .getRevisions(dimension, limit, next.getRevision().getId())).toUri());
+                        .getRevisions(id, limit, next.getRevision().getId())).toUri());
 
         return new DimensionRevisionPage(link, revisions);
     }
