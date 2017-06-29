@@ -13,7 +13,7 @@ import org.jooq.Row2;
 import org.jooq.SelectSeekStep1;
 import org.jooq.Table;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.model.tables.records.ValueDimensionRecord;
 import org.zalando.compass.domain.persistence.model.tables.records.ValueRecord;
@@ -39,7 +39,7 @@ import static org.jooq.impl.DSL.values;
 import static org.zalando.compass.domain.persistence.model.Tables.VALUE;
 import static org.zalando.compass.domain.persistence.model.Tables.VALUE_DIMENSION;
 
-@Component
+@Repository
 public class ValueRepository{
 
     private final DSLContext db;

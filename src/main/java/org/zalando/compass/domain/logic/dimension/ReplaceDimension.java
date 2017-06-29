@@ -7,10 +7,12 @@ import org.springframework.validation.annotation.Validated;
 import org.zalando.compass.domain.logic.BadArgumentException;
 import org.zalando.compass.domain.logic.Locking;
 import org.zalando.compass.domain.logic.RelationService;
+import org.zalando.compass.domain.logic.RevisionService;
 import org.zalando.compass.domain.logic.ValidationService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionLock;
 import org.zalando.compass.domain.model.Relation;
+import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.DimensionRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
@@ -19,6 +21,8 @@ import javax.annotation.Nullable;
 import javax.validation.Valid;
 import java.util.List;
 
+import static org.zalando.compass.domain.model.Revision.Type.CREATE;
+import static org.zalando.compass.domain.model.Revision.Type.UPDATE;
 import static org.zalando.compass.library.Changed.changed;
 
 @Slf4j
@@ -26,21 +30,24 @@ import static org.zalando.compass.library.Changed.changed;
 @Component
 class ReplaceDimension {
 
-    private final ValidationService validator;
-    private final DimensionRepository repository;
-    private final RelationService relationService;
     private final Locking locking;
+    private final RelationService relationService;
+    private final ValidationService validator;
+    private final RevisionService revisionService;
+    private final DimensionRepository repository;
 
     @Autowired
     ReplaceDimension(
-            final ValidationService validator,
-            final DimensionRepository repository,
+            final Locking locking,
             final RelationService relationService,
-            final Locking locking) {
+            final ValidationService validator,
+            final RevisionService revisionService,
+            final DimensionRepository repository) {
         this.validator = validator;
         this.repository = repository;
         this.relationService = relationService;
         this.locking = locking;
+        this.revisionService = revisionService;
     }
 
     /**
@@ -52,11 +59,15 @@ class ReplaceDimension {
         final DimensionLock lock = locking.lockDimensions(dimension.getId());
         @Nullable final Dimension current = lock.getDimension();
 
+        // TODO expect comment
+        final String comment = "..";
+
         // TODO make sure this is transactional
         if (current == null) {
             validateRelation(dimension);
 
-            repository.create(dimension);
+            final Revision revision = revisionService.create(CREATE, comment);
+            repository.create(dimension, revision);
             log.info("Created dimension [{}]", dimension);
 
             return true;
@@ -70,7 +81,8 @@ class ReplaceDimension {
                 validateRelation(dimension);
             }
 
-            repository.update(dimension);
+            final Revision revision = revisionService.create(UPDATE, comment);
+            repository.update(dimension, revision);
             log.info("Updated dimension [{}]", dimension);
 
             return false;

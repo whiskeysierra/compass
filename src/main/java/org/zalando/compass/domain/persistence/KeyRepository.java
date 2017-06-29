@@ -5,7 +5,7 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Key;
 
 import javax.annotation.Nullable;
@@ -15,7 +15,7 @@ import java.util.Optional;
 import static org.jooq.impl.DSL.trueCondition;
 import static org.zalando.compass.domain.persistence.model.Tables.KEY;
 
-@Component
+@Repository
 public class KeyRepository {
 
     private final DSLContext db;

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
+import org.zalando.compass.domain.model.DimensionRevision;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -30,13 +31,23 @@ class DefaultDimensionService implements DimensionService {
     }
 
     @Override
+    public List<Dimension> readAll(@Nullable final String term) {
+        return read.readAll(term);
+    }
+
+    @Override
     public Dimension read(final String id) {
         return read.read(id);
     }
 
     @Override
-    public List<Dimension> readAll(@Nullable final String term) {
-        return read.readAll(term);
+    public List<DimensionRevision> readRevisions(final String id) {
+        return read.readRevisions(id);
+    }
+
+    @Override
+    public DimensionRevision readRevision(final String id, final long revision) {
+        return read.readRevision(id, revision);
     }
 
     @Transactional

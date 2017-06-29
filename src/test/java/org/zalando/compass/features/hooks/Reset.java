@@ -1,48 +1,59 @@
 package org.zalando.compass.features.hooks;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import cucumber.api.java.Before;
+import org.jooq.DSLContext;
+import org.jooq.Sequence;
+import org.jooq.Table;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.zalando.riptide.Rest;
 import org.zalando.tracer.aspectj.Traced;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.StreamSupport;
-
-import static org.springframework.http.HttpStatus.Series.SUCCESSFUL;
-import static org.zalando.riptide.Bindings.on;
-import static org.zalando.riptide.Navigators.series;
-import static org.zalando.riptide.Route.pass;
+import static org.zalando.compass.domain.persistence.model.Sequences.REVISION_ID_SEQ;
+import static org.zalando.compass.domain.persistence.model.Sequences.VALUE_ID_SEQ;
+import static org.zalando.compass.domain.persistence.model.Sequences.VALUE_INDEX_SEQ;
+import static org.zalando.compass.domain.persistence.model.Tables.DIMENSION;
+import static org.zalando.compass.domain.persistence.model.Tables.DIMENSION_REVISION;
+import static org.zalando.compass.domain.persistence.model.Tables.KEY;
+import static org.zalando.compass.domain.persistence.model.Tables.KEY_REVISION;
+import static org.zalando.compass.domain.persistence.model.Tables.REVISION;
+import static org.zalando.compass.domain.persistence.model.Tables.VALUE;
+import static org.zalando.compass.domain.persistence.model.Tables.VALUE_DIMENSION_REVISION;
+import static org.zalando.compass.domain.persistence.model.Tables.VALUE_REVISION;
 
 @Component
 public class Reset {
 
-    private final Rest rest;
+    private final DSLContext db;
 
     @Autowired
-    public Reset(final Rest rest) {
-        this.rest = rest;
+    public Reset(final DSLContext db) {
+        this.db = db;
     }
 
     @Traced
     @Before
     public void begin() {
-        delete("keys");
-        delete("dimensions");
+        truncate(VALUE);
+        truncate(KEY);
+        truncate(DIMENSION);
+
+        truncate(VALUE_DIMENSION_REVISION);
+        truncate(VALUE_REVISION);
+        truncate(KEY_REVISION);
+        truncate(DIMENSION_REVISION);
+        truncate(REVISION);
+
+        restart(REVISION_ID_SEQ);
+        restart(VALUE_ID_SEQ);
+        restart(VALUE_INDEX_SEQ);
     }
 
-    private void delete(final String resource) {
-        rest.get("/{path}", resource).dispatch(series(),
-                on(SUCCESSFUL).call(JsonNode.class, root ->
-                        StreamSupport.stream(root.get(resource).spliterator(), false)
-                                .map(node -> delete(resource, node.get("id").asText()))
-                                .forEach(CompletableFuture::join))).join();
+    private void truncate(final Table<?> table) {
+        db.truncate(table).cascade().execute();
     }
 
-    private CompletableFuture<Void> delete(final String resource, final String id) {
-        return rest.delete("/{path}/{id}", resource, id).dispatch(series(),
-                on(SUCCESSFUL).call(pass()));
+    private void restart(final Sequence<Long> sequence) {
+        db.alterSequence(sequence).restart().execute();
     }
 
 }

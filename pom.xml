@@ -536,6 +536,7 @@
                         </database>
                         <generate>
                             <immutablePojos>true</immutablePojos>
+                            <javaTimeTypes>true</javaTimeTypes>
                         </generate>
                         <strategy>
                             <matchers>

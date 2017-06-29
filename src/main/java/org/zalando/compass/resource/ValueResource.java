@@ -156,6 +156,7 @@ class ValueResource {
     }
 
     private URI canonicalUrl(final String key, final Value value) {
+        // TODO document sort
         final Map<String, String> dimensions = ImmutableSortedMap.copyOf(
                 Maps.transformValues(value.getDimensions(), JsonNode::asText));
         return linkTo(methodOn(ValueResource.class).read(key, dimensions)).toUri();
