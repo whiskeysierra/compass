@@ -11,7 +11,7 @@ public interface ValueService {
 
     void replace(String key, List<Value> values);
 
-    boolean replace(String key, Map<String, JsonNode> dimensions, Value value);
+    boolean replace(String key, Value value);
 
     List<Value> readAll(String key, Map<String, JsonNode> filter);
 

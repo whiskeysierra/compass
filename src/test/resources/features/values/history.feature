@@ -33,32 +33,38 @@ Feature: Value history
       | "DE"                | 3            | "create"       | "anonymous"    | ".."              | 0.16   |
 
   Scenario: Create/update/delete value and read revisions
-    When "PUT /keys/tax-rate/value?country=AT" responds successfully when requested with:
+    When "PUT /keys/tax-rate/value?country=DE" responds successfully when requested with:
       | /value |
-      | 0.2    |
-    And "PUT /keys/tax-rate/value?country=AT" responds successfully when requested with:
-      | /dimensions/country | /value |
-      | "DE"                | 0.19   |
+      | 0.16   |
+    When "PUT /keys/tax-rate/value?country=DE" responds successfully when requested with:
+      | /value |
+      | 0.19   |
+    And "DELETE /keys/tax-rate/values?country=DE" responds successfully
+    And "PUT /keys/tax-rate/value?country=DE" responds successfully when requested with:
+      | /value |
+      | 0.19   |
     And "DELETE /keys/tax-rate/values?country=DE" responds successfully
     Then "GET /keys/tax-rate/value/revisions?country=DE" responds successfully with an array at "/values":
       | /dimensions/country | /revision/id | /revision/type | /revision/user | /revision/comment | /value |
+      | "DE"                | 7            | "delete"       | "anonymous"    | ".."              | 0.19   |
+      | "DE"                | 6            | "create"       | "anonymous"    | ".."              | 0.19   |
       | "DE"                | 5            | "delete"       | "anonymous"    | ".."              | 0.19   |
       | "DE"                | 4            | "update"       | "anonymous"    | ".."              | 0.19   |
-      | "AT"                | 3            | "create"       | "anonymous"    | ".."              | 0.2    |
+      | "DE"                | 3            | "create"       | "anonymous"    | ".."              | 0.16   |
 
   # TODO more values + from different keys to show that filtering works
 
   Scenario: Read value revision
-    When "PUT /keys/tax-rate/value?country=AT" responds successfully when requested with:
+    When "PUT /keys/tax-rate/value?country=DE" responds successfully when requested with:
       | /value |
-      | 0.2    |
-    And "PUT /keys/tax-rate/value?country=AT" responds successfully when requested with:
-      | /dimensions/country | /value |
-      | "DE"                | 0.19   |
+      | 0.16    |
+    And "PUT /keys/tax-rate/value?country=DE" responds successfully when requested with:
+      | /value |
+      | 0.19   |
     And "DELETE /keys/tax-rate/values?country=DE" responds successfully
     Then "GET /keys/tax-rate/value/revisions/3?country=DE" responds successfully with:
       | /dimensions/country | /revision/id | /revision/type | /revision/user | /revision/comment | /value |
-      | "AT"                | 3            | "create"       | "anonymous"    | ".."              | 0.2    |
+      | "DE"                | 3            | "create"       | "anonymous"    | ".."              | 0.16   |
     And "GET /keys/tax-rate/value/revisions/4?country=DE" responds successfully with:
       | /dimensions/country | /revision/id | /revision/type | /revision/user | /revision/comment | /value |
       | "DE"                | 4            | "update"       | "anonymous"    | ".."              | 0.19   |

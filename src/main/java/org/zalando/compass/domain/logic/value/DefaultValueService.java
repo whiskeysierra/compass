@@ -27,8 +27,8 @@ class DefaultValueService implements ValueService {
 
     @Transactional
     @Override
-    public boolean replace(final String key, final Map<String, JsonNode> dimensions, final Value value) {
-        return replace.replace(key, dimensions, value);
+    public boolean replace(final String key, final Value value) {
+        return replace.replace(key, value);
     }
 
     @Transactional

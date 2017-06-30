@@ -1,11 +1,8 @@
 package org.zalando.compass.domain.persistence;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Streams;
-import lombok.Lombok;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Query;
@@ -23,10 +20,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.collect.MoreCollectors.toOptional;
 import static java.util.stream.Collectors.toList;
+import static org.jooq.impl.DSL.coalesce;
 import static org.jooq.impl.DSL.exists;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.notExists;
@@ -66,11 +63,17 @@ public class ValueRepository{
         }
 
         final Long id = record.getId();
-        createDimensions(id, value.getDimensions());
 
-        return value
-                .withId(id)
-                .withIndex(record.getIndex());
+        final List<Query> queries = value.getDimensions().entrySet().stream()
+                .map(e -> db.insertInto(VALUE_DIMENSION)
+                        .columns(VALUE_DIMENSION.VALUE_ID, VALUE_DIMENSION.DIMENSION_ID,
+                                VALUE_DIMENSION.DIMENSION_VALUE)
+                        .values(id, e.getKey(), e.getValue()))
+                .collect(toList());
+
+        db.batch(queries).execute();
+
+        return value.withIndex(record.getIndex());
     }
 
     public List<Value> findAll(final ValueCriteria criteria) {
@@ -137,7 +140,6 @@ public class ValueRepository{
         final ImmutableMap<String, JsonNode> dimensions = toMap(result);
 
         return new Value(
-                row.getId(),
                 dimensions,
                 row.getIndex(),
                 row.getValue());
@@ -158,42 +160,20 @@ public class ValueRepository{
                 ValueDimensionRecord::getDimensionValue));
     }
 
-    public void update(final Map<String, JsonNode> dimensions, final Value value) {
-        final Long id = checkNotNull(value.getId(), "No id");
-        final Long index = checkNotNull(value.getIndex(), "No index");
-
+    public void update(final String key, final Value value) {
         db.update(VALUE)
-                .set(VALUE.INDEX, index)
+                .set(VALUE.INDEX, coalesce(val(value.getIndex()), VALUE.INDEX))
                 .set(VALUE.VALUE_, value.getValue())
-                .where(VALUE.ID.eq(id))
+                .where(VALUE.KEY_ID.eq(key))
+                .and(exactMatch(value.getDimensions()))
                 .returning(VALUE.ID)
                 .fetchOne().getId();
-
-        if (dimensions.equals(value.getDimensions())) {
-            return;
-        }
-
-        db.deleteFrom(VALUE_DIMENSION)
-                .where(VALUE_DIMENSION.VALUE_ID.eq(id))
-                .execute();
-
-        createDimensions(id, value.getDimensions());
     }
 
-    private void createDimensions(final Long valueId, final Map<String, JsonNode> dimensions) {
-        final List<Query> queries = dimensions.entrySet().stream()
-                .map(e -> db.insertInto(VALUE_DIMENSION)
-                        .columns(VALUE_DIMENSION.VALUE_ID, VALUE_DIMENSION.DIMENSION_ID,
-                                VALUE_DIMENSION.DIMENSION_VALUE)
-                        .values(valueId, e.getKey(), e.getValue()))
-                .collect(toList());
-
-        db.batch(queries).execute();
-    }
-
-    public void delete(final long id) {
+    public void delete(final String key, final Map<String, JsonNode> dimensions) {
         db.deleteFrom(VALUE)
-                .where(VALUE.ID.eq(id))
+                .where(VALUE.KEY_ID.eq(key))
+                .and(exactMatch(dimensions))
                 .execute();
     }
 

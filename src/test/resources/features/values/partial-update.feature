@@ -13,41 +13,39 @@ Feature: Value update
       | "CH"                | 0.08   |
       | "DE"                | 0.19   |
 
-  Scenario Outline: Partially updating value should allow to modify dimensions (JSON Merge Patch)
+  Scenario Outline: Partially updating value (JSON Merge Patch)
     When "PATCH /keys/tax-rate/value?country=DE" responds "200 OK" when requested with as "<content-type>":
-      | /dimensions/country | /value |
-      | "DK"                | 0.25   |
+      | /value |
+      | 0.25   |
     And "GET /keys/tax-rate/values" responds "200 OK" with an array at "/values":
       | /dimensions/country | /value |
       | "AT"                | 0.2    |
       | "CH"                | 0.08   |
-      | "DK"                | 0.25   |
+      | "DE"                | 0.25   |
     Examples:
       | content-type                 |
       | application/json             |
       | application/merge-patch+json |
 
-  Scenario: Partially updating value should allow to modify dimensions (JSON Patch)
+  Scenario: Partially updating value (JSON Patch)
     When "PATCH /keys/tax-rate/value?country=DE" responds "200 OK" when requested with an array as "application/json-patch+json":
       | /op       | /path                 | /value |
-      | "replace" | "/dimensions/country" | "DK"   |
       | "replace" | "/value"              | 0.25   |
     And "GET /keys/tax-rate/values" responds "200 OK" with an array at "/values":
       | /dimensions/country | /value |
       | "AT"                | 0.2    |
       | "CH"                | 0.08   |
-      | "DK"                | 0.25   |
+      | "DE"                | 0.25   |
 
-  Scenario Outline: Partially updating values should allow to modify dimensions
+  Scenario Outline: Partially updating values
     When "PATCH /keys/tax-rate/values?country=DE" responds "200 OK" when requested with an array as "<content-type>":
       | /op       | /path                          | /value |
-      | "replace" | "/values/2/dimensions/country" | "DK"   |
       | "replace" | "/values/2/value"              | 0.25   |
     And "GET /keys/tax-rate/values" responds "200 OK" with an array at "/values":
       | /dimensions/country | /value |
       | "AT"                | 0.2    |
       | "CH"                | 0.08   |
-      | "DK"                | 0.25   |
+      | "DE"                | 0.25   |
     Examples:
       | content-type                |
       | application/json            |
@@ -67,4 +65,7 @@ Feature: Value update
       | application/json            |
       | application/json-patch+json |
 
-  # TODO partially updating without an exact match should return 404
+  Scenario: Partially updating without match should fail
+    When "PATCH /keys/tax-rate/value?country=DK" responds "404 Not Found" when requested with:
+      | /value |
+      | 0.25   |

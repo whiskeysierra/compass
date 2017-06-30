@@ -8,10 +8,6 @@ import org.zalando.compass.library.Internal;
 @lombok.Value
 public class ValueRevision {
 
-    @Internal
-    @JsonIgnore
-    Long id;
-
     ImmutableMap<String, JsonNode> dimensions;
 
     @Internal

@@ -24,7 +24,6 @@ import java.util.Optional;
 
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.collect.MoreCollectors.toOptional;
-import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.max;
@@ -35,8 +34,6 @@ import static org.jooq.impl.DSL.val;
 import static org.zalando.compass.domain.persistence.model.Tables.DIMENSION_REVISION;
 import static org.zalando.compass.domain.persistence.model.Tables.KEY_REVISION;
 import static org.zalando.compass.domain.persistence.model.Tables.REVISION;
-import static org.zalando.compass.domain.persistence.model.Tables.VALUE;
-import static org.zalando.compass.domain.persistence.model.Tables.VALUE_DIMENSION;
 import static org.zalando.compass.domain.persistence.model.Tables.VALUE_DIMENSION_REVISION;
 import static org.zalando.compass.domain.persistence.model.Tables.VALUE_REVISION;
 import static org.zalando.compass.library.Enums.translate;
@@ -52,13 +49,11 @@ public class ValueRevisionRepository {
         this.db = db;
     }
 
-    // TODO assumes that we're called after the actual insert/update/delete
     public void create(final String key, final ValueRevision value) {
         final Revision revision = value.getRevision();
 
-        db.insertInto(VALUE_REVISION)
+        final long id = db.insertInto(VALUE_REVISION)
                 .columns(
-                        VALUE_REVISION.ID,
                         VALUE_REVISION.REVISION,
                         VALUE_REVISION.REVISION_TYPE,
                         VALUE_REVISION.KEY_ID,
@@ -66,7 +61,6 @@ public class ValueRevisionRepository {
                         VALUE_REVISION.INDEX,
                         VALUE_REVISION.VALUE)
                 .values(
-                        val(value.getId()),
                         val(revision.getId()),
                         val(translate(revision.getType(), RevisionType.class)),
                         val(key),
@@ -75,7 +69,8 @@ public class ValueRevisionRepository {
                                 .where(KEY_REVISION.ID.eq(key)).asField(),
                         val(value.getIndex()),
                         val(value.getValue(), JsonNode.class))
-                .execute();
+                .returning(VALUE_REVISION.ID)
+                .fetchOne().getId();
 
         final List<Query> queries = value.getDimensions().entrySet().stream()
                 .map(dimension -> db.insertInto(VALUE_DIMENSION_REVISION)
@@ -85,7 +80,7 @@ public class ValueRevisionRepository {
                                 VALUE_DIMENSION_REVISION.DIMENSION_ID,
                                 VALUE_DIMENSION_REVISION.DIMENSION_REVISION,
                                 VALUE_DIMENSION_REVISION.DIMENSION_VALUE)
-                        .values(val(value.getId()),
+                        .values(val(id),
                                 val(revision.getId()),
                                 val(dimension.getKey()),
                                 // TODO do it once?!
@@ -99,8 +94,7 @@ public class ValueRevisionRepository {
     }
 
     public List<ValueRevision> findAll(final String key, final Map<String, JsonNode> dimensions) {
-        return findLatestValueId(key, dimensions)
-                .map(id -> db.select(VALUE_REVISION.fields())
+        return db.select(VALUE_REVISION.fields())
                         .select(REVISION.fields())
                         .select(VALUE_DIMENSION_REVISION.fields())
                         .from(VALUE_REVISION)
@@ -109,18 +103,17 @@ public class ValueRevisionRepository {
                         .leftJoin(VALUE_DIMENSION_REVISION)
                         .on(VALUE_DIMENSION_REVISION.VALUE_ID.eq(VALUE_REVISION.ID))
                         .and(VALUE_DIMENSION_REVISION.VALUE_REVISION.eq(VALUE_REVISION.REVISION))
-                        .where(VALUE_REVISION.ID.eq(id))
+                        .where(VALUE_REVISION.KEY_ID.eq(key))
+                        .and(exactMatch(dimensions))
                         .orderBy(REVISION.ID.desc())
                         .fetchGroups(this::group, ValueDimensionRevisionRecord.class)
                         .entrySet().stream()
                         .map(this::mapRevision)
-                        .collect(toList()))
-                .orElse(emptyList());
+                        .collect(toList());
     }
 
     public Optional<ValueRevision> find(final String key, final Map<String, JsonNode> dimensions, final long revision) {
-        return findLatestValueId(key, dimensions)
-                .flatMap(id -> db.select(VALUE_REVISION.fields())
+        return db.select(VALUE_REVISION.fields())
                         .select(REVISION.fields())
                         .select(VALUE_DIMENSION_REVISION.fields())
                         .from(VALUE_REVISION)
@@ -129,22 +122,13 @@ public class ValueRevisionRepository {
                         .leftJoin(VALUE_DIMENSION_REVISION)
                         .on(VALUE_DIMENSION_REVISION.VALUE_ID.eq(VALUE_REVISION.ID))
                         .and(VALUE_DIMENSION_REVISION.VALUE_REVISION.eq(VALUE_REVISION.REVISION))
-                        .where(VALUE_REVISION.ID.eq(id))
+                        .where(VALUE_REVISION.KEY_ID.eq(key))
+                        .and(exactMatch(dimensions))
                         .and(VALUE_REVISION.REVISION.eq(revision))
                         .fetchGroups(this::group, ValueDimensionRevisionRecord.class)
                         .entrySet().stream()
                         .map(this::mapRevision)
-                        .collect(toOptional()));
-    }
-
-    private Optional<Long> findLatestValueId(final String key, final Map<String, JsonNode> dimensions) {
-        return db.select(VALUE_REVISION.ID)
-                .from(VALUE_REVISION)
-                .where(VALUE_REVISION.KEY_ID.eq(key))
-                .and(exactMatch(dimensions))
-                .orderBy(VALUE_REVISION.REVISION.desc())
-                .limit(1)
-                .fetchOptionalInto(Long.class);
+                        .collect(toOptional());
     }
 
     private Condition exactMatch(final Map<String, JsonNode> dimensions) {
@@ -176,6 +160,7 @@ public class ValueRevisionRepository {
                 record.into(RevisionRecord.class));
     }
 
+    // TODO isn't there something we can use for this?
     @Value
     @VisibleForTesting
     public static final class Group {
@@ -190,18 +175,18 @@ public class ValueRevisionRepository {
         final ValueRevisionRecord value = group.getValue();
 
         return new ValueRevision(
-                value.getId(),
                 dimensions,
                 value.getIndex(),
                 new Revision(
                         revision.getId(),
                         revision.getTimestamp(),
-                        Enums.translate(value.getRevisionType(), Revision.Type.class),
+                        translate(value.getRevisionType(), Revision.Type.class),
                         revision.getUser(),
                         revision.getComment()),
                 value.getValue());
     }
 
+    // TODO reuse
     private ImmutableMap<String, JsonNode> toMap(final List<ValueDimensionRevisionRecord> result) {
         if (result.size() == 1) {
             final ValueDimensionRevisionRecord record = result.get(0);

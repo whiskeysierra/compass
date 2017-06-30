@@ -49,8 +49,8 @@ class ReplaceValue {
         this.revisionRepository = revisionRepository;
     }
 
-    boolean replace(final String key, final Map<String, JsonNode> dimensions, final Value value) {
-        final ValueLock lock = locking.lockValue(key, dimensions, value);
+    boolean replace(final String key, final Value value) {
+        final ValueLock lock = locking.lockValue(key, value.getDimensions());
         @Nullable final Value current = lock.getValue();
 
         // TODO validate that all mentioned dimensions and key exists
@@ -63,12 +63,11 @@ class ReplaceValue {
 
         // TODO make sure this is transactional
         if (current == null) {
-            // TODO should we validate that dimensions + value.getDimensions are the same in this case?
             create(key, value, rev);
             return true;
         } else {
             // TODO exclude non-update?
-            update(key, dimensions, value.withId(current.getId()).withIndex(current.getIndex()), rev);
+            update(key, value.withIndex(current.getIndex()), rev);
             return false;
         }
     }
@@ -101,7 +100,7 @@ class ReplaceValue {
                 delete(key, revision, current);
             } else {
                 // TODO exclude non-updates?
-                update(key, current.getDimensions(), next.withId(current.getId()), revision);
+                update(key, next, revision);
             }
         });
 
@@ -118,14 +117,14 @@ class ReplaceValue {
         createRevision(key, created, rev, CREATE);
     }
 
-    private void update(final String key, final Map<String, JsonNode> dimensions, final Value value, final Revision rev) {
-        repository.update(dimensions, value);
+    private void update(final String key, final Value value, final Revision rev) {
+        repository.update(key, value);
         log.info("Updated value for key [{}]: [{}]", key, value);
         createRevision(key, value, rev, UPDATE);
     }
 
     private void delete(final String key, final Revision rev, final Value value) {
-        repository.delete(value.getId());
+        repository.delete(key, value.getDimensions());
         log.info("Deleted value for key [{}]: [{}]", key, value);
         createRevision(key, value, rev, DELETE);
     }

@@ -1,7 +1,6 @@
 package org.zalando.compass.domain.logic;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.model.Dimension;
@@ -19,7 +18,6 @@ import org.zalando.compass.domain.persistence.ValueRepository;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
 import static org.zalando.compass.domain.persistence.ValueCriteria.byDimension;
@@ -56,25 +54,19 @@ public class Locking {
     public DimensionLock lockDimensions(final String id) {
         @Nullable final Dimension current = dimensionRepository.lock(id).orElse(null);
         final List<Value> values = valueRepository.lockAll(byDimension(id));
+
         return new DimensionLock(current, values);
     }
 
     public KeyLock lockKey(final String id) {
         @Nullable final Key current = keyRepository.lock(id).orElse(null);
         final List<Value> values = valueRepository.lockAll(byKey(id));
+
         return new KeyLock(current, values);
     }
 
     public ValueLock lockValue(final String keyId, final Map<String, JsonNode> filter) {
-        return doLock(keyId, filter.keySet(), filter);
-    }
-
-    public ValueLock lockValue(final String keyId, final Map<String, JsonNode> filter, final Value value) {
-        return doLock(keyId, Sets.union(filter.keySet(), value.getDimensions().keySet()), filter);
-    }
-
-    private ValueLock doLock(final String keyId, final Set<String> dimensionIds, final Map<String, JsonNode> filter) {
-        final List<Dimension> dimensions = dimensionRepository.lockAll(dimensionIds);
+        final List<Dimension> dimensions = dimensionRepository.lockAll(filter.keySet());
         final Key key = keyRepository.lock(keyId).orElseThrow(NotFoundException::new);
         @Nullable final Value current = valueRepository.lock(keyId, filter).orElse(null);
 

@@ -80,10 +80,9 @@ class ValueResource {
             @RequestBody final JsonNode node) throws IOException {
 
         final ImmutableMap<String, JsonNode> dimensions = parser.parse(query);
-        final Value input = reader.read(node, Value.class);
-        final Value value = input.withDimensions(firstNonNull(input.getDimensions(), dimensions));
+        final Value value = reader.read(node, Value.class).withDimensions(dimensions);
 
-        final boolean created = service.replace(key, dimensions, value);
+        final boolean created = service.replace(key, value);
 
         return ResponseEntity
                 .status(created ? CREATED : OK)

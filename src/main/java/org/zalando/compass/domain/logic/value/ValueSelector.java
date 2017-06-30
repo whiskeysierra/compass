@@ -88,7 +88,7 @@ class ValueSelector {
                     final ImmutableMap<String, JsonNode> dimensions = value.getDimensions().entrySet().stream()
                             .collect(toImmutableMap(e -> e.getKey().getId(), Map.Entry::getValue));
                     // TODO do the nulls hurt us here?
-                    return new Value(null, dimensions, null, value.getValue());
+                    return new Value(dimensions, null, value.getValue());
                 })
                 .collect(toList());
     }

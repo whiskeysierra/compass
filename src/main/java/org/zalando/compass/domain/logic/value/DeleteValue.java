@@ -45,7 +45,7 @@ class DeleteValue {
             throw new NotFoundException();
         }
 
-        repository.delete(value.getId());
+        repository.delete(key, filter);
         log.info("Deleted value [{}, {}]", key, filter);
 
         // TODO reuse logic from replace command?

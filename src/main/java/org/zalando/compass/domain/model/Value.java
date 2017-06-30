@@ -9,11 +9,6 @@ import org.zalando.compass.library.Internal;
 @lombok.Value
 public class Value {
 
-    @Internal
-    @JsonIgnore
-    @Wither
-    Long id;
-
     @Wither
     ImmutableMap<String, JsonNode> dimensions;
 
@@ -25,7 +20,7 @@ public class Value {
     JsonNode value;
 
     public ValueRevision toRevision(final Revision revision) {
-        return new ValueRevision(id, dimensions, index, revision, value);
+        return new ValueRevision(dimensions, index, revision, value);
     }
 
 }
