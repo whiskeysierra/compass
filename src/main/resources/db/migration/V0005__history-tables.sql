@@ -35,8 +35,8 @@ CREATE TABLE value_revision (
   index BIGINT NOT NULL,
   value JSONB NOT NULL, -- adheres to key_revision.schema
   PRIMARY KEY (id, revision),
-  FOREIGN KEY (key_id, key_revision) REFERENCES key_revision(id, revision),
-  UNIQUE (key_id, revision, index)
+  FOREIGN KEY (key_id, key_revision) REFERENCES key_revision(id, revision)
+  -- TODO UNIQUE (key_id, revision, index) we might have duplicates due to deletions
 );
 
 CREATE TABLE value_dimension_revision (

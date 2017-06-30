@@ -47,4 +47,4 @@ Feature: Read value
       | http://localhost:8080/keys/income-tax/value?before=2018-01-01T00:00:00Z&income=256303 |
 
   Scenario: Read value from non-existing key should fail
-    Then "GET /keys/tax-rate/value" responds "404 Not Found"
+    Then "GET /keys/unknown/value" responds "404 Not Found"

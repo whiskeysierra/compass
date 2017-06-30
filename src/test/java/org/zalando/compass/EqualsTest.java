@@ -1,4 +1,4 @@
-package org.zalando.compass.domain.model;
+package org.zalando.compass;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
@@ -6,15 +6,25 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.zalando.compass.domain.model.Dimension;
+import org.zalando.compass.domain.model.DimensionRevision;
+import org.zalando.compass.domain.model.Key;
+import org.zalando.compass.domain.model.KeyRevision;
+import org.zalando.compass.domain.model.Page;
+import org.zalando.compass.domain.model.Revision;
+import org.zalando.compass.domain.model.Value;
+import org.zalando.compass.domain.model.ValueRevision;
+import org.zalando.compass.domain.persistence.ValueRevisionRepository;
+import org.zalando.compass.library.Maps;
 
 import java.util.Arrays;
 
 @RunWith(Parameterized.class)
-public final class DomainModelEqualsTest<T> {
+public final class EqualsTest<T> {
 
     private final Class<T> type;
 
-    public DomainModelEqualsTest(final Class<T> type) {
+    public EqualsTest(final Class<T> type) {
         this.type = type;
     }
 
@@ -26,8 +36,11 @@ public final class DomainModelEqualsTest<T> {
                 {Key.class},
                 {KeyRevision.class},
                 {Value.class},
+                {ValueRevision.class},
                 {Revision.class},
                 {Page.class},
+                {ValueRevisionRepository.Group.class},
+                {Maps.Pair.class},
         });
     }
 

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.RevisionRepository;
 
+import javax.annotation.Nullable;
 import java.security.Principal;
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -25,7 +26,7 @@ public class RevisionService {
         this.repository = repository;
     }
 
-    public Revision create(final Revision.Type type, final String comment) {
+    public Revision create(@Nullable final Revision.Type type, final String comment) {
         final LocalDateTime timestamp = LocalDateTime.now(clock);
 
         // TODO introduce proper dependency
@@ -35,7 +36,7 @@ public class RevisionService {
         final Revision input = new Revision(null, timestamp, type, user, comment);
         final long id = repository.create(input);
 
-        final Revision revision = new Revision(id, timestamp, type, user, comment);
+        final Revision revision = input.withId(id);
         log.info("Created revision [{}].", revision);
         return revision;
     }

@@ -1,4 +1,4 @@
-Feature: Dimension revisions
+Feature: Dimension history
 
   Background: Updated dimension
     Given "PUT /dimensions/device" responds successfully when requested with:

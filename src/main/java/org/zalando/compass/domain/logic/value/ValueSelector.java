@@ -84,8 +84,12 @@ class ValueSelector {
 
     private List<Value> unwrap(final List<RichValue> values) {
         return values.stream()
-                .map(value -> new Value(value.getDimensions().entrySet().stream()
-                        .collect(toImmutableMap(e -> e.getKey().getId(), Map.Entry::getValue)), value.getValue()))
+                .map(value -> {
+                    final ImmutableMap<String, JsonNode> dimensions = value.getDimensions().entrySet().stream()
+                            .collect(toImmutableMap(e -> e.getKey().getId(), Map.Entry::getValue));
+                    // TODO do the nulls hurt us here?
+                    return new Value(null, dimensions, null, value.getValue());
+                })
                 .collect(toList());
     }
 

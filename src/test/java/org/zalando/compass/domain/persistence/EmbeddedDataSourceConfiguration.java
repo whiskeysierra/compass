@@ -30,7 +30,7 @@ public class EmbeddedDataSourceConfiguration {
 
     @Bean(destroyMethod = "close")
     public EmbeddedPostgres embeddedPostgres() throws IOException {
-        return EmbeddedPostgres.start();
+        return EmbeddedPostgres.builder().setPort(5432).start();
     }
 
 }

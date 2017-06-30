@@ -1,7 +1,7 @@
 package org.zalando.compass.domain.logic;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.model.Dimension;
@@ -19,6 +19,7 @@ import org.zalando.compass.domain.persistence.ValueRepository;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
 import static org.zalando.compass.domain.persistence.ValueCriteria.byDimension;
@@ -65,7 +66,15 @@ public class Locking {
     }
 
     public ValueLock lockValue(final String keyId, final Map<String, JsonNode> filter) {
-        final List<Dimension> dimensions = dimensionRepository.lockAll(filter.keySet());
+        return doLock(keyId, filter.keySet(), filter);
+    }
+
+    public ValueLock lockValue(final String keyId, final Map<String, JsonNode> filter, final Value value) {
+        return doLock(keyId, Sets.union(filter.keySet(), value.getDimensions().keySet()), filter);
+    }
+
+    private ValueLock doLock(final String keyId, final Set<String> dimensionIds, final Map<String, JsonNode> filter) {
+        final List<Dimension> dimensions = dimensionRepository.lockAll(dimensionIds);
         final Key key = keyRepository.lock(keyId).orElseThrow(NotFoundException::new);
         @Nullable final Value current = valueRepository.lock(keyId, filter).orElse(null);
 

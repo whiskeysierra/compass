@@ -67,3 +67,4 @@ Feature: Value update
       | application/json            |
       | application/json-patch+json |
 
+  # TODO partially updating without an exact match should return 404

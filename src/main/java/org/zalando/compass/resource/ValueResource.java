@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.ValueService;
 import org.zalando.compass.domain.model.Value;
+import org.zalando.compass.domain.model.ValueRevision;
+import org.zalando.compass.domain.persistence.NotFoundException;
 
 import java.io.IOException;
 import java.net.URI;
@@ -34,6 +36,7 @@ import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.GONE;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
@@ -97,11 +100,43 @@ class ValueResource {
     @RequestMapping(method = GET, path = "/value")
     public ResponseEntity<Value> read(@PathVariable final String key, @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = parser.parse(query);
-        final Value value = service.read(key, filter);
+        try {
+            final Value value = service.read(key, filter);
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_LOCATION, canonicalUrl(key, value).toASCIIString())
-                .body(value);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_LOCATION, canonicalUrl(key, value).toASCIIString())
+                    .body(value);
+        } catch (final NotFoundException e) {
+            // TODO limit 1
+            final List<ValueRevision> revisions = service.readRevisions(key, filter);
+
+            if (revisions.isEmpty()) {
+                throw e;
+            }
+
+            // TODO getOnlyElement
+            final long revision = revisions.get(0).getRevision().getId();
+
+            return ResponseEntity
+                    .status(GONE)
+                    .location(linkTo(methodOn(ValueResource.class).getRevision(key, revision, render(filter))).toUri())
+                    .build();
+        }
+    }
+
+    @RequestMapping(method = GET, path = "/value/revisions")
+    public ValueRevisionPage getRevisions(@PathVariable final String key,
+            @RequestParam final Map<String, String> query) {
+        final Map<String, JsonNode> filter = parser.parse(query);
+        final List<ValueRevision> revisions = service.readRevisions(key, filter);
+        return new ValueRevisionPage(revisions);
+    }
+
+    @RequestMapping(method = GET, path = "/value/revisions/{revision}")
+    public ResponseEntity<ValueRevision> getRevision(@PathVariable final String key, @PathVariable final long revision,
+            @RequestParam final Map<String, String> query) {
+        final Map<String, JsonNode> filter = parser.parse(query);
+        return ResponseEntity.ok(service.readRevision(key, filter, revision));
     }
 
     @RequestMapping(method = PATCH, path = "/values", consumes = {APPLICATION_JSON_VALUE, JSON_PATCH_VALUE})
@@ -146,6 +181,7 @@ class ValueResource {
         return replace(key, query, patched);
     }
 
+    // TODO shouldn't this be singular?!
     @RequestMapping(method = DELETE, path = "/values")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable final String key, @RequestParam final Map<String, String> query) {
@@ -154,10 +190,14 @@ class ValueResource {
     }
 
     private URI canonicalUrl(final String key, final Value value) {
-        // TODO document sort
-        final Map<String, String> dimensions = ImmutableSortedMap.copyOf(
-                Maps.transformValues(value.getDimensions(), JsonNode::asText));
-        return linkTo(methodOn(ValueResource.class).read(key, dimensions)).toUri();
+        final Map<String, String> query = render(value.getDimensions());
+        return linkTo(methodOn(ValueResource.class).read(key, query)).toUri();
+    }
+
+    // TODO document sort
+    private Map<String, String> render(final Map<String, JsonNode> filter) {
+        return ImmutableSortedMap.copyOf(
+                Maps.transformValues(filter, JsonNode::asText));
     }
 
 }

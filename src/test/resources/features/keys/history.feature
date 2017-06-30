@@ -1,4 +1,4 @@
-Feature: Key revisions
+Feature: Key history
 
   Background: Updated key
     Given "PUT /keys/device" responds successfully when requested with:

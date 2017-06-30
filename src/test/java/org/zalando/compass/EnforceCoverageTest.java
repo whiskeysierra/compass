@@ -5,7 +5,11 @@ import com.google.gag.annotation.remark.OhNoYouDidnt;
 import org.junit.Test;
 import org.zalando.compass.library.Changed;
 import org.zalando.compass.library.Enums;
+import org.zalando.compass.library.Maps;
+import org.zalando.compass.library.Tables;
 import org.zalando.compass.resource.MediaTypes;
+
+import java.util.Map;
 
 @Hack
 @OhNoYouDidnt
@@ -22,8 +26,18 @@ public final class EnforceCoverageTest {
     }
 
     @Test
+    public void shouldUseMapsConstructor() {
+        new Maps();
+    }
+
+    @Test
     public void shouldUseMediaTypesConstructor() {
         new MediaTypes();
+    }
+
+    @Test
+    public void shouldUseTablesConstructor() {
+        new Tables();
     }
 
 }
