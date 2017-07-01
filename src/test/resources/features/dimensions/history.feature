@@ -33,7 +33,6 @@ Feature: Dimension history
       | /id      | /revision/id | /revision/type | /revision/user | /revision/comment | /schema/type | /relation | /description               |
       | "device" | 3            | "delete"       | "anonymous"    | ".."              | "string"     | "~"       | "Client Device Identifier" |
 
-  # TODO does this belong here?
   Scenario: Read deleted dimension
     Then "GET /dimensions/device" responds "410 Gone" with headers:
       | Location                                            |

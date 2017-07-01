@@ -2,12 +2,14 @@ package org.zalando.compass.domain.persistence;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Query;
 import org.jooq.Record;
-import org.jooq.SelectSeekStep1;
+import org.jooq.SelectSeekStep2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Value;
@@ -23,19 +25,18 @@ import java.util.Optional;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.collect.MoreCollectors.toOptional;
 import static java.util.stream.Collectors.toList;
-import static org.jooq.impl.DSL.coalesce;
 import static org.jooq.impl.DSL.exists;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.notExists;
 import static org.jooq.impl.DSL.select;
 import static org.jooq.impl.DSL.selectOne;
-import static org.jooq.impl.DSL.val;
+import static org.zalando.compass.domain.persistence.ValueCriteria.byDimension;
 import static org.zalando.compass.domain.persistence.model.Tables.VALUE;
 import static org.zalando.compass.domain.persistence.model.Tables.VALUE_DIMENSION;
 import static org.zalando.compass.library.Tables.table;
 
 @Repository
-public class ValueRepository{
+public class ValueRepository {
 
     private final DSLContext db;
 
@@ -84,6 +85,19 @@ public class ValueRepository{
                 .collect(toList());
     }
 
+    public Multimap<String, Value> lockAll(final String dimension) {
+        final ImmutableMultimap.Builder<String, Value> builder = ImmutableMultimap.builder();
+        doFindAll(byDimension(dimension))
+                .forUpdate().of(VALUE)
+                .fetchGroups(VALUE.KEY_ID)
+                .forEach((key, result) ->
+                        result.intoGroups(ValueRecord.class, ValueDimensionRecord.class)
+                                .entrySet().stream()
+                                .map(this::map)
+                                .forEach(value -> builder.put(key, value)));
+        return builder.build();
+    }
+
     public List<Value> lockAll(final ValueCriteria criteria) {
         return doFindAll(criteria)
                 .forUpdate().of(VALUE)
@@ -93,13 +107,13 @@ public class ValueRepository{
                 .collect(toList());
     }
 
-    private SelectSeekStep1<Record, Long> doFindAll(final ValueCriteria criteria) {
+    private SelectSeekStep2<Record, String, Long> doFindAll(final ValueCriteria criteria) {
         return db.select()
                 .from(VALUE)
                 .leftJoin(VALUE_DIMENSION)
                 .on(VALUE_DIMENSION.VALUE_ID.eq(VALUE.ID))
                 .where(toCondition(criteria))
-                .orderBy(VALUE.INDEX);
+                .orderBy(VALUE.KEY_ID, VALUE.INDEX);
     }
 
     private Collection<Condition> toCondition(final ValueCriteria criteria) {
@@ -162,7 +176,7 @@ public class ValueRepository{
 
     public void update(final String key, final Value value) {
         db.update(VALUE)
-                .set(VALUE.INDEX, coalesce(val(value.getIndex()), VALUE.INDEX))
+                .set(VALUE.INDEX, value.getIndex())
                 .set(VALUE.VALUE_, value.getValue())
                 .where(VALUE.KEY_ID.eq(key))
                 .and(exactMatch(value.getDimensions()))

@@ -1,6 +1,7 @@
 package org.zalando.compass.domain.logic;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.Multimap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.model.Dimension;
@@ -53,7 +54,7 @@ public class Locking {
 
     public DimensionLock lockDimensions(final String id) {
         @Nullable final Dimension current = dimensionRepository.lock(id).orElse(null);
-        final List<Value> values = valueRepository.lockAll(byDimension(id));
+        final Multimap<String, Value> values = valueRepository.lockAll(id);
 
         return new DimensionLock(current, values);
     }

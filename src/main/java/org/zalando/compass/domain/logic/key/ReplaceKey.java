@@ -11,8 +11,10 @@ import org.zalando.compass.domain.model.KeyLock;
 import org.zalando.compass.domain.model.KeyRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
+import org.zalando.compass.domain.model.ValueRevision;
 import org.zalando.compass.domain.persistence.KeyRepository;
 import org.zalando.compass.domain.persistence.KeyRevisionRepository;
+import org.zalando.compass.domain.persistence.ValueRevisionRepository;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -30,6 +32,7 @@ class ReplaceKey {
     private final KeyRepository repository;
     private final RevisionService revisionService;
     private final KeyRevisionRepository revisionRepository;
+    private final ValueRevisionRepository valueRevisionRepository;
 
     @Autowired
     ReplaceKey(
@@ -37,12 +40,14 @@ class ReplaceKey {
             final ValidationService validator,
             final KeyRepository repository,
             final RevisionService revisionService,
-            final KeyRevisionRepository revisionRepository) {
+            final KeyRevisionRepository revisionRepository,
+            final ValueRevisionRepository valueRevisionRepository) {
         this.locking = locking;
         this.validator = validator;
         this.repository = repository;
         this.revisionService = revisionService;
         this.revisionRepository = revisionRepository;
+        this.valueRevisionRepository = valueRevisionRepository;
     }
 
     /**
@@ -53,6 +58,7 @@ class ReplaceKey {
     boolean replace(final Key key) {
         final KeyLock lock = locking.lockKey(key.getId());
         @Nullable final Key current = lock.getKey();
+        final List<Value> values = lock.getValues();
 
         // TODO expect comment
         final String comment = "..";
@@ -71,17 +77,23 @@ class ReplaceKey {
             return true;
         } else {
             if (changed(Key::getSchema, current, key)) {
-                final List<Value> values = lock.getValues();
                 validator.check(key, values);
             }
 
             repository.update(key);
             log.info("Updated key [{}]", key);
 
-            final Revision rev = revisionService.create(UPDATE, comment);
-            final KeyRevision revision = key.toRevision(rev);
+            final Revision rev = revisionService.create(null, comment);
+
+            final KeyRevision revision = key.toRevision(rev.withType(UPDATE));
             revisionRepository.create(revision);
             log.info("Created key revision [{}]", revision);
+
+            values.forEach(value -> {
+                final ValueRevision valueRevision = value.toRevision(rev.withType(UPDATE));
+                valueRevisionRepository.create(key.getId(), valueRevision);
+                log.info("Created value revision [{}]", valueRevision);
+            });
 
             return false;
         }

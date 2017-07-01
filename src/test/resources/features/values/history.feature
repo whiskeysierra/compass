@@ -105,6 +105,3 @@ Feature: Value history
     Then "GET /keys/tax-rate/value/revisions?country=DE&after=2007-01-01T00:00:00Z" responds successfully with an array at "/values":
       | /dimensions/country | /dimensions/after      | /revision/id | /revision/type | /revision/user | /revision/comment | /value |
       | "DE"                | "2007-01-01T00:00:00Z" | 4            | "create"       | "anonymous"    | ".."              | 0.19   |
-
-  # TODO does re-creating a value lead to orphaned revisions?
-  # TODO don't allow to update values' dimensions, always create new ones

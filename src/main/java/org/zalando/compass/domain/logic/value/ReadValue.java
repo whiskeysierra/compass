@@ -21,7 +21,6 @@ class ReadValue {
     private final KeyRepository keyRepository;
     private final ValueRepository valueRepository;
     private final ValueSelector selector;
-    // TODO ReadValueRevision.read/readAll
     private final ValueRevisionRepository revisionRepository;
 
     @Autowired

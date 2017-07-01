@@ -1,5 +1,6 @@
 package org.zalando.compass.domain.logic.dimension;
 
+import com.google.common.collect.Multimap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,13 +16,16 @@ import org.zalando.compass.domain.model.DimensionRevision;
 import org.zalando.compass.domain.model.Relation;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
+import org.zalando.compass.domain.model.ValueRevision;
 import org.zalando.compass.domain.persistence.DimensionRepository;
 import org.zalando.compass.domain.persistence.DimensionRevisionRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
+import org.zalando.compass.domain.persistence.ValueRevisionRepository;
 
 import javax.annotation.Nullable;
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 import static org.zalando.compass.domain.model.Revision.Type.CREATE;
 import static org.zalando.compass.domain.model.Revision.Type.UPDATE;
@@ -38,6 +42,7 @@ class ReplaceDimension {
     private final DimensionRepository repository;
     private final RevisionService revisionService;
     private final DimensionRevisionRepository revisionRepository;
+    private final ValueRevisionRepository valueRevisionRepository;
 
     @Autowired
     ReplaceDimension(
@@ -46,13 +51,15 @@ class ReplaceDimension {
             final ValidationService validator,
             final DimensionRepository repository,
             final RevisionService revisionService,
-            final DimensionRevisionRepository revisionRepository) {
+            final DimensionRevisionRepository revisionRepository,
+            final ValueRevisionRepository valueRevisionRepository) {
         this.locking = locking;
         this.relationService = relationService;
         this.validator = validator;
         this.repository = repository;
         this.revisionService = revisionService;
         this.revisionRepository = revisionRepository;
+        this.valueRevisionRepository = valueRevisionRepository;
     }
 
     /**
@@ -63,6 +70,7 @@ class ReplaceDimension {
     boolean replace(@Valid final Dimension dimension) {
         final DimensionLock lock = locking.lockDimensions(dimension.getId());
         @Nullable final Dimension current = lock.getDimension();
+        final Multimap<String, Value> values = lock.getValues();
 
         // TODO expect comment
         final String comment = "..";
@@ -82,8 +90,7 @@ class ReplaceDimension {
             return true;
         } else {
             if (changed(Dimension::getSchema, current, dimension)) {
-                final List<Value> values = lock.getValues();
-                validator.validate(dimension, values);
+                validator.validate(dimension, values.values());
             }
 
             if (changed(Dimension::getRelation, current, dimension)) {
@@ -93,10 +100,17 @@ class ReplaceDimension {
             repository.update(dimension);
             log.info("Updated dimension [{}]", dimension);
 
-            final Revision rev = revisionService.create(UPDATE, comment);
-            final DimensionRevision revision = dimension.toRevision(rev);
+            final Revision rev = revisionService.create(null, comment);
+
+            final DimensionRevision revision = dimension.toRevision(rev.withType(UPDATE));
             revisionRepository.create(revision);
             log.info("Created dimension revision [{}]", revision);
+
+            values.forEach((key, value) -> {
+                final ValueRevision valueRevision = value.toRevision(rev.withType(UPDATE));
+                // TODO find key valueRevisionRepository.create(key, valueRevision);
+                log.info("Created value revision [{}]", valueRevision);
+            });
 
             return false;
         }

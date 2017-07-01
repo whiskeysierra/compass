@@ -33,7 +33,6 @@ Feature: Key history
       | /id      | /revision/id | /revision/type | /revision/user | /revision/comment | /schema/type | /description               |
       | "device" | 3            | "delete"       | "anonymous"    | ".."              | "string"     | "Client Device Identifier" |
 
-  # TODO does this belong here?
   Scenario: Read deleted key
     Then "GET /keys/device" responds "410 Gone" with headers:
       | Location                                      |

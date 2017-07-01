@@ -48,7 +48,6 @@ class DeleteValue {
         repository.delete(key, filter);
         log.info("Deleted value [{}, {}]", key, filter);
 
-        // TODO reuse logic from replace command?
         final Revision revision = revisionService.create(DELETE, "..");
         final ValueRevision valueRevision = value.toRevision(revision);
         revisionRepository.create(key, valueRevision);

@@ -1,6 +1,5 @@
 package org.zalando.compass.domain.logic.value;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,7 +19,6 @@ import org.zalando.compass.library.Maps.Pair;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import static com.google.common.collect.Streams.mapWithIndex;
 import static java.util.stream.Collectors.toList;
@@ -66,7 +64,6 @@ class ReplaceValue {
             create(key, value, rev);
             return true;
         } else {
-            // TODO exclude non-update?
             update(key, value.withIndex(current.getIndex()), rev);
             return false;
         }
@@ -99,7 +96,6 @@ class ReplaceValue {
             } else if (next == null) {
                 delete(key, revision, current);
             } else {
-                // TODO exclude non-updates?
                 update(key, next, revision);
             }
         });
