@@ -25,6 +25,17 @@ Feature: Key update
       | /id              | /schema/type | /description                 |
       | "feature.active" | "boolean"    | "Lorem ipsum dolor sit amet" |
 
+  Scenario: Updating a key with values
+    Given "PUT /keys/tax-rate" responds successfully when requested with:
+      | /schema/type | /description |
+      | "number"     | ".."         |
+    And "PUT /keys/tax-rate/value" responds successfully when requested with:
+      | /value |
+      | 0.19   |
+    Then "PATCH /keys/tax-rate" responds successfully when requested with:
+      | /schema/minimum | /schema/maximum |
+      | 0.0             | 1.0             |
+
   Scenario: Updating a key failed due to id mismatch
     Given "PUT /keys/tax-rate" responds successfully when requested with:
       | /schema/type | /description |

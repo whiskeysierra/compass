@@ -62,6 +62,7 @@ class ReplaceKey {
 
         // TODO expect comment
         final String comment = "..";
+        final Revision revision = revisionService.create(comment);
 
         // TODO make sure this is transactional
         if (current == null) {
@@ -69,10 +70,9 @@ class ReplaceKey {
             repository.create(key);
             log.info("Created key [{}]", key);
 
-            final Revision rev = revisionService.create(CREATE, comment);
-            final KeyRevision revision = key.toRevision(rev);
-            revisionRepository.create(revision);
-            log.info("Created key revision [{}]", revision);
+            final KeyRevision keyRevision = key.toRevision(revision.withType(CREATE));
+            revisionRepository.create(keyRevision);
+            log.info("Created key revision [{}]", keyRevision);
 
             return true;
         } else {
@@ -83,14 +83,14 @@ class ReplaceKey {
             repository.update(key);
             log.info("Updated key [{}]", key);
 
-            final Revision rev = revisionService.create(null, comment);
+            final Revision update = revision.withType(UPDATE);
+            final KeyRevision keyRevision = key.toRevision(update);
+            revisionRepository.create(keyRevision);
+            log.info("Created key revision [{}]", keyRevision);
 
-            final KeyRevision revision = key.toRevision(rev.withType(UPDATE));
-            revisionRepository.create(revision);
-            log.info("Created key revision [{}]", revision);
-
+            // TODO test
             values.forEach(value -> {
-                final ValueRevision valueRevision = value.toRevision(rev.withType(UPDATE));
+                final ValueRevision valueRevision = value.toRevision(update);
                 valueRevisionRepository.create(key.getId(), valueRevision);
                 log.info("Created value revision [{}]", valueRevision);
             });

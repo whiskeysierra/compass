@@ -48,7 +48,7 @@ class DeleteValue {
         repository.delete(key, filter);
         log.info("Deleted value [{}, {}]", key, filter);
 
-        final Revision revision = revisionService.create(DELETE, "..");
+        final Revision revision = revisionService.create("..").withType(DELETE);
         final ValueRevision valueRevision = value.toRevision(revision);
         revisionRepository.create(key, valueRevision);
         log.info("Created value revision [{}]", valueRevision);

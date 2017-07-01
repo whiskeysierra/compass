@@ -24,8 +24,6 @@ import org.zalando.compass.domain.persistence.ValueRevisionRepository;
 
 import javax.annotation.Nullable;
 import javax.validation.Valid;
-import java.util.List;
-import java.util.Map;
 
 import static org.zalando.compass.domain.model.Revision.Type.CREATE;
 import static org.zalando.compass.domain.model.Revision.Type.UPDATE;
@@ -74,6 +72,7 @@ class ReplaceDimension {
 
         // TODO expect comment
         final String comment = "..";
+        final Revision revision = revisionService.create(comment);
 
         // TODO make sure this is transactional
         if (current == null) {
@@ -82,10 +81,9 @@ class ReplaceDimension {
             repository.create(dimension);
             log.info("Created dimension [{}]", dimension);
 
-            final Revision rev = revisionService.create(CREATE, comment);
-            final DimensionRevision revision = dimension.toRevision(rev);
-            revisionRepository.create(revision);
-            log.info("Created dimension revision [{}]", revision);
+            final DimensionRevision dimensionRevision = dimension.toRevision(revision.withType(CREATE));
+            revisionRepository.create(dimensionRevision);
+            log.info("Created dimension revision [{}]", dimensionRevision);
 
             return true;
         } else {
@@ -100,15 +98,15 @@ class ReplaceDimension {
             repository.update(dimension);
             log.info("Updated dimension [{}]", dimension);
 
-            final Revision rev = revisionService.create(null, comment);
+            final Revision update = revision.withType(UPDATE);
+            final DimensionRevision dimensionRevision = dimension.toRevision(update);
+            revisionRepository.create(dimensionRevision);
+            log.info("Created dimension revision [{}]", dimensionRevision);
 
-            final DimensionRevision revision = dimension.toRevision(rev.withType(UPDATE));
-            revisionRepository.create(revision);
-            log.info("Created dimension revision [{}]", revision);
-
+            // TODO test
             values.forEach((key, value) -> {
-                final ValueRevision valueRevision = value.toRevision(rev.withType(UPDATE));
-                // TODO find key valueRevisionRepository.create(key, valueRevision);
+                final ValueRevision valueRevision = value.toRevision(update);
+                valueRevisionRepository.create(key, valueRevision);
                 log.info("Created value revision [{}]", valueRevision);
             });
 

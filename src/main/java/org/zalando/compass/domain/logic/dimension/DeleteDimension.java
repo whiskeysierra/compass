@@ -54,7 +54,7 @@ class DeleteDimension {
         log.info("Deleted dimension [{}]", id);
 
         // TODO expect comment
-        final Revision rev = revisionService.create(DELETE, "..");
+        final Revision rev = revisionService.create("..").withType(DELETE);
         final DimensionRevision revision = dimension.toRevision(rev);
         revisionRepository.create(revision);
         log.info("Created dimension revision [{}]", revision);

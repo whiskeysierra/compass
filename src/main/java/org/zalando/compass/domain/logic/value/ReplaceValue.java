@@ -57,7 +57,7 @@ class ReplaceValue {
 
         // TODO expect comment
         final String comment = "..";
-        final Revision rev = revisionService.create(null, comment);
+        final Revision rev = revisionService.create(comment);
 
         // TODO make sure this is transactional
         if (current == null) {
@@ -85,7 +85,7 @@ class ReplaceValue {
 
         // TODO expect comment
         final String comment = "..";
-        final Revision revision = revisionService.create(null, comment);
+        final Revision revision = revisionService.create(comment);
 
         diff.forEach(pair -> {
             final Value current = pair.getLeft();
