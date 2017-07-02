@@ -21,17 +21,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.collect.MoreCollectors.toOptional;
 import static java.util.stream.Collectors.toList;
 import static org.jooq.impl.DSL.field;
-import static org.jooq.impl.DSL.max;
 import static org.jooq.impl.DSL.notExists;
 import static org.jooq.impl.DSL.select;
 import static org.jooq.impl.DSL.selectOne;
 import static org.jooq.impl.DSL.val;
-import static org.zalando.compass.domain.persistence.model.Tables.DIMENSION_REVISION;
-import static org.zalando.compass.domain.persistence.model.Tables.KEY_REVISION;
 import static org.zalando.compass.domain.persistence.model.Tables.REVISION;
 import static org.zalando.compass.domain.persistence.model.Tables.VALUE_DIMENSION_REVISION;
 import static org.zalando.compass.domain.persistence.model.Tables.VALUE_REVISION;
@@ -57,16 +53,12 @@ public class ValueRevisionRepository {
                         VALUE_REVISION.REVISION,
                         VALUE_REVISION.REVISION_TYPE,
                         VALUE_REVISION.KEY_ID,
-                        VALUE_REVISION.KEY_REVISION,
                         VALUE_REVISION.INDEX,
                         VALUE_REVISION.VALUE)
                 .values(
                         val(revision.getId()),
                         val(translate(revision.getType(), RevisionType.class)),
                         val(key),
-                        select(max(KEY_REVISION.REVISION))
-                                .from(KEY_REVISION)
-                                .where(KEY_REVISION.ID.eq(key)).asField(),
                         val(value.getIndex()),
                         val(value.getValue(), JsonNode.class))
                 .returning(VALUE_REVISION.ID)
@@ -78,14 +70,10 @@ public class ValueRevisionRepository {
                                 VALUE_DIMENSION_REVISION.VALUE_ID,
                                 VALUE_DIMENSION_REVISION.VALUE_REVISION,
                                 VALUE_DIMENSION_REVISION.DIMENSION_ID,
-                                VALUE_DIMENSION_REVISION.DIMENSION_REVISION,
                                 VALUE_DIMENSION_REVISION.DIMENSION_VALUE)
                         .values(val(id),
                                 val(revision.getId()),
                                 val(dimension.getKey()),
-                                select(max(DIMENSION_REVISION.REVISION))
-                                        .from(DIMENSION_REVISION)
-                                        .where(DIMENSION_REVISION.ID.eq(dimension.getKey())).asField(),
                                 val(dimension.getValue(), JsonNode.class)))
                 .collect(toList());
 

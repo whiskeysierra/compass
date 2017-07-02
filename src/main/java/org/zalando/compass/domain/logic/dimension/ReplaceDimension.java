@@ -1,6 +1,5 @@
 package org.zalando.compass.domain.logic.dimension;
 
-import com.google.common.collect.Multimap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,7 +15,6 @@ import org.zalando.compass.domain.model.DimensionRevision;
 import org.zalando.compass.domain.model.Relation;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.domain.model.ValueRevision;
 import org.zalando.compass.domain.persistence.DimensionRepository;
 import org.zalando.compass.domain.persistence.DimensionRevisionRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
@@ -24,6 +22,7 @@ import org.zalando.compass.domain.persistence.ValueRevisionRepository;
 
 import javax.annotation.Nullable;
 import javax.validation.Valid;
+import java.util.List;
 
 import static org.zalando.compass.domain.model.Revision.Type.CREATE;
 import static org.zalando.compass.domain.model.Revision.Type.UPDATE;
@@ -68,7 +67,7 @@ class ReplaceDimension {
     boolean replace(@Valid final Dimension dimension) {
         final DimensionLock lock = locking.lockDimensions(dimension.getId());
         @Nullable final Dimension current = lock.getDimension();
-        final Multimap<String, Value> values = lock.getValues();
+        final List<Value> values = lock.getValues();
 
         // TODO expect comment
         final String comment = "..";
@@ -88,7 +87,7 @@ class ReplaceDimension {
             return true;
         } else {
             if (changed(Dimension::getSchema, current, dimension)) {
-                validator.validate(dimension, values.values());
+                validator.validate(dimension, values);
             }
 
             if (changed(Dimension::getRelation, current, dimension)) {
@@ -102,12 +101,6 @@ class ReplaceDimension {
             final DimensionRevision dimensionRevision = dimension.toRevision(update);
             revisionRepository.create(dimensionRevision);
             log.info("Created dimension revision [{}]", dimensionRevision);
-
-            values.forEach((key, value) -> {
-                final ValueRevision valueRevision = value.toRevision(update);
-                valueRevisionRepository.create(key, valueRevision);
-                log.info("Created value revision [{}]", valueRevision);
-            });
 
             return false;
         }

@@ -2,9 +2,7 @@ package org.zalando.compass.domain.persistence;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Query;
@@ -22,7 +20,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.collect.MoreCollectors.toOptional;
 import static java.util.stream.Collectors.toList;
 import static org.jooq.impl.DSL.exists;
@@ -30,7 +27,6 @@ import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.notExists;
 import static org.jooq.impl.DSL.select;
 import static org.jooq.impl.DSL.selectOne;
-import static org.zalando.compass.domain.persistence.ValueCriteria.byDimension;
 import static org.zalando.compass.domain.persistence.model.Tables.VALUE;
 import static org.zalando.compass.domain.persistence.model.Tables.VALUE_DIMENSION;
 import static org.zalando.compass.library.Tables.leftOuterJoin;
@@ -84,19 +80,6 @@ public class ValueRepository {
                 .entrySet().stream()
                 .map(this::map)
                 .collect(toList());
-    }
-
-    public Multimap<String, Value> lockAll(final String dimension) {
-        final ImmutableMultimap.Builder<String, Value> builder = ImmutableMultimap.builder();
-        doFindAll(byDimension(dimension))
-                .forUpdate().of(VALUE)
-                .fetchGroups(VALUE.KEY_ID)
-                .forEach((key, result) ->
-                        result.intoGroups(ValueRecord.class, ValueDimensionRecord.class)
-                                .entrySet().stream()
-                                .map(this::map)
-                                .forEach(value -> builder.put(key, value)));
-        return builder.build();
     }
 
     public List<Value> lockAll(final ValueCriteria criteria) {

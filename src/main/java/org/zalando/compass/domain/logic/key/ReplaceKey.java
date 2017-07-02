@@ -88,13 +88,6 @@ class ReplaceKey {
             revisionRepository.create(keyRevision);
             log.info("Created key revision [{}]", keyRevision);
 
-            // TODO test
-            values.forEach(value -> {
-                final ValueRevision valueRevision = value.toRevision(update);
-                valueRevisionRepository.create(key.getId(), valueRevision);
-                log.info("Created value revision [{}]", valueRevision);
-            });
-
             return false;
         }
     }
