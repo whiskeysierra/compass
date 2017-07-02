@@ -30,12 +30,9 @@
       | "$.schema.type" | "$.schema.type: string found, array expected"                                                                     |
 
     Scenario Outline: Creating a new key fails due to reserved keywords
-      When "PUT /keys/<key>" when requested with:
+      Then "PUT /keys/<key>" responds "405 Method Not Allowed" when requested with:
         | /schema/type | /description                 |
         | "string"     | "Lorem ipsum dolor sit amet" |
-      Then "400 Bad Request" was responded with an array at "/violations":
-        | /message                        |
-        | "may not be a reserved keyword" |
       Examples:
         | key       |
         | cursor    |

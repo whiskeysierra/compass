@@ -37,3 +37,6 @@ Feature: Key history
     Then "GET /keys/device" responds "410 Gone" with headers:
       | Location                                      |
       | http://localhost:8080/keys/device/revisions/3 |
+
+  Scenario: Access all key revisions
+    Then "GET /keys/revisions" responds successfully

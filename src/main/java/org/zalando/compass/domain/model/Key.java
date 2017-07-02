@@ -5,9 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 @lombok.Value
 public final class Key {
 
-    @NotReserved
     String id;
-
     JsonNode schema;
     String description;
 

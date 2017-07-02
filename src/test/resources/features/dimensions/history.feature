@@ -37,3 +37,6 @@ Feature: Dimension history
     Then "GET /dimensions/device" responds "410 Gone" with headers:
       | Location                                            |
       | http://localhost:8080/dimensions/device/revisions/3 |
+
+  Scenario: Access all dimension revisions
+    Then "GET /dimensions/revisions" responds successfully

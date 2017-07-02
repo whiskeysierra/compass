@@ -23,6 +23,7 @@ import org.zalando.compass.domain.persistence.NotFoundException;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
@@ -43,7 +44,7 @@ import static org.zalando.compass.resource.MediaTypes.JSON_PATCH_VALUE;
 
 @RestController
 @RequestMapping(path = "/dimensions")
-class DimensionResource {
+class DimensionResource implements Reserved {
 
     private final JsonReader reader;
     private final ObjectMapper mapper;
@@ -158,6 +159,12 @@ class DimensionResource {
     @ResponseStatus(NO_CONTENT)
     public void delete(@PathVariable final String id) {
         service.delete(id);
+    }
+
+    @RequestMapping(method = GET, path = "/revisions")
+    public Object getRevisions() {
+        // TODO implement
+        return Collections.emptyMap();
     }
 
 }

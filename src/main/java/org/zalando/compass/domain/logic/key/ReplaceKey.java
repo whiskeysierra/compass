@@ -3,7 +3,6 @@ package org.zalando.compass.domain.logic.key;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.annotation.Validated;
 import org.zalando.compass.domain.logic.Locking;
 import org.zalando.compass.domain.logic.RevisionService;
 import org.zalando.compass.domain.logic.ValidationService;
@@ -16,7 +15,6 @@ import org.zalando.compass.domain.persistence.KeyRepository;
 import org.zalando.compass.domain.persistence.KeyRevisionRepository;
 
 import javax.annotation.Nullable;
-import javax.validation.Valid;
 import java.util.List;
 
 import static org.zalando.compass.domain.model.Revision.Type.CREATE;
@@ -24,7 +22,6 @@ import static org.zalando.compass.domain.model.Revision.Type.UPDATE;
 import static org.zalando.compass.library.Changed.changed;
 
 @Slf4j
-@Validated
 @Component
 class ReplaceKey {
 
@@ -53,7 +50,7 @@ class ReplaceKey {
      * @param key the key to replace
      * @return true if key was created, false if an existing one was updated
      */
-    boolean replace(@Valid final Key key) {
+    boolean replace(final Key key) {
         final KeyLock lock = locking.lockKey(key.getId());
         @Nullable final Key current = lock.getKey();
         final List<Value> values = lock.getValues();

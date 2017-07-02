@@ -3,7 +3,6 @@ package org.zalando.compass.domain.logic.dimension;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.annotation.Validated;
 import org.zalando.compass.domain.logic.BadArgumentException;
 import org.zalando.compass.domain.logic.Locking;
 import org.zalando.compass.domain.logic.RelationService;
@@ -20,7 +19,6 @@ import org.zalando.compass.domain.persistence.DimensionRevisionRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
 
 import javax.annotation.Nullable;
-import javax.validation.Valid;
 import java.util.List;
 
 import static org.zalando.compass.domain.model.Revision.Type.CREATE;
@@ -28,7 +26,6 @@ import static org.zalando.compass.domain.model.Revision.Type.UPDATE;
 import static org.zalando.compass.library.Changed.changed;
 
 @Slf4j
-@Validated
 @Component
 class ReplaceDimension {
 
@@ -60,7 +57,7 @@ class ReplaceDimension {
      * @param dimension the dimension to replace
      * @return true if dimension was created, false if an existing one was updated
      */
-    boolean replace(@Valid final Dimension dimension) {
+    boolean replace(final Dimension dimension) {
         final DimensionLock lock = locking.lockDimensions(dimension.getId());
         @Nullable final Dimension current = lock.getDimension();
         final List<Value> values = lock.getValues();
