@@ -33,6 +33,7 @@ import static org.jooq.impl.DSL.selectOne;
 import static org.zalando.compass.domain.persistence.ValueCriteria.byDimension;
 import static org.zalando.compass.domain.persistence.model.Tables.VALUE;
 import static org.zalando.compass.domain.persistence.model.Tables.VALUE_DIMENSION;
+import static org.zalando.compass.library.Tables.leftOuterJoin;
 import static org.zalando.compass.library.Tables.table;
 
 @Repository
@@ -149,29 +150,14 @@ public class ValueRepository {
 
     private Value map(final Entry<ValueRecord, List<ValueDimensionRecord>> entry) {
         final ValueRecord row = entry.getKey();
-
-        final List<ValueDimensionRecord> result = entry.getValue();
-        final ImmutableMap<String, JsonNode> dimensions = toMap(result);
+        final ImmutableMap<String, JsonNode> dimensions = leftOuterJoin(entry.getValue(),
+                ValueDimensionRecord::getDimensionId,
+                ValueDimensionRecord::getDimensionValue);
 
         return new Value(
                 dimensions,
                 row.getIndex(),
                 row.getValue());
-    }
-
-    private ImmutableMap<String, JsonNode> toMap(final List<ValueDimensionRecord> result) {
-        if (result.size() == 1) {
-            final ValueDimensionRecord record = result.get(0);
-
-            // empty left join
-            if (record.getDimensionId() == null) {
-                return ImmutableMap.of();
-            }
-        }
-
-        return result.stream().collect(toImmutableMap(
-                ValueDimensionRecord::getDimensionId,
-                ValueDimensionRecord::getDimensionValue));
     }
 
     public void update(final String key, final Value value) {
@@ -205,7 +191,6 @@ public class ValueRepository {
                             .where(VALUE_DIMENSION.VALUE_ID.eq(VALUE.ID))
                             .asTable("actual"))
                     .using(field("dimension_id"), field("dimension_value"))
-                    // TODO find out why coalesce doesn't work here
                     .where(field("actual.dimension_id").isNull())
                     .or(field("expected.dimension_id").isNull()));
         }

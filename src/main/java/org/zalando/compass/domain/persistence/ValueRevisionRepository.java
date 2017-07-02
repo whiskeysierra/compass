@@ -16,7 +16,6 @@ import org.zalando.compass.domain.persistence.model.enums.RevisionType;
 import org.zalando.compass.domain.persistence.model.tables.records.RevisionRecord;
 import org.zalando.compass.domain.persistence.model.tables.records.ValueDimensionRevisionRecord;
 import org.zalando.compass.domain.persistence.model.tables.records.ValueRevisionRecord;
-import org.zalando.compass.library.Enums;
 
 import java.util.List;
 import java.util.Map;
@@ -37,6 +36,7 @@ import static org.zalando.compass.domain.persistence.model.Tables.REVISION;
 import static org.zalando.compass.domain.persistence.model.Tables.VALUE_DIMENSION_REVISION;
 import static org.zalando.compass.domain.persistence.model.Tables.VALUE_REVISION;
 import static org.zalando.compass.library.Enums.translate;
+import static org.zalando.compass.library.Tables.leftOuterJoin;
 import static org.zalando.compass.library.Tables.table;
 
 @Repository
@@ -83,7 +83,6 @@ public class ValueRevisionRepository {
                         .values(val(id),
                                 val(revision.getId()),
                                 val(dimension.getKey()),
-                                // TODO do it once?!
                                 select(max(DIMENSION_REVISION.REVISION))
                                         .from(DIMENSION_REVISION)
                                         .where(DIMENSION_REVISION.ID.eq(dimension.getKey())).asField(),
@@ -95,40 +94,40 @@ public class ValueRevisionRepository {
 
     public List<ValueRevision> findAll(final String key, final Map<String, JsonNode> dimensions) {
         return db.select(VALUE_REVISION.fields())
-                        .select(REVISION.fields())
-                        .select(VALUE_DIMENSION_REVISION.fields())
-                        .from(VALUE_REVISION)
-                        .join(REVISION)
-                        .on(REVISION.ID.eq(VALUE_REVISION.REVISION))
-                        .leftJoin(VALUE_DIMENSION_REVISION)
-                        .on(VALUE_DIMENSION_REVISION.VALUE_ID.eq(VALUE_REVISION.ID))
-                        .and(VALUE_DIMENSION_REVISION.VALUE_REVISION.eq(VALUE_REVISION.REVISION))
-                        .where(VALUE_REVISION.KEY_ID.eq(key))
-                        .and(exactMatch(dimensions))
-                        .orderBy(REVISION.ID.desc())
-                        .fetchGroups(this::group, ValueDimensionRevisionRecord.class)
-                        .entrySet().stream()
-                        .map(this::mapRevision)
-                        .collect(toList());
+                .select(REVISION.fields())
+                .select(VALUE_DIMENSION_REVISION.fields())
+                .from(VALUE_REVISION)
+                .join(REVISION)
+                .on(REVISION.ID.eq(VALUE_REVISION.REVISION))
+                .leftJoin(VALUE_DIMENSION_REVISION)
+                .on(VALUE_DIMENSION_REVISION.VALUE_ID.eq(VALUE_REVISION.ID))
+                .and(VALUE_DIMENSION_REVISION.VALUE_REVISION.eq(VALUE_REVISION.REVISION))
+                .where(VALUE_REVISION.KEY_ID.eq(key))
+                .and(exactMatch(dimensions))
+                .orderBy(REVISION.ID.desc())
+                .fetchGroups(this::group, ValueDimensionRevisionRecord.class)
+                .entrySet().stream()
+                .map(this::mapRevision)
+                .collect(toList());
     }
 
     public Optional<ValueRevision> find(final String key, final Map<String, JsonNode> dimensions, final long revision) {
         return db.select(VALUE_REVISION.fields())
-                        .select(REVISION.fields())
-                        .select(VALUE_DIMENSION_REVISION.fields())
-                        .from(VALUE_REVISION)
-                        .join(REVISION)
-                        .on(REVISION.ID.eq(VALUE_REVISION.REVISION))
-                        .leftJoin(VALUE_DIMENSION_REVISION)
-                        .on(VALUE_DIMENSION_REVISION.VALUE_ID.eq(VALUE_REVISION.ID))
-                        .and(VALUE_DIMENSION_REVISION.VALUE_REVISION.eq(VALUE_REVISION.REVISION))
-                        .where(VALUE_REVISION.KEY_ID.eq(key))
-                        .and(exactMatch(dimensions))
-                        .and(VALUE_REVISION.REVISION.eq(revision))
-                        .fetchGroups(this::group, ValueDimensionRevisionRecord.class)
-                        .entrySet().stream()
-                        .map(this::mapRevision)
-                        .collect(toOptional());
+                .select(REVISION.fields())
+                .select(VALUE_DIMENSION_REVISION.fields())
+                .from(VALUE_REVISION)
+                .join(REVISION)
+                .on(REVISION.ID.eq(VALUE_REVISION.REVISION))
+                .leftJoin(VALUE_DIMENSION_REVISION)
+                .on(VALUE_DIMENSION_REVISION.VALUE_ID.eq(VALUE_REVISION.ID))
+                .and(VALUE_DIMENSION_REVISION.VALUE_REVISION.eq(VALUE_REVISION.REVISION))
+                .where(VALUE_REVISION.KEY_ID.eq(key))
+                .and(exactMatch(dimensions))
+                .and(VALUE_REVISION.REVISION.eq(revision))
+                .fetchGroups(this::group, ValueDimensionRevisionRecord.class)
+                .entrySet().stream()
+                .map(this::mapRevision)
+                .collect(toOptional());
     }
 
     private Condition exactMatch(final Map<String, JsonNode> dimensions) {
@@ -148,7 +147,6 @@ public class ValueRevisionRepository {
                                     .and(VALUE_DIMENSION_REVISION.VALUE_REVISION.eq(VALUE_REVISION.REVISION))
                                     .asTable("actual"))
                     .using(field("dimension_id"), field("dimension_value"))
-                    // TODO find out why coalesce doesn't work here
                     .where(field("actual.dimension_id").isNull())
                     .or(field("expected.dimension_id").isNull()));
         }
@@ -160,7 +158,6 @@ public class ValueRevisionRepository {
                 record.into(RevisionRecord.class));
     }
 
-    // TODO isn't there something we can use for this?
     @Value
     @VisibleForTesting
     public static final class Group {
@@ -169,8 +166,10 @@ public class ValueRevisionRepository {
     }
 
     private ValueRevision mapRevision(final Map.Entry<Group, List<ValueDimensionRevisionRecord>> entry) {
+        final ImmutableMap<String, JsonNode> dimensions = leftOuterJoin(entry.getValue(),
+                ValueDimensionRevisionRecord::getDimensionId,
+                ValueDimensionRevisionRecord::getDimensionValue);
         final Group group = entry.getKey();
-        final ImmutableMap<String, JsonNode> dimensions = toMap(entry.getValue());
         final RevisionRecord revision = group.getRevision();
         final ValueRevisionRecord value = group.getValue();
 
@@ -184,22 +183,6 @@ public class ValueRevisionRepository {
                         revision.getUser(),
                         revision.getComment()),
                 value.getValue());
-    }
-
-    // TODO reuse
-    private ImmutableMap<String, JsonNode> toMap(final List<ValueDimensionRevisionRecord> result) {
-        if (result.size() == 1) {
-            final ValueDimensionRevisionRecord record = result.get(0);
-
-            // empty left join
-            if (record.getDimensionId() == null) {
-                return ImmutableMap.of();
-            }
-        }
-
-        return result.stream().collect(toImmutableMap(
-                ValueDimensionRevisionRecord::getDimensionId,
-                ValueDimensionRevisionRecord::getDimensionValue));
     }
 
 }

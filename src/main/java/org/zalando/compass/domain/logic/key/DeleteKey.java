@@ -51,7 +51,8 @@ class DeleteKey {
         log.info("Deleted key [{}]", id);
 
         // TODO expect comment
-        final Revision rev = revisionService.create("..").withType(DELETE);
+        final String comment = "..";
+        final Revision rev = revisionService.create(comment).withType(DELETE);
         final KeyRevision revision = key.toRevision(rev);
         revisionRepository.create(revision);
         log.info("Created key revision [{}]", revision);

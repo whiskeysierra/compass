@@ -36,5 +36,3 @@ Feature: Read values
 
   Scenario: Read values from non-existing key should fail
     Then "GET /keys/tax-rate/values" responds "404 Not Found"
-
-  # TODO make it clear how matching values work, e.g. that we ignore additional filters when matching

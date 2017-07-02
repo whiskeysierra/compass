@@ -31,7 +31,7 @@ CREATE TABLE value_revision (
   revision BIGINT REFERENCES revision(id),
   revision_type revision_type NOT NULL,
   key_id TEXT NOT NULL,
-  key_revision BIGINT NOT NULL, -- TODO does updating the key create a new version here?
+  key_revision BIGINT NOT NULL,
   index BIGINT NOT NULL,
   value JSONB NOT NULL, -- adheres to key_revision.schema
   PRIMARY KEY (id, revision),
@@ -43,7 +43,7 @@ CREATE TABLE value_dimension_revision (
   value_id BIGINT NOT NULL,
   value_revision BIGINT NOT NULL,
   dimension_id TEXT NOT NULL,
-  dimension_revision BIGINT NOT NULL, -- TODO does updating the dimension create a new version here?
+  dimension_revision BIGINT NOT NULL,
   dimension_value JSONB NOT NULL, -- adheres to dimension_revision.schema,
   FOREIGN KEY (value_id, value_revision) REFERENCES value_revision(id, revision),
   FOREIGN KEY (dimension_id, dimension_revision) REFERENCES dimension_revision(id, revision),

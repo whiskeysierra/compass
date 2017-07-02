@@ -28,7 +28,6 @@ public class RevisionService {
     public Revision create(final String comment) {
         final LocalDateTime timestamp = LocalDateTime.now(clock);
 
-        // TODO introduce proper dependency
         final String user = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
                 .map(Principal::getName).orElse("anonymous");
 

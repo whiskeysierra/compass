@@ -1,7 +1,5 @@
 Feature: Value history
 
-  # TODO control time and test timestamps
-
   Background: Dimensions and key
     Given "PUT /dimensions/country" responds successfully when requested with:
       | /schema/type | /relation | /description         |

@@ -70,7 +70,6 @@ class DimensionResource {
                 .body(dimension);
     }
 
-    // TODO allow to change id?
     private void ensureConsistentId(@PathVariable final String inUrl, final JsonNode node) {
         final JsonNode inBody = node.path("id");
 

@@ -103,7 +103,6 @@ class ReplaceDimension {
             revisionRepository.create(dimensionRevision);
             log.info("Created dimension revision [{}]", dimensionRevision);
 
-            // TODO test
             values.forEach((key, value) -> {
                 final ValueRevision valueRevision = value.toRevision(update);
                 valueRevisionRepository.create(key, valueRevision);
