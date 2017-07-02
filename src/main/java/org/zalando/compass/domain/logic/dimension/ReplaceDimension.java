@@ -18,7 +18,6 @@ import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.DimensionRepository;
 import org.zalando.compass.domain.persistence.DimensionRevisionRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
-import org.zalando.compass.domain.persistence.ValueRevisionRepository;
 
 import javax.annotation.Nullable;
 import javax.validation.Valid;
@@ -39,7 +38,6 @@ class ReplaceDimension {
     private final DimensionRepository repository;
     private final RevisionService revisionService;
     private final DimensionRevisionRepository revisionRepository;
-    private final ValueRevisionRepository valueRevisionRepository;
 
     @Autowired
     ReplaceDimension(
@@ -48,15 +46,13 @@ class ReplaceDimension {
             final ValidationService validator,
             final DimensionRepository repository,
             final RevisionService revisionService,
-            final DimensionRevisionRepository revisionRepository,
-            final ValueRevisionRepository valueRevisionRepository) {
+            final DimensionRevisionRepository revisionRepository) {
         this.locking = locking;
         this.relationService = relationService;
         this.validator = validator;
         this.repository = repository;
         this.revisionService = revisionService;
         this.revisionRepository = revisionRepository;
-        this.valueRevisionRepository = valueRevisionRepository;
     }
 
     /**

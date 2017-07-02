@@ -1,4 +1,4 @@
-Feature: Key creation
+  Feature: Key creation
 
   Scenario: Creating a new key
     Given "GET /keys/example" responds "404 Not Found"
@@ -28,3 +28,24 @@ Feature: Key creation
       | "$.id"          | "$.id: does not match the regex pattern ^([a-z0-9]+(-[a-z0-9]+)*)([.]([a-z0-9]+(-[a-z0-9]+)*))*$"                 |
       | "$.schema.type" | "$.schema.type: does not have a value in the enumeration [array, boolean, integer, null, number, object, string]" |
       | "$.schema.type" | "$.schema.type: string found, array expected"                                                                     |
+
+    Scenario Outline: Creating a new key fails due to reserved keywords
+      When "PUT /keys/<key>" when requested with:
+        | /schema/type | /description                 |
+        | "string"     | "Lorem ipsum dolor sit amet" |
+      Then "400 Bad Request" was responded with an array at "/violations":
+        | /message                        |
+        | "may not be a reserved keyword" |
+      Examples:
+        | key       |
+        | cursor    |
+        | embed     |
+        | fields    |
+        | filter    |
+        | key       |
+        | limit     |
+        | offset    |
+        | q         |
+        | query     |
+        | revisions |
+        | sort      |

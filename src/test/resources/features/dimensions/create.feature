@@ -63,6 +63,7 @@ Feature: Dimension creation
       | offset    |
       | q         |
       | query     |
+      | revisions |
       | sort      |
 
   Scenario: Creating a new dimension fails due to unsupported schema type

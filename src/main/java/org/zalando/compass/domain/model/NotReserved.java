@@ -50,7 +50,8 @@ public @interface NotReserved {
                 "query",
 
                 // Compass specific
-                "key"
+                "key",
+                "revisions"
         );
 
         @Override

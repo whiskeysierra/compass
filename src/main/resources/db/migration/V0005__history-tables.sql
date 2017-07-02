@@ -34,7 +34,7 @@ CREATE TABLE value_revision (
   index BIGINT NOT NULL,
   value JSONB NOT NULL, -- adheres to key_revision.schema
   PRIMARY KEY (id, revision),
-  -- TODO foreign key to key_revision(id) would be handy
+  -- foreign key to key_revision(id) would be handy, but it's not unique
   UNIQUE (key_id, revision, revision_type, index) -- we might have duplicate indexes due to deletions, hency the revision_type
 );
 
@@ -44,6 +44,6 @@ CREATE TABLE value_dimension_revision (
   dimension_id TEXT NOT NULL,
   dimension_value JSONB NOT NULL, -- adheres to dimension_revision.schema,
   FOREIGN KEY (value_id, value_revision) REFERENCES value_revision(id, revision),
-  -- TODO foreign key to dimension_revision(id) would be handy
+  -- foreign key to dimension_revision(id) would be handy, but it's not unique
   UNIQUE (value_id, value_revision, dimension_id)
 );
