@@ -27,13 +27,13 @@
     },
     {
       "id": "~",
-      "title": "Matchesn",
+      "title": "Regular Expression",
       "description": "Matches regular expression"
     },
     {
       "id": "^",
-      "title": "Prefix",
-      "description": "Special version of equality that falls back to longest prefix matches"
+      "title": "Prefix Match",
+      "description": "Longest Prefix Match"
     }
   ]
 }

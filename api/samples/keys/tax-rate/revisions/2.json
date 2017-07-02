@@ -1,5 +1,12 @@
 {
   "id": "tax-rate",
+  "revision": {
+    "id": 2,
+    "timestamp": "2017-07-02T01:42:11Z",
+    "type": "update",
+    "user": "anonymous",
+    "comment": ".."
+  },
   "schema": {
     "type": "number",
     "format": "decimal",

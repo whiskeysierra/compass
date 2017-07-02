@@ -14,7 +14,18 @@
 - REST API
 - pluggable relations: =, <, >, <=, >=, ~
 
-## Comparison
+## Concepts
+
+TODO
+
+## Known Issues
+
+- ISO 8601 time zones
+
+## Alternatives
+
+- [YCB](https://github.com/yahoo/ycb-java)
+- [Decision Model and Notation (DMN)](https://en.wikipedia.org/wiki/Decision_Model_and_Notation) for example [Camunda DMN Engine](https://docs.camunda.org/manual/latest/user-guide/dmn-engine)
 
 ### Config Service (internal)
 
@@ -33,26 +44,3 @@
 - without pre-defined values for dimensions
 - without value hierarchies
 - with REST API
-
-## Concepts
-
-### Keys and Values
-
-TODO
-
-### Dimensions
-
-TODO
-
-### Relations
-
-TODO
-
-## Known Issues
-
-- ISO 8601 time zones
-
-## Alternatives
-
-- [YCB](https://github.com/yahoo/ycb-java)
-- [Decision Model and Notation (DMN)](https://en.wikipedia.org/wiki/Decision_Model_and_Notation) for example [Camunda DMN Engine](https://docs.camunda.org/manual/latest/user-guide/dmn-engine)

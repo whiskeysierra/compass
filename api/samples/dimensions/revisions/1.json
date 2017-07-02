@@ -1,10 +1,16 @@
 {
+  "revision": {
+    "id": 1,
+    "timestamp": "2017-07-02T01:35:17Z",
+    "type": "create",
+    "user": "anonymous",
+    "comment": ".."
+  },
   "dimensions": [
     {
       "id": "country",
       "schema": {
-        "type": "string",
-        "pattern": "^[A-Z]{2}$"
+        "type": "string"
       },
       "relation": "=",
       "description": ".."

@@ -1,0 +1,51 @@
+{
+  "dimensions": [
+    {
+      "id": "country",
+      "revision": {
+        "id": 3,
+        "timestamp": "2017-07-03T00:47:32Z",
+        "type": "delete",
+        "user": "anonymous",
+        "comment": ".."
+      },
+      "schema": {
+        "type": "string",
+        "pattern": "^[A-Z]{2}$"
+      },
+      "relation": "=",
+      "description": ".."
+    },
+    {
+      "id": "country",
+      "revision": {
+        "id": 2,
+        "timestamp": "2017-07-02T01:42:11Z",
+        "type": "update",
+        "user": "anonymous",
+        "comment": ".."
+      },
+      "schema": {
+        "type": "string",
+        "pattern": "^[A-Z]{2}$"
+      },
+      "relation": "=",
+      "description": ".."
+    },
+    {
+      "id": "country",
+      "revision": {
+        "id": 1,
+        "timestamp": "2017-07-02T01:35:17Z",
+        "type": "create",
+        "user": "anonymous",
+        "comment": ".."
+      },
+      "schema": {
+        "type": "string"
+      },
+      "relation": "=",
+      "description": ".."
+    }
+  ]
+}

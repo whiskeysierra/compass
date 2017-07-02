@@ -1,0 +1,9 @@
+{
+  "id": "country",
+  "schema": {
+    "type": "string",
+    "pattern": "^[A-Z]{2}$"
+  },
+  "relation": "=",
+  "description": ".."
+}

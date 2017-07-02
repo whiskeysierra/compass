@@ -1,12 +1,17 @@
 {
+  "revision": {
+    "id": 1,
+    "timestamp": "2017-07-02T01:35:17Z",
+    "type": "create",
+    "user": "anonymous",
+    "comment": ".."
+  },
   "keys": [
     {
       "id": "tax-rate",
       "schema": {
         "type": "number",
-        "format": "decimal",
-        "minimum": 0.0,
-        "maximum": 1.0
+        "format": "decimal"
       },
       "description": "The sales tax rate expressed as a factor."
     }

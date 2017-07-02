@@ -1,0 +1,29 @@
+{
+  "revision": {
+    "id": 1,
+    "timestamp": "2017-06-30T15:32:01Z",
+    "type": "create",
+    "user": "anonymous",
+    "comment": ".."
+  },
+  "values": [
+    {
+      "dimensions": {
+        "country": "CH"
+      },
+      "value": 0.08
+    },
+    {
+      "dimensions": {
+        "country": "AT"
+      },
+      "value": 0.20
+    },
+    {
+      "dimensions": {
+        "country": "DE"
+      },
+      "value": 0.16
+    }
+  ]
+}
