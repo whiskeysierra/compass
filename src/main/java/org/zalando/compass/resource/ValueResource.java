@@ -118,24 +118,9 @@ class ValueResource {
 
             return ResponseEntity
                     .status(GONE)
-                    .location(linkTo(methodOn(ValueResource.class).getRevision(key, revision, render(filter))).toUri())
+                    .location(linkTo(methodOn(ValueRevisionResource.class).getRevision(key, revision, render(filter))).toUri())
                     .build();
         }
-    }
-
-    @RequestMapping(method = GET, path = "/value/revisions")
-    public ValueRevisionPage getRevisions(@PathVariable final String key,
-            @RequestParam final Map<String, String> query) {
-        final Map<String, JsonNode> filter = parser.parse(query);
-        final List<ValueRevision> revisions = service.readRevisions(key, filter);
-        return new ValueRevisionPage(revisions);
-    }
-
-    @RequestMapping(method = GET, path = "/value/revisions/{revision}")
-    public ResponseEntity<ValueRevision> getRevision(@PathVariable final String key, @PathVariable final long revision,
-            @RequestParam final Map<String, String> query) {
-        final Map<String, JsonNode> filter = parser.parse(query);
-        return ResponseEntity.ok(service.readRevision(key, filter, revision));
     }
 
     @RequestMapping(method = PATCH, path = "/values", consumes = {APPLICATION_JSON_VALUE, JSON_PATCH_VALUE})

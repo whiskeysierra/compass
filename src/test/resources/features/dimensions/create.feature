@@ -46,9 +46,12 @@ Feature: Dimension creation
       | "$.schema.type" | "$.schema.type: string found, array expected"                                                                     |
 
   Scenario Outline: Creating a new dimension fails due to reserved keywords
-    Then "PUT /dimensions/<dimension>" responds "405 Method Not Allowed" when requested with:
+    When "PUT /dimensions/<dimension>" when requested with:
       | /schema/type | /relation | /description                 |
       | "string"     | "="       | "Lorem ipsum dolor sit amet" |
+    Then "405 Method Not Allowed" was responded with:
+      | /detail          |
+      | "ID is reserved" |
     Examples:
       | dimension |
       | cursor    |

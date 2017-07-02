@@ -18,12 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionRevision;
-import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.persistence.NotFoundException;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
@@ -102,32 +100,11 @@ class DimensionResource implements Reserved {
 
             return ResponseEntity
                     .status(GONE)
-                    .location(linkTo(methodOn(DimensionResource.class).getRevision(id, revision)).toUri())
+                    .location(linkTo(methodOn(DimensionRevisionResource.class).getRevision(id, revision)).toUri())
                     .build();
         }
     }
 
-    @RequestMapping(method = GET, path = "/{id}/revisions")
-    public DimensionRevisionPage getRevisions(@PathVariable final String id,
-            @RequestParam(required = false, defaultValue = "25") final int limit,
-            @Nullable @RequestParam(required = false) final Long after) {
-
-        final Page<DimensionRevision> page = service.readRevisions(id, limit, after);
-        final DimensionRevision next = page.getNext();
-        final List<DimensionRevision> revisions = page.getElements();
-
-        final Link link = next == null ?
-                null :
-                new Link(linkTo(methodOn(DimensionResource.class)
-                        .getRevisions(id, limit, next.getRevision().getId())).toUri());
-
-        return new DimensionRevisionPage(link, revisions);
-    }
-
-    @RequestMapping(method = GET, path = "/{id}/revisions/{revision}")
-    public ResponseEntity<DimensionRevision> getRevision(@PathVariable final String id, @PathVariable final long revision) {
-        return ResponseEntity.ok(service.readRevision(id, revision));
-    }
 
     @RequestMapping(method = PATCH, path = "/{id}", consumes = {APPLICATION_JSON_VALUE, JSON_MERGE_PATCH_VALUE})
     public ResponseEntity<Dimension> update(@PathVariable final String id,
@@ -159,12 +136,6 @@ class DimensionResource implements Reserved {
     @ResponseStatus(NO_CONTENT)
     public void delete(@PathVariable final String id) {
         service.delete(id);
-    }
-
-    @RequestMapping(method = GET, path = "/revisions")
-    public Object getRevisions() {
-        // TODO implement
-        return Collections.emptyMap();
     }
 
 }

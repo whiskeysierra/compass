@@ -21,7 +21,7 @@ public interface Reserved {
             "/sort",
     })
     default void reserved(final HttpServletRequest request) throws HttpRequestMethodNotSupportedException {
-        throw new HttpRequestMethodNotSupportedException(request.getMethod());
+        throw new HttpRequestMethodNotSupportedException(request.getMethod(), "ID is reserved");
     }
 
 }
