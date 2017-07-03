@@ -7,7 +7,7 @@ import java.net.URI;
 
 @Getter
 @AllArgsConstructor
-public class Link {
+class Link {
 
     URI href;
 

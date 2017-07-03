@@ -1,0 +1,23 @@
+{
+  "latest-version": "http://localhost:8080/keys",
+  "predecessor-version": "http://localhost:8080/keys/revisions/1",
+  "revision":{
+    "id": 2,
+    "timestamp": "2017-07-02T01:42:11Z",
+    "type": "update",
+    "user": "anonymous",
+    "comment": ".."
+  },
+  "keys": [
+    {
+      "id": "tax-rate",
+      "schema": {
+        "type": "number",
+        "format": "decimal",
+        "minimum": 0.0,
+        "maximum": 1.0
+      },
+      "description": "The sales tax rate expressed as a factor."
+    }
+  ]
+}

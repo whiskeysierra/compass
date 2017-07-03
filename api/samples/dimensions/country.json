@@ -1,5 +1,6 @@
 {
   "id": "country",
+  "version-history": "http://localhost:8080/dimensions/country/revisions",
   "schema": {
     "type": "string",
     "pattern": "^[A-Z]{2}$"

@@ -1,0 +1,17 @@
+{
+  "id": "tax-rate",
+  "latest-version": "http://localhost:8080/keys/tax-rate",
+  "successor-version": "http://localhost:8080/keys/tax-rate/revisions/2",
+  "revision": {
+    "id": 1,
+    "timestamp": "2017-07-02T01:35:17Z",
+    "type": "create",
+    "user": "anonymous",
+    "comment": ".."
+  },
+  "schema": {
+    "type": "number",
+    "format": "decimal"
+  },
+  "description": "The sales tax rate expressed as a factor."
+}

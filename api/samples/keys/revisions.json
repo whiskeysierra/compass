@@ -1,36 +1,28 @@
 {
-  "keys": [
+  "revisions": [
     {
-      "id": "tax-rate",
-      "revision": {
-        "id": 2,
-        "timestamp": "2017-07-02T01:42:11Z",
-        "type": "update",
-        "user": "anonymous",
-        "comment": ".."
-      },
-      "schema": {
-        "type": "number",
-        "format": "decimal",
-        "minimum": 0.0,
-        "maximum": 1.0
-      },
-      "description": "The sales tax rate expressed as a factor."
+      "id": 3,
+      "timestamp": "2017-07-03T00:47:32Z",
+      "href": "http://localhost:8080/keys/revisions/3",
+      "type": "update",
+      "user": "anonymous",
+      "comment": ".."
     },
     {
-      "id": "tax-rate",
-      "revision": {
-        "id": 1,
-        "timestamp": "2017-07-02T01:35:17Z",
-        "type": "create",
-        "user": "anonymous",
-        "comment": ".."
-      },
-      "schema": {
-        "type": "number",
-        "format": "decimal"
-      },
-      "description": "The sales tax rate expressed as a factor."
+      "id": 2,
+      "timestamp": "2017-07-02T01:42:11Z",
+      "href": "http://localhost:8080/keys/revisions/2",
+      "type": "update",
+      "user": "anonymous",
+      "comment": ".."
+    },
+    {
+      "id": 1,
+      "timestamp": "2017-07-02T01:35:17Z",
+      "href": "http://localhost:8080/keys/revisions/1",
+      "type": "update",
+      "user": "anonymous",
+      "comment": ".."
     }
   ]
 }

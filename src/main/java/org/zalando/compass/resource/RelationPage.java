@@ -8,7 +8,7 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-final class RelationPage {
+class RelationPage {
 
     private final List<Relation> relations;
 

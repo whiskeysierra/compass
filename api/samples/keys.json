@@ -1,4 +1,5 @@
 {
+  "version-history": "http://localhost:8080/keys/revisions",
   "keys": [
     {
       "id": "tax-rate",

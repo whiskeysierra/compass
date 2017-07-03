@@ -1,5 +1,13 @@
 {
-  "version-history": "http://localhost:8080/dimensions/revisions",
+  "latest-version": "http://localhost:8080/dimensions",
+  "predecessor-version": "http://localhost:8080/dimensions/revisions/2",
+  "revision":{
+    "id": 3,
+    "timestamp": "2017-07-03T00:47:32Z",
+    "type": "update",
+    "user": "anonymous",
+    "comment": ".."
+  },
   "dimensions": [
     {
       "id": "before",

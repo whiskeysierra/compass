@@ -1,0 +1,18 @@
+{
+  "id": "country",
+  "latest-version": "http://localhost:8080/dimensions/country",
+  "successor-version": "http://localhost:8080/dimensions/country/revisions/2",
+  "revision": {
+    "id": 1,
+    "timestamp": "2017-07-02T01:35:17Z",
+    "type": "create",
+    "user": "anonymous",
+    "comment": ".."
+  },
+  "schema": {
+    "type": "string",
+    "pattern": "^[A-Z]{2}$"
+  },
+  "relation": "=",
+  "description": ".."
+}

@@ -8,7 +8,7 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-final class ValuePage {
+class ValuePage {
 
     private final List<Value> values;
 

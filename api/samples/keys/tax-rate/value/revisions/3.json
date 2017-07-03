@@ -1,0 +1,8 @@
+{
+  "dimensions": {
+    "country": "DE"
+  },
+  "latest-version": "http://localhost:8080/keys/tax-rate/value?country=DE",
+  "predecessor-version": "http://localhost:8080/keys/tax-rate/value/revisions/2?country=DE",
+  "value": 0.19
+}

@@ -2,5 +2,6 @@
   "dimensions": {
     "country": "DE"
   },
+  "version-history": "http://localhost:8080/keys/tax-rate/value/revisions?country=DE",
   "value": 0.19
 }

@@ -1,5 +1,6 @@
 {
-  "version-history": "http://localhost:8080/keys/tax-rate/values/revisions",
+  "latest-version": "http://localhost:8080/keys/tax-rate/values",
+  "successor-version": "http://localhost:8080/keys/tax-rate/values/revisions/2",
   "values": [
     {
       "dimensions": {
@@ -30,7 +31,7 @@
       "dimensions": {
         "country": "DE"
       },
-      "value": 0.19
+      "value": 0.16
     }
   ]
 }

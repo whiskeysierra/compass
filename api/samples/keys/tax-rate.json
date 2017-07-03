@@ -1,5 +1,6 @@
 {
   "id": "tax-rate",
+  "version-history": "http://localhost:8080/keys/tax-rate/revisions",
   "schema": {
     "type": "number",
     "format": "decimal",

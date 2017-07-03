@@ -23,14 +23,16 @@ class WebConfiguration extends WebMvcConfigurerAdapter {
     }
 
     @Bean
-    public HttpMessageConverters messageConverters(final ObjectMapper mapper, final StringHttpMessageConverter textConverter) {
-        return new HttpMessageConverters(false, asList(textConverter, jsonConverter(mapper)));
-    }
-
-    private MappingJackson2HttpMessageConverter jsonConverter(final ObjectMapper mapper) {
+    public MappingJackson2HttpMessageConverter jsonConverter(final ObjectMapper mapper) {
         final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
         converter.setDefaultCharset(null);
         return converter;
+    }
+
+    @Bean
+    public HttpMessageConverters messageConverters(final StringHttpMessageConverter textConverter,
+            final MappingJackson2HttpMessageConverter jsonConverter) {
+        return new HttpMessageConverters(false, asList(textConverter, jsonConverter));
     }
 
 }

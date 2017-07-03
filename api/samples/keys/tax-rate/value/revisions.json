@@ -1,43 +1,28 @@
 {
   "revisions": [
     {
-      "dimensions": {
-        "country": "DE"
-      },
-      "revision": {
-        "id": 3,
-        "timestamp": "2017-07-02T01:35:17Z",
-        "type": "delete",
-        "user": "anonymous",
-        "comment": ".."
-      },
-      "value": 0.19
+      "id": 3,
+      "timestamp": "2017-07-02T01:35:17Z",
+      "href": "http://localhost:8080/keys/tax-rate/value/revisions/3?country=DE",
+      "type": "delete",
+      "user": "anonymous",
+      "comment": ".."
     },
     {
-      "dimensions": {
-        "country": "DE"
-      },
-      "revision": {
-        "id": 2,
-        "timestamp": "2017-06-30T17:58:55Z",
-        "type": "update",
-        "user": "anonymous",
-        "comment": ".."
-      },
-      "value": 0.19
+      "id": 2,
+      "timestamp": "2017-06-30T17:58:55Z",
+      "href": "http://localhost:8080/keys/tax-rate/value/revisions/2?country=DE",
+      "type": "update",
+      "user": "anonymous",
+      "comment": ".."
     },
     {
-      "dimensions": {
-        "country": "DE"
-      },
-      "revision": {
-        "id": 1,
-        "timestamp": "2017-06-30T15:32:01Z",
-        "type": "create",
-        "user": "anonymous",
-        "comment": ".."
-      },
-      "value": 0.16
+      "id": 1,
+      "timestamp": "2017-06-30T15:32:01Z",
+      "href": "http://localhost:8080/keys/tax-rate/value/revisions/1?country=DE",
+      "type": "create",
+      "user": "anonymous",
+      "comment": ".."
     }
   ]
 }

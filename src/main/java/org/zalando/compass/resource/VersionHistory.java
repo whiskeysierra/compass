@@ -7,7 +7,7 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-final class VersionHistory<T> {
+class VersionHistory<T> {
 
     Link next;
     List<T> revisions;

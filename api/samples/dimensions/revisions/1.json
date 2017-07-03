@@ -1,0 +1,39 @@
+{
+  "latest-version": "http://localhost:8080/dimensions",
+  "successor-version": "http://localhost:8080/dimensions/revisions/2",
+  "revision": {
+    "id": 1,
+    "timestamp": "2017-07-02T01:35:17Z",
+    "type": "update",
+    "user": "anonymous",
+    "comment": ".."
+  },
+  "dimensions": [
+    {
+      "id": "country",
+      "schema": {
+        "type": "string"
+      },
+      "relation": "=",
+      "description": ".."
+    },
+    {
+      "id": "before",
+      "schema": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "relation": "<",
+      "description": ".."
+    },
+    {
+      "id": "after",
+      "schema": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "relation": ">",
+      "description": ".."
+    }
+  ]
+}
