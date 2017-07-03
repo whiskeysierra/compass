@@ -11,7 +11,6 @@ import org.zalando.compass.domain.persistence.model.enums.RevisionType;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Optional;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static org.zalando.compass.domain.persistence.model.Tables.DIMENSION_REVISION;
@@ -64,17 +63,6 @@ public class DimensionRevisionRepository {
         } else {
             return new Page<>(revisions, null);
         }
-    }
-
-    public Optional<DimensionRevision> find(final String id, final long revision) {
-        return db.select(DIMENSION_REVISION.fields())
-                .select(REVISION.fields())
-                .from(DIMENSION_REVISION)
-                .join(REVISION).on(REVISION.ID.eq(DIMENSION_REVISION.REVISION))
-                .where(DIMENSION_REVISION.ID.eq(id))
-                .and(REVISION.ID.eq(revision))
-                .fetchOptional()
-                .map(this::mapRevision);
     }
 
     private DimensionRevision mapRevision(final Record record) {

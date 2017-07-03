@@ -17,8 +17,6 @@ public interface DimensionService {
 
     Page<DimensionRevision> readRevisions(String id, int limit, @Nullable Long after);
 
-    DimensionRevision readRevision(String id, long revision);
-
     void delete(String id);
 
 }

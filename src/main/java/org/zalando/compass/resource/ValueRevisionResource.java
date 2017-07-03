@@ -28,22 +28,14 @@ class ValueRevisionResource {
         this.service = service;
     }
 
+    // TODO /values/revisions
+
     @RequestMapping(method = GET, path = "/value/revisions")
-    public ValueRevisionPage getRevisions(@PathVariable final String key,
+    public ResponseEntity<ValueRevisionPage> getRevisions(@PathVariable final String key,
             @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = parser.parse(query);
         final List<ValueRevision> revisions = service.readRevisions(key, filter);
-        return new ValueRevisionPage(revisions);
+        return ResponseEntity.ok(new ValueRevisionPage(revisions));
     }
-
-    @RequestMapping(method = GET, path = "/value/revisions/{revision}")
-    public ResponseEntity<ValueRevision> getRevision(@PathVariable final String key, @PathVariable final long revision,
-            @RequestParam final Map<String, String> query) {
-        final Map<String, JsonNode> filter = parser.parse(query);
-        return ResponseEntity.ok(service.readRevision(key, filter, revision));
-    }
-
-    // TODO /values/revisions
-    // TODO /values/revisions/{revision}
 
 }

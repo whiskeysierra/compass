@@ -19,9 +19,7 @@ import org.zalando.compass.domain.persistence.model.tables.records.ValueRevision
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-import static com.google.common.collect.MoreCollectors.toOptional;
 import static java.util.stream.Collectors.toList;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.notExists;
@@ -97,25 +95,6 @@ public class ValueRevisionRepository {
                 .entrySet().stream()
                 .map(this::mapRevision)
                 .collect(toList());
-    }
-
-    public Optional<ValueRevision> find(final String key, final Map<String, JsonNode> dimensions, final long revision) {
-        return db.select(VALUE_REVISION.fields())
-                .select(REVISION.fields())
-                .select(VALUE_DIMENSION_REVISION.fields())
-                .from(VALUE_REVISION)
-                .join(REVISION)
-                .on(REVISION.ID.eq(VALUE_REVISION.REVISION))
-                .leftJoin(VALUE_DIMENSION_REVISION)
-                .on(VALUE_DIMENSION_REVISION.VALUE_ID.eq(VALUE_REVISION.ID))
-                .and(VALUE_DIMENSION_REVISION.VALUE_REVISION.eq(VALUE_REVISION.REVISION))
-                .where(VALUE_REVISION.KEY_ID.eq(key))
-                .and(exactMatch(dimensions))
-                .and(VALUE_REVISION.REVISION.eq(revision))
-                .fetchGroups(this::group, ValueDimensionRevisionRecord.class)
-                .entrySet().stream()
-                .map(this::mapRevision)
-                .collect(toOptional());
     }
 
     private Condition exactMatch(final Map<String, JsonNode> dimensions) {

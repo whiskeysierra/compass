@@ -46,11 +46,6 @@ class DefaultDimensionService implements DimensionService {
         return read.readRevisions(id, limit, after);
     }
 
-    @Override
-    public DimensionRevision readRevision(final String id, final long revision) {
-        return read.readRevision(id, revision);
-    }
-
     @Transactional
     @Override
     public void delete(final String id) {

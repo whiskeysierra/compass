@@ -113,12 +113,9 @@ class ValueResource {
                 throw e;
             }
 
-            // TODO getOnlyElement
-            final long revision = revisions.get(0).getRevision().getId();
-
             return ResponseEntity
                     .status(GONE)
-                    .location(linkTo(methodOn(ValueRevisionResource.class).getRevision(key, revision, render(filter))).toUri())
+                    .location(linkTo(methodOn(ValueRevisionResource.class).getRevisions(key, render(filter))).toUri())
                     .build();
         }
     }

@@ -22,21 +22,10 @@ Feature: Key history
       | "device" | 3            | "delete"       | "anonymous"    | ".."              | "string"     | "Client Device Identifier" |
       | "device" | 2            | "update"       | "anonymous"    | ".."              | "string"     | "Client Device Identifier" |
 
-  Scenario: Read key revision
-    Then "GET /keys/device/revisions/1" responds successfully with:
-      | /id      | /revision/id | /revision/type | /revision/user | /revision/comment | /schema/type | /description |
-      | "device" | 1            | "create"       | "anonymous"    | ".."              | "string"     | ".."         |
-    And "GET /keys/device/revisions/2" responds successfully with:
-      | /id      | /revision/id | /revision/type | /revision/user | /revision/comment | /schema/type | /description               |
-      | "device" | 2            | "update"       | "anonymous"    | ".."              | "string"     | "Client Device Identifier" |
-    And "GET /keys/device/revisions/3" responds successfully with:
-      | /id      | /revision/id | /revision/type | /revision/user | /revision/comment | /schema/type | /description               |
-      | "device" | 3            | "delete"       | "anonymous"    | ".."              | "string"     | "Client Device Identifier" |
-
   Scenario: Read deleted key
     Then "GET /keys/device" responds "410 Gone" with headers:
-      | Location                                      |
-      | http://localhost:8080/keys/device/revisions/3 |
+      | Location                                    |
+      | http://localhost:8080/keys/device/revisions |
 
   Scenario: Access all key revisions
     Then "GET /keys/revisions" responds successfully

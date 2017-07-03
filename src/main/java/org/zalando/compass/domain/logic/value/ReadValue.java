@@ -61,8 +61,4 @@ class ReadValue {
         return revisionRepository.findAll(key, filter);
     }
 
-    public ValueRevision readRevision(final String key, final Map<String, JsonNode> filter, final long revision) {
-        return revisionRepository.find(key, filter, revision)
-                .orElseThrow(NotFoundException::new);
-    }
 }

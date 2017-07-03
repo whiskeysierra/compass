@@ -1,7 +1,6 @@
 package org.zalando.compass.resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,6 +13,7 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -31,8 +31,11 @@ class KeyRevisionResource {
 
     @RequestMapping(method = GET, path = "/{id}/revisions")
     public KeyRevisionPage getRevisions(@PathVariable final String id,
-            @RequestParam(required = false, defaultValue = "25") final int limit,
+            @Nullable@RequestParam(required = false, defaultValue = "25") final Integer limit,
             @Nullable @RequestParam(required = false) final Long after) {
+
+        // can actually never happen, just to satisfy IDEA
+        checkNotNull(limit, "Limit required");
 
         final Page<KeyRevision> page = service.readRevisions(id, limit, after);
         final KeyRevision next = page.getNext();
@@ -46,17 +49,10 @@ class KeyRevisionResource {
         return new KeyRevisionPage(link, revisions);
     }
 
-    @RequestMapping(method = GET, path = "/{id}/revisions/{revision}")
-    public ResponseEntity<KeyRevision> getRevision(@PathVariable final String id, @PathVariable final long revision) {
-        return ResponseEntity.ok(service.readRevision(id, revision));
-    }
-
     @RequestMapping(method = GET, path = "/revisions")
     public Object getRevisions() {
         // TODO implement
         return Collections.emptyMap();
     }
-
-    // TODO "/revisions/{revision}
 
 }

@@ -19,8 +19,6 @@ public interface ValueService {
 
     List<ValueRevision> readRevisions(String key, Map<String, JsonNode> filter);
 
-    ValueRevision readRevision(String key, Map<String, JsonNode> filter, long revision);
-
     void delete(String key, Map<String, JsonNode> filter);
 
 }

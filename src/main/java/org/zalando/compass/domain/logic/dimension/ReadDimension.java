@@ -37,8 +37,4 @@ class ReadDimension {
         return revisionRepository.findAll(id, limit, after);
     }
 
-    public DimensionRevision readRevision(final String id, final long revision) {
-        return revisionRepository.find(id, revision).orElseThrow(NotFoundException::new);
-    }
-
 }

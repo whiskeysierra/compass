@@ -22,21 +22,10 @@ Feature: Dimension history
       | "device" | 3            | "delete"       | "anonymous"    | ".."              | "string"     | "~"       | "Client Device Identifier" |
       | "device" | 2            | "update"       | "anonymous"    | ".."              | "string"     | "~"       | "Client Device Identifier" |
 
-  Scenario: Read dimension revision
-    Then "GET /dimensions/device/revisions/1" responds successfully with:
-      | /id      | /revision/id | /revision/type | /revision/user | /revision/comment | /schema/type | /relation | /description |
-      | "device" | 1            | "create"       | "anonymous"    | ".."              | "string"     | "="       | ".."         |
-    And "GET /dimensions/device/revisions/2" responds successfully with:
-      | /id      | /revision/id | /revision/type | /revision/user | /revision/comment | /schema/type | /relation | /description               |
-      | "device" | 2            | "update"       | "anonymous"    | ".."              | "string"     | "~"       | "Client Device Identifier" |
-    And "GET /dimensions/device/revisions/3" responds successfully with:
-      | /id      | /revision/id | /revision/type | /revision/user | /revision/comment | /schema/type | /relation | /description               |
-      | "device" | 3            | "delete"       | "anonymous"    | ".."              | "string"     | "~"       | "Client Device Identifier" |
-
   Scenario: Read deleted dimension
     Then "GET /dimensions/device" responds "410 Gone" with headers:
-      | Location                                            |
-      | http://localhost:8080/dimensions/device/revisions/3 |
+      | Location                                          |
+      | http://localhost:8080/dimensions/device/revisions |
 
   Scenario: Access all dimension revisions
     Then "GET /dimensions/revisions" responds successfully

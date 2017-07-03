@@ -4,7 +4,6 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.KeyRevision;
 import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.model.Revision;
@@ -12,7 +11,6 @@ import org.zalando.compass.domain.persistence.model.enums.RevisionType;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Optional;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static org.zalando.compass.domain.persistence.model.Tables.KEY_REVISION;
@@ -63,17 +61,6 @@ public class KeyRevisionRepository {
         } else {
             return new Page<>(revisions, null);
         }
-    }
-
-    public Optional<KeyRevision> find(final String id, final long revision) {
-        return db.select(KEY_REVISION.fields())
-                .select(REVISION.fields())
-                .from(KEY_REVISION)
-                .join(REVISION).on(REVISION.ID.eq(KEY_REVISION.REVISION))
-                .where(KEY_REVISION.ID.eq(id))
-                .and(REVISION.ID.eq(revision))
-                .fetchOptional()
-                .map(this::mapRevision);
     }
 
     private KeyRevision mapRevision(final Record record) {
