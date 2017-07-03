@@ -2,14 +2,14 @@ package org.zalando.compass.resource;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.zalando.compass.domain.model.ValueRevision;
 
 import java.util.List;
 
 @Getter
 @AllArgsConstructor
-final class ValueRevisionPage {
+final class VersionHistory<T> {
 
-    private final List<ValueRevision> values;
+    Link next;
+    List<T> revisions;
 
 }

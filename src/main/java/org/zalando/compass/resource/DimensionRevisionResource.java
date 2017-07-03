@@ -1,6 +1,7 @@
 package org.zalando.compass.resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,7 +31,7 @@ class DimensionRevisionResource {
     }
 
     @RequestMapping(method = GET, path = "/{id}/revisions")
-    public DimensionRevisionPage getRevisions(@PathVariable final String id,
+    public ResponseEntity<VersionHistory<DimensionRevision>> getRevisions(@PathVariable final String id,
             @Nullable @RequestParam(required = false, defaultValue = "25") final Integer limit,
             @Nullable @RequestParam(required = false) final Long after) {
 
@@ -46,7 +47,7 @@ class DimensionRevisionResource {
                 new Link(linkTo(methodOn(DimensionRevisionResource.class)
                         .getRevisions(id, limit, next.getRevision().getId())).toUri());
 
-        return new DimensionRevisionPage(link, revisions);
+        return ResponseEntity.ok(new VersionHistory<>(link, revisions));
     }
 
     @RequestMapping(method = GET, path = "/revisions")

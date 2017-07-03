@@ -24,7 +24,7 @@ Feature: Value history
       | "AT"                | 0.2    |
       | "CH"                | 0.08   |
       | "FR"                | 0.2    |
-    Then "GET /keys/tax-rate/value/revisions?country=DE" responds successfully with an array at "/values":
+    Then "GET /keys/tax-rate/value/revisions?country=DE" responds successfully with an array at "/revisions":
       | /dimensions/country | /revision/id | /revision/type | /revision/user | /revision/comment | /value |
       | "DE"                | 5            | "delete"       | "anonymous"    | ".."              | 0.19   |
       | "DE"                | 4            | "update"       | "anonymous"    | ".."              | 0.19   |
@@ -42,7 +42,7 @@ Feature: Value history
       | /value |
       | 0.19   |
     And "DELETE /keys/tax-rate/values?country=DE" responds successfully
-    Then "GET /keys/tax-rate/value/revisions?country=DE" responds successfully with an array at "/values":
+    Then "GET /keys/tax-rate/value/revisions?country=DE" responds successfully with an array at "/revisions":
       | /dimensions/country | /revision/id | /revision/type | /revision/user | /revision/comment | /value |
       | "DE"                | 7            | "delete"       | "anonymous"    | ".."              | 0.19   |
       | "DE"                | 6            | "create"       | "anonymous"    | ".."              | 0.19   |
@@ -69,7 +69,7 @@ Feature: Value history
       | /value |
       | 0.19   |
     And "DELETE /keys/tax-rate/values" responds successfully
-    Then "GET /keys/tax-rate/value/revisions" responds successfully with an array at "/values":
+    Then "GET /keys/tax-rate/value/revisions" responds successfully with an array at "/revisions":
       | /revision/id | /revision/type | /revision/user | /revision/comment | /value |
       | 5            | "delete"       | "anonymous"    | ".."              | 0.19   |
       | 4            | "update"       | "anonymous"    | ".."              | 0.19   |
@@ -82,6 +82,6 @@ Feature: Value history
     When "PUT /keys/tax-rate/value?country=DE&after=2007-01-01T00:00:00Z" responds successfully when requested with:
       | /value |
       | 0.19   |
-    Then "GET /keys/tax-rate/value/revisions?country=DE&after=2007-01-01T00:00:00Z" responds successfully with an array at "/values":
+    Then "GET /keys/tax-rate/value/revisions?country=DE&after=2007-01-01T00:00:00Z" responds successfully with an array at "/revisions":
       | /dimensions/country | /dimensions/after      | /revision/id | /revision/type | /revision/user | /revision/comment | /value |
       | "DE"                | "2007-01-01T00:00:00Z" | 4            | "create"       | "anonymous"    | ".."              | 0.19   |

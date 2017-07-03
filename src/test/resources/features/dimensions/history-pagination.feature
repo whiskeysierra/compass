@@ -13,7 +13,7 @@ Feature: Dimension revisions
     Then "GET /dimensions/device/revisions?limit=2" responds successfully with:
       | /next/href                                                          |
       | "http://localhost:8080/dimensions/device/revisions?limit=2&after=2" |
-    And "GET /dimensions/device/revisions?limit=2&after=2" responds successfully with an array at "/dimensions":
+    And "GET /dimensions/device/revisions?limit=2&after=2" responds successfully with an array at "/revisions":
       | /id      | /revision/id | /revision/type | /revision/user | /revision/comment | /schema/type | /relation | /description |
       | "device" | 1            | "create"       | "anonymous"    | ".."              | "string"     | "="       | ".."         |
     Then "GET /dimensions/device/revisions?limit=2&after=2" responds successfully with:

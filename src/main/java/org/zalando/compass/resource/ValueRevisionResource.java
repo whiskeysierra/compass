@@ -31,11 +31,11 @@ class ValueRevisionResource {
     // TODO /values/revisions
 
     @RequestMapping(method = GET, path = "/value/revisions")
-    public ResponseEntity<ValueRevisionPage> getRevisions(@PathVariable final String key,
+    public ResponseEntity<VersionHistory<ValueRevision>> getRevisions(@PathVariable final String key,
             @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = parser.parse(query);
         final List<ValueRevision> revisions = service.readRevisions(key, filter);
-        return ResponseEntity.ok(new ValueRevisionPage(revisions));
+        return ResponseEntity.ok(new VersionHistory<>(null, revisions));
     }
 
 }

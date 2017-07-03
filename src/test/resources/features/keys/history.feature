@@ -10,14 +10,14 @@ Feature: Key history
     And "DELETE /keys/device" responds successfully
 
   Scenario: Read key revisions
-    Then "GET /keys/device/revisions" responds successfully with an array at "/keys":
+    Then "GET /keys/device/revisions" responds successfully with an array at "/revisions":
       | /id      | /revision/id | /revision/type | /revision/user | /revision/comment | /schema/type | /description               |
       | "device" | 3            | "delete"       | "anonymous"    | ".."              | "string"     | "Client Device Identifier" |
       | "device" | 2            | "update"       | "anonymous"    | ".."              | "string"     | "Client Device Identifier" |
       | "device" | 1            | "create"       | "anonymous"    | ".."              | "string"     | ".."                       |
 
   Scenario: Read key revisions should support limit
-    Then "GET /keys/device/revisions?limit=2" responds successfully with an array at "/keys":
+    Then "GET /keys/device/revisions?limit=2" responds successfully with an array at "/revisions":
       | /id      | /revision/id | /revision/type | /revision/user | /revision/comment | /schema/type | /description               |
       | "device" | 3            | "delete"       | "anonymous"    | ".."              | "string"     | "Client Device Identifier" |
       | "device" | 2            | "update"       | "anonymous"    | ".."              | "string"     | "Client Device Identifier" |
