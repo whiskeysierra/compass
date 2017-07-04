@@ -1,6 +1,6 @@
-Feature: Reading keys
+Feature: Read keys
 
-  Scenario: List keys
+  Scenario: Read keys
     Given "PUT /keys/{id}" (using /id) always responds "201 Created" when requested individually with:
       | /id              | /schema/type | /schema/format | /description |
       | "feature.active" | "boolean"    |                | ".."         |
@@ -10,5 +10,5 @@ Feature: Reading keys
       | "feature.active" | "boolean"    |                | ".."         |
       | "tax-rate"       | "number"     | "double"       | ".."         |
 
-  Scenario: List empty keys
+  Scenario: Read empty keys
     Then "GET /keys" responds "200 OK" with an empty array at "/keys"

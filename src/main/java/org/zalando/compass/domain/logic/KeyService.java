@@ -17,6 +17,8 @@ public interface KeyService {
 
     Page<KeyRevision> readRevisions(String id, int limit, @Nullable Long after);
 
+    KeyRevision readRevision(String id, long revision);
+
     void delete(String id);
 
 }

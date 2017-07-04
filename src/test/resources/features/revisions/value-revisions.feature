@@ -66,7 +66,7 @@ Feature: Value history
       | 4            | "update"       | "anonymous"    | ".."              | 0.19   |
       | 3            | "create"       | "anonymous"    | ".."              | 0.16   |
 
-  Scenario: Read value revisions with multiple dimensions
+  Scenario: Read value revisions with dimensions
     Given "PUT /dimensions/after" responds "201 Created" when requested with:
       | /schema/type | /relation | /description |
       | "string"     | "="       | "ISO 8601"   |

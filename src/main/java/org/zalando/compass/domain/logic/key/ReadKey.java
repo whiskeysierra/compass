@@ -37,4 +37,8 @@ class ReadKey {
         return revisionRepository.findAll(id, limit, after);
     }
 
+    public KeyRevision readRevision(final String id, final long revision) {
+        return revisionRepository.find(id, revision).orElseThrow(NotFoundException::new);
+    }
+
 }

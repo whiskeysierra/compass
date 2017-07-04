@@ -52,6 +52,11 @@ class DefaultValueService implements ValueService {
         return read.readRevisions(key, filter);
     }
 
+    @Override
+    public ValueRevision readRevision(final String key, final Map<String, JsonNode> filter, final long revision) {
+        return read.readRevision(key, filter, revision);
+    }
+
     @Transactional
     @Override
     public void delete(final String key, final Map<String, JsonNode> filter) {

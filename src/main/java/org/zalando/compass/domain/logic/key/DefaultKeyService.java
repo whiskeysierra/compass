@@ -46,6 +46,11 @@ class DefaultKeyService implements KeyService {
         return read.readRevisions(id, limit, after);
     }
 
+    @Override
+    public KeyRevision readRevision(final String id, final long revision) {
+        return read.readRevision(id, revision);
+    }
+
     @Transactional
     @Override
     public void delete(final String id) {

@@ -17,6 +17,9 @@ spring:
   jooq:
     sql-dialect: postgres
 
+flyway.schemas:
+  - compass
+
 server:
   compression:
     enabled: true

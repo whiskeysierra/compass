@@ -51,8 +51,8 @@ class DimensionRevisionResource {
     }
 
     @RequestMapping(method = GET, path = "/{id}/revisions/{revision}")
-    public ResponseEntity<Void> getRevision(@PathVariable final String id, @PathVariable final long revision) {
-        return null;
+    public ResponseEntity<DimensionRevision> getRevision(@PathVariable final String id, @PathVariable final long revision) {
+        return ResponseEntity.ok(service.readRevision(id, revision));
     }
 
     @RequestMapping(method = GET, path = "/revisions")

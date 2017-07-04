@@ -1,6 +1,6 @@
-Feature: Reading dimensions
+Feature: Read dimensions
 
-  Scenario: List dimensions
+  Scenario: Read dimensions
     Given "PUT /dimensions/{id}" (using /id) always responds "201 Created" when requested individually with:
       | /id        | /schema/type | /schema/format | /relation | /description |
       | "device"   | "string"     |                | "="       | ".."         |
@@ -18,5 +18,5 @@ Feature: Reading dimensions
       | "language" | "string"     | "bcp47"        | "^"       | ".."         |
       | "location" | "string"     | "geohash"      | "^"       | ".."         |
 
-  Scenario: List empty dimensions
+  Scenario: Read empty dimensions
     Then "GET /dimensions" responds "200 OK" with an empty array at "/dimensions"

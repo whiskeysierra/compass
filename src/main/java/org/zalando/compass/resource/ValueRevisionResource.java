@@ -29,6 +29,7 @@ class ValueRevisionResource {
     }
 
     // TODO /values/revisions
+    // TODO /values/revisions/{revision}
 
     @RequestMapping(method = GET, path = "/value/revisions")
     public ResponseEntity<VersionHistory<ValueRevision>> getRevisions(@PathVariable final String key,
@@ -39,9 +40,10 @@ class ValueRevisionResource {
     }
 
     @RequestMapping(method = GET, path = "/value/revisions/{revision}")
-    public ResponseEntity<Void> getRevision(@PathVariable final String key, @PathVariable final long revision,
+    public ResponseEntity<ValueRevision> getRevision(@PathVariable final String key, @PathVariable final long revision,
             @RequestParam final Map<String, String> query) {
-        return null;
+        final Map<String, JsonNode> filter = parser.parse(query);
+        return ResponseEntity.ok(service.readRevision(key, filter, revision));
     }
 
 }
