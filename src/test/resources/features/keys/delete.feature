@@ -15,10 +15,10 @@ Feature: Key deletion
     Then "DELETE /keys/example" responds "404 Not Found"
 
   Scenario: Delete used key
-    Given "PUT /keys/tax-rate" responds successfully when requested with:
+    Given "PUT /keys/tax-rate" responds "201 Created" when requested with:
       | /schema/type | /description |
       | "number"     | ".."         |
-    And "PUT /keys/tax-rate/values" responds "200 OK" when requested with an array at "/values":
+    And "PUT /keys/tax-rate/values" responds "201 Created" when requested with an array at "/values":
       | /value |
       | 0.16   |
     Then "DELETE /keys/tax-rate" responds "204 No Content"

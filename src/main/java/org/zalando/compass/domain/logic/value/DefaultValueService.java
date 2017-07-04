@@ -33,8 +33,8 @@ class DefaultValueService implements ValueService {
 
     @Transactional
     @Override
-    public void replace(final String key, final List<Value> values) {
-        replace.replace(key, values);
+    public boolean replace(final String key, final List<Value> values) {
+        return replace.replace(key, values);
     }
 
     @Override

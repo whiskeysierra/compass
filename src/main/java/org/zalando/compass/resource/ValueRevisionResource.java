@@ -38,4 +38,10 @@ class ValueRevisionResource {
         return ResponseEntity.ok(new VersionHistory<>(null, revisions));
     }
 
+    @RequestMapping(method = GET, path = "/value/revisions/{revision}")
+    public ResponseEntity<Void> getRevision(@PathVariable final String key, @PathVariable final long revision,
+            @RequestParam final Map<String, String> query) {
+        return null;
+    }
+
 }

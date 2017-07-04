@@ -1,7 +1,7 @@
 Feature: Dimension update
 
   Scenario: Updating a dimension
-    Given "PUT /dimensions/version" responds successfully when requested with:
+    Given "PUT /dimensions/version" responds "201 Created" when requested with:
       | /schema/type | /relation | /description |
       | "string"     | "="       | ".."         |
     When "PUT /dimensions/version" when requested with:
@@ -15,7 +15,7 @@ Feature: Dimension update
       | "version" | "number"     | ">"       | "Lorem ipsum dolor sit amet" |
 
   Scenario: Update description alone
-    Given "PUT /dimensions/version" responds successfully when requested with:
+    Given "PUT /dimensions/version" responds "201 Created" when requested with:
       | /schema/type | /relation | /description |
       | "string"     | "="       | ".."         |
     When "PUT /dimensions/version" responds "200 OK" when requested with:
@@ -26,7 +26,7 @@ Feature: Dimension update
       | "version" | "string"     | "="       | "Lorem ipsum dolor sit amet" |
 
   Scenario: Updating a dimension failed due to id mismatch
-    Given "PUT /dimensions/device" responds successfully when requested with:
+    Given "PUT /dimensions/device" responds "201 Created" when requested with:
       | /schema/type | /relation | /description |
       | "string"     | "="       | ".."         |
     When "PUT /dimensions/device" responds "400 Bad Request" when requested with:
@@ -34,7 +34,7 @@ Feature: Dimension update
       | "bar" | "string"     | "="       | "Lorem ipsum dolor sit amet" |
 
   Scenario: Updating a dimension failed due to schema violation
-    Given "PUT /dimensions/device" responds successfully when requested with:
+    Given "PUT /dimensions/device" responds "201 Created" when requested with:
       | /schema/type | /relation | /description |
       | "string"     | "="       | ".."         |
     When "PUT /dimensions/device" when requested with:
@@ -48,13 +48,13 @@ Feature: Dimension update
       | "$.schema.type" | "$.schema.type: string found, array expected"                                                                     |
 
   Scenario: Update dimension with values
-    Given "PUT /dimensions/country" responds successfully when requested with:
+    Given "PUT /dimensions/country" responds "201 Created" when requested with:
       | /schema/type | /relation | /description |
       | "string"     | "<="      | "ISO 8601"   |
-    And "PUT /keys/tax-rate" responds successfully when requested with:
+    And "PUT /keys/tax-rate" responds "201 Created" when requested with:
       | /schema/type | /description |
       | "number"     | ".."         |
-    And "PUT /keys/tax-rate/values" responds "200 OK" when requested with an array at "/values":
+    And "PUT /keys/tax-rate/values" responds "201 Created" when requested with an array at "/values":
       | /dimensions/country | /value |
       | "AT"                | 0.2    |
       | "CH"                | 0.08   |
@@ -64,13 +64,13 @@ Feature: Dimension update
       | "string"     | "[A-Z]{2}"      | "="       | "ISO 3166-1 alpha-2" |
 
   Scenario: Updating a dimension's schema should fail if at least one value violates it
-    Given "PUT /dimensions/country" responds successfully when requested with:
+    Given "PUT /dimensions/country" responds "201 Created" when requested with:
       | /schema/type | /relation | /description |
       | "string"     | "<="      | "ISO 8601"   |
-    And "PUT /keys/tax-rate" responds successfully when requested with:
+    And "PUT /keys/tax-rate" responds "201 Created" when requested with:
       | /schema/type | /description |
       | "number"     | ".."         |
-    And "PUT /keys/tax-rate/values" responds "200 OK" when requested with an array at "/values":
+    And "PUT /keys/tax-rate/values" responds "201 Created" when requested with an array at "/values":
       | /dimensions/country | /value |
       | "AT"                | 0.2    |
       | "CH"                | 0.08   |

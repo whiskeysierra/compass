@@ -1,13 +1,13 @@
 Feature: Value update
 
   Background: Values
-    Given "PUT /dimensions/country" responds successfully when requested with:
+    Given "PUT /dimensions/country" responds "201 Created" when requested with:
       | /schema/type | /relation | /description         |
       | "string"     | "="       | "ISO 3166-1 alpha-2" |
-    And "PUT /keys/tax-rate" responds successfully when requested with:
+    And "PUT /keys/tax-rate" responds "201 Created" when requested with:
       | /schema/type | /description |
       | "number"     | ".."         |
-    And "PUT /keys/tax-rate/values" responds "200 OK" when requested with an array at "/values":
+    And "PUT /keys/tax-rate/values" responds "201 Created" when requested with an array at "/values":
       | /dimensions/country | /value |
       | "AT"                | 0.2    |
       | "CH"                | 0.08   |

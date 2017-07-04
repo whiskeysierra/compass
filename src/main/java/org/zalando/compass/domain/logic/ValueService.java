@@ -9,7 +9,7 @@ import java.util.Map;
 
 public interface ValueService {
 
-    void replace(String key, List<Value> values);
+    boolean replace(String key, List<Value> values);
 
     boolean replace(String key, Value value);
 

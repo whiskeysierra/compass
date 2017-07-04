@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatus.Series;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -22,6 +21,7 @@ import org.zalando.riptide.capture.Capture;
 import org.zuchini.runner.tables.Datatable;
 import org.zuchini.spring.ScenarioScoped;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
@@ -31,7 +31,6 @@ import java.util.concurrent.CompletableFuture;
 import static com.fasterxml.jackson.databind.node.JsonNodeFactory.instance;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static java.util.Collections.singletonList;
-import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -62,17 +61,17 @@ public class HttpSteps {
         this.rest = rest;
     }
 
-    @Given("^\"([A-Z]+) ([^ ]*)\" responds (?:(?:\"(\\d+) ([^\"]+)\")|successfully)$")
-    public void responds(final HttpMethod method, final String uri, @Nullable final String statusCode,
-            @Nullable final String reasonPhrase) throws IOException {
+    @Given("^\"([A-Z]+) ([^ ]*)\" responds \"(\\d+) ([^\"]+)\"$")
+    public void responds(final HttpMethod method, final String uri, final int statusCode,
+            final String reasonPhrase) throws IOException {
 
         final ResponseEntity<JsonNode> response = requestAsync(method, uri).join();
         verifyStatus(response, statusCode, reasonPhrase);
     }
 
-    @Given("^\"([A-Z]+) ([^ ]*)\" responds (?:(?:\"(\\d+) ([^\"]+)\")|successfully) with headers:$")
-    public void respondsWithHeaders(final HttpMethod method, final String uri, @Nullable final String statusCode,
-            @Nullable final String reasonPhrase, final Datatable expected) throws IOException {
+    @Given("^\"([A-Z]+) ([^ ]*)\" responds \"(\\d+) ([^\"]+)\" with headers:$")
+    public void respondsWithHeaders(final HttpMethod method, final String uri, final int statusCode,
+            final String reasonPhrase, final Datatable expected) throws IOException {
 
         final ResponseEntity<JsonNode> response = requestAsync(method, uri).join();
         verifyStatus(response, statusCode, reasonPhrase);
@@ -81,9 +80,9 @@ public class HttpSteps {
         assertThat(actual, matchesTable(expected));
     }
 
-    @Then("^\"([A-Z]+) ([^ ]*)\" responds (?:(?:\"(\\d+) ([^\"]+)\")|successfully) with(?: an array)?(?: at \"(.+)\")?:$")
-    public void repsondsWithAnArrayAt(final HttpMethod method, final String uri, @Nullable final String statusCode,
-            @Nullable final String reasonPhrase, @Nullable final String path, final Datatable expected)
+    @Then("^\"([A-Z]+) ([^ ]*)\" responds \"(\\d+) ([^\"]+)\" with(?: an array)?(?: at \"(.+)\")?:$")
+    public void repsondsWithAnArrayAt(final HttpMethod method, final String uri, final int statusCode,
+            final String reasonPhrase, @Nullable final String path, final Datatable expected)
             throws IOException {
 
         final ResponseEntity<JsonNode> response = requestAsync(method, uri).join();
@@ -93,9 +92,9 @@ public class HttpSteps {
         assertThat(actual, matchesTable(expected));
     }
 
-    @Then("^\"([A-Z]+) ([^ ]*)\" responds (?:(?:\"(\\d+) ([^\"]+)\")|successfully) with an empty array(?: at \"(.+)\")?$")
+    @Then("^\"([A-Z]+) ([^ ]*)\" responds \"(\\d+) ([^\"]+)\" with an empty array(?: at \"(.+)\")?$")
     public void respondsWithAnEmptyArrayAt(final HttpMethod method, final String uri,
-            @Nullable final String statusCode, @Nullable final String reasonPhrase, @Nullable final String path) {
+            final int statusCode, final String reasonPhrase, @Nullable final String path) {
         final ResponseEntity<JsonNode> response = requestAsync(method, uri).join();
 
         verifyStatus(response, statusCode, reasonPhrase);
@@ -107,9 +106,9 @@ public class HttpSteps {
         assertThat(array.size(), is(0));
     }
 
-    @When("^\"([A-Z]+) ([^ ]*)\" \\(using (.+)\\) always responds (?:(?:\"(\\d+) ([^\"]+)\")|successfully) when requested individually with:$")
+    @When("^\"([A-Z]+) ([^ ]*)\" \\(using (.+)\\) always responds \"(\\d+) ([^\"]+)\" when requested individually with:$")
     public void usingAlwaysReturnsWhenRequestedIndividuallyWith(final HttpMethod method, final String uriTemplate,
-            final String path, @Nullable final String statusCode, @Nullable final String reasonPhrase,
+            final String path, final int statusCode, final String reasonPhrase,
             final Datatable table) throws IOException {
 
         mapper.map(table).stream()
@@ -118,11 +117,12 @@ public class HttpSteps {
                 .forEach(response -> verifyStatus(response, statusCode, reasonPhrase));
     }
 
-    @When("^\"([A-Z]+) ([^ ]*)\" (?:(responds) (?:(?:\"(\\d+) ([^\"]+)\")|successfully) )?when requested with(?: an (array))?(?: at \"(.*)\")?(?: as \"(.+)\")?:$")
+    @When("^\"([A-Z]+) ([^ ]*)\" (?:(responds) \"(\\d+) ([^\"]+)\" )?when requested with(?: an (array))?(?: at \"(.*)\")?(?: as \"(.+)\")?:$")
     public void respondsWhenRequestedWithAnArrayAtAs(
             final HttpMethod method, final String uri,
             @Nullable final String responds,
-            @Nullable final String statusCode, @Nullable final String reasonPhrase,
+            @Nullable final String statusCode,
+            @Nullable final String reasonPhrase,
             @Nullable final String type,
             @Nullable final String path,
             @Nullable final String contentType, final Datatable table) throws IOException {
@@ -141,7 +141,7 @@ public class HttpSteps {
             lastResponse = future;
         } else {
             final ResponseEntity<JsonNode> response = future.join();
-            verifyStatus(response, statusCode, reasonPhrase);
+            verifyStatus(response, Integer.parseInt(statusCode), reasonPhrase);
         }
     }
 
@@ -159,8 +159,8 @@ public class HttpSteps {
         }
     }
 
-    @Then("^(?:(?:\"(\\d+) ([^\"]+)\")|successfully) was responded with(?:(?: an array)? at \"(.+)\")?:$")
-    public void wasRespondedWithAnArrayAt(@Nullable final String statusCode, @Nullable final String reasonPhrase,
+    @Then("^\"(\\d+) ([^\"]+)\" was responded with(?:(?: an array)? at \"(.+)\")?:$")
+    public void wasRespondedWithAnArrayAt(final int statusCode, final String reasonPhrase,
             @Nullable final String path, final Datatable expected) throws IOException {
 
         final ResponseEntity<JsonNode> response = lastResponse.join();
@@ -170,8 +170,8 @@ public class HttpSteps {
         assertThat(actual, matchesTable(expected));
     }
 
-    @Then("^(?:(?:\"(\\d+) ([^\"]+)\")|successfully) was responded with headers:$")
-    public void wasReturnedWithHeaders(@Nullable final String statusCode, @Nullable final String reasonPhrase,
+    @Then("^\"(\\d+) ([^\"]+)\" was responded with headers:$")
+    public void wasReturnedWithHeaders(final int statusCode, final String reasonPhrase,
             final Datatable expected) {
 
         final ResponseEntity<JsonNode> response = lastResponse.join();
@@ -181,6 +181,7 @@ public class HttpSteps {
         assertThat(actual, matchesTable(expected));
     }
 
+    @CheckReturnValue
     private CompletableFuture<ResponseEntity<JsonNode>> requestAsync(final HttpMethod method, final String uri) {
         return requestAsync(rest.execute(method, uri), null);
     }
@@ -200,15 +201,11 @@ public class HttpSteps {
                 .thenApply(capture);
     }
 
-    private void verifyStatus(final ResponseEntity<JsonNode> response, @Nullable final String statusCode,
-            @Nullable final String reasonPhrase) {
+    private void verifyStatus(final ResponseEntity<JsonNode> response, final int statusCode,
+            final String reasonPhrase) {
 
-        if (statusCode == null) {
-            assertThat(response.getStatusCode().series(), is(Series.SUCCESSFUL));
-        } else {
-            assertThat(response.getStatusCodeValue(), hasToString(statusCode));
-            assertThat(response.getStatusCode().getReasonPhrase(), is(reasonPhrase));
-        }
+        assertThat(response.getStatusCodeValue(), is(statusCode));
+        assertThat(response.getStatusCode().getReasonPhrase(), is(reasonPhrase));
     }
 
     private Datatable render(final HttpHeaders headers, final Datatable expected) {

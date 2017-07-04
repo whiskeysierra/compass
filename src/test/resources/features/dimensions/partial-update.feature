@@ -1,7 +1,7 @@
 Feature: Dimension partial update
 
   Scenario Outline: Partially updating a dimension (JSON Merge Patch)
-    Given "PUT /dimensions/version" responds successfully when requested with:
+    Given "PUT /dimensions/version" responds "201 Created" when requested with:
       | /schema/type | /relation | /description |
       | "string"     | "="       | ".."         |
     When "PATCH /dimensions/version" responds "200 OK" when requested with as "<content-type>":
@@ -16,7 +16,7 @@ Feature: Dimension partial update
       | application/merge-patch+json |
 
   Scenario: Partially updating a dimension (JSON Patch)
-    Given "PUT /dimensions/version" responds successfully when requested with:
+    Given "PUT /dimensions/version" responds "201 Created" when requested with:
       | /schema/type | /relation | /description |
       | "string"     | "="       | ".."         |
     When "PATCH /dimensions/version" responds "200 OK" when requested with an array as "application/json-patch+json":

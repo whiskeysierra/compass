@@ -1,7 +1,7 @@
 Feature: Key update
 
   Scenario: Updating a key
-    Given "PUT /keys/feature.active" responds successfully when requested with:
+    Given "PUT /keys/feature.active" responds "201 Created" when requested with:
       | /schema/type | /description |
       | "boolean"    | ".."         |
     When "PUT /keys/feature.active" when requested with:
@@ -15,7 +15,7 @@ Feature: Key update
       | "feature.active" | "string"     | ["mobile","desktop"] | "Lorem ipsum dolor sit amet" |
 
   Scenario: Update description alone
-    Given "PUT /keys/feature.active" responds successfully when requested with:
+    Given "PUT /keys/feature.active" responds "201 Created" when requested with:
       | /schema/type | /description |
       | "boolean"    | ".."         |
     When "PUT /keys/feature.active" responds "200 OK" when requested with:
@@ -26,18 +26,18 @@ Feature: Key update
       | "feature.active" | "boolean"    | "Lorem ipsum dolor sit amet" |
 
   Scenario: Updating a key with values
-    Given "PUT /keys/tax-rate" responds successfully when requested with:
+    Given "PUT /keys/tax-rate" responds "201 Created" when requested with:
       | /schema/type | /description |
       | "number"     | ".."         |
-    And "PUT /keys/tax-rate/value" responds successfully when requested with:
+    And "PUT /keys/tax-rate/value" responds "201 Created" when requested with:
       | /value |
       | 0.19   |
-    Then "PATCH /keys/tax-rate" responds successfully when requested with:
+    Then "PATCH /keys/tax-rate" responds "200 OK" when requested with:
       | /schema/minimum | /schema/maximum |
       | 0.0             | 1.0             |
 
   Scenario: Updating a key failed due to id mismatch
-    Given "PUT /keys/tax-rate" responds successfully when requested with:
+    Given "PUT /keys/tax-rate" responds "201 Created" when requested with:
       | /schema/type | /description |
       | "number"     | ".."         |
     When "PUT /keys/tax-rate" responds "400 Bad Request" when requested with:
@@ -45,7 +45,7 @@ Feature: Key update
       | "bar" | "number"     | "Lorem ipsum dolor sit amet" |
 
   Scenario: Updating a key failed due to schema violation
-    Given "PUT /keys/tax-rate" responds successfully when requested with:
+    Given "PUT /keys/tax-rate" responds "201 Created" when requested with:
       | /schema/type | /description |
       | "number"     | ".."         |
     When "PUT /keys/tax-rate" when requested with:
@@ -58,13 +58,13 @@ Feature: Key update
       | "$.schema.type" | "$.schema.type: string found, array expected"                                                                     |
 
   Scenario: Updating a dimension's schema should fail if at least one value violates it
-    Given "PUT /dimensions/country" responds successfully when requested with:
+    Given "PUT /dimensions/country" responds "201 Created" when requested with:
       | /schema/type | /relation | /description |
       | "string"     | "="       | ".."         |
-    And "PUT /keys/tax-rate" responds successfully when requested with:
+    And "PUT /keys/tax-rate" responds "201 Created" when requested with:
       | /schema/type | /description |
       | "number"     | ".."         |
-    And "PUT /keys/tax-rate/values" responds "200 OK" when requested with an array at "/values":
+    And "PUT /keys/tax-rate/values" responds "201 Created" when requested with an array at "/values":
       | /dimensions/country | /value |
       | "AT"                | 20     |
       | "CH"                | 8      |

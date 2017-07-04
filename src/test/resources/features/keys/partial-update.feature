@@ -1,7 +1,7 @@
 Feature: Key partial update
 
   Scenario Outline: Partially updating a key (JSON Merge Patch)
-    Given "PUT /keys/version" responds successfully when requested with:
+    Given "PUT /keys/version" responds "201 Created" when requested with:
       | /schema/type | /description |
       | "string"     | ".."         |
     When "PATCH /keys/version" responds "200 OK" when requested with as "<content-type>":
@@ -16,7 +16,7 @@ Feature: Key partial update
       | application/merge-patch+json |
 
   Scenario: Partially updating a key (JSON Patch)
-    Given "PUT /keys/version" responds successfully when requested with:
+    Given "PUT /keys/version" responds "201 Created" when requested with:
       | /schema/type | /description |
       | "string"     | ".."         |
     When "PATCH /keys/version" responds "200 OK" when requested with an array as "application/json-patch+json":

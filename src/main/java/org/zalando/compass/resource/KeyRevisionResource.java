@@ -50,6 +50,11 @@ class KeyRevisionResource {
         return ResponseEntity.ok(new VersionHistory<>(link, revisions));
     }
 
+    @RequestMapping(method = GET, path = "/{id}/revisions/{revision}")
+    public ResponseEntity<Void> getRevision(@PathVariable final String id, @PathVariable final long revision) {
+        return null;
+    }
+
     @RequestMapping(method = GET, path = "/revisions")
     public Object getRevisions() {
         // TODO implement

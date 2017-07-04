@@ -5,7 +5,7 @@ Feature: Value update
       | /id       | /schema/type | /relation | /description         |
       | "country" | "string"     | "="       | "ISO 3166-1 alpha-2" |
       | "before"  | "string"     | "<"       | "ISO 8601"           |
-    And "PUT /keys/tax-rate" responds successfully when requested with:
+    And "PUT /keys/tax-rate" responds "201 Created" when requested with:
       | /schema/type | /description |
       | "number"     | ".."         |
     And "PUT /keys/tax-rate/value?country=DE&before=2007-01-01T00:00:00Z" responds "201 Created" when requested with:

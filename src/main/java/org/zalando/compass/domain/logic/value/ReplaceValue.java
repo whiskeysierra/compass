@@ -69,7 +69,7 @@ class ReplaceValue {
         }
     }
 
-    void replace(final String key, final List<Value> values) {
+    boolean replace(final String key, final List<Value> values) {
         log.info("Replacing values of key [{}]", key);
 
         final ValuesLock lock = locking.lock(key, values);
@@ -101,6 +101,9 @@ class ReplaceValue {
         });
 
         log.info("Replaced values of key [{}] with [{}]", key, after);
+
+        // TODO using Sets.difference/intersection would be nicer here...
+        return diff.stream().anyMatch(p -> p.getLeft() == null);
     }
 
     private List<Value> preserveIndex(final List<Value> values) {

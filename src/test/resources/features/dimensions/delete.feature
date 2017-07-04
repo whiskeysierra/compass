@@ -17,13 +17,13 @@ Feature: Dimension deletion
     Then "DELETE /dimensions/example" responds "404 Not Found"
 
   Scenario: Delete used dimension
-    Given "PUT /dimensions/before" responds successfully when requested with:
+    Given "PUT /dimensions/before" responds "201 Created" when requested with:
       | /schema/type | /relation | /description |
       | "string"     | "<="      | "ISO 8601"   |
-    Given "PUT /keys/tax-rate" responds successfully when requested with:
+    Given "PUT /keys/tax-rate" responds "201 Created" when requested with:
       | /schema/type | /description |
       | "number"     | ".."         |
-    And "PUT /keys/tax-rate/values" responds "200 OK" when requested with an array at "/values":
+    And "PUT /keys/tax-rate/values" responds "201 Created" when requested with an array at "/values":
       | /dimensions/before     | /value |
       | "2007-01-01T00:00:00Z" | 0.19   |
       |                        | 0.16   |

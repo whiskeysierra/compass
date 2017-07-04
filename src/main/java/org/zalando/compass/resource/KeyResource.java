@@ -100,7 +100,7 @@ class KeyResource implements Reserved {
 
             return ResponseEntity
                     .status(GONE)
-                    .location(linkTo(methodOn(KeyRevisionResource.class).getRevisions(id, null, null)).toUri())
+                    .location(linkTo(methodOn(KeyRevisionResource.class).getRevision(id, revision)).toUri())
                     .build();
         }
     }

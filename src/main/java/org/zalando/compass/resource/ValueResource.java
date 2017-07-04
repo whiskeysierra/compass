@@ -9,6 +9,7 @@ import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -65,14 +66,15 @@ class ValueResource {
     }
 
     @RequestMapping(method = PUT, path = "/values")
-    public ValuePage replaceAll(@PathVariable final String key, @RequestBody final JsonNode node) throws IOException {
+    public ResponseEntity<ValuePage> replaceAll(@PathVariable final String key, @RequestBody final JsonNode node) throws IOException {
         final List<Value> values = reader.read(node, ValuePage.class).getValues().stream()
                 .map(value -> value.withDimensions(firstNonNull(value.getDimensions(), ImmutableMap.of())))
                 .collect(toList());
 
-        service.replace(key, values);
+        final boolean created = service.replace(key, values);
 
-        return readAll(key, emptyMap());
+        return ResponseEntity.status(created ? CREATED : OK)
+                .body(readAll(key, emptyMap()));
     }
 
     @RequestMapping(method = PUT, path = "/value")
@@ -113,15 +115,18 @@ class ValueResource {
                 throw e;
             }
 
+            final Long revision = revisions.get(0).getRevision().getId();
+            final Map<String, String> sorted = render(filter);
+
             return ResponseEntity
                     .status(GONE)
-                    .location(linkTo(methodOn(ValueRevisionResource.class).getRevisions(key, render(filter))).toUri())
+                    .location(linkTo(methodOn(ValueRevisionResource.class).getRevision(key, revision, sorted)).toUri())
                     .build();
         }
     }
 
     @RequestMapping(method = PATCH, path = "/values", consumes = {APPLICATION_JSON_VALUE, JSON_PATCH_VALUE})
-    public ValuePage updateAll(@PathVariable final String key,
+    public ResponseEntity<ValuePage> updateAll(@PathVariable final String key,
             @RequestBody final ArrayNode patch) throws IOException, JsonPatchException {
 
         // TODO validate JsonPatch schema?

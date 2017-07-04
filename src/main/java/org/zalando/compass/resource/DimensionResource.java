@@ -96,9 +96,11 @@ class DimensionResource implements Reserved {
                 throw e;
             }
 
+            final long revision = getOnlyElement(revisions).getRevision().getId();
+
             return ResponseEntity
                     .status(GONE)
-                    .location(linkTo(methodOn(DimensionRevisionResource.class).getRevisions(id, null, null)).toUri())
+                    .location(linkTo(methodOn(DimensionRevisionResource.class).getRevision(id, revision)).toUri())
                     .build();
         }
     }
