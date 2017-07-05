@@ -80,7 +80,7 @@ class ReplaceDimension {
             return true;
         } else {
             if (changed(Dimension::getSchema, current, dimension)) {
-                validator.validate(dimension, values);
+                validator.check(dimension, values);
             }
 
             if (changed(Dimension::getRelation, current, dimension)) {

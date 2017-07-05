@@ -21,13 +21,13 @@ Feature: Content-Type
       | /relations/=                      |
       | /dimensions                       |
       | /dimensions/revisions             |
-      # TODO | /dimensions/revisions/1           |
+      | /dimensions/revisions/1           |
       | /dimensions/country               |
       | /dimensions/country/revisions     |
       | /dimensions/country/revisions/1   |
       | /keys                             |
       | /keys/revisions                   |
-      # TODO | /keys/revisions/2                 |
+      | /keys/revisions/2                 |
       | /keys/tax-rate                    |
       | /keys/tax-rate/revisions          |
       | /keys/tax-rate/revisions/2        |

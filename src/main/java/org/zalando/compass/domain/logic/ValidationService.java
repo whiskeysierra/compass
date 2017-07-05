@@ -34,14 +34,18 @@ public class ValidationService {
         throwIfNotEmpty(validator.check(relation.supports(), dimension.getSchema()));
     }
 
-    public void validate(final Dimension dimension, final Collection<Value> values) {
+    public void check(final Dimension dimension, final Collection<Value> values) {
         check(singleton(dimension), values);
     }
 
     public void check(final Collection<Dimension> dimensions, final Collection<Value> values) {
-        throwIfNotEmpty(values.stream()
+        throwIfNotEmpty(validate(dimensions, values));
+    }
+
+    private List<Violation> validate(final Collection<Dimension> dimensions, final Collection<Value> values) {
+        return values.stream()
                 .flatMap(value -> validate(dimensions, value).stream())
-                .collect(toList()));
+                .collect(toList());
     }
 
     public void check(final Collection<Dimension> dimensions, final Value value) {

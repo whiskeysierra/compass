@@ -12,6 +12,7 @@ public final class Revision {
 
         CREATE, UPDATE, DELETE;
 
+        // TODO can we do this with a custom serializer?
         @JsonValue // TODO move this closer to the web layer
         @Override
         public String toString() {
@@ -26,6 +27,7 @@ public final class Revision {
 
     LocalDateTime timestamp;
 
+    // TODO doesn't belong here
     @Wither
     Type type;
 

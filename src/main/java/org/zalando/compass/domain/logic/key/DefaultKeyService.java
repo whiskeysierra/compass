@@ -17,12 +17,15 @@ class DefaultKeyService implements KeyService {
 
     private final ReplaceKey replace;
     private final ReadKey read;
+    private final ReadKeyRevision readRevision;
     private final DeleteKey delete;
 
     @Autowired
-    DefaultKeyService(final ReplaceKey replace, final ReadKey read, final DeleteKey delete) {
+    DefaultKeyService(final ReplaceKey replace, final ReadKey read,
+            final ReadKeyRevision readRevision, final DeleteKey delete) {
         this.replace = replace;
         this.read = read;
+        this.readRevision = readRevision;
         this.delete = delete;
     }
 
@@ -39,12 +42,12 @@ class DefaultKeyService implements KeyService {
 
     @Override
     public Page<Revision> readRevisions(final int limit, @Nullable final Long after) {
-        return read.readRevisions(limit, after);
+        return readRevision.readAll(limit, after);
     }
 
     @Override
     public List<Key> readRevision(final long revision) {
-        return read.readRevision(revision);
+        return readRevision.read(revision);
     }
 
     @Override
@@ -54,12 +57,12 @@ class DefaultKeyService implements KeyService {
 
     @Override
     public Page<Revision> readRevisions(final String id, final int limit, @Nullable final Long after) {
-        return read.readRevisions(id, limit, after);
+        return readRevision.readAll(id, limit, after);
     }
 
     @Override
     public KeyRevision readRevision(final String id, final long revision) {
-        return read.readRevision(id, revision);
+        return readRevision.read(id, revision);
     }
 
     @Transactional

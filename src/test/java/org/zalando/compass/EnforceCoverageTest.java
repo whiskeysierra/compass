@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.zalando.compass.library.Changed;
 import org.zalando.compass.library.Enums;
 import org.zalando.compass.library.Maps;
+import org.zalando.compass.library.Pages;
 import org.zalando.compass.library.Tables;
 import org.zalando.compass.resource.MediaTypes;
 
@@ -33,6 +34,11 @@ public final class EnforceCoverageTest {
     @Test
     public void shouldUseMediaTypesConstructor() {
         new MediaTypes();
+    }
+
+    @Test
+    public void shouldUsePagesConstructor() {
+        new Pages();
     }
 
     @Test

@@ -17,12 +17,15 @@ class DefaultDimensionService implements DimensionService {
 
     private final ReplaceDimension replace;
     private final ReadDimension read;
+    private final ReadDimensionRevision readRevision;
     private final DeleteDimension delete;
 
     @Autowired
-    DefaultDimensionService(final ReplaceDimension replace, final ReadDimension read, final DeleteDimension delete) {
+    DefaultDimensionService(final ReplaceDimension replace, final ReadDimension read,
+            final ReadDimensionRevision readRevision, final DeleteDimension delete) {
         this.replace = replace;
         this.read = read;
+        this.readRevision = readRevision;
         this.delete = delete;
     }
 
@@ -43,23 +46,23 @@ class DefaultDimensionService implements DimensionService {
     }
 
     @Override
-    public Page<Revision> readRevisions(int limit, @Nullable Long after) {
-        return read.readRevisions(limit, after);
+    public Page<Revision> readRevisions(final int limit, @Nullable final Long after) {
+        return readRevision.readAll(limit, after);
     }
 
     @Override
-    public List<Dimension> readRevision(long revision) {
-        return read.readRevision(revision);
+    public List<Dimension> readRevision(final long revision) {
+        return readRevision.read(revision);
     }
 
     @Override
     public Page<Revision> readRevisions(final String id, final int limit, @Nullable final Long after) {
-        return read.readRevisions(id, limit, after);
+        return readRevision.readAll(id, limit, after);
     }
 
     @Override
     public DimensionRevision readRevision(final String id, final long revision) {
-        return read.readRevision(id, revision);
+        return readRevision.read(id, revision);
     }
 
     @Transactional

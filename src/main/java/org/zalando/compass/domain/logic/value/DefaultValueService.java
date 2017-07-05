@@ -17,12 +17,15 @@ class DefaultValueService implements ValueService {
 
     private final ReplaceValue replace;
     private final ReadValue read;
+    private final ReadValueRevision readRevision;
     private final DeleteValue delete;
 
     @Autowired
-    DefaultValueService(final ReplaceValue replace, final ReadValue read, final DeleteValue delete) {
+    DefaultValueService(final ReplaceValue replace, final ReadValue read,
+            final ReadValueRevision readRevision, final DeleteValue delete) {
         this.replace = replace;
         this.read = read;
+        this.readRevision = readRevision;
         this.delete = delete;
     }
 
@@ -50,12 +53,12 @@ class DefaultValueService implements ValueService {
 
     @Override
     public List<Revision> readRevisions(final String key, final Map<String, JsonNode> filter) {
-        return read.readRevisions(key, filter);
+        return readRevision.readAll(key, filter);
     }
 
     @Override
     public ValueRevision readRevision(final String key, final Map<String, JsonNode> filter, final long revision) {
-        return read.readRevision(key, filter, revision);
+        return readRevision.read(key, filter, revision);
     }
 
     @Transactional
