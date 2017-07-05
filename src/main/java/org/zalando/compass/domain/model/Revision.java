@@ -12,7 +12,7 @@ public final class Revision {
 
         CREATE, UPDATE, DELETE;
 
-        @JsonValue
+        @JsonValue // TODO move this closer to the web layer
         @Override
         public String toString() {
             return name().toLowerCase();
@@ -20,6 +20,7 @@ public final class Revision {
 
     }
 
+    // TODO long?
     @Wither
     Long id;
 

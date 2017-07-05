@@ -11,11 +11,11 @@ Feature: Key revisions
 
   Scenario: Read key revisions should paginate
     Then "GET /keys/device/revisions?limit=2" responds "200 OK" with:
-      | /next/href                                                    |
+      | /next                                                         |
       | "http://localhost:8080/keys/device/revisions?limit=2&after=2" |
     And "GET /keys/device/revisions?limit=2&after=2" responds "200 OK" with an array at "/revisions":
-      | /id      | /revision/id | /revision/type | /revision/user | /revision/comment | /schema/type | /description |
-      | "device" | 1            | "create"       | "anonymous"    | ".."              | "string"     | ".."         |
+      | /id | /type    | /user       | /comment |
+      | 1   | "create" | "anonymous" | ".."     |
     Then "GET /keys/device/revisions?limit=2&after=2" responds "200 OK" with:
-      | /next/href |
-      |            |
+      | /next |
+      |       |

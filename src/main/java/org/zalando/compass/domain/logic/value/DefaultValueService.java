@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.logic.ValueService;
+import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueRevision;
 
@@ -48,7 +49,7 @@ class DefaultValueService implements ValueService {
     }
 
     @Override
-    public List<ValueRevision> readRevisions(final String key, final Map<String, JsonNode> filter) {
+    public List<Revision> readRevisions(final String key, final Map<String, JsonNode> filter) {
         return read.readRevisions(key, filter);
     }
 

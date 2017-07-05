@@ -23,6 +23,7 @@ import java.util.Optional;
 
 import static com.google.common.collect.MoreCollectors.toOptional;
 import static java.util.stream.Collectors.toList;
+import static org.jooq.impl.DSL.exists;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.notExists;
 import static org.jooq.impl.DSL.select;
@@ -80,23 +81,21 @@ public class ValueRevisionRepository {
         db.batch(queries).execute();
     }
 
-    public List<ValueRevision> findAll(final String key, final Map<String, JsonNode> dimensions) {
-        return db.select(VALUE_REVISION.fields())
-                .select(REVISION.fields())
-                .select(VALUE_DIMENSION_REVISION.fields())
-                .from(VALUE_REVISION)
-                .join(REVISION)
-                .on(REVISION.ID.eq(VALUE_REVISION.REVISION))
-                .leftJoin(VALUE_DIMENSION_REVISION)
-                .on(VALUE_DIMENSION_REVISION.VALUE_ID.eq(VALUE_REVISION.ID))
-                .and(VALUE_DIMENSION_REVISION.VALUE_REVISION.eq(VALUE_REVISION.REVISION))
+    public List<Revision> findAll(final String key, final Map<String, JsonNode> dimensions) {
+        return db.select(REVISION.fields())
+                .select(VALUE_REVISION.REVISION_TYPE)
+                .from(REVISION)
+                .join(VALUE_REVISION).on(VALUE_REVISION.REVISION.eq(REVISION.ID))
                 .where(VALUE_REVISION.KEY_ID.eq(key))
                 .and(exactMatch(dimensions))
                 .orderBy(REVISION.ID.desc())
-                .fetchGroups(this::group, ValueDimensionRevisionRecord.class)
-                .entrySet().stream()
-                .map(this::mapRevision)
-                .collect(toList());
+                .fetch(record -> new Revision(
+                        record.get(REVISION.ID),
+                        record.get(REVISION.TIMESTAMP),
+                        translate(record.get(VALUE_REVISION.REVISION_TYPE), Revision.Type.class),
+                        record.get(REVISION.USER),
+                        record.get(REVISION.COMMENT)
+                ));
     }
 
     public Optional<ValueRevision> find(final String key, final Map<String, JsonNode> dimensions, final long revision) {
@@ -114,7 +113,7 @@ public class ValueRevisionRepository {
                 .and(VALUE_REVISION.REVISION.eq(revision))
                 .fetchGroups(this::group, ValueDimensionRevisionRecord.class)
                 .entrySet().stream()
-                .map(this::mapRevision)
+                .map(this::mapValue)
                 .collect(toOptional());
     }
 
@@ -153,7 +152,7 @@ public class ValueRevisionRepository {
         RevisionRecord revision;
     }
 
-    private ValueRevision mapRevision(final Map.Entry<Group, List<ValueDimensionRevisionRecord>> entry) {
+    private ValueRevision mapValue(final Map.Entry<Group, List<ValueDimensionRevisionRecord>> entry) {
         final ImmutableMap<String, JsonNode> dimensions = leftOuterJoin(entry.getValue(),
                 ValueDimensionRevisionRecord::getDimensionId,
                 ValueDimensionRevisionRecord::getDimensionValue);
@@ -164,13 +163,17 @@ public class ValueRevisionRepository {
         return new ValueRevision(
                 dimensions,
                 value.getIndex(),
-                new Revision(
-                        revision.getId(),
-                        revision.getTimestamp(),
-                        translate(value.getRevisionType(), Revision.Type.class),
-                        revision.getUser(),
-                        revision.getComment()),
+                mapRevision(revision, value),
                 value.getValue());
+    }
+
+    private Revision mapRevision(RevisionRecord revision, ValueRevisionRecord value) {
+        return new Revision(
+                revision.getId(),
+                revision.getTimestamp(),
+                translate(value.getRevisionType(), Revision.Type.class),
+                revision.getUser(),
+                revision.getComment());
     }
 
 }

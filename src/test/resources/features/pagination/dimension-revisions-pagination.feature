@@ -11,11 +11,11 @@ Feature: Dimension revisions
 
   Scenario: Read dimension revisions should paginate
     Then "GET /dimensions/device/revisions?limit=2" responds "200 OK" with:
-      | /next/href                                                          |
+      | /next                                                               |
       | "http://localhost:8080/dimensions/device/revisions?limit=2&after=2" |
     And "GET /dimensions/device/revisions?limit=2&after=2" responds "200 OK" with an array at "/revisions":
-      | /id      | /revision/id | /revision/type | /revision/user | /revision/comment | /schema/type | /relation | /description |
-      | "device" | 1            | "create"       | "anonymous"    | ".."              | "string"     | "="       | ".."         |
+      | /id | /type    | /user       | /comment |
+      | 1   | "create" | "anonymous" | ".."     |
     Then "GET /dimensions/device/revisions?limit=2&after=2" responds "200 OK" with:
-      | /next/href |
-      |            |
+      | /next |
+      |       |

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
-import org.zalando.compass.domain.model.DimensionRevision;
+import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.NotFoundException;
 
 import javax.annotation.Nullable;
@@ -90,13 +90,13 @@ class DimensionResource implements Reserved {
         try {
             return ResponseEntity.ok(service.read(id));
         } catch (final NotFoundException e) {
-            final List<DimensionRevision> revisions = service.readRevisions(id, 1, null).getElements();
+            final List<Revision> revisions = service.readRevisions(id, 1, null).getElements();
 
             if (revisions.isEmpty()) {
                 throw e;
             }
 
-            final long revision = getOnlyElement(revisions).getRevision().getId();
+            final long revision = getOnlyElement(revisions).getId();
 
             return ResponseEntity
                     .status(GONE)

@@ -7,6 +7,7 @@ import org.zalando.compass.domain.logic.KeyService;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.KeyRevision;
 import org.zalando.compass.domain.model.Page;
+import org.zalando.compass.domain.model.Revision;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -37,12 +38,22 @@ class DefaultKeyService implements KeyService {
     }
 
     @Override
+    public Page<Revision> readRevisions(final int limit, @Nullable final Long after) {
+        return read.readRevisions(limit, after);
+    }
+
+    @Override
+    public List<Key> readRevision(final long revision) {
+        return read.readRevision(revision);
+    }
+
+    @Override
     public List<Key> readAll(@Nullable final String term) {
         return read.readAll(term);
     }
 
     @Override
-    public Page<KeyRevision> readRevisions(final String id, final int limit, @Nullable final Long after) {
+    public Page<Revision> readRevisions(final String id, final int limit, @Nullable final Long after) {
         return read.readRevisions(id, limit, after);
     }
 

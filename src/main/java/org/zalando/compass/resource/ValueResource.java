@@ -21,8 +21,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.ValueService;
+import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.domain.model.ValueRevision;
 import org.zalando.compass.domain.persistence.NotFoundException;
 
 import java.io.IOException;
@@ -108,13 +108,13 @@ class ValueResource {
                     .body(value);
         } catch (final NotFoundException e) {
             // TODO limit 1
-            final List<ValueRevision> revisions = service.readRevisions(key, filter);
+            final List<Revision> revisions = service.readRevisions(key, filter);
 
             if (revisions.isEmpty()) {
                 throw e;
             }
 
-            final Long revision = revisions.get(0).getRevision().getId();
+            final Long revision = revisions.get(0).getId();
             final Map<String, String> sorted = render(filter);
 
             return ResponseEntity

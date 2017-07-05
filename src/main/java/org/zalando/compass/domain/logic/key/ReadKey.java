@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.KeyRevision;
 import org.zalando.compass.domain.model.Page;
+import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.KeyRepository;
 import org.zalando.compass.domain.persistence.KeyRevisionRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
@@ -33,7 +34,17 @@ class ReadKey {
         return repository.find(id).orElseThrow(NotFoundException::new);
     }
 
-    public Page<KeyRevision> readRevisions(final String id, final int limit, @Nullable final Long after) {
+    // TODO ReadRevision command?
+
+    public Page<Revision> readRevisions(final int limit, @Nullable final Long after) {
+        return revisionRepository.findAll(limit, after);
+    }
+
+    public List<Key> readRevision(final long revision) {
+        return revisionRepository.find(revision);
+    }
+
+    public Page<Revision> readRevisions(final String id, final int limit, @Nullable final Long after) {
         return revisionRepository.findAll(id, limit, after);
     }
 

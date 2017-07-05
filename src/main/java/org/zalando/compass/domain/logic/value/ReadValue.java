@@ -3,6 +3,7 @@ package org.zalando.compass.domain.logic.value;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueRevision;
 import org.zalando.compass.domain.persistence.KeyRepository;
@@ -57,7 +58,7 @@ class ReadValue {
         return selector.select(values, filter);
     }
 
-    public List<ValueRevision> readRevisions(final String key, final Map<String, JsonNode> filter) {
+    public List<Revision> readRevisions(final String key, final Map<String, JsonNode> filter) {
         return revisionRepository.findAll(key, filter);
     }
 

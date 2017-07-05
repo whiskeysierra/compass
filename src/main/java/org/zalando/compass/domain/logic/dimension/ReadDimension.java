@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionRevision;
 import org.zalando.compass.domain.model.Page;
+import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.DimensionRepository;
 import org.zalando.compass.domain.persistence.DimensionRevisionRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
@@ -33,7 +34,7 @@ class ReadDimension {
         return repository.find(id).orElseThrow(NotFoundException::new);
     }
 
-    public Page<DimensionRevision> readRevisions(final String id, final int limit, @Nullable final Long after) {
+    public Page<Revision> readRevisions(final String id, final int limit, @Nullable final Long after) {
         return revisionRepository.findAll(id, limit, after);
     }
 

@@ -11,10 +11,10 @@ Feature: Key history
 
   Scenario: Read revisions
     Then "GET /keys/device/revisions" responds "200 OK" with an array at "/revisions":
-      | /id      | /revision/id | /revision/type | /revision/user | /revision/comment | /schema/type | /description               |
-      | "device" | 3            | "delete"       | "anonymous"    | ".."              | "string"     | "Client Device Identifier" |
-      | "device" | 2            | "update"       | "anonymous"    | ".."              | "string"     | "Client Device Identifier" |
-      | "device" | 1            | "create"       | "anonymous"    | ".."              | "string"     | ".."                       |
+      | /id | /type    | /user       | /comment |
+      | 3   | "delete" | "anonymous" | ".."     |
+      | 2   | "update" | "anonymous" | ".."     |
+      | 1   | "create" | "anonymous" | ".."     |
 
   Scenario: Read revision
     Then "GET /keys/device/revisions/1" responds "200 OK" with:
@@ -31,9 +31,10 @@ Feature: Key history
 
   Scenario: Read revisions should support limit
     Then "GET /keys/device/revisions?limit=2" responds "200 OK" with an array at "/revisions":
-      | /id      | /revision/id | /revision/type | /revision/user | /revision/comment | /schema/type | /description               |
-      | "device" | 3            | "delete"       | "anonymous"    | ".."              | "string"     | "Client Device Identifier" |
-      | "device" | 2            | "update"       | "anonymous"    | ".."              | "string"     | "Client Device Identifier" |
+      | /id | /type    | /user       | /comment |
+      | 3   | "delete" | "anonymous" | ".."     |
+      | 2   | "update" | "anonymous" | ".."     |
 
   Scenario: Read all revisions
     Then "GET /keys/revisions" responds "200 OK"
+    # TODO implement

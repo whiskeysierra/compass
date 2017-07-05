@@ -7,6 +7,7 @@ import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionRevision;
 import org.zalando.compass.domain.model.Page;
+import org.zalando.compass.domain.model.Revision;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -42,7 +43,7 @@ class DefaultDimensionService implements DimensionService {
     }
 
     @Override
-    public Page<DimensionRevision> readRevisions(final String id, final int limit, @Nullable final Long after) {
+    public Page<Revision> readRevisions(final String id, final int limit, @Nullable final Long after) {
         return read.readRevisions(id, limit, after);
     }
 

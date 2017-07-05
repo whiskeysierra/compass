@@ -1,6 +1,7 @@
 package org.zalando.compass.domain.logic;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueRevision;
 
@@ -17,7 +18,7 @@ public interface ValueService {
 
     Value read(String key, Map<String, JsonNode> filter);
 
-    List<ValueRevision> readRevisions(String key, Map<String, JsonNode> filter);
+    List<Revision> readRevisions(String key, Map<String, JsonNode> filter);
 
     ValueRevision readRevision(String key, Map<String, JsonNode> filter, long revision);
 
