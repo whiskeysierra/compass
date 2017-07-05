@@ -75,7 +75,8 @@ public class KeyRevisionRepository {
                 .where(KEY_REVISION.REVISION_TYPE.ne(RevisionType.DELETE))
                 .and(KEY_REVISION.REVISION.eq(select(max(inner.REVISION))
                         .from(inner)
-                        .where(inner.REVISION.le(revision))))
+                        .where(inner.ID.eq(KEY_REVISION.ID)) // TODO test with multiple keys
+                        .and(inner.REVISION.le(revision))))
                 .fetchInto(Key.class);
     }
 

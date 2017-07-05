@@ -34,11 +34,21 @@ class ReadDimension {
         return repository.find(id).orElseThrow(NotFoundException::new);
     }
 
-    public Page<Revision> readRevisions(final String id, final int limit, @Nullable final Long after) {
+    // TODO ReadRevision command?
+
+    Page<Revision> readRevisions(final int limit, @Nullable final Long after) {
+        return revisionRepository.findAll(limit, after);
+    }
+
+    List<Dimension> readRevision(final long revision) {
+        return revisionRepository.find(revision);
+    }
+
+    Page<Revision> readRevisions(final String id, final int limit, @Nullable final Long after) {
         return revisionRepository.findAll(id, limit, after);
     }
 
-    public DimensionRevision readRevision(final String id, final long revision) {
+    DimensionRevision readRevision(final String id, final long revision) {
         return revisionRepository.find(id, revision).orElseThrow(NotFoundException::new);
     }
 

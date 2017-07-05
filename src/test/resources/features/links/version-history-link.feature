@@ -9,3 +9,4 @@ Feature: Version history link
     #  | /version-history                                   |
     #  | http://localhost:8080/dimensions/country/revisions |
 
+ # TODO should revisions only include the latest-version link if it's not deleted right now?

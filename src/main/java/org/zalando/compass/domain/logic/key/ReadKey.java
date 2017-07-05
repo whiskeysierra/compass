@@ -36,19 +36,19 @@ class ReadKey {
 
     // TODO ReadRevision command?
 
-    public Page<Revision> readRevisions(final int limit, @Nullable final Long after) {
+    Page<Revision> readRevisions(final int limit, @Nullable final Long after) {
         return revisionRepository.findAll(limit, after);
     }
 
-    public List<Key> readRevision(final long revision) {
+    List<Key> readRevision(final long revision) {
         return revisionRepository.find(revision);
     }
 
-    public Page<Revision> readRevisions(final String id, final int limit, @Nullable final Long after) {
+    Page<Revision> readRevisions(final String id, final int limit, @Nullable final Long after) {
         return revisionRepository.findAll(id, limit, after);
     }
 
-    public KeyRevision readRevision(final String id, final long revision) {
+    KeyRevision readRevision(final String id, final long revision) {
         return revisionRepository.find(id, revision).orElseThrow(NotFoundException::new);
     }
 

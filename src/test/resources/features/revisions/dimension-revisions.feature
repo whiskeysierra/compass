@@ -35,6 +35,4 @@ Feature: Dimension history
       | 3   | "delete" | "anonymous" | ".."     |
       | 2   | "update" | "anonymous" | ".."     |
 
-  Scenario: Read all revisions
-    Then "GET /dimensions/revisions" responds "200 OK"
-    # TODO implement
+  # TODO allow to re-create

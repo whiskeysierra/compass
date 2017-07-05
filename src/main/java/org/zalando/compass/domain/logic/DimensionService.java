@@ -12,9 +12,15 @@ public interface DimensionService {
 
     boolean replace(Dimension dimension);
 
+    // TODO Page
     List<Dimension> readAll(@Nullable String term);
 
     Dimension read(String id);
+
+    Page<Revision> readRevisions(int limit, @Nullable Long after);
+
+    // TODO Page
+    List<Dimension> readRevision(long revision);
 
     Page<Revision> readRevisions(String id, int limit, @Nullable Long after);
 

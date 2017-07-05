@@ -42,7 +42,7 @@ public class RevisionRepository {
         return new Revision(
                 record.get(REVISION.ID),
                 record.get(REVISION.TIMESTAMP),
-                translate(record.get(KEY_REVISION.REVISION_TYPE), Revision.Type.class),
+                Revision.Type.UPDATE, // TODO hack, doesn't belong here
                 record.get(REVISION.USER),
                 record.get(REVISION.COMMENT)
         );

@@ -22,8 +22,8 @@ class DefaultDimensionService implements DimensionService {
     @Autowired
     DefaultDimensionService(final ReplaceDimension replace, final ReadDimension read, final DeleteDimension delete) {
         this.replace = replace;
-        this.delete = delete;
         this.read = read;
+        this.delete = delete;
     }
 
     @Transactional
@@ -40,6 +40,16 @@ class DefaultDimensionService implements DimensionService {
     @Override
     public Dimension read(final String id) {
         return read.read(id);
+    }
+
+    @Override
+    public Page<Revision> readRevisions(int limit, @Nullable Long after) {
+        return read.readRevisions(limit, after);
+    }
+
+    @Override
+    public List<Dimension> readRevision(long revision) {
+        return read.readRevision(revision);
     }
 
     @Override

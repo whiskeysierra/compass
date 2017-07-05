@@ -12,13 +12,14 @@ public interface KeyService {
 
     boolean replace(Key key);
 
-    // TODO Page<Key>
+    // TODO Page
     List<Key> readAll(@Nullable String term);
 
     Key read(String id);
 
     Page<Revision> readRevisions(int limit, @Nullable Long after);
 
+    // TODO Page
     List<Key> readRevision(long revision);
 
     Page<Revision> readRevisions(String id, int limit, @Nullable Long after);
