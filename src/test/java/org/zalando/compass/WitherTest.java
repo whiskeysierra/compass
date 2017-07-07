@@ -8,7 +8,6 @@ import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.library.Maps.Pair;
 
 import java.util.Arrays;
 import java.util.List;
@@ -34,8 +33,6 @@ public final class WitherTest<T, P> {
     public static Iterable<TestCase<?, ?>> data() {
 
         return Arrays.asList(
-                new TestCase<>(new Pair<>(null, null), Pair::withLeft),
-                new TestCase<>(new Pair<>(null, null), Pair::withRight),
                 new TestCase<>(new Revision(null, null, null, null, null), Revision::withId),
                 new TestCase<>(new Revision(null, null, null, null, null), Revision::withType),
                 new TestCase<>(new Value(null, null, null), Value::withDimensions),

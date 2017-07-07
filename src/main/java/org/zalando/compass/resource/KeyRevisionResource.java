@@ -51,6 +51,7 @@ class KeyRevisionResource {
                 rev -> linkTo(methodOn(KeyRevisionResource.class).getRevision(rev.getId())).toUri());
     }
 
+    // TODO search by term
     @RequestMapping(method = GET, path = "/revisions/{revision}")
     public ResponseEntity<KeyCollectionRevisionRepresentation> getRevision(@PathVariable final long revision) {
 

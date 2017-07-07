@@ -10,11 +10,9 @@ import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionRevision;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.KeyRevision;
-import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueRevision;
-import org.zalando.compass.library.Maps;
 
 import java.util.Arrays;
 
@@ -36,8 +34,7 @@ public final class EqualsTest<T> {
                 {KeyRevision.class},
                 {Value.class},
                 {ValueRevision.class},
-                {Revision.class},
-                {Maps.Pair.class},
+                {Revision.class}
         });
     }
 

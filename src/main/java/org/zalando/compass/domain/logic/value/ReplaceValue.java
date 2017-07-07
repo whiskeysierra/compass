@@ -1,5 +1,7 @@
 package org.zalando.compass.domain.logic.value;
 
+import com.google.common.base.Equivalence;
+import com.google.common.base.Equivalence.Wrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,18 +16,20 @@ import org.zalando.compass.domain.model.ValueRevision;
 import org.zalando.compass.domain.model.ValuesLock;
 import org.zalando.compass.domain.persistence.ValueRepository;
 import org.zalando.compass.domain.persistence.ValueRevisionRepository;
-import org.zalando.compass.library.Maps.Pair;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
+import static com.google.common.collect.Sets.difference;
+import static com.google.common.collect.Sets.intersection;
 import static com.google.common.collect.Streams.mapWithIndex;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static org.zalando.compass.domain.model.Revision.Type.CREATE;
 import static org.zalando.compass.domain.model.Revision.Type.DELETE;
 import static org.zalando.compass.domain.model.Revision.Type.UPDATE;
-import static org.zalando.compass.library.Maps.diff;
 
 @Slf4j
 @Component
@@ -81,33 +85,44 @@ class ReplaceValue {
         final List<Value> before = lock.getValues();
         final List<Value> after = preserveIndex(values);
 
-        final Collection<Pair<Value, Value>> diff = diff(before, after, Value::getDimensions).values();
+        return replace(key, before, after);
+    }
+
+    private boolean replace(final String key, final List<Value> left, final List<Value> right) {
+        final Set<Wrapper<Value>> before = wrap(left);
+        final Set<Wrapper<Value>> after = wrap(right);
+
+        final Collection<Value> creates = unwrap(difference(after, before));
+        final Collection<Value> updates = unwrap(intersection(after, before));
+        final Collection<Value> deletes = unwrap(difference(before, after));
 
         // TODO expect comment
         final String comment = "..";
         final Revision revision = revisionService.create(comment);
 
-        diff.forEach(pair -> {
-            final Value current = pair.getLeft();
-            final Value next = pair.getRight();
+        creates.forEach(value ->
+            create(key, value, revision));
 
-            if (current == null) {
-                create(key, next, revision);
-            } else if (next == null) {
-                delete(key, revision, current);
-            } else {
-                update(key, next, revision);
-            }
-        });
+        updates.forEach(value ->
+            update(key, value, revision));
 
-        log.info("Replaced values of key [{}] with [{}]", key, after);
+        deletes.forEach(value ->
+            delete(key, value, revision));
 
-        // TODO using Sets.difference/intersection would be nicer here...
-        return diff.stream().anyMatch(p -> p.getLeft() == null);
+        return !creates.isEmpty();
     }
 
     private List<Value> preserveIndex(final List<Value> values) {
         return mapWithIndex(values.stream(), Value::withIndex).collect(toList());
+    }
+
+    private Set<Wrapper<Value>> wrap(final Collection<Value> values) {
+        final Equivalence<Value> equivalence = Equivalence.equals().onResultOf(Value::getDimensions);
+        return values.stream().map(equivalence::wrap).collect(toSet());
+    }
+
+    private static <T> Collection<T> unwrap(final Collection<Wrapper<T>> wraps) {
+        return wraps.stream().map(Equivalence.Wrapper::get).collect(toList());
     }
 
     private void create(final String key, final Value value, final Revision rev) {
@@ -122,7 +137,7 @@ class ReplaceValue {
         createRevision(key, value, rev, UPDATE);
     }
 
-    private void delete(final String key, final Revision rev, final Value value) {
+    private void delete(final String key, final Value value, final Revision rev) {
         repository.delete(key, value.getDimensions());
         log.info("Deleted value for key [{}]: [{}]", key, value);
         createRevision(key, value, rev, DELETE);

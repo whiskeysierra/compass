@@ -13,8 +13,8 @@ info:
     | tax-rate | AT      |                           | 0.20  |
     | tax-rate | CH      |                           | 0.08  |
 
-    Different dimension my influence how values are queried. The `country` dimension is matched based on equality (`=`)
-    while the `after` dimension is based on inequality or to be more precise less than (`<`). That property is called
+    Different dimension may influence how values are queried. The `country` dimension is matched based on equality (`=`)
+    while the `before` dimension is based on inequality or to be more precise less than (`<`). That property is called
     relation and they can't be created using this API - in contrast to keys and dimensions.
 
     Keys can impose certain type restrictions on their values by defining a JSON schema. The same applies to dimensions
@@ -33,6 +33,7 @@ tags:
   - name: keys
   - name: values
   - name: value
+  - name: history
 paths:
   /relations:
     get:
@@ -77,6 +78,27 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/DimensionPage'
+  /dimensions/revisions:
+    get:
+      tags: [dimensions, history]
+      summary: Read revisions of all dimensions
+      description: "" # TODO
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/RevisionPage'
+
+  /dimensions/revisions/{revision}:
+    get:
+      tags: [dimensions, history]
+      summary: Read historic version of all dimensions and optionally filter by search term
+      parameters:
+        - $ref: '#/parameters/Revision'
+        - name: q
+          description: Search term
+          in: query
+          type: string
   /dimensions/{dimension}:
     put:
       tags: [dimensions]
@@ -141,6 +163,10 @@ paths:
       responses:
         204:
           description: No Content
+  /dimensions/{dimension}/revisions:
+    {}
+  /dimensions/{dimension}/revisions/{revision}:
+    {}
   /keys:
     get:
       tags: [keys]
@@ -378,6 +404,12 @@ parameters:
     in: path
     type: string
     required: true
+  Revision:
+    name: revision
+    in: path
+    type: integer
+    format: int64
+    required: true
   Filter:
     name: '' # we have to specify a name here even though we support any and many of them.
     description: |
@@ -532,3 +564,39 @@ definitions:
         country: DE
         after: 2017-01-01T00:00:00
       value: 0.2
+  RevisionPage:
+    type: object
+    properties:
+      # TODO prev + next
+      revisions:
+        type: array
+        item:
+          $ref: '#/definitions/Revision'
+    required:
+      - revisions
+  Revision:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      timestamp:
+        type: string
+        format: date-time
+      href:
+        type: string
+        format: uri
+      type:
+        type: string
+        enum: [create, update, deleted]
+      user:
+        type: string
+      comment:
+        type: string
+    required:
+      - id
+      - timestamp
+      - href
+      - type
+      - user
+      - comment

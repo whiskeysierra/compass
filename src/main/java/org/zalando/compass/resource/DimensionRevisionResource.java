@@ -51,6 +51,7 @@ class DimensionRevisionResource {
                 rev -> linkTo(methodOn(DimensionRevisionResource.class).getRevision(rev.getId())).toUri());
     }
 
+    // TODO search by term
     @RequestMapping(method = GET, path = "/revisions/{revision}")
     public ResponseEntity<DimensionCollectionRevisionRepresentation> getRevision(@PathVariable final long revision) {
 
