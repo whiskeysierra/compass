@@ -3,7 +3,7 @@
     {
       "id": 3,
       "timestamp": "2017-07-02T01:35:17Z",
-      "href": "http://localhost:8080/keys/tax-rate/value/revisions/3?country=DE",
+      "href": "http://localhost:8080/keys/tax-rate/value/revisions/3",
       "type": "delete",
       "user": "anonymous",
       "comment": ".."
@@ -11,7 +11,7 @@
     {
       "id": 2,
       "timestamp": "2017-06-30T17:58:55Z",
-      "href": "http://localhost:8080/keys/tax-rate/value/revisions/2?country=DE",
+      "href": "http://localhost:8080/keys/tax-rate/value/revisions/2",
       "type": "update",
       "user": "anonymous",
       "comment": ".."
@@ -19,7 +19,7 @@
     {
       "id": 1,
       "timestamp": "2017-06-30T15:32:01Z",
-      "href": "http://localhost:8080/keys/tax-rate/value/revisions/1?country=DE",
+      "href": "http://localhost:8080/keys/tax-rate/value/revisions/1",
       "type": "create",
       "user": "anonymous",
       "comment": ".."

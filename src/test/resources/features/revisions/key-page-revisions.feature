@@ -1,4 +1,4 @@
-Feature: Keys history
+Feature: /keys/revisions
 
   Background: Updated keys
     Given "PUT /keys/device" responds "201 Created" when requested with:
@@ -23,26 +23,6 @@ Feature: Keys history
       | 3   | "update" | "anonymous" | ".."     |
       | 2   | "update" | "anonymous" | ".."     |
       | 1   | "update" | "anonymous" | ".."     |
-
-  Scenario: Read revision
-    Then "GET /keys/revisions/1" responds "200 OK" with an array at "/keys":
-      | /id      | /schema/type | /description |
-      | "device" | "string"     | ".."         |
-    And "GET /keys/revisions/2" responds "200 OK" with an array at "/keys":
-      | /id      | /schema/type | /description               |
-      | "device" | "string"     | "Client Device Identifier" |
-    And "GET /keys/revisions/3" responds "200 OK" with an empty array at "/keys"
-    And "GET /keys/revisions/4" responds "200 OK" with an array at "/keys":
-      | /id       | /schema/type | /description |
-      | "country" | "string"     | ".."         |
-    And "GET /keys/revisions/5" responds "200 OK" with an array at "/keys":
-      | /id       | /schema/type | /description |
-      | "country" | "string"     | "ISO 3166"   |
-
-  Scenario: Read revision metadata
-    Then "GET /keys/revisions/1" responds "200 OK" with:
-      | /revision/id | /revision/type | /revision/user | /revision/comment |
-      | 1            | "update"       | "anonymous"    | ".."              |
 
   Scenario: Read revisions should support limit
     Then "GET /keys/revisions?limit=3" responds "200 OK" with an array at "/revisions":

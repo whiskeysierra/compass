@@ -55,7 +55,6 @@ public class ValueRevisionRepository {
     }
 
     public void create(final String key, final ValueRevision value) {
-
         final long id = db.insertInto(VALUE_REVISION)
                 .columns(
                         VALUE_REVISION.REVISION,
@@ -86,6 +85,23 @@ public class ValueRevisionRepository {
                 .collect(toList());
 
         db.batch(queries).execute();
+    }
+
+    public List<Revision> findPageRevisions(final String key) {
+        return db.select(REVISION.fields())
+                .from(REVISION)
+                .where(exists(selectOne()
+                        .from(VALUE_REVISION)
+                        .where(VALUE_REVISION.KEY_ID.eq(key))
+                        .and(VALUE_REVISION.REVISION.eq(REVISION.ID))))
+                .orderBy(REVISION.ID.desc())
+                .fetch(record -> new Revision(
+                        record.get(REVISION.ID),
+                        record.get(REVISION.TIMESTAMP),
+                        null,
+                        record.get(REVISION.USER),
+                        record.get(REVISION.COMMENT)
+                ));
     }
 
     public <T> Optional<PageRevision<ValueRevision>> findPage(final String key, final long revision, final boolean excludeDeleted) {
@@ -141,23 +157,6 @@ public class ValueRevisionRepository {
 
             return new PageRevision<>(r, values);
         });
-    }
-
-    public List<Revision> findPageRevisions(final String key) {
-        return db.select(REVISION.fields())
-                .from(REVISION)
-                .where(exists(selectOne()
-                        .from(VALUE_REVISION)
-                        .where(VALUE_REVISION.KEY_ID.eq(key))
-                        .and(VALUE_REVISION.REVISION.eq(REVISION.ID))))
-                .orderBy(REVISION.ID.desc())
-                .fetch(record -> new Revision(
-                        record.get(REVISION.ID),
-                        record.get(REVISION.TIMESTAMP),
-                        null,
-                        record.get(REVISION.USER),
-                        record.get(REVISION.COMMENT)
-                ));
     }
 
     public List<Revision> findRevisions(final String key, final Map<String, JsonNode> dimensions) {
