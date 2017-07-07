@@ -47,7 +47,6 @@ public class JsonQueryParser {
             try {
                 return mapper.readTree(value);
             } catch (final JsonParseException e) {
-                // TODO since we're most likely hitting this very often, is there a better way?!
                 try {
                     return mapper.readTree("\"" + value + "\"");
                 } catch (final JsonParseException ignored) {

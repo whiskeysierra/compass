@@ -35,7 +35,6 @@ class ValueRevisionResource {
         this.service = service;
     }
 
-    // TODO almost identical with getValueRevisions, so why do we need it?
     @RequestMapping(method = GET, path = "/values/revisions")
     public ResponseEntity<RevisionCollectionRepresentation> getValuesRevisions(@PathVariable final String key) {
         final List<Revision> revisions = service.readPageRevisions(key);
@@ -58,7 +57,6 @@ class ValueRevisionResource {
     public ResponseEntity<ValueCollectionRevisionRepresentation> getValuesRevision(@PathVariable final String key,
             @PathVariable final long revision, @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = parser.parse(query);
-
         final PageRevision<Value> page = service.readPageAt(key, filter, revision);
         final Revision rev = page.getRevision();
 
