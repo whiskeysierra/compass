@@ -109,6 +109,9 @@ Feature: Value history
     When "PUT /keys/tax-rate/value?country=DE&after=2007-01-01T00:00:00Z" responds "201 Created" when requested with:
       | /value |
       | 0.19   |
+    When "PUT /keys/tax-rate/value?country=AT" responds "201 Created" when requested with:
+      | /value |
+      | 0.2    |
     Then "GET /keys/tax-rate/value/revisions?country=DE&after=2007-01-01T00:00:00Z" responds "200 OK" with an array at "/revisions":
       | /id | /type    | /user       | /comment |
       | 5   | "create" | "anonymous" | ".."     |
