@@ -30,6 +30,9 @@ import static org.zalando.compass.library.Enums.translate;
 @Repository
 public class DimensionRevisionRepository {
 
+    private static final org.zalando.compass.domain.persistence.model.tables.DimensionRevision SELF =
+            DIMENSION_REVISION.as("self");
+
     private final DSLContext db;
 
     @Autowired
@@ -56,7 +59,6 @@ public class DimensionRevisionRepository {
 
     public Page<Revision> findPageRevisions(final int limit, @Nullable final Long after) {
         final List<Revision> revisions = db.select(REVISION.fields())
-                .select(val(RevisionType.UPDATE).as(DIMENSION_REVISION.REVISION_TYPE)) // TODO HACK!
                 .from(REVISION)
                 .where(exists(selectOne()
                         .from(DIMENSION_REVISION)
@@ -65,7 +67,7 @@ public class DimensionRevisionRepository {
                 .orderBy(REVISION.ID.desc())
                 .seekAfter(firstNonNull(after, Long.MAX_VALUE)) // TODO find a better way
                 .limit(limit + 1)
-                .fetch().map(this::mapRevision);
+                .fetch().map(this::mapRevisionWithoutType);
 
         return Pages.page(revisions, limit);
     }
@@ -77,16 +79,13 @@ public class DimensionRevisionRepository {
                 .fetchOptionalInto(Revision.class);
 
         return optional.map(r -> {
-            // TODO get rid of fqcn
-            final org.zalando.compass.domain.persistence.model.tables.DimensionRevision inner = DIMENSION_REVISION.as(
-                    "inner");
             final List<Dimension> dimensions = db.select(DIMENSION_REVISION.fields())
                     .from(DIMENSION_REVISION)
                     .where(DIMENSION_REVISION.REVISION_TYPE.ne(RevisionType.DELETE))
-                    .and(DIMENSION_REVISION.REVISION.eq(select(max(inner.REVISION))
-                            .from(inner)
-                            .where(inner.ID.eq(DIMENSION_REVISION.ID)) // TODO test with multiple dimensions
-                            .and(inner.REVISION.le(revision))))
+                    .and(DIMENSION_REVISION.REVISION.eq(select(max(SELF.REVISION))
+                            .from(SELF)
+                            .where(SELF.ID.eq(DIMENSION_REVISION.ID)) // TODO test with multiple dimensions
+                            .and(SELF.REVISION.le(revision))))
                     .fetchInto(Dimension.class);
 
             return new PageRevision<>(r, dimensions);
@@ -95,14 +94,14 @@ public class DimensionRevisionRepository {
 
     public Page<Revision> findRevisions(final String id, final int limit, @Nullable final Long after) {
         final List<Revision> revisions = db.select(REVISION.fields())
-                .select(DIMENSION_REVISION.REVISION_TYPE)
+                .select(DIMENSION_REVISION.fields())
                 .from(REVISION)
                 .join(DIMENSION_REVISION).on(DIMENSION_REVISION.REVISION.eq(REVISION.ID))
                 .where(DIMENSION_REVISION.ID.eq(id))
                 .orderBy(REVISION.ID.desc())
                 .seekAfter(firstNonNull(after, Long.MAX_VALUE)) // TODO find a better way
                 .limit(limit + 1)
-                .fetch().map(this::mapRevision);
+                .fetch().map(this::mapRevisionWithType);
 
         return Pages.page(revisions, limit);
     }
@@ -121,18 +120,28 @@ public class DimensionRevisionRepository {
     private DimensionRevision mapDimension(final Record record) {
         return new DimensionRevision(
                 record.get(DIMENSION_REVISION.ID),
-                mapRevision(record),
+                mapRevisionWithType(record),
                 record.get(DIMENSION_REVISION.SCHEMA),
                 record.get(DIMENSION_REVISION.RELATION),
                 record.get(DIMENSION_REVISION.DESCRIPTION)
         );
     }
 
-    private Revision mapRevision(final Record record) {
+    private Revision mapRevisionWithType(final Record record) {
+        return new Revision(
+                        record.get(REVISION.ID),
+                        record.get(REVISION.TIMESTAMP),
+                        translate(record.get(DIMENSION_REVISION.REVISION_TYPE), Revision.Type.class),
+                        record.get(REVISION.USER),
+                        record.get(REVISION.COMMENT)
+                );
+    }
+
+    private Revision mapRevisionWithoutType(final Record record) {
         return new Revision(
                 record.get(REVISION.ID),
                 record.get(REVISION.TIMESTAMP),
-                translate(record.get(DIMENSION_REVISION.REVISION_TYPE), Revision.Type.class),
+                null,
                 record.get(REVISION.USER),
                 record.get(REVISION.COMMENT)
         );

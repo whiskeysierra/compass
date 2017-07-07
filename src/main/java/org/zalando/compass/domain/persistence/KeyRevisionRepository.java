@@ -22,13 +22,14 @@ import static org.jooq.impl.DSL.max;
 import static org.jooq.impl.DSL.select;
 import static org.jooq.impl.DSL.selectOne;
 import static org.jooq.impl.DSL.trueCondition;
-import static org.jooq.impl.DSL.val;
 import static org.zalando.compass.domain.persistence.model.Tables.KEY_REVISION;
 import static org.zalando.compass.domain.persistence.model.Tables.REVISION;
 import static org.zalando.compass.library.Enums.translate;
 
 @Repository
 public class KeyRevisionRepository {
+
+    private static final org.zalando.compass.domain.persistence.model.tables.KeyRevision SELF = KEY_REVISION.as("self");
 
     private final DSLContext db;
 
@@ -54,7 +55,6 @@ public class KeyRevisionRepository {
 
     public Page<Revision> findPageRevisions(final int limit, @Nullable final Long after) {
         final List<Revision> revisions = db.select(REVISION.fields())
-                .select(val(RevisionType.UPDATE).as(KEY_REVISION.REVISION_TYPE)) // TODO HACK!
                 .from(REVISION)
                 .where(exists(selectOne()
                         .from(KEY_REVISION)
@@ -63,7 +63,7 @@ public class KeyRevisionRepository {
                 .orderBy(REVISION.ID.desc())
                 .seekAfter(firstNonNull(after, Long.MAX_VALUE)) // TODO find a better way
                 .limit(limit + 1)
-                .fetch().map(this::mapRevision);
+                .fetch().map(this::mapRevisionWithoutType);
 
         return Pages.page(revisions, limit);
     }
@@ -75,15 +75,13 @@ public class KeyRevisionRepository {
                 .fetchOptionalInto(Revision.class);
 
         return optional.map(r -> {
-            // TODO get rid of fqcn
-            final org.zalando.compass.domain.persistence.model.tables.KeyRevision inner = KEY_REVISION.as("inner");
             final List<Key> keys = db.select(KEY_REVISION.fields())
                     .from(KEY_REVISION)
                     .where(KEY_REVISION.REVISION_TYPE.ne(RevisionType.DELETE))
-                    .and(KEY_REVISION.REVISION.eq(select(max(inner.REVISION))
-                            .from(inner)
-                            .where(inner.ID.eq(KEY_REVISION.ID)) // TODO test with multiple keys
-                            .and(inner.REVISION.le(revision))))
+                    .and(KEY_REVISION.REVISION.eq(select(max(SELF.REVISION))
+                            .from(SELF)
+                            .where(SELF.ID.eq(KEY_REVISION.ID)) // TODO test with multiple keys
+                            .and(SELF.REVISION.le(revision))))
                     .fetchInto(Key.class);
 
             return new PageRevision<>(r, keys);
@@ -99,7 +97,7 @@ public class KeyRevisionRepository {
                 .orderBy(REVISION.ID.desc())
                 .seekAfter(firstNonNull(after, Long.MAX_VALUE)) // TODO find a better way
                 .limit(limit + 1)
-                .fetch().map(this::mapRevision);
+                .fetch().map(this::mapRevisionWithType);
 
         return Pages.page(revisions, limit);
     }
@@ -118,17 +116,27 @@ public class KeyRevisionRepository {
     private KeyRevision mapKey(final Record record) {
         return new KeyRevision(
                 record.get(KEY_REVISION.ID),
-                mapRevision(record),
+                mapRevisionWithType(record),
                 record.get(KEY_REVISION.SCHEMA),
                 record.get(KEY_REVISION.DESCRIPTION)
         );
     }
 
-    private Revision mapRevision(final Record record) {
+    private Revision mapRevisionWithType(final Record record) {
         return new Revision(
                 record.get(REVISION.ID),
                 record.get(REVISION.TIMESTAMP),
                 translate(record.get(KEY_REVISION.REVISION_TYPE), Revision.Type.class),
+                record.get(REVISION.USER),
+                record.get(REVISION.COMMENT)
+        );
+    }
+
+    private Revision mapRevisionWithoutType(final Record record) {
+        return new Revision(
+                record.get(REVISION.ID),
+                record.get(REVISION.TIMESTAMP),
+                null,
                 record.get(REVISION.USER),
                 record.get(REVISION.COMMENT)
         );
