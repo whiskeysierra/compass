@@ -1,19 +1,15 @@
 package org.zalando.compass.domain.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
 import lombok.experimental.Wither;
-import org.zalando.compass.library.Internal;
 
 @lombok.Value
-public class Value {
+public class Value implements Dimensional {
 
     @Wither
     ImmutableMap<String, JsonNode> dimensions;
 
-    @Internal
-    @JsonIgnore
     @Wither
     Long index;
 

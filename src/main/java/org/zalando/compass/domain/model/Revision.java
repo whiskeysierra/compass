@@ -34,4 +34,8 @@ public final class Revision {
     String user;
     String comment;
 
+    public Revision withTypeUpdate() {
+        return withType(Type.UPDATE);
+    }
+
 }

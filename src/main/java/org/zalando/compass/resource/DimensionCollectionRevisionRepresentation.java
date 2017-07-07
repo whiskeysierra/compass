@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
-import org.zalando.compass.domain.model.Key;
 
 import java.net.URI;
 import java.util.List;
@@ -14,7 +13,7 @@ import static lombok.AccessLevel.PRIVATE;
 @FieldDefaults(makeFinal = true, level = PRIVATE)
 @Getter
 @AllArgsConstructor
-class KeyPageRevision {
+final class DimensionCollectionRevisionRepresentation {
 
     @JsonProperty("latest-version")
     URI latestVersion;
@@ -27,6 +26,6 @@ class KeyPageRevision {
 
     // TODO without href
     RevisionRepresentation revision;
-    List<Key> keys;
+    List<DimensionRepresentation> dimensions;
 
 }

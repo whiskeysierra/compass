@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
+import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -56,17 +57,18 @@ class DimensionResource implements Reserved {
     }
 
     @RequestMapping(method = PUT, path = "/{id}")
-    public ResponseEntity<Dimension> replace(@PathVariable final String id,
+    public ResponseEntity<DimensionRepresentation> replace(@PathVariable final String id,
             @RequestBody final JsonNode node) throws IOException {
 
         ensureConsistentId(id, node);
         final Dimension dimension = reader.read(node, Dimension.class);
 
         final boolean created = service.replace(dimension);
+        final DimensionRepresentation representation = DimensionRepresentation.valueOf(dimension);
 
         return ResponseEntity
                 .status(created ? CREATED : OK)
-                .body(dimension);
+                .body(representation);
     }
 
     private void ensureConsistentId(@PathVariable final String inUrl, final JsonNode node) {
@@ -81,14 +83,16 @@ class DimensionResource implements Reserved {
 
     // TODO order by relevance? pagination?
     @RequestMapping(method = GET)
-    public DimensionPage getAll(@RequestParam(name = "q", required = false) @Nullable final String q) {
-        return new DimensionPage(service.readAll(q));
+    public ResponseEntity<DimensionCollectionRepresentation> getAll(@RequestParam(name = "q", required = false) @Nullable final String q) {
+        return ResponseEntity.ok(new DimensionCollectionRepresentation(service.readPage(q).stream()
+            .map(DimensionRepresentation::valueOf)
+            .collect(toList())));
     }
 
     @RequestMapping(method = GET, path = "/{id}")
-    public ResponseEntity<Dimension> get(@PathVariable final String id) {
+    public ResponseEntity<DimensionRepresentation> get(@PathVariable final String id) {
         try {
-            return ResponseEntity.ok(service.read(id));
+            return ResponseEntity.ok(DimensionRepresentation.valueOf(service.read(id)));
         } catch (final NotFoundException e) {
             final List<Revision> revisions = service.readRevisions(id, 1, null).getElements();
 
@@ -105,9 +109,8 @@ class DimensionResource implements Reserved {
         }
     }
 
-
     @RequestMapping(method = PATCH, path = "/{id}", consumes = {APPLICATION_JSON_VALUE, JSON_MERGE_PATCH_VALUE})
-    public ResponseEntity<Dimension> update(@PathVariable final String id,
+    public ResponseEntity<DimensionRepresentation> update(@PathVariable final String id,
             @RequestBody final ObjectNode patch) throws IOException, JsonPatchException {
 
         final Dimension dimension = service.read(id);
@@ -119,7 +122,7 @@ class DimensionResource implements Reserved {
     }
 
     @RequestMapping(method = PATCH, path = "/{id}", consumes = JSON_PATCH_VALUE)
-    public ResponseEntity<Dimension> update(@PathVariable final String id,
+    public ResponseEntity<DimensionRepresentation> update(@PathVariable final String id,
             @RequestBody final ArrayNode patch) throws IOException, JsonPatchException {
 
         // TODO validate JsonPatch schema?

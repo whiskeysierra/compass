@@ -7,10 +7,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.KeyService;
-import org.zalando.compass.domain.logic.RevisionService;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.KeyRevision;
 import org.zalando.compass.domain.model.Page;
+import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 
 import javax.annotation.Nullable;
@@ -31,17 +31,14 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 class KeyRevisionResource {
 
     private final KeyService service;
-    private final RevisionService revisionService;
 
     @Autowired
-    public KeyRevisionResource(final KeyService service,
-            final RevisionService revisionService) {
+    public KeyRevisionResource(final KeyService service) {
         this.service = service;
-        this.revisionService = revisionService;
     }
 
     @RequestMapping(method = GET, path = "/revisions")
-    public ResponseEntity<VersionHistory> getRevisions(
+    public ResponseEntity<RevisionCollectionRepresentation> getRevisions(
             @Nullable @RequestParam(required = false, defaultValue = "25") final Integer limit,
             @Nullable @RequestParam(required = false) final Long after) {
 
@@ -49,18 +46,18 @@ class KeyRevisionResource {
         checkNotNull(limit, "Limit required");
 
         return paginate(
-                () -> service.readRevisions(limit, after),
+                () -> service.readPageRevisions(limit, after),
                 rev -> linkTo(methodOn(KeyRevisionResource.class).getRevisions(limit, rev.getId())).toUri(),
                 rev -> linkTo(methodOn(KeyRevisionResource.class).getRevision(rev.getId())).toUri());
     }
 
     @RequestMapping(method = GET, path = "/revisions/{revision}")
-    public KeyPageRevision getRevision(@PathVariable final long revision) {
+    public ResponseEntity<KeyCollectionRevisionRepresentation> getRevision(@PathVariable final long revision) {
 
-        final Revision rev = revisionService.read(revision);
-        final List<Key> keys = service.readRevision(revision);
+        final PageRevision<Key> page = service.readPageAt(revision);
+        final Revision rev = page.getRevision();
 
-        return new KeyPageRevision(
+        return ResponseEntity.ok(new KeyCollectionRevisionRepresentation(
                 linkTo(methodOn(KeyResource.class).getAll(null)).toUri(),
                 null,
                 null,
@@ -72,12 +69,12 @@ class KeyRevisionResource {
                         rev.getUser(),
                         rev.getComment()
                 ),
-                keys
-        );
+                page.getElements().stream().map(KeyRepresentation::valueOf).collect(toList())
+        ));
     }
 
     @RequestMapping(method = GET, path = "/{id}/revisions")
-    public ResponseEntity<VersionHistory> getRevisions(@PathVariable final String id,
+    public ResponseEntity<RevisionCollectionRepresentation> getRevisions(@PathVariable final String id,
             @Nullable @RequestParam(required = false, defaultValue = "25") final Integer limit,
             @Nullable @RequestParam(required = false) final Long after) {
 
@@ -91,7 +88,8 @@ class KeyRevisionResource {
                 rev -> linkTo(methodOn(KeyRevisionResource.class).getRevision(id, rev.getId())).toUri());
     }
 
-    private ResponseEntity<VersionHistory> paginate(final Supplier<Page<Revision>> reader,
+    // TODO library?!
+    private ResponseEntity<RevisionCollectionRepresentation> paginate(final Supplier<Page<Revision>> reader,
             final Function<Revision, URI> nexter, final Function<Revision, URI> linker) {
         final Page<Revision> page = reader.get();
 
@@ -106,15 +104,30 @@ class KeyRevisionResource {
                 ))
                 .collect(toList());
 
-        return ResponseEntity.ok(new VersionHistory(
+        return ResponseEntity.ok(new RevisionCollectionRepresentation(
                 null,
                 Optional.ofNullable(page.getNext()).map(nexter).orElse(null),
                 revisions));
     }
 
     @RequestMapping(method = GET, path = "/{id}/revisions/{revision}")
-    public ResponseEntity<KeyRevision> getRevision(@PathVariable final String id, @PathVariable final long revision) {
-        return ResponseEntity.ok(service.readRevision(id, revision));
+    public ResponseEntity<KeyRevisionRepresentation> getRevision(@PathVariable final String id,
+            @PathVariable final long revision) {
+        final KeyRevision key = service.readAt(id, revision);
+        final Revision rev = key.getRevision();
+        return ResponseEntity.ok(new KeyRevisionRepresentation(
+                key.getId(),
+                new RevisionRepresentation(
+                        rev.getId(),
+                        rev.getTimestamp(),
+                        null,
+                        rev.getType(),
+                        rev.getUser(),
+                        rev.getComment()
+                ),
+                key.getSchema(),
+                key.getDescription()
+        ));
     }
 
 }

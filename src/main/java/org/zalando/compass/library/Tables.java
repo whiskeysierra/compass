@@ -46,5 +46,5 @@ public final class Tables {
 
         return result.stream().collect(toImmutableMap(keyFunction, valueFunction));
     }
-    
+
 }

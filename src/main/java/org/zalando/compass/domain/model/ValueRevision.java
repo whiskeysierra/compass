@@ -1,20 +1,18 @@
 package org.zalando.compass.domain.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
-import org.zalando.compass.library.Internal;
 
 @lombok.Value
-public class ValueRevision {
+public class ValueRevision implements Dimensional {
 
     ImmutableMap<String, JsonNode> dimensions;
-
-    @Internal
-    @JsonIgnore
     Long index;
-
     Revision revision;
     JsonNode value;
+
+    public Value toValue() {
+        return new Value(dimensions, index, value);
+    }
 
 }

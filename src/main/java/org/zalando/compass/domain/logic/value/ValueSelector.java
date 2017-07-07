@@ -1,11 +1,12 @@
 package org.zalando.compass.domain.logic.value;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableMap;
 import org.springframework.stereotype.Service;
 import org.zalando.compass.domain.logic.RelationService;
 import org.zalando.compass.domain.model.Dimension;
-import org.zalando.compass.domain.model.Value;
+import org.zalando.compass.domain.model.Dimensional;
 import org.zalando.compass.domain.persistence.DimensionRepository;
 
 import javax.annotation.Nullable;
@@ -14,8 +15,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import static com.google.common.collect.ImmutableBiMap.toImmutableBiMap;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.collect.Sets.union;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
@@ -34,16 +37,20 @@ class ValueSelector {
         this.matcher = matcher;
     }
 
-    List<Value> select(final List<Value> rawValues, final Map<String, JsonNode> rawFilter) {
+    <V extends Dimensional> List<V> select(final List<V> rawValues, final Map<String, JsonNode> rawFilter) {
         final Map<String, RichDimension> map = findDimensions(rawValues, rawFilter);
 
-        final List<RichValue> values = wrap(rawValues, map::get);
+        final BiMap<V, Map<RichDimension, JsonNode>> values = wrap(rawValues, map::get);
         final Map<RichDimension, JsonNode> filter = wrap(rawFilter, map);
 
-        return unwrap(matcher.match(values, filter));
+        final List<Map<RichDimension, JsonNode>> match = matcher.match(values.values(), filter);
+
+        return match.stream()
+                .map(values.inverse()::get)
+                .collect(toList());
     }
 
-    private Map<String, RichDimension> findDimensions(final List<Value> values, final Map<String, JsonNode> filter) {
+    private Map<String, RichDimension> findDimensions(final List<? extends Dimensional> values, final Map<String, JsonNode> filter) {
         final Set<String> dimensionIds = union(
                 values.stream()
                         .flatMap(value -> value.getDimensions().keySet().stream())
@@ -59,14 +66,12 @@ class ValueSelector {
                 )));
     }
 
-    private List<RichValue> wrap(final List<Value> values, final Function<String, RichDimension> lookup) {
+    private <V extends Dimensional> BiMap<V, Map<RichDimension, JsonNode>> wrap(final List<V> values,
+            final Function<String, RichDimension> lookup) {
         return values.stream()
-                .map(value -> {
-                    final ImmutableMap<RichDimension, JsonNode> dimensions = value.getDimensions().entrySet().stream()
-                            .collect(toImmutableMap(e -> lookup.apply(e.getKey()), Map.Entry::getValue));
-                    return new RichValue(dimensions, value.getValue());
-                })
-                .collect(toList());
+                .collect(toImmutableBiMap(identity(),
+                        value -> value.getDimensions().entrySet().stream()
+                        .collect(toImmutableMap(e -> lookup.apply(e.getKey()), Map.Entry::getValue))));
     }
 
     private ImmutableMap<RichDimension, JsonNode> wrap(final Map<String, JsonNode> rawFilter, final Map<String, RichDimension> lookup) {
@@ -80,16 +85,6 @@ class ValueSelector {
         });
 
         return builder.build();
-    }
-
-    private List<Value> unwrap(final List<RichValue> values) {
-        return values.stream()
-                .map(value -> {
-                    final ImmutableMap<String, JsonNode> dimensions = value.getDimensions().entrySet().stream()
-                            .collect(toImmutableMap(e -> e.getKey().getId(), Map.Entry::getValue));
-                    return new Value(dimensions, null, value.getValue());
-                })
-                .collect(toList());
     }
 
 }

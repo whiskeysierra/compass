@@ -6,13 +6,6 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.zalando.compass.domain.model.Dimension;
-import org.zalando.compass.domain.model.DimensionLock;
-import org.zalando.compass.domain.model.Key;
-import org.zalando.compass.domain.model.KeyLock;
-import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.domain.model.ValueLock;
-import org.zalando.compass.domain.model.ValuesLock;
 
 import java.util.Arrays;
 
@@ -29,7 +22,6 @@ public final class ValueEqualsTest<T> {
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][] {
                 {RichDimension.class},
-                {RichValue.class},
         });
     }
 

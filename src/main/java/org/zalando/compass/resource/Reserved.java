@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
 
-public interface Reserved {
+interface Reserved {
 
     @RequestMapping(path = {
             "/cursor",

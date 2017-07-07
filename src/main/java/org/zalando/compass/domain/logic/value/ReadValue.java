@@ -28,14 +28,6 @@ class ReadValue {
         this.selector = selector;
     }
 
-    Value read(final String key, final Map<String, JsonNode> filter) {
-        final List<Value> values = valueRepository.findAll(byKey(key));
-        final List<Value> matched = selector.select(values, filter);
-
-        return matched.stream()
-                .findFirst().orElseThrow(NotFoundException::new);
-    }
-
     List<Value> readAll(final String key, final Map<String, JsonNode> filter) {
         final List<Value> values = valueRepository.findAll(byKey(key));
 
@@ -46,11 +38,19 @@ class ReadValue {
         }
 
         if (filter.isEmpty()) {
-            // special case, just for read many values
+            // special case, just for reading many values
             return values;
         }
 
         return selector.select(values, filter);
+    }
+
+    Value read(final String key, final Map<String, JsonNode> filter) {
+        final List<Value> values = valueRepository.findAll(byKey(key));
+        final List<Value> matched = selector.select(values, filter);
+
+        return matched.stream()
+                .findFirst().orElseThrow(NotFoundException::new);
     }
 
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionRevision;
 import org.zalando.compass.domain.model.Page;
+import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.model.enums.RevisionType;
 import org.zalando.compass.library.Pages;
@@ -53,7 +54,7 @@ public class DimensionRevisionRepository {
                 .execute();
     }
 
-    public Page<Revision> findAll(final int limit, @Nullable final Long after) {
+    public Page<Revision> findPageRevisions(final int limit, @Nullable final Long after) {
         final List<Revision> revisions = db.select(REVISION.fields())
                 .select(val(RevisionType.UPDATE).as(DIMENSION_REVISION.REVISION_TYPE)) // TODO HACK!
                 .from(REVISION)
@@ -69,20 +70,30 @@ public class DimensionRevisionRepository {
         return Pages.page(revisions, limit);
     }
 
-    public List<Dimension> find(final long revision) {
-        // TODO get rid of fqcn
-        final org.zalando.compass.domain.persistence.model.tables.DimensionRevision inner = DIMENSION_REVISION.as("inner");
-        return db.select(DIMENSION_REVISION.fields())
-                .from(DIMENSION_REVISION)
-                .where(DIMENSION_REVISION.REVISION_TYPE.ne(RevisionType.DELETE))
-                .and(DIMENSION_REVISION.REVISION.eq(select(max(inner.REVISION))
-                        .from(inner)
-                        .where(inner.ID.eq(DIMENSION_REVISION.ID)) // TODO test with multiple dimensions
-                        .and(inner.REVISION.le(revision))))
-                .fetchInto(Dimension.class);
+    public Optional<PageRevision<Dimension>> findPage(final long revision) {
+        final Optional<Revision> optional = db.select(REVISION.fields())
+                .from(REVISION)
+                .where(REVISION.ID.eq(revision))
+                .fetchOptionalInto(Revision.class);
+
+        return optional.map(r -> {
+            // TODO get rid of fqcn
+            final org.zalando.compass.domain.persistence.model.tables.DimensionRevision inner = DIMENSION_REVISION.as(
+                    "inner");
+            final List<Dimension> dimensions = db.select(DIMENSION_REVISION.fields())
+                    .from(DIMENSION_REVISION)
+                    .where(DIMENSION_REVISION.REVISION_TYPE.ne(RevisionType.DELETE))
+                    .and(DIMENSION_REVISION.REVISION.eq(select(max(inner.REVISION))
+                            .from(inner)
+                            .where(inner.ID.eq(DIMENSION_REVISION.ID)) // TODO test with multiple dimensions
+                            .and(inner.REVISION.le(revision))))
+                    .fetchInto(Dimension.class);
+
+            return new PageRevision<>(r, dimensions, null);
+        });
     }
 
-    public Page<Revision> findAll(final String id, final int limit, @Nullable final Long after) {
+    public Page<Revision> findRevisions(final String id, final int limit, @Nullable final Long after) {
         final List<Revision> revisions = db.select(REVISION.fields())
                 .select(DIMENSION_REVISION.REVISION_TYPE)
                 .from(REVISION)

@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Revision;
-import org.zalando.compass.domain.persistence.NotFoundException;
 import org.zalando.compass.domain.persistence.RevisionRepository;
 
 import java.security.Principal;
@@ -38,10 +37,6 @@ public class RevisionService {
         final Revision revision = input.withId(id);
         log.info("Created revision [{}].", revision);
         return revision;
-    }
-
-    public Revision read(final long id) {
-        return repository.read(id).orElseThrow(NotFoundException::new);
     }
 
 }

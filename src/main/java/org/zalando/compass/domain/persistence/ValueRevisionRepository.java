@@ -1,19 +1,19 @@
 package org.zalando.compass.domain.persistence;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
-import lombok.Value;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Query;
 import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
+import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueRevision;
 import org.zalando.compass.domain.persistence.model.enums.RevisionType;
-import org.zalando.compass.domain.persistence.model.tables.records.RevisionRecord;
+import org.zalando.compass.domain.persistence.model.tables.ValueDimensionRevision;
 import org.zalando.compass.domain.persistence.model.tables.records.ValueDimensionRevisionRecord;
 import org.zalando.compass.domain.persistence.model.tables.records.ValueRevisionRecord;
 
@@ -21,13 +21,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.google.common.collect.MoreCollectors.toOptional;
 import static java.util.stream.Collectors.toList;
 import static org.jooq.impl.DSL.exists;
 import static org.jooq.impl.DSL.field;
+import static org.jooq.impl.DSL.max;
 import static org.jooq.impl.DSL.notExists;
+import static org.jooq.impl.DSL.recordType;
 import static org.jooq.impl.DSL.select;
 import static org.jooq.impl.DSL.selectOne;
+import static org.jooq.impl.DSL.trueCondition;
 import static org.jooq.impl.DSL.val;
 import static org.zalando.compass.domain.persistence.model.Tables.REVISION;
 import static org.zalando.compass.domain.persistence.model.Tables.VALUE_DIMENSION_REVISION;
@@ -39,6 +41,12 @@ import static org.zalando.compass.library.Tables.table;
 @Repository
 public class ValueRevisionRepository {
 
+    private static final org.zalando.compass.domain.persistence.model.tables.ValueRevision VALUE_REVISION_SELF =
+            VALUE_REVISION.as("self");
+
+    private static final ValueDimensionRevision LEFT = VALUE_DIMENSION_REVISION.as("left");
+    private static final ValueDimensionRevision RIGHT = VALUE_DIMENSION_REVISION.as("right");
+
     private final DSLContext db;
 
     @Autowired
@@ -47,7 +55,6 @@ public class ValueRevisionRepository {
     }
 
     public void create(final String key, final ValueRevision value) {
-        final Revision revision = value.getRevision();
 
         final long id = db.insertInto(VALUE_REVISION)
                 .columns(
@@ -57,8 +64,8 @@ public class ValueRevisionRepository {
                         VALUE_REVISION.INDEX,
                         VALUE_REVISION.VALUE)
                 .values(
-                        val(revision.getId()),
-                        val(translate(revision.getType(), RevisionType.class)),
+                        val(value.getRevision().getId()),
+                        val(translate(value.getRevision().getType(), RevisionType.class)),
                         val(key),
                         val(value.getIndex()),
                         val(value.getValue(), JsonNode.class))
@@ -73,7 +80,7 @@ public class ValueRevisionRepository {
                                 VALUE_DIMENSION_REVISION.DIMENSION_ID,
                                 VALUE_DIMENSION_REVISION.DIMENSION_VALUE)
                         .values(val(id),
-                                val(revision.getId()),
+                                val(value.getRevision().getId()),
                                 val(dimension.getKey()),
                                 val(dimension.getValue(), JsonNode.class)))
                 .collect(toList());
@@ -81,7 +88,79 @@ public class ValueRevisionRepository {
         db.batch(queries).execute();
     }
 
-    public List<Revision> findAll(final String key, final Map<String, JsonNode> dimensions) {
+    public <T> Optional<PageRevision<ValueRevision>> findPage(final String key, final long revision, final boolean excludeDeleted) {
+        final Optional<Revision> optional = db.select(REVISION.fields())
+                .from(REVISION)
+                .where(REVISION.ID.eq(revision))
+                .fetchOptionalInto(Revision.class);
+
+        return optional.map(r -> {
+            final Map<ValueRevisionRecord, List<ValueDimensionRevisionRecord>> map = db
+                    .select(VALUE_REVISION.fields())
+                    .select(VALUE_DIMENSION_REVISION.fields())
+                    .from(VALUE_REVISION)
+                    .leftJoin(VALUE_DIMENSION_REVISION)
+                    .on(VALUE_DIMENSION_REVISION.VALUE_ID.eq(VALUE_REVISION.ID))
+                    .and(VALUE_DIMENSION_REVISION.VALUE_REVISION.eq(VALUE_REVISION.REVISION))
+                    .where(VALUE_REVISION.KEY_ID.eq(key))
+                    .and(VALUE_REVISION.REVISION.le(revision))
+                    .and(excludeDeleted ? VALUE_REVISION.REVISION_TYPE.ne(RevisionType.DELETE) : trueCondition())
+                    .and(VALUE_REVISION.REVISION.eq(select(max(VALUE_REVISION_SELF.REVISION))
+                            .from(VALUE_REVISION_SELF)
+                            .where(VALUE_REVISION_SELF.KEY_ID.eq(VALUE_REVISION.KEY_ID))
+                            .and(VALUE_REVISION_SELF.REVISION.le(revision))
+                            .and(notExists(selectOne()
+                                    .from(LEFT)
+                                    .fullOuterJoin(RIGHT)
+                                    .on(LEFT.DIMENSION_ID.eq(RIGHT.DIMENSION_ID))
+                                    .and(LEFT.DIMENSION_VALUE.eq(RIGHT.DIMENSION_VALUE))
+                                    .where(LEFT.VALUE_ID.eq(VALUE_REVISION.ID))
+                                    .and(LEFT.VALUE_REVISION.eq(VALUE_REVISION.REVISION))
+                                    .and(LEFT.DIMENSION_ID.isNull())
+                                    .or(RIGHT.DIMENSION_ID.isNull())))))
+                    .orderBy(VALUE_REVISION.INDEX)
+                    .fetchGroups(ValueRevisionRecord.class, ValueDimensionRevisionRecord.class);
+
+            final List<ValueRevision> values = map.entrySet().stream()
+                    .map(entry -> {
+                        final ValueRevisionRecord value = entry.getKey();
+                        final ImmutableMap<String, JsonNode> dimensions = leftOuterJoin(
+                                entry.getValue(),
+                                ValueDimensionRevisionRecord::getDimensionId,
+                                ValueDimensionRevisionRecord::getDimensionValue);
+
+                        return new ValueRevision(
+                                dimensions,
+                                value.getIndex(),
+                                r
+                                        .withId(value.getRevision())
+                                        .withType(translate(value.getRevisionType(), Revision.Type.class)),
+                                value.getValue());
+                    })
+                    .collect(toList());
+
+            return new PageRevision<>(r, values, null);
+        });
+    }
+
+    public List<Revision> findPageRevisions(final String key) {
+        return db.select(REVISION.fields())
+                .from(REVISION)
+                .where(exists(selectOne()
+                        .from(VALUE_REVISION)
+                        .where(VALUE_REVISION.KEY_ID.eq(key))
+                        .and(VALUE_REVISION.REVISION.eq(REVISION.ID))))
+                .orderBy(REVISION.ID.desc())
+                .fetch(record -> new Revision(
+                        record.get(REVISION.ID),
+                        record.get(REVISION.TIMESTAMP),
+                        null,
+                        record.get(REVISION.USER),
+                        record.get(REVISION.COMMENT)
+                ));
+    }
+
+    public List<Revision> findRevisions(final String key, final Map<String, JsonNode> dimensions) {
         return db.select(REVISION.fields())
                 .select(VALUE_REVISION.REVISION_TYPE)
                 .from(REVISION)
@@ -89,32 +168,7 @@ public class ValueRevisionRepository {
                 .where(VALUE_REVISION.KEY_ID.eq(key))
                 .and(exactMatch(dimensions))
                 .orderBy(REVISION.ID.desc())
-                .fetch(record -> new Revision(
-                        record.get(REVISION.ID),
-                        record.get(REVISION.TIMESTAMP),
-                        translate(record.get(VALUE_REVISION.REVISION_TYPE), Revision.Type.class),
-                        record.get(REVISION.USER),
-                        record.get(REVISION.COMMENT)
-                ));
-    }
-
-    public Optional<ValueRevision> find(final String key, final Map<String, JsonNode> dimensions, final long revision) {
-        return db.select(VALUE_REVISION.fields())
-                .select(REVISION.fields())
-                .select(VALUE_DIMENSION_REVISION.fields())
-                .from(VALUE_REVISION)
-                .join(REVISION)
-                .on(REVISION.ID.eq(VALUE_REVISION.REVISION))
-                .leftJoin(VALUE_DIMENSION_REVISION)
-                .on(VALUE_DIMENSION_REVISION.VALUE_ID.eq(VALUE_REVISION.ID))
-                .and(VALUE_DIMENSION_REVISION.VALUE_REVISION.eq(VALUE_REVISION.REVISION))
-                .where(VALUE_REVISION.KEY_ID.eq(key))
-                .and(exactMatch(dimensions))
-                .and(VALUE_REVISION.REVISION.eq(revision))
-                .fetchGroups(this::group, ValueDimensionRevisionRecord.class)
-                .entrySet().stream()
-                .map(this::mapValue)
-                .collect(toOptional());
+                .fetch(this::mapRevision);
     }
 
     private Condition exactMatch(final Map<String, JsonNode> dimensions) {
@@ -139,41 +193,14 @@ public class ValueRevisionRepository {
         }
     }
 
-    private Group group(final Record record) {
-        return new Group(
-                record.into(ValueRevisionRecord.class),
-                record.into(RevisionRecord.class));
-    }
-
-    @Value
-    @VisibleForTesting
-    public static final class Group {
-        ValueRevisionRecord value;
-        RevisionRecord revision;
-    }
-
-    private ValueRevision mapValue(final Map.Entry<Group, List<ValueDimensionRevisionRecord>> entry) {
-        final ImmutableMap<String, JsonNode> dimensions = leftOuterJoin(entry.getValue(),
-                ValueDimensionRevisionRecord::getDimensionId,
-                ValueDimensionRevisionRecord::getDimensionValue);
-        final Group group = entry.getKey();
-        final RevisionRecord revision = group.getRevision();
-        final ValueRevisionRecord value = group.getValue();
-
-        return new ValueRevision(
-                dimensions,
-                value.getIndex(),
-                mapRevision(revision, value),
-                value.getValue());
-    }
-
-    private Revision mapRevision(RevisionRecord revision, ValueRevisionRecord value) {
+    private Revision mapRevision(final Record record) {
         return new Revision(
-                revision.getId(),
-                revision.getTimestamp(),
-                translate(value.getRevisionType(), Revision.Type.class),
-                revision.getUser(),
-                revision.getComment());
+                record.get(REVISION.ID),
+                record.get(REVISION.TIMESTAMP),
+                translate(record.get(VALUE_REVISION.REVISION_TYPE), Revision.Type.class),
+                record.get(REVISION.USER),
+                record.get(REVISION.COMMENT)
+        );
     }
 
 }

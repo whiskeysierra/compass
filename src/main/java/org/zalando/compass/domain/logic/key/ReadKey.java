@@ -19,7 +19,7 @@ class ReadKey {
         this.repository = repository;
     }
 
-    List<Key> readAll(@Nullable final String term) {
+    List<Key> readPage(@Nullable final String term) {
         return repository.findAll(term);
     }
 

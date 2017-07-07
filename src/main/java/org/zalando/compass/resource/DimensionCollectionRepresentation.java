@@ -12,8 +12,8 @@ import static lombok.AccessLevel.PRIVATE;
 @FieldDefaults(makeFinal = true, level = PRIVATE)
 @Getter
 @AllArgsConstructor
-class DimensionPage {
+class DimensionCollectionRepresentation {
 
-    List<Dimension> dimensions;
+    List<DimensionRepresentation> dimensions;
 
 }

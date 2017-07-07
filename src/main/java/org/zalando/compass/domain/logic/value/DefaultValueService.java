@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.logic.ValueService;
+import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueRevision;
@@ -42,7 +43,7 @@ class DefaultValueService implements ValueService {
     }
 
     @Override
-    public List<Value> readAll(final String key, final Map<String, JsonNode> filter) {
+    public List<Value> readPage(final String key, final Map<String, JsonNode> filter) {
         return read.readAll(key, filter);
     }
 
@@ -52,13 +53,23 @@ class DefaultValueService implements ValueService {
     }
 
     @Override
-    public List<Revision> readRevisions(final String key, final Map<String, JsonNode> filter) {
-        return readRevision.readAll(key, filter);
+    public List<Revision> readPageRevisions(final String key) {
+        return readRevision.readPageRevisions(key);
     }
 
     @Override
-    public ValueRevision readRevision(final String key, final Map<String, JsonNode> filter, final long revision) {
-        return readRevision.read(key, filter, revision);
+    public PageRevision<Value> readPageAt(final String key, final Map<String, JsonNode> filter, final long revision) {
+        return readRevision.readPageAt(key, filter, revision);
+    }
+
+    @Override
+    public List<Revision> readRevisions(final String key, final Map<String, JsonNode> dimensions) {
+        return readRevision.readRevisions(key, dimensions);
+    }
+
+    @Override
+    public ValueRevision readAt(final String key, final Map<String, JsonNode> dimensions, final long revision) {
+        return readRevision.readAt(key, dimensions, revision);
     }
 
     @Transactional

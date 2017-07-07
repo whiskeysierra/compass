@@ -14,7 +14,6 @@ import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueRevision;
-import org.zalando.compass.domain.persistence.ValueRevisionRepository;
 import org.zalando.compass.library.Maps;
 
 import java.util.Arrays;
@@ -39,7 +38,6 @@ public final class EqualsTest<T> {
                 {ValueRevision.class},
                 {Revision.class},
                 {Page.class},
-                {ValueRevisionRepository.Group.class},
                 {Maps.Pair.class},
         });
     }

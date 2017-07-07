@@ -7,6 +7,7 @@ import org.zalando.compass.domain.logic.KeyService;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.KeyRevision;
 import org.zalando.compass.domain.model.Page;
+import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 
 import javax.annotation.Nullable;
@@ -36,33 +37,33 @@ class DefaultKeyService implements KeyService {
     }
 
     @Override
+    public List<Key> readPage(@Nullable final String term) {
+        return read.readPage(term);
+    }
+
+    @Override
     public Key read(final String id) {
         return read.read(id);
     }
 
     @Override
-    public Page<Revision> readRevisions(final int limit, @Nullable final Long after) {
-        return readRevision.readAll(limit, after);
+    public Page<Revision> readPageRevisions(final int limit, @Nullable final Long after) {
+        return readRevision.readPageRevisions(limit, after);
     }
 
     @Override
-    public List<Key> readRevision(final long revision) {
-        return readRevision.read(revision);
-    }
-
-    @Override
-    public List<Key> readAll(@Nullable final String term) {
-        return read.readAll(term);
+    public PageRevision<Key> readPageAt(final long revision) {
+        return readRevision.readPageAt(revision);
     }
 
     @Override
     public Page<Revision> readRevisions(final String id, final int limit, @Nullable final Long after) {
-        return readRevision.readAll(id, limit, after);
+        return readRevision.readRevisions(id, limit, after);
     }
 
     @Override
-    public KeyRevision readRevision(final String id, final long revision) {
-        return readRevision.read(id, revision);
+    public KeyRevision readAt(final String id, final long revision) {
+        return readRevision.readAt(id, revision);
     }
 
     @Transactional

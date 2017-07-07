@@ -5,37 +5,46 @@ import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.KeyRevision;
 import org.zalando.compass.domain.model.Page;
+import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.KeyRevisionRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
 
 import javax.annotation.Nullable;
-import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 @Component
 class ReadKeyRevision {
 
-    private final KeyRevisionRepository revisionRepository;
+    private final KeyRevisionRepository repository;
 
     @Autowired
-    ReadKeyRevision(final KeyRevisionRepository revisionRepository) {
-        this.revisionRepository = revisionRepository;
+    ReadKeyRevision(final KeyRevisionRepository repository) {
+        this.repository = repository;
     }
 
-    Page<Revision> readAll(final int limit, @Nullable final Long after) {
-        return revisionRepository.findAll(limit, after);
+    Page<Revision> readPageRevisions(final int limit, @Nullable final Long after) {
+        final Page<Revision> page = repository.findPageRevisions(limit, after);
+
+        return page.withElements(page.getElements().stream()
+                .map(Revision::withTypeUpdate)
+                .collect(toList()));
     }
 
-    List<Key> read(final long revision) {
-        return revisionRepository.find(revision);
+    PageRevision<Key> readPageAt(final long revision) {
+        return repository.findPage(revision)
+                .orElseThrow(NotFoundException::new)
+                .withRevisionTypeUpdate();
     }
 
-    Page<Revision> readAll(final String id, final int limit, @Nullable final Long after) {
-        return revisionRepository.findAll(id, limit, after);
+    Page<Revision> readRevisions(final String id, final int limit, @Nullable final Long after) {
+        return repository.findRevisions(id, limit, after);
     }
 
-    KeyRevision read(final String id, final long revision) {
-        return revisionRepository.find(id, revision).orElseThrow(NotFoundException::new);
+    KeyRevision readAt(final String id, final long revision) {
+        return repository.find(id, revision)
+                .orElseThrow(NotFoundException::new);
     }
 
 }

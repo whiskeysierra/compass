@@ -29,8 +29,10 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.collect.Streams.mapWithIndex;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -65,10 +67,14 @@ class ValueResource {
     }
 
     @RequestMapping(method = PUT, path = "/values")
-    public ResponseEntity<ValuePage> replaceAll(@PathVariable final String key, @RequestBody final JsonNode node) throws IOException {
-        final List<Value> values = reader.read(node, ValuePage.class).getValues().stream()
-                .map(value -> value.withDimensions(firstNonNull(value.getDimensions(), ImmutableMap.of())))
-                .collect(toList());
+    public ResponseEntity<ValueCollectionRepresentation> replaceAll(@PathVariable final String key,
+            @RequestBody final JsonNode node) throws IOException {
+        final ValueCollectionRepresentation representation = reader.read(node, ValueCollectionRepresentation.class);
+        final List<ValueRepresentation> representations = representation.getValues();
+
+        final Stream<ValueRepresentation> withDimensions = representations.stream()
+                .map(value -> value.withDimensions(firstNonNull(value.getDimensions(), ImmutableMap.of())));
+        final List<Value> values = mapWithIndex(withDimensions, ValueRepresentation::toValue).collect(toList());
 
         final boolean created = service.replace(key, values);
 
@@ -77,7 +83,7 @@ class ValueResource {
     }
 
     @RequestMapping(method = PUT, path = "/value")
-    public ResponseEntity<Value> replace(@PathVariable final String key, @RequestParam final Map<String, String> query,
+    public ResponseEntity<ValueRepresentation> replace(@PathVariable final String key, @RequestParam final Map<String, String> query,
             @RequestBody final JsonNode node) throws IOException {
 
         final ImmutableMap<String, JsonNode> dimensions = parser.parse(query);
@@ -88,24 +94,25 @@ class ValueResource {
         return ResponseEntity
                 .status(created ? CREATED : OK)
                 .location(canonicalUrl(key, value))
-                .body(value);
+                .body(ValueRepresentation.valueOf(value));
     }
 
     @RequestMapping(method = GET, path = "/values")
-    public ValuePage readAll(@PathVariable final String key, @RequestParam final Map<String, String> query) {
+    public ValueCollectionRepresentation readAll(@PathVariable final String key, @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = parser.parse(query);
-        return new ValuePage(service.readAll(key, filter));
+        return new ValueCollectionRepresentation(service.readPage(key, filter).stream()
+            .map(ValueRepresentation::valueOf).collect(toList()));
     }
 
     @RequestMapping(method = GET, path = "/value")
-    public ResponseEntity<Value> read(@PathVariable final String key, @RequestParam final Map<String, String> query) {
+    public ResponseEntity<ValueRepresentation> read(@PathVariable final String key, @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = parser.parse(query);
         try {
             final Value value = service.read(key, filter);
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_LOCATION, canonicalUrl(key, value).toASCIIString())
-                    .body(value);
+                    .body(ValueRepresentation.valueOf(value));
         } catch (final NotFoundException e) {
             // TODO limit 1
             final List<Revision> revisions = service.readRevisions(key, filter);
@@ -125,12 +132,12 @@ class ValueResource {
     }
 
     @RequestMapping(method = PATCH, path = "/values", consumes = {APPLICATION_JSON_VALUE, JSON_PATCH_VALUE})
-    public ResponseEntity<ValuePage> updateAll(@PathVariable final String key,
+    public ResponseEntity<ValueCollectionRepresentation> updateAll(@PathVariable final String key,
             @RequestBody final ArrayNode patch) throws IOException, JsonPatchException {
 
         // TODO validate JsonPatch schema?
 
-        final ValuePage values = readAll(key, emptyMap());
+        final ValueCollectionRepresentation values = readAll(key, emptyMap());
         final JsonNode node = mapper.valueToTree(values);
 
         final JsonPatch jsonPatch = JsonPatch.fromJson(patch);
@@ -139,7 +146,7 @@ class ValueResource {
     }
 
     @RequestMapping(method = PATCH, path = "/{id}", consumes = {APPLICATION_JSON_VALUE, JSON_MERGE_PATCH_VALUE})
-    public ResponseEntity<Value> update(@PathVariable final String key, @RequestParam final Map<String, String> query,
+    public ResponseEntity<ValueRepresentation> update(@PathVariable final String key, @RequestParam final Map<String, String> query,
             @RequestBody final ObjectNode patch) throws IOException, JsonPatchException {
 
         final Map<String, JsonNode> filter = parser.parse(query);
@@ -152,7 +159,7 @@ class ValueResource {
     }
 
     @RequestMapping(method = PATCH, path = "/{id}", consumes = JSON_PATCH_VALUE)
-    public ResponseEntity<Value> update(@PathVariable final String key, @RequestParam final Map<String, String> query,
+    public ResponseEntity<ValueRepresentation> update(@PathVariable final String key, @RequestParam final Map<String, String> query,
             @RequestBody final ArrayNode patch) throws IOException, JsonPatchException {
 
         // TODO validate JsonPatch schema?

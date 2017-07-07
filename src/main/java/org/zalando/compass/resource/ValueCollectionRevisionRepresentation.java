@@ -3,23 +3,17 @@ package org.zalando.compass.resource;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
-import org.zalando.compass.domain.model.Revision;
 
-import java.net.URI;
-import java.time.LocalDateTime;
+import java.util.List;
 
 import static lombok.AccessLevel.PRIVATE;
 
 @FieldDefaults(makeFinal = true, level = PRIVATE)
 @Getter
 @AllArgsConstructor
-final class RevisionRepresentation {
+final class ValueCollectionRevisionRepresentation {
 
-    Long id;
-    LocalDateTime timestamp;
-    URI href;
-    Revision.Type type;
-    String user;
-    String comment;
+    RevisionRepresentation revision;
+    List<ValueRepresentation> values;
 
 }

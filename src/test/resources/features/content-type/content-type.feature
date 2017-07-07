@@ -34,5 +34,5 @@ Feature: Content-Type
       | /keys/tax-rate/value              |
       | /keys/tax-rate/value/revisions    |
       | /keys/tax-rate/value/revisions/3  |
-      # TODO | /keys/tax-rate/values/revisions   |
-      # TODO | /keys/tax-rate/values/revisions/3 |
+      | /keys/tax-rate/values/revisions   |
+      | /keys/tax-rate/values/revisions/3 |

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.KeyRevision;
 import org.zalando.compass.domain.model.Page;
+import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.model.enums.RevisionType;
 import org.zalando.compass.library.Pages;
@@ -51,7 +52,7 @@ public class KeyRevisionRepository {
                 .execute();
     }
 
-    public Page<Revision> findAll(final int limit, @Nullable final Long after) {
+    public Page<Revision> findPageRevisions(final int limit, @Nullable final Long after) {
         final List<Revision> revisions = db.select(REVISION.fields())
                 .select(val(RevisionType.UPDATE).as(KEY_REVISION.REVISION_TYPE)) // TODO HACK!
                 .from(REVISION)
@@ -67,20 +68,29 @@ public class KeyRevisionRepository {
         return Pages.page(revisions, limit);
     }
 
-    public List<Key> find(final long revision) {
-        // TODO get rid of fqcn
-        final org.zalando.compass.domain.persistence.model.tables.KeyRevision inner = KEY_REVISION.as("inner");
-        return db.select(KEY_REVISION.fields())
-                .from(KEY_REVISION)
-                .where(KEY_REVISION.REVISION_TYPE.ne(RevisionType.DELETE))
-                .and(KEY_REVISION.REVISION.eq(select(max(inner.REVISION))
-                        .from(inner)
-                        .where(inner.ID.eq(KEY_REVISION.ID)) // TODO test with multiple keys
-                        .and(inner.REVISION.le(revision))))
-                .fetchInto(Key.class);
+    public Optional<PageRevision<Key>> findPage(final long revision) {
+        final Optional<Revision> optional = db.select(REVISION.fields())
+                .from(REVISION)
+                .where(REVISION.ID.eq(revision))
+                .fetchOptionalInto(Revision.class);
+
+        return optional.map(r -> {
+            // TODO get rid of fqcn
+            final org.zalando.compass.domain.persistence.model.tables.KeyRevision inner = KEY_REVISION.as("inner");
+            final List<Key> keys = db.select(KEY_REVISION.fields())
+                    .from(KEY_REVISION)
+                    .where(KEY_REVISION.REVISION_TYPE.ne(RevisionType.DELETE))
+                    .and(KEY_REVISION.REVISION.eq(select(max(inner.REVISION))
+                            .from(inner)
+                            .where(inner.ID.eq(KEY_REVISION.ID)) // TODO test with multiple keys
+                            .and(inner.REVISION.le(revision))))
+                    .fetchInto(Key.class);
+
+            return new PageRevision<>(r, keys, null);
+        });
     }
 
-    public Page<Revision> findAll(final String id, final int limit, @Nullable final Long after) {
+    public Page<Revision> findRevisions(final String id, final int limit, @Nullable final Long after) {
         final List<Revision> revisions = db.select(REVISION.fields())
                 .select(KEY_REVISION.REVISION_TYPE)
                 .from(REVISION)

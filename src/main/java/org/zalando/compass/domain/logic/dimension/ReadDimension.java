@@ -19,7 +19,7 @@ class ReadDimension {
         this.repository = repository;
     }
 
-    List<Dimension> readAll(@Nullable final String term) {
+    List<Dimension> readPage(@Nullable final String term) {
         return repository.findAll(term);
     }
 
