@@ -16,7 +16,6 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-import static com.google.common.base.MoreObjects.firstNonNull;
 import static org.jooq.impl.DSL.exists;
 import static org.jooq.impl.DSL.max;
 import static org.jooq.impl.DSL.select;
@@ -25,7 +24,6 @@ import static org.jooq.impl.DSL.trueCondition;
 import static org.jooq.impl.DSL.val;
 import static org.zalando.compass.domain.persistence.model.Tables.DIMENSION_REVISION;
 import static org.zalando.compass.domain.persistence.model.Tables.REVISION;
-import static org.zalando.compass.library.Enums.translate;
 
 @Repository
 public class DimensionRevisionRepository {
@@ -50,7 +48,7 @@ public class DimensionRevisionRepository {
                         DIMENSION_REVISION.DESCRIPTION)
                 .values(dimension.getId(),
                         dimension.getRevision().getId(),
-                        translate(dimension.getRevision().getType(), RevisionType.class),
+                        dimension.getRevision().getType(),
                         dimension.getSchema(),
                         dimension.getRelation(),
                         dimension.getDescription())
@@ -65,30 +63,30 @@ public class DimensionRevisionRepository {
                         .where(DIMENSION_REVISION.REVISION.eq(REVISION.ID))
                         .and(trueCondition())))
                 .orderBy(REVISION.ID.desc())
-                .seekAfter(firstNonNull(after, Long.MAX_VALUE)) // TODO find a better way
+                // TODO .seekAfter(after == null ? null : val(after, Long.class))
                 .limit(limit + 1)
                 .fetch().map(this::mapRevisionWithoutType);
 
         return Pages.page(revisions, limit);
     }
 
-    public Optional<PageRevision<Dimension>> findPage(final long revision) {
+    public Optional<PageRevision<Dimension>> findPage(final long revisionId) {
         final Optional<Revision> optional = db.select(REVISION.fields())
                 .from(REVISION)
-                .where(REVISION.ID.eq(revision))
+                .where(REVISION.ID.eq(revisionId))
                 .fetchOptionalInto(Revision.class);
 
-        return optional.map(r -> {
+        return optional.map(revision -> {
             final List<Dimension> dimensions = db.select(DIMENSION_REVISION.fields())
                     .from(DIMENSION_REVISION)
                     .where(DIMENSION_REVISION.REVISION_TYPE.ne(RevisionType.DELETE))
                     .and(DIMENSION_REVISION.REVISION.eq(select(max(SELF.REVISION))
                             .from(SELF)
-                            .where(SELF.ID.eq(DIMENSION_REVISION.ID)) // TODO test with multiple dimensions
-                            .and(SELF.REVISION.le(revision))))
+                            .where(SELF.ID.eq(DIMENSION_REVISION.ID))
+                            .and(SELF.REVISION.le(revisionId))))
                     .fetchInto(Dimension.class);
 
-            return new PageRevision<>(r, dimensions);
+            return new PageRevision<>(revision, dimensions);
         });
     }
 
@@ -99,7 +97,7 @@ public class DimensionRevisionRepository {
                 .join(DIMENSION_REVISION).on(DIMENSION_REVISION.REVISION.eq(REVISION.ID))
                 .where(DIMENSION_REVISION.ID.eq(id))
                 .orderBy(REVISION.ID.desc())
-                .seekAfter(firstNonNull(after, Long.MAX_VALUE)) // TODO find a better way
+                .seekAfter(after == null ? null : val(after, Long.class))
                 .limit(limit + 1)
                 .fetch().map(this::mapRevisionWithType);
 
@@ -131,7 +129,7 @@ public class DimensionRevisionRepository {
         return new Revision(
                         record.get(REVISION.ID),
                         record.get(REVISION.TIMESTAMP),
-                        translate(record.get(DIMENSION_REVISION.REVISION_TYPE), Revision.Type.class),
+                        record.get(DIMENSION_REVISION.REVISION_TYPE),
                         record.get(REVISION.USER),
                         record.get(REVISION.COMMENT)
                 );

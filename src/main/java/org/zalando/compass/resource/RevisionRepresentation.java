@@ -1,9 +1,11 @@
 package org.zalando.compass.resource;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
-import org.zalando.compass.domain.model.Revision;
+import org.zalando.compass.domain.persistence.model.enums.RevisionType;
+import org.zalando.compass.library.LowerCaseConverter;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -18,7 +20,9 @@ final class RevisionRepresentation {
     Long id;
     LocalDateTime timestamp;
     URI href;
-    Revision.Type type;
+
+    @JsonSerialize(converter = LowerCaseConverter.class)
+    RevisionType type;
     String user;
     String comment;
 

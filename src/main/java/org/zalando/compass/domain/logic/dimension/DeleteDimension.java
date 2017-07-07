@@ -16,7 +16,7 @@ import org.zalando.compass.domain.persistence.NotFoundException;
 import javax.annotation.Nullable;
 
 import static org.zalando.compass.domain.logic.BadArgumentException.checkArgument;
-import static org.zalando.compass.domain.model.Revision.Type.DELETE;
+import static org.zalando.compass.domain.persistence.model.enums.RevisionType.DELETE;
 
 @Slf4j
 @Component

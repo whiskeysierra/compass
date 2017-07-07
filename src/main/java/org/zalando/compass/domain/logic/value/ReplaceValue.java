@@ -9,13 +9,13 @@ import org.zalando.compass.domain.logic.Locking;
 import org.zalando.compass.domain.logic.RevisionService;
 import org.zalando.compass.domain.logic.ValidationService;
 import org.zalando.compass.domain.model.Revision;
-import org.zalando.compass.domain.model.Revision.Type;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueLock;
 import org.zalando.compass.domain.model.ValueRevision;
 import org.zalando.compass.domain.model.ValuesLock;
 import org.zalando.compass.domain.persistence.ValueRepository;
 import org.zalando.compass.domain.persistence.ValueRevisionRepository;
+import org.zalando.compass.domain.persistence.model.enums.RevisionType;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -27,9 +27,9 @@ import static com.google.common.collect.Sets.intersection;
 import static com.google.common.collect.Streams.mapWithIndex;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static org.zalando.compass.domain.model.Revision.Type.CREATE;
-import static org.zalando.compass.domain.model.Revision.Type.DELETE;
-import static org.zalando.compass.domain.model.Revision.Type.UPDATE;
+import static org.zalando.compass.domain.persistence.model.enums.RevisionType.CREATE;
+import static org.zalando.compass.domain.persistence.model.enums.RevisionType.DELETE;
+import static org.zalando.compass.domain.persistence.model.enums.RevisionType.UPDATE;
 
 @Slf4j
 @Component
@@ -143,7 +143,7 @@ class ReplaceValue {
         createRevision(key, value, rev, DELETE);
     }
 
-    private void createRevision(final String key, final Value value, final Revision revision, final Type type) {
+    private void createRevision(final String key, final Value value, final Revision revision, final RevisionType type) {
         final ValueRevision valueRevision = value.toRevision(revision.withType(type));
         revisionRepository.create(key, valueRevision);
         log.info("Created value revision [{}]", valueRevision);

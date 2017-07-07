@@ -16,15 +16,14 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-import static com.google.common.base.MoreObjects.firstNonNull;
 import static org.jooq.impl.DSL.exists;
 import static org.jooq.impl.DSL.max;
 import static org.jooq.impl.DSL.select;
 import static org.jooq.impl.DSL.selectOne;
 import static org.jooq.impl.DSL.trueCondition;
+import static org.jooq.impl.DSL.val;
 import static org.zalando.compass.domain.persistence.model.Tables.KEY_REVISION;
 import static org.zalando.compass.domain.persistence.model.Tables.REVISION;
-import static org.zalando.compass.library.Enums.translate;
 
 @Repository
 public class KeyRevisionRepository {
@@ -47,7 +46,7 @@ public class KeyRevisionRepository {
                         KEY_REVISION.DESCRIPTION)
                 .values(key.getId(),
                         key.getRevision().getId(),
-                        translate(key.getRevision().getType(), RevisionType.class),
+                        key.getRevision().getType(),
                         key.getSchema(),
                         key.getDescription())
                 .execute();
@@ -61,30 +60,30 @@ public class KeyRevisionRepository {
                         .where(KEY_REVISION.REVISION.eq(REVISION.ID))
                         .and(trueCondition())))
                 .orderBy(REVISION.ID.desc())
-                .seekAfter(firstNonNull(after, Long.MAX_VALUE)) // TODO find a better way
+                // TODO .seekAfter(after == null ? null : val(after, Long.class))
                 .limit(limit + 1)
                 .fetch().map(this::mapRevisionWithoutType);
 
         return Pages.page(revisions, limit);
     }
 
-    public Optional<PageRevision<Key>> findPage(final long revision) {
+    public Optional<PageRevision<Key>> findPage(final long revisionId) {
         final Optional<Revision> optional = db.select(REVISION.fields())
                 .from(REVISION)
-                .where(REVISION.ID.eq(revision))
+                .where(REVISION.ID.eq(revisionId))
                 .fetchOptionalInto(Revision.class);
 
-        return optional.map(r -> {
+        return optional.map(revision -> {
             final List<Key> keys = db.select(KEY_REVISION.fields())
                     .from(KEY_REVISION)
                     .where(KEY_REVISION.REVISION_TYPE.ne(RevisionType.DELETE))
                     .and(KEY_REVISION.REVISION.eq(select(max(SELF.REVISION))
                             .from(SELF)
-                            .where(SELF.ID.eq(KEY_REVISION.ID)) // TODO test with multiple keys
-                            .and(SELF.REVISION.le(revision))))
+                            .where(SELF.ID.eq(KEY_REVISION.ID))
+                            .and(SELF.REVISION.le(revisionId))))
                     .fetchInto(Key.class);
 
-            return new PageRevision<>(r, keys);
+            return new PageRevision<>(revision, keys);
         });
     }
 
@@ -95,7 +94,7 @@ public class KeyRevisionRepository {
                 .join(KEY_REVISION).on(KEY_REVISION.REVISION.eq(REVISION.ID))
                 .where(KEY_REVISION.ID.eq(id))
                 .orderBy(REVISION.ID.desc())
-                .seekAfter(firstNonNull(after, Long.MAX_VALUE)) // TODO find a better way
+                .seekAfter(after == null ? null : val(after, Long.class))
                 .limit(limit + 1)
                 .fetch().map(this::mapRevisionWithType);
 
@@ -126,7 +125,7 @@ public class KeyRevisionRepository {
         return new Revision(
                 record.get(REVISION.ID),
                 record.get(REVISION.TIMESTAMP),
-                translate(record.get(KEY_REVISION.REVISION_TYPE), Revision.Type.class),
+                record.get(KEY_REVISION.REVISION_TYPE),
                 record.get(REVISION.USER),
                 record.get(REVISION.COMMENT)
         );

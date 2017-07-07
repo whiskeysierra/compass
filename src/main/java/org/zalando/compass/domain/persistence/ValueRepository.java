@@ -45,7 +45,6 @@ public class ValueRepository {
     public Value create(final String key, final Value value) {
         final ValueRecord record;
 
-        // TODO ugly!
         if (value.getIndex() == null) {
             record = db.insertInto(VALUE)
                     .columns(VALUE.KEY_ID, VALUE.VALUE_)

@@ -16,7 +16,7 @@ import org.zalando.compass.domain.persistence.ValueRevisionRepository;
 
 import java.util.Map;
 
-import static org.zalando.compass.domain.model.Revision.Type.DELETE;
+import static org.zalando.compass.domain.persistence.model.enums.RevisionType.DELETE;
 
 @Slf4j
 @Component

@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
-import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueRevision;
 import org.zalando.compass.domain.persistence.model.enums.RevisionType;
 import org.zalando.compass.domain.persistence.model.tables.ValueDimensionRevision;
@@ -26,7 +25,6 @@ import static org.jooq.impl.DSL.exists;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.max;
 import static org.jooq.impl.DSL.notExists;
-import static org.jooq.impl.DSL.recordType;
 import static org.jooq.impl.DSL.select;
 import static org.jooq.impl.DSL.selectOne;
 import static org.jooq.impl.DSL.trueCondition;
@@ -34,7 +32,6 @@ import static org.jooq.impl.DSL.val;
 import static org.zalando.compass.domain.persistence.model.Tables.REVISION;
 import static org.zalando.compass.domain.persistence.model.Tables.VALUE_DIMENSION_REVISION;
 import static org.zalando.compass.domain.persistence.model.Tables.VALUE_REVISION;
-import static org.zalando.compass.library.Enums.translate;
 import static org.zalando.compass.library.Tables.leftOuterJoin;
 import static org.zalando.compass.library.Tables.table;
 
@@ -64,7 +61,7 @@ public class ValueRevisionRepository {
                         VALUE_REVISION.VALUE)
                 .values(
                         val(value.getRevision().getId()),
-                        val(translate(value.getRevision().getType(), RevisionType.class)),
+                        val(value.getRevision().getType()),
                         val(key),
                         val(value.getIndex()),
                         val(value.getValue(), JsonNode.class))
@@ -104,13 +101,14 @@ public class ValueRevisionRepository {
                 ));
     }
 
-    public <T> Optional<PageRevision<ValueRevision>> findPage(final String key, final long revision, final boolean excludeDeleted) {
+    public <T> Optional<PageRevision<ValueRevision>> findPage(final String key, final long revisionId,
+            final boolean excludeDeleted) {
         final Optional<Revision> optional = db.select(REVISION.fields())
                 .from(REVISION)
-                .where(REVISION.ID.eq(revision))
+                .where(REVISION.ID.eq(revisionId))
                 .fetchOptionalInto(Revision.class);
 
-        return optional.map(r -> {
+        return optional.map(revision -> {
             final Map<ValueRevisionRecord, List<ValueDimensionRevisionRecord>> map = db
                     .select(VALUE_REVISION.fields())
                     .select(VALUE_DIMENSION_REVISION.fields())
@@ -119,12 +117,12 @@ public class ValueRevisionRepository {
                     .on(VALUE_DIMENSION_REVISION.VALUE_ID.eq(VALUE_REVISION.ID))
                     .and(VALUE_DIMENSION_REVISION.VALUE_REVISION.eq(VALUE_REVISION.REVISION))
                     .where(VALUE_REVISION.KEY_ID.eq(key))
-                    .and(VALUE_REVISION.REVISION.le(revision))
+                    .and(VALUE_REVISION.REVISION.le(revisionId))
                     .and(excludeDeleted ? VALUE_REVISION.REVISION_TYPE.ne(RevisionType.DELETE) : trueCondition())
                     .and(VALUE_REVISION.REVISION.eq(select(max(VALUE_REVISION_SELF.REVISION))
                             .from(VALUE_REVISION_SELF)
                             .where(VALUE_REVISION_SELF.KEY_ID.eq(VALUE_REVISION.KEY_ID))
-                            .and(VALUE_REVISION_SELF.REVISION.le(revision))
+                            .and(VALUE_REVISION_SELF.REVISION.le(revisionId))
                             .and(notExists(selectOne()
                                     .from(LEFT)
                                     .fullOuterJoin(RIGHT)
@@ -148,14 +146,14 @@ public class ValueRevisionRepository {
                         return new ValueRevision(
                                 dimensions,
                                 value.getIndex(),
-                                r
+                                revision
                                         .withId(value.getRevision())
-                                        .withType(translate(value.getRevisionType(), Revision.Type.class)),
+                                        .withType(value.getRevisionType()),
                                 value.getValue());
                     })
                     .collect(toList());
 
-            return new PageRevision<>(r, values);
+            return new PageRevision<>(revision, values);
         });
     }
 
@@ -196,7 +194,7 @@ public class ValueRevisionRepository {
         return new Revision(
                 record.get(REVISION.ID),
                 record.get(REVISION.TIMESTAMP),
-                translate(record.get(VALUE_REVISION.REVISION_TYPE), Revision.Type.class),
+                record.get(VALUE_REVISION.REVISION_TYPE),
                 record.get(REVISION.USER),
                 record.get(REVISION.COMMENT)
         );

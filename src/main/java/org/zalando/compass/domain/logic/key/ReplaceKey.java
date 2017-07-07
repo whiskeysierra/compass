@@ -17,8 +17,8 @@ import org.zalando.compass.domain.persistence.KeyRevisionRepository;
 import javax.annotation.Nullable;
 import java.util.List;
 
-import static org.zalando.compass.domain.model.Revision.Type.CREATE;
-import static org.zalando.compass.domain.model.Revision.Type.UPDATE;
+import static org.zalando.compass.domain.persistence.model.enums.RevisionType.CREATE;
+import static org.zalando.compass.domain.persistence.model.enums.RevisionType.UPDATE;
 import static org.zalando.compass.library.Changed.changed;
 
 @Slf4j

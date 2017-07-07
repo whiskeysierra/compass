@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.Wither;
+import org.zalando.compass.domain.persistence.model.enums.RevisionType;
 
 import java.util.List;
 import java.util.function.Function;
@@ -27,7 +28,7 @@ public class PageRevision<T> {
     }
 
     public PageRevision<T> withRevisionTypeUpdate() {
-        return withRevision(revision.withType(Revision.Type.UPDATE));
+        return withRevision(revision.withType(RevisionType.UPDATE));
     }
 
 }
