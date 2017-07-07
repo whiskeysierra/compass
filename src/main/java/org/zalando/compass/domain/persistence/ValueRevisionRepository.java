@@ -139,7 +139,7 @@ public class ValueRevisionRepository {
                     })
                     .collect(toList());
 
-            return new PageRevision<>(r, values, null);
+            return new PageRevision<>(r, values);
         });
     }
 

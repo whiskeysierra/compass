@@ -37,7 +37,6 @@ public final class EqualsTest<T> {
                 {Value.class},
                 {ValueRevision.class},
                 {Revision.class},
-                {Page.class},
                 {Maps.Pair.class},
         });
     }

@@ -15,7 +15,9 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.ImmutableMap.of;
-import static org.hamcrest.Matchers.contains;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.zalando.compass.library.Schema.stringSchema;
 
@@ -51,96 +53,91 @@ public class ValueMatcherTest {
 
     @Test
     public void shouldMatchEquality() throws IOException {
-        assertThat(unit.match(values, of(country, text("DE"))), contains(
+        assertThat(unit.match(values, of(country, text("DE"))), is(asList(
                 of(country, text("DE")),
-                of()));
+                of())));
     }
 
     @Test
     public void shouldMatchEqualityFallback() throws IOException {
-        assertThat(unit.match(values, of(country, text("UK"))), contains(
-                of()));
+        assertThat(unit.match(values, of(country, text("UK"))), is(singletonList(of())));
     }
 
     @Test
     public void shouldMatchLessThan() throws IOException {
-        assertThat(unit.match(values, of(country, text("CH"), before, text("2013-12-20T11:47:19Z"))), contains(
+        assertThat(unit.match(values, of(country, text("CH"), before, text("2013-12-20T11:47:19Z"))), is(asList(
                 of(country, text("CH"), before, text("2014-01-01T00:00:00Z")),
                 of(country, text("CH"), before, text("2015-01-01T00:00:00Z")),
                 of(country, text("CH")),
-                of()));
+                of())));
     }
 
     @Test
     public void shouldMatchLessThanEqual() throws IOException {
-        assertThat(unit.match(values, of(country, text("CH"), before, text("2014-01-01T00:00:00Z"))), contains(
+        assertThat(unit.match(values, of(country, text("CH"), before, text("2014-01-01T00:00:00Z"))), is(asList(
                 of(country, text("CH"), before, text("2014-01-01T00:00:00Z")),
                 of(country, text("CH"), before, text("2015-01-01T00:00:00Z")),
                 of(country, text("CH")),
-                of()
-        ));
+                of())));
     }
 
     @Test
     public void shouldMatchGreaterThan() throws IOException {
-        assertThat(unit.match(values, of(country, text("CH"), after, text("2019-12-20T11:47:19Z"))), contains(
+        assertThat(unit.match(values, of(country, text("CH"), after, text("2019-12-20T11:47:19Z"))), is(asList(
                 of(country, text("CH"), after, text("2018-01-01T00:00:00Z")),
                 of(country, text("CH"), after, text("2017-01-01T00:00:00Z")),
                 of(country, text("CH")),
                 of(after, text("2017-01-01T00:00:00Z")),
-                of()));
+                of())));
     }
 
     @Test
     public void shouldMatchGreaterThanEqual() throws IOException {
-        assertThat(unit.match(values, of(country, text("CH"), after, text("2018-01-01T00:00:00Z"))), contains(
+        assertThat(unit.match(values, of(country, text("CH"), after, text("2018-01-01T00:00:00Z"))), is(asList(
                 of(country, text("CH"), after, text("2018-01-01T00:00:00Z")),
                 of(country, text("CH"), after, text("2017-01-01T00:00:00Z")),
                 of(country, text("CH")),
                 of(after, text("2017-01-01T00:00:00Z")),
-                of()));
+                of())));
     }
 
     @Test
     public void shouldMatchPrefix() throws IOException {
-        assertThat(unit.match(values, of(locale, text("de-AT"))),contains(
+        assertThat(unit.match(values, of(locale, text("de-AT"))),is(asList(
                 of(locale, text("de")),
-                of()));
+                of())));
     }
 
     @Test
     public void shouldMatchMatches() throws IOException {
-        assertThat(unit.match(values, of(email, text("user@zalando.de"))), contains(
+        assertThat(unit.match(values, of(email, text("user@zalando.de"))), is(asList(
                 of(email, text(".*@zalando\\.de")),
-                of()));
+                of())));
     }
 
     @Test
     public void shouldMatchWithoutFilter() throws IOException {
-        assertThat(unit.match(values, of()), contains(
-                of()));
+        assertThat(unit.match(values, of()), is(singletonList(of())));
     }
 
     @Test
     public void shouldMatchWithUnknownDimensions() throws IOException {
         final RichDimension foo = new RichDimension("foo", stringSchema(), new Equality(), "");
-        assertThat(unit.match(values, of(foo, text("bar"))), contains(
-                of()));
+        assertThat(unit.match(values, of(foo, text("bar"))), is(singletonList(of())));
     }
 
     @Test
     public void shouldMatchWithoutMatchingDimensions() throws IOException {
-        assertThat(unit.match(values, of(postalCode, text("12345"))), contains(
-                of()));
+        assertThat(unit.match(values, of(postalCode, text("12345"))), is(singletonList(of())));
     }
 
     @Test
     public void shouldMatchWithPartiallyUnknownDimensions() throws IOException {
         final RichDimension foo = new RichDimension("foo", stringSchema(), new Equality(), "");
         assertThat(unit.match(values, of(country, text("DE"),
-                foo, text("bar"))), contains(
+                foo, text("bar"))), is(asList(
                 of(country, text("DE")),
-                of()));
+                of())));
     }
 
     private JsonNode text(final String text) {

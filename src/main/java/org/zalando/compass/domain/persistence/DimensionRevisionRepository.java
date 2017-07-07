@@ -89,7 +89,7 @@ public class DimensionRevisionRepository {
                             .and(inner.REVISION.le(revision))))
                     .fetchInto(Dimension.class);
 
-            return new PageRevision<>(r, dimensions, null);
+            return new PageRevision<>(r, dimensions);
         });
     }
 

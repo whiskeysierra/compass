@@ -92,6 +92,17 @@ Feature: Value history
       | "CH"                | 0.08   |
       | "FR"                | 0.2    |
 
+  Scenario: Read revisions with filter
+    Given "PUT /keys/tax-rate/values" responds "201 Created" when requested with an array at "/values":
+      | /dimensions/country | /value |
+      | "AT"                | 0.2    |
+      | "CH"                | 0.08   |
+      | "DE"                | 0.19   |
+      | "FR"                | 0.2    |
+    And "GET /keys/tax-rate/values/revisions/4?country=AT" responds "200 OK" with an array at "/values":
+      | /dimensions/country | /value |
+      | "AT"                | 0.2    |
+
   Scenario: Read revision metadata
     Given "PUT /keys/tax-rate/value?country=DE" responds "201 Created" when requested with:
       | /value |

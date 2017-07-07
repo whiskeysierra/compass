@@ -86,7 +86,7 @@ public class KeyRevisionRepository {
                             .and(inner.REVISION.le(revision))))
                     .fetchInto(Key.class);
 
-            return new PageRevision<>(r, keys, null);
+            return new PageRevision<>(r, keys);
         });
     }
 

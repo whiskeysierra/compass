@@ -1,14 +1,19 @@
 package org.zalando.compass.domain.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.experimental.FieldDefaults;
 import lombok.experimental.Wither;
 
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
+import static lombok.AccessLevel.PRIVATE;
 
-@lombok.Value
+@FieldDefaults(makeFinal = true, level = PRIVATE)
+@Getter
+@AllArgsConstructor
 public class PageRevision<T> {
 
     @Wither
@@ -17,14 +22,8 @@ public class PageRevision<T> {
     @Wither
     List<T> elements;
 
-    T next;
-
     public <R> PageRevision<R> map(final Function<T, R> function) {
-        return new PageRevision<>(
-                revision,
-                elements.stream().map(function).collect(toList()),
-                next == null ? null : function.apply(next)
-        );
+        return new PageRevision<>(revision, elements.stream().map(function).collect(toList()));
     }
 
     public PageRevision<T> withRevisionTypeUpdate() {
