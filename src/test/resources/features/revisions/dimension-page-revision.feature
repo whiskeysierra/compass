@@ -31,6 +31,7 @@ Feature: /dimensions/revisions/{revision}
       | "country" | "string"     | "="       | "ISO 3166"   |
 
   Scenario: Read revision metadata
-    Then "GET /dimensions/revisions/1" responds "200 OK" with:
-      | /revision/id | /revision/type | /revision/user | /revision/comment |
-      | 1            | "update"       | "anonymous"    | ".."              |
+    # TODO at "/revision"
+    Then "GET /dimensions/revisions/1" responds "200 OK" with at "/revision":
+      | /id | /timestamp             | /type    | /user       | /comment |
+      | 1   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | ".."     |

@@ -9,7 +9,7 @@ import org.zalando.compass.domain.persistence.RevisionRepository;
 
 import java.security.Principal;
 import java.time.Clock;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 @Slf4j
@@ -26,7 +26,7 @@ public class RevisionService {
     }
 
     public Revision create(final String comment) {
-        final LocalDateTime timestamp = LocalDateTime.now(clock);
+        final OffsetDateTime timestamp = OffsetDateTime.now(clock);
 
         final String user = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
                 .map(Principal::getName).orElse("anonymous");

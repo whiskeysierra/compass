@@ -31,10 +31,10 @@ Feature: /keys/{id}/value/revision
       | /value |
       | true   |
     Then "GET /keys/tax-rate/value/revisions?country=DE" responds "200 OK" with an array at "/revisions":
-      | /id | /type    | /user       | /comment |
-      | 6   | "delete" | "anonymous" | ".."     |
-      | 5   | "update" | "anonymous" | ".."     |
-      | 4   | "create" | "anonymous" | ".."     |
+      | /id | /timestamp             | /type    | /user       | /comment |
+      | 6   | "2017-07-07T22:09:21Z" | "delete" | "anonymous" | ".."     |
+      | 5   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | ".."     |
+      | 4   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | ".."     |
 
   Scenario: Create/update/delete value and read revisions
     When "PUT /keys/tax-rate/value?country=DE" responds "201 Created" when requested with:
@@ -57,12 +57,12 @@ Feature: /keys/{id}/value/revision
       | /value |
       | true   |
     Then "GET /keys/tax-rate/value/revisions?country=DE" responds "200 OK" with an array at "/revisions":
-      | /id | /type    | /user       | /comment |
-      | 8   | "delete" | "anonymous" | ".."     |
-      | 7   | "create" | "anonymous" | ".."     |
-      | 6   | "delete" | "anonymous" | ".."     |
-      | 5   | "update" | "anonymous" | ".."     |
-      | 4   | "create" | "anonymous" | ".."     |
+      | /id | /timestamp             | /type    | /user       | /comment |
+      | 8   | "2017-07-07T22:09:21Z" | "delete" | "anonymous" | ".."     |
+      | 7   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | ".."     |
+      | 6   | "2017-07-07T22:09:21Z" | "delete" | "anonymous" | ".."     |
+      | 5   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | ".."     |
+      | 4   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | ".."     |
 
   Scenario: Read value revisions without dimensions
     When "PUT /keys/tax-rate/value" responds "201 Created" when requested with:
@@ -73,10 +73,10 @@ Feature: /keys/{id}/value/revision
       | 0.19   |
     And "DELETE /keys/tax-rate/values" responds "204 No Content"
     Then "GET /keys/tax-rate/value/revisions" responds "200 OK" with an array at "/revisions":
-      | /id | /type    | /user       | /comment |
-      | 6   | "delete" | "anonymous" | ".."     |
-      | 5   | "update" | "anonymous" | ".."     |
-      | 4   | "create" | "anonymous" | ".."     |
+      | /id | /timestamp             | /type    | /user       | /comment |
+      | 6   | "2017-07-07T22:09:21Z" | "delete" | "anonymous" | ".."     |
+      | 5   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | ".."     |
+      | 4   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | ".."     |
 
   Scenario: Read value revisions with dimensions
     Given "PUT /dimensions/after" responds "201 Created" when requested with:
@@ -89,5 +89,5 @@ Feature: /keys/{id}/value/revision
       | /value |
       | 0.2    |
     Then "GET /keys/tax-rate/value/revisions?country=DE&after=2007-01-01T00:00:00Z" responds "200 OK" with an array at "/revisions":
-      | /id | /type    | /user       | /comment |
-      | 5   | "create" | "anonymous" | ".."     |
+      | /id | /timestamp             | /type    | /user       | /comment |
+      | 5   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | ".."     |

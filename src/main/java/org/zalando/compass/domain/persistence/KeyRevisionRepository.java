@@ -16,6 +16,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
+import static java.time.ZoneOffset.UTC;
 import static org.jooq.impl.DSL.exists;
 import static org.jooq.impl.DSL.max;
 import static org.jooq.impl.DSL.select;
@@ -68,11 +69,13 @@ public class KeyRevisionRepository {
     }
 
     public Optional<PageRevision<Key>> findPage(final long revisionId) {
+        // TODO move to revisionrepository
         final Optional<Revision> optional = db.select(REVISION.fields())
                 .from(REVISION)
                 .where(REVISION.ID.eq(revisionId))
-                .fetchOptionalInto(Revision.class);
+                .fetchOptional(this::mapRevisionWithoutType);
 
+        // TODO this belongs to the service layer
         return optional.map(revision -> {
             final List<Key> keys = db.select(KEY_REVISION.fields())
                     .from(KEY_REVISION)
@@ -124,7 +127,7 @@ public class KeyRevisionRepository {
     private Revision mapRevisionWithType(final Record record) {
         return new Revision(
                 record.get(REVISION.ID),
-                record.get(REVISION.TIMESTAMP),
+                record.get(REVISION.TIMESTAMP).atOffset(UTC),
                 record.get(KEY_REVISION.REVISION_TYPE),
                 record.get(REVISION.USER),
                 record.get(REVISION.COMMENT)
@@ -134,7 +137,7 @@ public class KeyRevisionRepository {
     private Revision mapRevisionWithoutType(final Record record) {
         return new Revision(
                 record.get(REVISION.ID),
-                record.get(REVISION.TIMESTAMP),
+                record.get(REVISION.TIMESTAMP).atOffset(UTC),
                 null,
                 record.get(REVISION.USER),
                 record.get(REVISION.COMMENT)

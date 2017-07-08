@@ -53,6 +53,6 @@ Feature: /keys/{id}/values/revision/{revision}
     Given "PUT /keys/tax-rate/value?country=DE" responds "201 Created" when requested with:
       | /value |
       | 0.16   |
-    Then "GET /keys/tax-rate/values/revisions/4" responds "200 OK" with:
-      | /revision/id | /revision/type | /revision/user | /revision/comment |
-      | 4            | "update"       | "anonymous"    | ".."              |
+    Then "GET /keys/tax-rate/values/revisions/4" responds "200 OK" with at "/revision":
+      | /id | /timestamp             | /type    | /user       | /comment |
+      | 4   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | ".."     |

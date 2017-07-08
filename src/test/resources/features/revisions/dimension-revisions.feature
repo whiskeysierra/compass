@@ -17,15 +17,15 @@ Feature: /dimensions/{id}/revisions
 
   Scenario: Read revisions
     Then "GET /dimensions/device/revisions" responds "200 OK" with an array at "/revisions":
-      | /id | /type    | /user       | /comment |
-      | 5   | "update" | "anonymous" | ".."     |
-      | 4   | "create" | "anonymous" | ".."     |
-      | 3   | "delete" | "anonymous" | ".."     |
-      | 2   | "update" | "anonymous" | ".."     |
-      | 1   | "create" | "anonymous" | ".."     |
+      | /id | /timestamp             | /type    | /user       | /comment |
+      | 5   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | ".."     |
+      | 4   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | ".."     |
+      | 3   | "2017-07-07T22:09:21Z" | "delete" | "anonymous" | ".."     |
+      | 2   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | ".."     |
+      | 1   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | ".."     |
 
   Scenario: Read revisions should support limit
     Then "GET /dimensions/device/revisions?limit=2" responds "200 OK" with an array at "/revisions":
-      | /id | /type    | /user       | /comment |
-      | 5   | "update" | "anonymous" | ".."     |
-      | 4   | "create" | "anonymous" | ".."     |
+      | /id | /timestamp             | /type    | /user       | /comment |
+      | 5   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | ".."     |
+      | 4   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | ".."     |

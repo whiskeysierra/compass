@@ -14,7 +14,7 @@ Feature: /keys/{id}/value/revision/{revision}
   Scenario: Read revision
     When "PUT /keys/tax-rate/value?country=DE" responds "201 Created" when requested with:
       | /value |
-      | 0.16    |
+      | 0.16   |
     And "PUT /keys/tax-rate/value?country=DE" responds "200 OK" when requested with:
       | /value |
       | 0.19   |
@@ -25,11 +25,11 @@ Feature: /keys/{id}/value/revision/{revision}
       | "CH"                | 0.08   |
       | "FR"                | 0.2    |
     Then "GET /keys/tax-rate/value/revisions/4?country=DE" responds "200 OK" with:
-      | /dimensions/country | /revision/id | /revision/type | /revision/user | /revision/comment | /value |
-      | "DE"                | 4            | "create"       | "anonymous"    | ".."              | 0.16   |
+      | /dimensions/country | /revision/id | /revision/timestamp    | /revision/type | /revision/user | /revision/comment | /value |
+      | "DE"                | 4            | "2017-07-07T22:09:21Z" | "create"       | "anonymous"    | ".."              | 0.16   |
     And "GET /keys/tax-rate/value/revisions/5?country=DE" responds "200 OK" with:
-      | /dimensions/country | /revision/id | /revision/type | /revision/user | /revision/comment | /value |
-      | "DE"                | 5            | "update"       | "anonymous"    | ".."              | 0.19   |
+      | /dimensions/country | /revision/id | /revision/timestamp    | /revision/type | /revision/user | /revision/comment | /value |
+      | "DE"                | 5            | "2017-07-07T22:09:21Z" | "update"       | "anonymous"    | ".."              | 0.19   |
     And "GET /keys/tax-rate/value/revisions/6?country=DE" responds "200 OK" with:
-      | /dimensions/country | /revision/id | /revision/type | /revision/user | /revision/comment | /value |
-      | "DE"                | 6            | "delete"       | "anonymous"    | ".."              | 0.19   |
+      | /dimensions/country | /revision/id | /revision/timestamp    | /revision/type | /revision/user | /revision/comment | /value |
+      | "DE"                | 6            | "2017-07-07T22:09:21Z" | "delete"       | "anonymous"    | ".."              | 0.19   |

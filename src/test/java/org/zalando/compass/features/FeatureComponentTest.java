@@ -5,6 +5,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.zalando.compass.Application;
 import org.zalando.compass.domain.persistence.EmbeddedDataSourceConfiguration;
+import org.zalando.compass.library.FixedClockConfiguration;
 import org.zuchini.junit.ZuchiniOptions;
 import org.zuchini.spring.SpringZuchini;
 import org.zuchini.spring.SpringZuchiniConfiguration;
@@ -20,7 +21,8 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @SpringBootTest(webEnvironment = DEFINED_PORT, classes = {
         Application.class,
         EmbeddedDataSourceConfiguration.class,
-        SpringZuchiniConfiguration.class
+        SpringZuchiniConfiguration.class,
+        FixedClockConfiguration.class,
 })
 @ActiveProfiles("test")
 public class FeatureComponentTest {

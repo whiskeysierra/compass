@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.time.ZoneOffset.UTC;
 import static java.util.stream.Collectors.toList;
 import static org.jooq.impl.DSL.exists;
 import static org.jooq.impl.DSL.field;
@@ -92,22 +93,18 @@ public class ValueRevisionRepository {
                         .where(VALUE_REVISION.KEY_ID.eq(key))
                         .and(VALUE_REVISION.REVISION.eq(REVISION.ID))))
                 .orderBy(REVISION.ID.desc())
-                .fetch(record -> new Revision(
-                        record.get(REVISION.ID),
-                        record.get(REVISION.TIMESTAMP),
-                        null,
-                        record.get(REVISION.USER),
-                        record.get(REVISION.COMMENT)
-                ));
+                .fetch(this::mapRevisionWithoutType);
     }
 
-    public <T> Optional<PageRevision<ValueRevision>> findPage(final String key, final long revisionId,
+    public Optional<PageRevision<ValueRevision>> findPage(final String key, final long revisionId,
             final boolean excludeDeleted) {
+        // TODO move to revisionrepository
         final Optional<Revision> optional = db.select(REVISION.fields())
                 .from(REVISION)
                 .where(REVISION.ID.eq(revisionId))
-                .fetchOptionalInto(Revision.class);
+                .fetchOptional(this::mapRevisionWithoutType);
 
+        // TODO move to service layer
         return optional.map(revision -> {
             final Map<ValueRevisionRecord, List<ValueDimensionRevisionRecord>> map = db
                     .select(VALUE_REVISION.fields())
@@ -165,7 +162,7 @@ public class ValueRevisionRepository {
                 .where(VALUE_REVISION.KEY_ID.eq(key))
                 .and(exactMatch(dimensions))
                 .orderBy(REVISION.ID.desc())
-                .fetch(this::mapRevision);
+                .fetch(this::mapRevisionWithType);
     }
 
     private Condition exactMatch(final Map<String, JsonNode> dimensions) {
@@ -190,11 +187,21 @@ public class ValueRevisionRepository {
         }
     }
 
-    private Revision mapRevision(final Record record) {
+    private Revision mapRevisionWithType(final Record record) {
         return new Revision(
                 record.get(REVISION.ID),
-                record.get(REVISION.TIMESTAMP),
+                record.get(REVISION.TIMESTAMP).atOffset(UTC),
                 record.get(VALUE_REVISION.REVISION_TYPE),
+                record.get(REVISION.USER),
+                record.get(REVISION.COMMENT)
+        );
+    }
+
+    private Revision mapRevisionWithoutType(final Record record) {
+        return new Revision(
+                record.get(REVISION.ID),
+                record.get(REVISION.TIMESTAMP).atOffset(UTC),
+                null,
                 record.get(REVISION.USER),
                 record.get(REVISION.COMMENT)
         );

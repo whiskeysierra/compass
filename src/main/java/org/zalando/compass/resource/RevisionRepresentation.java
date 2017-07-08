@@ -9,6 +9,7 @@ import org.zalando.compass.library.LowerCaseConverter;
 
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 import static lombok.AccessLevel.PRIVATE;
 
@@ -18,7 +19,7 @@ import static lombok.AccessLevel.PRIVATE;
 final class RevisionRepresentation {
 
     Long id;
-    LocalDateTime timestamp;
+    OffsetDateTime timestamp;
     URI href;
 
     @JsonSerialize(converter = LowerCaseConverter.class)

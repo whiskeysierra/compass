@@ -4,6 +4,7 @@ import lombok.experimental.Wither;
 import org.zalando.compass.domain.persistence.model.enums.RevisionType;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @lombok.Value
 public final class Revision {
@@ -12,7 +13,7 @@ public final class Revision {
     @Wither
     Long id;
 
-    LocalDateTime timestamp;
+    OffsetDateTime timestamp;
 
     @Wither
     RevisionType type;
