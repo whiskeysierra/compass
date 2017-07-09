@@ -37,8 +37,7 @@ public final class WitherTest<T, P> {
                 new TestCase<>(new Revision(null, null, null, null, null), Revision::withType),
                 new TestCase<>(new Value(null, null, null), Value::withDimensions),
                 new TestCase<>(new Value(null, null, null), Value::withIndex),
-                new TestCase<PageRevision<Object>, List<Object>>(new PageRevision<>(null, null), PageRevision::withElements),
-                new TestCase<Page<Object>, List<Object>>(new Page<>(null, null), Page::withElements)
+                new TestCase<PageRevision<Object>, List<Object>>(new PageRevision<>(null, null), PageRevision::withElements)
         );
     }
 

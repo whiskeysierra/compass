@@ -6,7 +6,6 @@ import java.util.List;
 
 public final class Pages {
 
-    // TODO belongs to the service layer
     public static <T> Page<T> page(final List<T> elements, final int limit) {
         if (elements.size() > limit) {
             final List<T> items = elements.subList(0, limit);

@@ -6,10 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionRevision;
-import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.model.enums.RevisionType;
-import org.zalando.compass.library.Pages;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -55,8 +53,8 @@ public class DimensionRevisionRepository {
                 .execute();
     }
 
-    public Page<Revision> findPageRevisions(final int limit, @Nullable final Long after) {
-        final List<Revision> revisions = db.select(REVISION.fields())
+    public List<Revision> findPageRevisions(final int limit, @Nullable final Long after) {
+        return db.select(REVISION.fields())
                 .from(REVISION)
                 .where(exists(selectOne()
                         .from(DIMENSION_REVISION)
@@ -64,10 +62,8 @@ public class DimensionRevisionRepository {
                         .and(trueCondition())))
                 .orderBy(REVISION.ID.desc())
                 // TODO .seekAfter(after == null ? null : val(after, Long.class))
-                .limit(limit + 1)
+                .limit(limit)
                 .fetch().map(this::mapRevisionWithoutType);
-
-        return Pages.page(revisions, limit);
     }
 
     // TODO Page<Dimension>?
@@ -82,18 +78,16 @@ public class DimensionRevisionRepository {
                 .fetchInto(Dimension.class);
     }
 
-    public Page<Revision> findRevisions(final String id, final int limit, @Nullable final Long after) {
-        final List<Revision> revisions = db.select(REVISION.fields())
+    public List<Revision> findRevisions(final String id, final int limit, @Nullable final Long after) {
+        return db.select(REVISION.fields())
                 .select(DIMENSION_REVISION.fields())
                 .from(REVISION)
                 .join(DIMENSION_REVISION).on(DIMENSION_REVISION.REVISION.eq(REVISION.ID))
                 .where(DIMENSION_REVISION.ID.eq(id))
                 .orderBy(REVISION.ID.desc())
                 .seekAfter(after == null ? null : val(after, Long.class))
-                .limit(limit + 1)
+                .limit(limit)
                 .fetch().map(this::mapRevisionWithType);
-
-        return Pages.page(revisions, limit);
     }
 
     public Optional<DimensionRevision> find(final String id, final long revision) {
