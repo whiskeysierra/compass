@@ -2,7 +2,7 @@ CREATE TABLE revision (
   id BIGSERIAL PRIMARY KEY,
   timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
   "user" TEXT NOT NULL,
-  comment TEXT NOT NULL
+  comment TEXT
 );
 
 CREATE TYPE revision_type AS ENUM ('CREATE', 'UPDATE', 'DELETE');

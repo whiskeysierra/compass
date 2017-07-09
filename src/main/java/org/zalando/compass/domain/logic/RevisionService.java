@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.RevisionRepository;
 
+import javax.annotation.Nullable;
 import java.security.Principal;
 import java.time.Clock;
 import java.time.OffsetDateTime;
@@ -25,7 +26,7 @@ public class RevisionService {
         this.repository = repository;
     }
 
-    public Revision create(final String comment) {
+    public Revision create(@Nullable final String comment) {
         final OffsetDateTime timestamp = OffsetDateTime.now(clock);
 
         final String user = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())

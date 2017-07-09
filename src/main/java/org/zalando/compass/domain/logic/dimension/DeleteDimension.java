@@ -39,7 +39,7 @@ class DeleteDimension {
         this.revisionRepository = revisionRepository;
     }
 
-    void delete(final String id) {
+    void delete(final String id, @Nullable final String comment) {
         final DimensionLock lock = locking.lockDimensions(id);
 
         @Nullable final Dimension dimension = lock.getDimension();
@@ -53,8 +53,6 @@ class DeleteDimension {
         repository.delete(dimension);
         log.info("Deleted dimension [{}]", id);
 
-        // TODO expect comment
-        final String comment = "..";
         final Revision rev = revisionService.create(comment).withType(DELETE);
         final DimensionRevision revision = dimension.toRevision(rev);
         revisionRepository.create(revision);

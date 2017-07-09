@@ -61,11 +61,17 @@ public class HttpSteps {
         this.rest = rest;
     }
 
-    @Given("^\"([A-Z]+) ([^ ]*)\" responds \"(\\d+) ([^\"]+)\"$")
-    public void responds(final HttpMethod method, final String uri, final int statusCode,
-            final String reasonPhrase) throws IOException {
+    @Given("^\"([A-Z]+) ([^ ]*)\"(?: and \"([^:]+): ([^\"]+)\")? responds \"(\\d+) ([^\"]+)\"$")
+    public void responds(final HttpMethod method, final String uri, @Nullable final String headerName,
+            @Nullable final String headerValue, final int statusCode, final String reasonPhrase) throws IOException {
 
-        final ResponseEntity<JsonNode> response = requestAsync(method, uri).join();
+        final Requester requester = rest.execute(method, uri);
+
+        if (headerName != null && headerValue != null) {
+            requester.header(headerName, headerValue);
+        }
+
+        final ResponseEntity<JsonNode> response = requestAsync(requester, null).join();
         verifyStatus(response, statusCode, reasonPhrase);
     }
 
@@ -117,11 +123,12 @@ public class HttpSteps {
                 .forEach(response -> verifyStatus(response, statusCode, reasonPhrase));
     }
 
-    @When("^\"([A-Z]+) ([^ ]*)\" (?:(responds) \"(\\d+) ([^\"]+)\" )?when requested with(?: an (array))?(?: at \"(.*)\")?(?: as \"(.+)\")?:$")
+    @When("^\"([A-Z]+) ([^ ]*)\"(?: and \"([^:]+): ([^\"]+)\")? (?:(responds) \"(\\d+) ([^\"]+)\" )?when requested with(?: an (array))?(?: at \"(.*)\")?(?: as \"(.+)\")?:$")
     public void respondsWhenRequestedWithAnArrayAtAs(
             final HttpMethod method, final String uri,
+            @Nullable final String headerName, @Nullable final String headerValue,
             @Nullable final String responds,
-            @Nullable final String statusCode,
+            final String statusCode,
             @Nullable final String reasonPhrase,
             @Nullable final String type,
             @Nullable final String path,
@@ -130,6 +137,10 @@ public class HttpSteps {
         final JsonNode body = produceBody(type, path, table);
 
         final Requester requester = rest.execute(method, uri);
+
+        if (headerName != null && headerValue != null) {
+            requester.header(headerName, headerValue);
+        }
 
         if (contentType != null) {
             requester.contentType(MediaType.parseMediaType(contentType));
@@ -186,6 +197,7 @@ public class HttpSteps {
         return requestAsync(rest.execute(method, uri), null);
     }
 
+    @CheckReturnValue
     private CompletableFuture<ResponseEntity<JsonNode>> requestAsync(final Requester requester, final Object body) {
         final Capture<ResponseEntity<JsonNode>> capture = Capture.empty();
         final Route route = call(responseEntityOf(JsonNode.class), capture);

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -58,12 +59,13 @@ class DimensionResource implements Reserved {
 
     @RequestMapping(method = PUT, path = "/{id}")
     public ResponseEntity<DimensionRepresentation> replace(@PathVariable final String id,
+            @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final JsonNode node) throws IOException {
 
         ensureConsistentId(id, node);
         final Dimension dimension = reader.read(node, Dimension.class);
 
-        final boolean created = service.replace(dimension);
+        final boolean created = service.replace(dimension, comment);
         final DimensionRepresentation representation = DimensionRepresentation.valueOf(dimension);
 
         return ResponseEntity
@@ -111,6 +113,7 @@ class DimensionResource implements Reserved {
 
     @RequestMapping(method = PATCH, path = "/{id}", consumes = {APPLICATION_JSON_VALUE, JSON_MERGE_PATCH_VALUE})
     public ResponseEntity<DimensionRepresentation> update(@PathVariable final String id,
+            @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final ObjectNode patch) throws IOException, JsonPatchException {
 
         final Dimension dimension = service.read(id);
@@ -118,11 +121,12 @@ class DimensionResource implements Reserved {
 
         final JsonMergePatch mergePatch = JsonMergePatch.fromJson(patch);
         final JsonNode patched = mergePatch.apply(node);
-        return replace(id, patched);
+        return replace(id, comment, patched);
     }
 
     @RequestMapping(method = PATCH, path = "/{id}", consumes = JSON_PATCH_VALUE)
     public ResponseEntity<DimensionRepresentation> update(@PathVariable final String id,
+            @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final ArrayNode patch) throws IOException, JsonPatchException {
 
         // TODO validate JsonPatch schema?
@@ -132,13 +136,14 @@ class DimensionResource implements Reserved {
 
         final JsonPatch jsonPatch = JsonPatch.fromJson(patch);
         final JsonNode patched = jsonPatch.apply(node);
-        return replace(id, patched);
+        return replace(id, comment, patched);
     }
 
     @RequestMapping(method = DELETE, path = "/{id}")
     @ResponseStatus(NO_CONTENT)
-    public void delete(@PathVariable final String id) {
-        service.delete(id);
+    public void delete(@PathVariable final String id,
+            @Nullable @RequestHeader(name = "Comment", required = false) final String comment) {
+        service.delete(id, comment);
     }
 
 }

@@ -1,14 +1,14 @@
 Feature: /dimensions/revisions/{revision}
 
   Background: Updated dimensions
-    Given "PUT /dimensions/device" responds "201 Created" when requested with:
+    Given "PUT /dimensions/device" and "Comment: Created dimension" responds "201 Created" when requested with:
       | /schema/type | /relation | /description |
       | "string"     | "="       | ".."         |
-    And "PUT /dimensions/device" responds "200 OK" when requested with:
+    And "PUT /dimensions/device" and "Comment: Updated dimension" responds "200 OK" when requested with:
       | /schema/type | /relation | /description               |
       | "string"     | "="       | "Client Device Identifier" |
-    And "DELETE /dimensions/device" responds "204 No Content"
-    Given "PUT /dimensions/country" responds "201 Created" when requested with:
+    And "DELETE /dimensions/device" and "Comment: Deleted dimension" responds "204 No Content"
+    Given "PUT /dimensions/country" and "Comment: Recreated dimension" responds "201 Created" when requested with:
       | /schema/type | /relation | /description |
       | "string"     | "="       | ".."         |
     And "PUT /dimensions/country" responds "200 OK" when requested with:
@@ -32,5 +32,5 @@ Feature: /dimensions/revisions/{revision}
 
   Scenario: Read revision metadata
     Then "GET /dimensions/revisions/1" responds "200 OK" with at "/revision":
-      | /id | /timestamp             | /type    | /user       | /comment |
-      | 1   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | ".."     |
+      | /id | /timestamp             | /type    | /user       | /comment            |
+      | 1   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | "Created dimension" |

@@ -32,8 +32,8 @@ class DefaultDimensionService implements DimensionService {
 
     @Transactional
     @Override
-    public boolean replace(final Dimension dimension) {
-        return replace.replace(dimension);
+    public boolean replace(final Dimension dimension, @Nullable final String comment) {
+        return replace.replace(dimension, comment);
     }
 
     @Override
@@ -68,8 +68,8 @@ class DefaultDimensionService implements DimensionService {
 
     @Transactional
     @Override
-    public void delete(final String id) {
-        delete.delete(id);
+    public void delete(final String id, @Nullable final String comment) {
+        delete.delete(id, comment);
     }
 
 }

@@ -57,13 +57,11 @@ class ReplaceDimension {
      * @param dimension the dimension to replace
      * @return true if dimension was created, false if an existing one was updated
      */
-    boolean replace(final Dimension dimension) {
+    boolean replace(final Dimension dimension, @Nullable final String comment) {
         final DimensionLock lock = locking.lockDimensions(dimension.getId());
         @Nullable final Dimension current = lock.getDimension();
         final List<Value> values = lock.getValues();
 
-        // TODO expect comment
-        final String comment = "..";
         final Revision revision = revisionService.create(comment);
 
         // TODO make sure this is transactional
