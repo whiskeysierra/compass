@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface KeyService {
 
-    boolean replace(Key key);
+    boolean replace(Key key, @Nullable String comment);
 
     // TODO Page
     List<Key> readPage(@Nullable String term);
@@ -26,6 +26,6 @@ public interface KeyService {
 
     KeyRevision readAt(String id, long revision);
 
-    void delete(String id);
+    void delete(String id, @Nullable String comment);
 
 }

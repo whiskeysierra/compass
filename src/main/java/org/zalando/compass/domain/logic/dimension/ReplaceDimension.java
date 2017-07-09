@@ -55,6 +55,7 @@ class ReplaceDimension {
     /**
      *
      * @param dimension the dimension to replace
+     * @param comment the revision comment
      * @return true if dimension was created, false if an existing one was updated
      */
     boolean replace(final Dimension dimension, @Nullable final String comment) {

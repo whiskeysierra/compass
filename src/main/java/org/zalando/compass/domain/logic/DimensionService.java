@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface DimensionService {
 
-    boolean replace(Dimension dimension, @Nullable final String comment);
+    boolean replace(Dimension dimension, @Nullable String comment);
 
     // TODO Page
     List<Dimension> readPage(@Nullable String term);
@@ -26,6 +26,6 @@ public interface DimensionService {
 
     DimensionRevision readAt(String id, long revision);
 
-    void delete(String id, @Nullable final String comment);
+    void delete(String id, @Nullable String comment);
 
 }

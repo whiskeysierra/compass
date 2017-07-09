@@ -38,7 +38,7 @@ class DeleteKey {
         this.revisionRepository = revisionRepository;
     }
 
-    void delete(final String id) {
+    void delete(final String id, @Nullable final String comment) {
         final KeyLock lock = locking.lockKey(id);
 
         @Nullable final Key key = lock.getKey();
@@ -50,8 +50,6 @@ class DeleteKey {
         repository.delete(id);
         log.info("Deleted key [{}]", id);
 
-        // TODO expect comment
-        final String comment = "..";
         final Revision rev = revisionService.create(comment).withType(DELETE);
         final KeyRevision revision = key.toRevision(rev);
         revisionRepository.create(revision);

@@ -48,15 +48,14 @@ class ReplaceKey {
     /**
      *
      * @param key the key to replace
+     * @param comment the revision comment
      * @return true if key was created, false if an existing one was updated
      */
-    boolean replace(final Key key) {
+    boolean replace(final Key key, @Nullable final String comment) {
         final KeyLock lock = locking.lockKey(key.getId());
         @Nullable final Key current = lock.getKey();
         final List<Value> values = lock.getValues();
 
-        // TODO expect comment
-        final String comment = "..";
         final Revision revision = revisionService.create(comment);
 
         // TODO make sure this is transactional

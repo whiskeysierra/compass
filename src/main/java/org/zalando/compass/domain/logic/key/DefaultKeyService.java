@@ -32,8 +32,8 @@ class DefaultKeyService implements KeyService {
 
     @Transactional
     @Override
-    public boolean replace(final Key key) {
-        return replace.replace(key);
+    public boolean replace(final Key key, @Nullable final String comment) {
+        return replace.replace(key, comment);
     }
 
     @Override
@@ -68,8 +68,8 @@ class DefaultKeyService implements KeyService {
 
     @Transactional
     @Override
-    public void delete(final String id) {
-        delete.delete(id);
+    public void delete(final String id, @Nullable final String comment) {
+        delete.delete(id, comment);
     }
 
 }
