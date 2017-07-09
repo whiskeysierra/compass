@@ -9,8 +9,10 @@ import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.KeyRevisionRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
+import org.zalando.compass.domain.persistence.RevisionRepository;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
@@ -18,10 +20,12 @@ import static java.util.stream.Collectors.toList;
 class ReadKeyRevision {
 
     private final KeyRevisionRepository repository;
+    private final RevisionRepository revisionRepository;
 
     @Autowired
-    ReadKeyRevision(final KeyRevisionRepository repository) {
+    ReadKeyRevision(final KeyRevisionRepository repository, final RevisionRepository revisionRepository) {
         this.repository = repository;
+        this.revisionRepository = revisionRepository;
     }
 
     Page<Revision> readPageRevisions(final int limit, @Nullable final Long after) {
@@ -32,10 +36,14 @@ class ReadKeyRevision {
                 .collect(toList()));
     }
 
-    PageRevision<Key> readPageAt(final long revision) {
-        return repository.findPage(revision)
+    PageRevision<Key> readPageAt(final long revisionId) {
+        final Revision revision = revisionRepository.read(revisionId)
                 .orElseThrow(NotFoundException::new)
-                .withRevisionTypeUpdate();
+                .withTypeUpdate();
+
+        final List<Key> keys = repository.findPage(revisionId);
+
+        return new PageRevision<>(revision, keys);
     }
 
     Page<Revision> readRevisions(final String id, final int limit, @Nullable final Long after) {

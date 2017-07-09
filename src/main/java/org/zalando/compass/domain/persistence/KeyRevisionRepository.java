@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.KeyRevision;
 import org.zalando.compass.domain.model.Page;
-import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.model.enums.RevisionType;
 import org.zalando.compass.library.Pages;
@@ -68,16 +67,9 @@ public class KeyRevisionRepository {
         return Pages.page(revisions, limit);
     }
 
-    public Optional<PageRevision<Key>> findPage(final long revisionId) {
-        // TODO move to revisionrepository
-        final Optional<Revision> optional = db.select(REVISION.fields())
-                .from(REVISION)
-                .where(REVISION.ID.eq(revisionId))
-                .fetchOptional(this::mapRevisionWithoutType);
-
-        // TODO this belongs to the service layer
-        return optional.map(revision -> {
-            final List<Key> keys = db.select(KEY_REVISION.fields())
+    // TODO Page<Key>?
+    public List<Key> findPage(final long revisionId) {
+        return  db.select(KEY_REVISION.fields())
                     .from(KEY_REVISION)
                     .where(KEY_REVISION.REVISION_TYPE.ne(RevisionType.DELETE))
                     .and(KEY_REVISION.REVISION.eq(select(max(SELF.REVISION))
@@ -85,9 +77,6 @@ public class KeyRevisionRepository {
                             .where(SELF.ID.eq(KEY_REVISION.ID))
                             .and(SELF.REVISION.le(revisionId))))
                     .fetchInto(Key.class);
-
-            return new PageRevision<>(revision, keys);
-        });
     }
 
     public Page<Revision> findRevisions(final String id, final int limit, @Nullable final Long after) {

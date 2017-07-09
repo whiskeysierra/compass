@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionRevision;
 import org.zalando.compass.domain.model.Page;
-import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.model.enums.RevisionType;
 import org.zalando.compass.library.Pages;
@@ -71,26 +70,16 @@ public class DimensionRevisionRepository {
         return Pages.page(revisions, limit);
     }
 
-    public Optional<PageRevision<Dimension>> findPage(final long revisionId) {
-        // TODO move to revisionrepository
-        final Optional<Revision> optional = db.select(REVISION.fields())
-                .from(REVISION)
-                .where(REVISION.ID.eq(revisionId))
-                .fetchOptional(this::mapRevisionWithoutType);
-
-        // TODO move to service layer
-        return optional.map(revision -> {
-            final List<Dimension> dimensions = db.select(DIMENSION_REVISION.fields())
-                    .from(DIMENSION_REVISION)
-                    .where(DIMENSION_REVISION.REVISION_TYPE.ne(RevisionType.DELETE))
-                    .and(DIMENSION_REVISION.REVISION.eq(select(max(SELF.REVISION))
-                            .from(SELF)
-                            .where(SELF.ID.eq(DIMENSION_REVISION.ID))
-                            .and(SELF.REVISION.le(revisionId))))
-                    .fetchInto(Dimension.class);
-
-            return new PageRevision<>(revision, dimensions);
-        });
+    // TODO Page<Dimension>?
+    public List<Dimension> findPage(final long revisionId) {
+        return db.select(DIMENSION_REVISION.fields())
+                .from(DIMENSION_REVISION)
+                .where(DIMENSION_REVISION.REVISION_TYPE.ne(RevisionType.DELETE))
+                .and(DIMENSION_REVISION.REVISION.eq(select(max(SELF.REVISION))
+                        .from(SELF)
+                        .where(SELF.ID.eq(DIMENSION_REVISION.ID))
+                        .and(SELF.REVISION.le(revisionId))))
+                .fetchInto(Dimension.class);
     }
 
     public Page<Revision> findRevisions(final String id, final int limit, @Nullable final Long after) {

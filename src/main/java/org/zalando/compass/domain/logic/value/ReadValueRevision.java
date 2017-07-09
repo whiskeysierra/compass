@@ -8,11 +8,11 @@ import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueRevision;
 import org.zalando.compass.domain.persistence.NotFoundException;
+import org.zalando.compass.domain.persistence.RevisionRepository;
 import org.zalando.compass.domain.persistence.ValueRevisionRepository;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -20,11 +20,14 @@ import static java.util.stream.Collectors.toList;
 class ReadValueRevision {
 
     private final ValueRevisionRepository repository;
+    private final RevisionRepository revisionRepository;
     private final ValueSelector selector;
 
     @Autowired
-    ReadValueRevision(final ValueRevisionRepository repository, final ValueSelector selector) {
+    ReadValueRevision(final ValueRevisionRepository repository,
+            final RevisionRepository revisionRepository, final ValueSelector selector) {
         this.repository = repository;
+        this.revisionRepository = revisionRepository;
         this.selector = selector;
     }
 
@@ -34,11 +37,15 @@ class ReadValueRevision {
                 .collect(toList());
     }
 
-    public PageRevision<Value> readPageAt(final String key, final Map<String, JsonNode> filter, final long revision) {
-        final PageRevision<Value> page = repository.findPage(key, revision, true)
+    public PageRevision<Value> readPageAt(final String key, final Map<String, JsonNode> filter, final long revisionId) {
+        final Revision revision = revisionRepository.read(revisionId)
                 .orElseThrow(NotFoundException::new)
-                .withRevisionTypeUpdate()
-                .map(ValueRevision::toValue);
+                .withTypeUpdate();
+
+        final List<Value> values = repository.findPage(key, revisionId, true)
+                .stream().map(ValueRevision::toValue).collect(toList());
+
+        final PageRevision<Value> page = new PageRevision<>(revision, values);
 
         if (filter.isEmpty()) {
             // special case, just for reading many values
@@ -53,10 +60,8 @@ class ReadValueRevision {
     }
 
     public ValueRevision readAt(final String key, final Map<String, JsonNode> dimensions, final long revision) {
-        final PageRevision<ValueRevision> page = repository.findPage(key, revision, false)
-                .orElseThrow(NotFoundException::new);
-
-        final List<ValueRevision> matched = selector.select(page.getElements(), dimensions);
+        final List<ValueRevision> values = repository.findPage(key, revision, false);
+        final List<ValueRevision> matched = selector.select(values, dimensions);
 
         return matched.stream()
                 .findFirst().orElseThrow(NotFoundException::new);
