@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -25,6 +26,7 @@ import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.NotFoundException;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
@@ -68,6 +70,7 @@ class ValueResource {
 
     @RequestMapping(method = PUT, path = "/values")
     public ResponseEntity<ValueCollectionRepresentation> replaceAll(@PathVariable final String key,
+            @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final JsonNode node) throws IOException {
         final ValueCollectionRepresentation representation = reader.read(node, ValueCollectionRepresentation.class);
         final List<ValueRepresentation> representations = representation.getValues();
@@ -76,20 +79,22 @@ class ValueResource {
                 .map(value -> value.withDimensions(firstNonNull(value.getDimensions(), ImmutableMap.of())));
         final List<Value> values = mapWithIndex(withDimensions, ValueRepresentation::toValue).collect(toList());
 
-        final boolean created = service.replace(key, values);
+        final boolean created = service.replace(key, values, comment);
 
         return ResponseEntity.status(created ? CREATED : OK)
                 .body(readAll(key, emptyMap()));
     }
 
     @RequestMapping(method = PUT, path = "/value")
-    public ResponseEntity<ValueRepresentation> replace(@PathVariable final String key, @RequestParam final Map<String, String> query,
+    public ResponseEntity<ValueRepresentation> replace(@PathVariable final String key,
+            @RequestParam final Map<String, String> query,
+            @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final JsonNode node) throws IOException {
 
         final ImmutableMap<String, JsonNode> dimensions = parser.parse(query);
         final Value value = reader.read(node, Value.class).withDimensions(dimensions);
 
-        final boolean created = service.replace(key, value);
+        final boolean created = service.replace(key, value, comment);
 
         return ResponseEntity
                 .status(created ? CREATED : OK)
@@ -133,6 +138,7 @@ class ValueResource {
 
     @RequestMapping(method = PATCH, path = "/values", consumes = {APPLICATION_JSON_VALUE, JSON_PATCH_VALUE})
     public ResponseEntity<ValueCollectionRepresentation> updateAll(@PathVariable final String key,
+            @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final ArrayNode patch) throws IOException, JsonPatchException {
 
         // TODO validate JsonPatch schema?
@@ -142,11 +148,13 @@ class ValueResource {
 
         final JsonPatch jsonPatch = JsonPatch.fromJson(patch);
         final JsonNode patched = jsonPatch.apply(node);
-        return replaceAll(key, patched);
+        return replaceAll(key, comment, patched);
     }
 
-    @RequestMapping(method = PATCH, path = "/{id}", consumes = {APPLICATION_JSON_VALUE, JSON_MERGE_PATCH_VALUE})
-    public ResponseEntity<ValueRepresentation> update(@PathVariable final String key, @RequestParam final Map<String, String> query,
+    @RequestMapping(method = PATCH, path = "/value", consumes = {APPLICATION_JSON_VALUE, JSON_MERGE_PATCH_VALUE})
+    public ResponseEntity<ValueRepresentation> update(@PathVariable final String key,
+            @RequestParam final Map<String, String> query,
+            @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final ObjectNode patch) throws IOException, JsonPatchException {
 
         final Map<String, JsonNode> filter = parser.parse(query);
@@ -155,11 +163,13 @@ class ValueResource {
 
         final JsonMergePatch jsonPatch = JsonMergePatch.fromJson(patch);
         final JsonNode patched = jsonPatch.apply(node);
-        return replace(key, query, patched);
+        return replace(key, query, comment, patched);
     }
 
-    @RequestMapping(method = PATCH, path = "/{id}", consumes = JSON_PATCH_VALUE)
-    public ResponseEntity<ValueRepresentation> update(@PathVariable final String key, @RequestParam final Map<String, String> query,
+    @RequestMapping(method = PATCH, path = "/value", consumes = JSON_PATCH_VALUE)
+    public ResponseEntity<ValueRepresentation> update(@PathVariable final String key,
+            @RequestParam final Map<String, String> query,
+            @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final ArrayNode patch) throws IOException, JsonPatchException {
 
         // TODO validate JsonPatch schema?
@@ -170,15 +180,16 @@ class ValueResource {
 
         final JsonPatch jsonPatch = JsonPatch.fromJson(patch);
         final JsonNode patched = jsonPatch.apply(node);
-        return replace(key, query, patched);
+        return replace(key, query, comment, patched);
     }
 
     // TODO shouldn't this be singular?!
     @RequestMapping(method = DELETE, path = "/values")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable final String key, @RequestParam final Map<String, String> query) {
+    public void delete(@PathVariable final String key, @RequestParam final Map<String, String> query,
+            @Nullable @RequestHeader(name = "Comment", required = false) final String comment) {
         final Map<String, JsonNode> filter = parser.parse(query);
-        service.delete(key, filter);
+        service.delete(key, filter, comment);
     }
 
     private URI canonicalUrl(final String key, final Value value) {

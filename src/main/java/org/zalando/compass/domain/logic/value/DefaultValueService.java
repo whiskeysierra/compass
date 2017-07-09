@@ -10,6 +10,7 @@ import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueRevision;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
@@ -32,14 +33,14 @@ class DefaultValueService implements ValueService {
 
     @Transactional
     @Override
-    public boolean replace(final String key, final Value value) {
-        return replace.replace(key, value);
+    public boolean replace(final String key, final List<Value> values, @Nullable final String comment) {
+        return replace.replace(key, values, comment);
     }
 
     @Transactional
     @Override
-    public boolean replace(final String key, final List<Value> values) {
-        return replace.replace(key, values);
+    public boolean replace(final String key, final Value value, @Nullable final String comment) {
+        return replace.replace(key, value, comment);
     }
 
     @Override
@@ -74,8 +75,8 @@ class DefaultValueService implements ValueService {
 
     @Transactional
     @Override
-    public void delete(final String key, final Map<String, JsonNode> filter) {
-        delete.delete(key, filter);
+    public void delete(final String key, final Map<String, JsonNode> filter, @Nullable final String comment) {
+        delete.delete(key, filter, comment);
     }
 
 }

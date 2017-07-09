@@ -51,7 +51,7 @@ class ReplaceValue {
         this.revisionRepository = revisionRepository;
     }
 
-    boolean replace(final String key, final Value value) {
+    boolean replace(final String key, final Value value, @Nullable final String comment) {
         final ValueLock lock = locking.lockValue(key, value.getDimensions());
         @Nullable final Value current = lock.getValue();
 
@@ -59,8 +59,6 @@ class ReplaceValue {
         validator.check(lock.getDimensions(), value);
         validator.check(lock.getKey(), value);
 
-        // TODO expect comment
-        final String comment = "..";
         final Revision rev = revisionService.create(comment);
 
         // TODO make sure this is transactional
@@ -73,7 +71,7 @@ class ReplaceValue {
         }
     }
 
-    boolean replace(final String key, final List<Value> values) {
+    boolean replace(final String key, final List<Value> values, @Nullable final String comment) {
         log.info("Replacing values of key [{}]", key);
 
         final ValuesLock lock = locking.lock(key, values);
@@ -85,10 +83,11 @@ class ReplaceValue {
         final List<Value> before = lock.getValues();
         final List<Value> after = preserveIndex(values);
 
-        return replace(key, before, after);
+        return replace(key, before, after, comment);
     }
 
-    private boolean replace(final String key, final List<Value> left, final List<Value> right) {
+    private boolean replace(final String key, final List<Value> left, final List<Value> right,
+            @Nullable final String comment) {
         final Set<Wrapper<Value>> before = wrap(left);
         final Set<Wrapper<Value>> after = wrap(right);
 
@@ -96,8 +95,6 @@ class ReplaceValue {
         final Collection<Value> updates = unwrap(intersection(after, before));
         final Collection<Value> deletes = unwrap(difference(before, after));
 
-        // TODO expect comment
-        final String comment = "..";
         final Revision revision = revisionService.create(comment);
 
         creates.forEach(value ->

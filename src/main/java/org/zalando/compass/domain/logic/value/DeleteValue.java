@@ -14,6 +14,7 @@ import org.zalando.compass.domain.persistence.NotFoundException;
 import org.zalando.compass.domain.persistence.ValueRepository;
 import org.zalando.compass.domain.persistence.ValueRevisionRepository;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
 import static org.zalando.compass.domain.persistence.model.enums.RevisionType.DELETE;
@@ -36,7 +37,7 @@ class DeleteValue {
         this.revisionRepository = revisionRepository;
     }
 
-    void delete(final String key, final Map<String, JsonNode> filter) {
+    void delete(final String key, final Map<String, JsonNode> filter, @Nullable final String comment) {
         final ValueLock lock = locking.lockValue(key, filter);
 
         final Value value = lock.getValue();
@@ -48,8 +49,6 @@ class DeleteValue {
         repository.delete(key, filter);
         log.info("Deleted value [{}, {}]", key, filter);
 
-        // TODO expect comment
-        final String comment = "..";
         final Revision revision = revisionService.create(comment).withType(DELETE);
         final ValueRevision valueRevision = value.toRevision(revision);
         revisionRepository.create(key, valueRevision);

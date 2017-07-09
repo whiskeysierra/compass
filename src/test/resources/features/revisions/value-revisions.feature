@@ -11,18 +11,18 @@ Feature: /keys/{id}/value/revision
       | /schema/type | /description |
       | "boolean"    | ".."         |
 
-  Scenario: Create/update/delete values and read revisions
-    When "PUT /keys/tax-rate/values" responds "201 Created" when requested with an array at "/values":
+  Scenario: Updates values and read revisions
+    When "PUT /keys/tax-rate/values" and "Comment: DACH tax rates" responds "201 Created" when requested with an array at "/values":
       | /dimensions/country | /value |
       | "CH"                | 0.08   |
       | "DE"                | 0.16   |
       | "AT"                | 0.2    |
-    And "PUT /keys/tax-rate/values" responds "200 OK" when requested with an array at "/values":
+    And "PUT /keys/tax-rate/values" and "Comment: Reordered tax rates" responds "200 OK" when requested with an array at "/values":
       | /dimensions/country | /value |
       | "AT"                | 0.2    |
       | "CH"                | 0.08   |
       | "DE"                | 0.19   |
-    And "PUT /keys/tax-rate/values" responds "201 Created" when requested with an array at "/values":
+    And "PUT /keys/tax-rate/values" and "Comment: Dropped DE and created FR tax rate" responds "201 Created" when requested with an array at "/values":
       | /dimensions/country | /value |
       | "AT"                | 0.2    |
       | "CH"                | 0.08   |
@@ -31,24 +31,24 @@ Feature: /keys/{id}/value/revision
       | /value |
       | true   |
     Then "GET /keys/tax-rate/value/revisions?country=DE" responds "200 OK" with an array at "/revisions":
-      | /id | /timestamp             | /type    | /user       | /comment |
-      | 6   | "2017-07-07T22:09:21Z" | "delete" | "anonymous" | ".."     |
-      | 5   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | ".."     |
-      | 4   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | ".."     |
+      | /id | /timestamp             | /type    | /user       | /comment                             |
+      | 6   | "2017-07-07T22:09:21Z" | "delete" | "anonymous" | "Dropped DE and created FR tax rate" |
+      | 5   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | "Reordered tax rates"                |
+      | 4   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | "DACH tax rates"                     |
 
-  Scenario: Create/update/delete value and read revisions
-    When "PUT /keys/tax-rate/value?country=DE" responds "201 Created" when requested with:
+  Scenario: Update value and read revisions
+    Given "PUT /keys/tax-rate/value?country=DE" and "Comment: Added DE tax rate" responds "201 Created" when requested with:
       | /value |
       | 0.16   |
-    When "PUT /keys/tax-rate/value?country=DE" responds "200 OK" when requested with:
+    And "PUT /keys/tax-rate/value?country=DE" and "Comment: Fixed DE tax rate" responds "200 OK" when requested with:
       | /value |
       | 0.19   |
-    And "DELETE /keys/tax-rate/values?country=DE" responds "204 No Content"
-    And "PUT /keys/tax-rate/value?country=DE" responds "201 Created" when requested with:
+    And "DELETE /keys/tax-rate/values?country=DE" and "Comment: Dropped DE tax rate" responds "204 No Content"
+    And "PUT /keys/tax-rate/value?country=DE" and "Comment: Re-added DE tax rate" responds "201 Created" when requested with:
       | /value |
       | 0.19   |
-    And "DELETE /keys/tax-rate/values?country=DE" responds "204 No Content"
-    And "PUT /keys/tax-rate/values" responds "201 Created" when requested with an array at "/values":
+    And "DELETE /keys/tax-rate/values?country=DE" and "Comment: Dropped DE tax rate again" responds "204 No Content"
+    And "PUT /keys/tax-rate/values" and "Comment: Added non-DE tax rates" responds "201 Created" when requested with an array at "/values":
       | /dimensions/country | /value |
       | "AT"                | 0.2    |
       | "CH"                | 0.08   |
@@ -57,12 +57,12 @@ Feature: /keys/{id}/value/revision
       | /value |
       | true   |
     Then "GET /keys/tax-rate/value/revisions?country=DE" responds "200 OK" with an array at "/revisions":
-      | /id | /timestamp             | /type    | /user       | /comment |
-      | 8   | "2017-07-07T22:09:21Z" | "delete" | "anonymous" | ".."     |
-      | 7   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | ".."     |
-      | 6   | "2017-07-07T22:09:21Z" | "delete" | "anonymous" | ".."     |
-      | 5   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | ".."     |
-      | 4   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | ".."     |
+      | /id | /timestamp             | /type    | /user       | /comment                    |
+      | 8   | "2017-07-07T22:09:21Z" | "delete" | "anonymous" | "Dropped DE tax rate again" |
+      | 7   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | "Re-added DE tax rate"      |
+      | 6   | "2017-07-07T22:09:21Z" | "delete" | "anonymous" | "Dropped DE tax rate"       |
+      | 5   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | "Fixed DE tax rate"         |
+      | 4   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | "Added DE tax rate"         |
 
   Scenario: Read value revisions without dimensions
     When "PUT /keys/tax-rate/value" responds "201 Created" when requested with:
@@ -74,9 +74,9 @@ Feature: /keys/{id}/value/revision
     And "DELETE /keys/tax-rate/values" responds "204 No Content"
     Then "GET /keys/tax-rate/value/revisions" responds "200 OK" with an array at "/revisions":
       | /id | /timestamp             | /type    | /user       | /comment |
-      | 6   | "2017-07-07T22:09:21Z" | "delete" | "anonymous" | ".."     |
-      | 5   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | ".."     |
-      | 4   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | ".."     |
+      | 6   | "2017-07-07T22:09:21Z" | "delete" | "anonymous" |          |
+      | 5   | "2017-07-07T22:09:21Z" | "update" | "anonymous" |          |
+      | 4   | "2017-07-07T22:09:21Z" | "create" | "anonymous" |          |
 
   Scenario: Read value revisions with dimensions
     Given "PUT /dimensions/after" responds "201 Created" when requested with:
@@ -90,4 +90,4 @@ Feature: /keys/{id}/value/revision
       | 0.2    |
     Then "GET /keys/tax-rate/value/revisions?country=DE&after=2007-01-01T00:00:00Z" responds "200 OK" with an array at "/revisions":
       | /id | /timestamp             | /type    | /user       | /comment |
-      | 5   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | ".."     |
+      | 5   | "2017-07-07T22:09:21Z" | "create" | "anonymous" |          |
