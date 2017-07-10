@@ -127,15 +127,14 @@ class DimensionResource implements Reserved {
     @RequestMapping(method = PATCH, path = "/{id}", consumes = JSON_PATCH_VALUE)
     public ResponseEntity<DimensionRepresentation> update(@PathVariable final String id,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
-            @RequestBody final ArrayNode patch) throws IOException, JsonPatchException {
+            @RequestBody final ArrayNode content) throws IOException, JsonPatchException {
 
-        // TODO validate JsonPatch schema?
+        final JsonPatch patch = reader.read(content, JsonPatch.class);
 
         final Dimension dimension = service.read(id);
         final JsonNode node = mapper.valueToTree(dimension);
 
-        final JsonPatch jsonPatch = JsonPatch.fromJson(patch);
-        final JsonNode patched = jsonPatch.apply(node);
+        final JsonNode patched = patch.apply(node);
         return replace(id, comment, patched);
     }
 

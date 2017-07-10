@@ -127,15 +127,14 @@ class KeyResource implements Reserved {
     @RequestMapping(method = PATCH, path = "/{id}", consumes = JSON_PATCH_VALUE)
     public ResponseEntity<KeyRepresentation> update(@PathVariable final String id,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
-            @RequestBody final ArrayNode patch) throws IOException, JsonPatchException {
+            @RequestBody final ArrayNode content) throws IOException, JsonPatchException {
 
-        // TODO validate JsonPatch schema?
+        final JsonPatch patch = reader.read(content, JsonPatch.class);
 
         final Key key = service.read(id);
         final JsonNode node = mapper.valueToTree(key);
 
-        final JsonPatch jsonPatch = JsonPatch.fromJson(patch);
-        final JsonNode patched = jsonPatch.apply(node);
+        final JsonNode patched = patch.apply(node);
         return replace(id, comment, patched);
     }
 

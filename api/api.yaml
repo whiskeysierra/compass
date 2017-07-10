@@ -295,7 +295,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: 'api/json-patch.json#'
+            $ref: '#/definitions/JsonPatch'
       responses:
         200:
           description: OK
@@ -603,3 +603,5 @@ definitions:
       - type
       - user
       - comment
+  JsonPatch:
+    $ref: 'api/json-patch.json#'

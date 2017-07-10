@@ -139,15 +139,14 @@ class ValueResource {
     @RequestMapping(method = PATCH, path = "/values", consumes = {APPLICATION_JSON_VALUE, JSON_PATCH_VALUE})
     public ResponseEntity<ValueCollectionRepresentation> updateAll(@PathVariable final String key,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
-            @RequestBody final ArrayNode patch) throws IOException, JsonPatchException {
+            @RequestBody final ArrayNode content) throws IOException, JsonPatchException {
 
-        // TODO validate JsonPatch schema?
+        final JsonPatch patch = reader.read(content, JsonPatch.class);
 
         final ValueCollectionRepresentation values = readAll(key, emptyMap());
         final JsonNode node = mapper.valueToTree(values);
 
-        final JsonPatch jsonPatch = JsonPatch.fromJson(patch);
-        final JsonNode patched = jsonPatch.apply(node);
+        final JsonNode patched = patch.apply(node);
         return replaceAll(key, comment, patched);
     }
 
@@ -170,16 +169,15 @@ class ValueResource {
     public ResponseEntity<ValueRepresentation> update(@PathVariable final String key,
             @RequestParam final Map<String, String> query,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
-            @RequestBody final ArrayNode patch) throws IOException, JsonPatchException {
+            @RequestBody final ArrayNode content) throws IOException, JsonPatchException {
 
-        // TODO validate JsonPatch schema?
+        final JsonPatch patch = reader.read(content, JsonPatch.class);
 
         final Map<String, JsonNode> filter = parser.parse(query);
         final Value value = service.read(key, filter);
         final JsonNode node = mapper.valueToTree(value);
 
-        final JsonPatch jsonPatch = JsonPatch.fromJson(patch);
-        final JsonNode patched = jsonPatch.apply(node);
+        final JsonNode patched = patch.apply(node);
         return replace(key, query, comment, patched);
     }
 
