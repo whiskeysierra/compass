@@ -55,7 +55,7 @@ class KeyRevisionResource {
     @RequestMapping(method = GET, path = "/revisions/{revision}")
     public ResponseEntity<KeyCollectionRevisionRepresentation> getRevision(@PathVariable final long revision) {
 
-        final PageRevision<Key> page = service.readPageAt(revision);
+        final PageRevision<Key> page = service.readPageAt(revision, 25, null);
         final Revision rev = page.getRevision();
 
         return ResponseEntity.ok(new KeyCollectionRevisionRepresentation(

@@ -55,7 +55,7 @@ class DimensionRevisionResource {
     @RequestMapping(method = GET, path = "/revisions/{revision}")
     public ResponseEntity<DimensionCollectionRevisionRepresentation> getRevision(@PathVariable final long revision) {
 
-        final PageRevision<Dimension> page = service.readPageAt(revision);
+        final PageRevision<Dimension> page = service.readPageAt(revision, 25, null);
         final Revision rev = page.getRevision();
 
         return ResponseEntity.ok(new DimensionCollectionRevisionRepresentation(

@@ -82,7 +82,7 @@ class DimensionResource implements Reserved {
     @RequestMapping(method = GET)
     public ResponseEntity<DimensionCollectionRepresentation> getAll(
             @RequestParam(name = "q", required = false) @Nullable final String q) {
-        final Page<Dimension> page = service.readPage(q, 25);
+        final Page<Dimension> page = service.readPage(q, 25, null);
 
         final List<DimensionRepresentation> representations = page.getElements().stream()
                 .map(DimensionRepresentation::valueOf)

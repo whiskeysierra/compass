@@ -36,8 +36,8 @@ class DefaultDimensionService implements DimensionService {
     }
 
     @Override
-    public Page<Dimension> readPage(@Nullable final String term, final int limit) {
-        return read.readPage(term, limit, null);
+    public Page<Dimension> readPage(@Nullable final String term, final int limit, @Nullable final String after) {
+        return read.readPage(term, limit, after);
     }
 
     @Override
@@ -51,8 +51,8 @@ class DefaultDimensionService implements DimensionService {
     }
 
     @Override
-    public PageRevision<Dimension> readPageAt(final long revision) {
-        return readRevision.readPageAt(revision, 25, null);
+    public PageRevision<Dimension> readPageAt(final long revision, final int limit, @Nullable final String after) {
+        return readRevision.readPageAt(revision, limit, after);
     }
 
     @Override

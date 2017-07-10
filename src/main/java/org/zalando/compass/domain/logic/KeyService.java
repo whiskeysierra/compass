@@ -12,13 +12,13 @@ public interface KeyService {
 
     boolean replace(Key key, @Nullable String comment);
 
-    Page<Key> readPage(@Nullable String term, final int limit);
+    Page<Key> readPage(@Nullable String term, final int limit, @Nullable final String after);
 
     Key read(String id);
 
     Page<Revision> readPageRevisions(int limit, @Nullable Long after);
 
-    PageRevision<Key> readPageAt(long revision);
+    PageRevision<Key> readPageAt(long revision, final int limit, @Nullable final String after);
 
     Page<Revision> readRevisions(String id, int limit, @Nullable Long after);
 

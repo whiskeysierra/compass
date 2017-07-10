@@ -36,8 +36,8 @@ class DefaultKeyService implements KeyService {
     }
 
     @Override
-    public Page<Key> readPage(@Nullable final String term, final int limit) {
-        return read.readPage(term, limit, null);
+    public Page<Key> readPage(@Nullable final String term, final int limit, @Nullable final String after) {
+        return read.readPage(term, limit, after);
     }
 
     @Override
@@ -51,8 +51,8 @@ class DefaultKeyService implements KeyService {
     }
 
     @Override
-    public PageRevision<Key> readPageAt(final long revision) {
-        return readRevision.readPageAt(revision, 25, null);
+    public PageRevision<Key> readPageAt(final long revision, final int limit, @Nullable final String after) {
+        return readRevision.readPageAt(revision, limit, after);
     }
 
     @Override
