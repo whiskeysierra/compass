@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.ValueService;
+import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
@@ -37,7 +38,8 @@ class ValueRevisionResource {
 
     @RequestMapping(method = GET, path = "/values/revisions")
     public ResponseEntity<RevisionCollectionRepresentation> getValuesRevisions(@PathVariable final String key) {
-        final List<Revision> revisions = service.readPageRevisions(key);
+        final Page<Revision> page = service.readPageRevisions(key);
+        final List<Revision> revisions = page.getElements();
 
         final List<RevisionRepresentation> representations = revisions.stream()
                 .map(revision -> new RevisionRepresentation(
@@ -79,7 +81,8 @@ class ValueRevisionResource {
     public ResponseEntity<RevisionCollectionRepresentation> getValueRevisions(@PathVariable final String key,
             @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = parser.parse(query);
-        final List<Revision> revisions = service.readRevisions(key, filter);
+        final Page<Revision> page = service.readRevisions(key, filter);
+        final List<Revision> revisions = page.getElements();
 
         final List<RevisionRepresentation> representations = revisions.stream()
                 .map(revision -> new RevisionRepresentation(

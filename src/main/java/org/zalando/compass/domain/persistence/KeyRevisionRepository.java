@@ -63,7 +63,6 @@ public class KeyRevisionRepository {
                 .fetch().map(this::mapRevisionWithoutType);
     }
 
-    // TODO Page<Key>?
     public List<Key> findPage(final long revisionId) {
         return  db.select(KEY_REVISION.fields())
                     .from(KEY_REVISION)

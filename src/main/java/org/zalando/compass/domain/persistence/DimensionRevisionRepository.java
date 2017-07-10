@@ -66,7 +66,6 @@ public class DimensionRevisionRepository {
                 .fetch().map(this::mapRevisionWithoutType);
     }
 
-    // TODO Page<Dimension>?
     public List<Dimension> findPage(final long revisionId) {
         return db.select(DIMENSION_REVISION.fields())
                 .from(DIMENSION_REVISION)

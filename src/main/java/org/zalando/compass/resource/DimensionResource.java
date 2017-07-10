@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
+import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.NotFoundException;
 
@@ -83,10 +84,11 @@ class DimensionResource implements Reserved {
         }
     }
 
-    // TODO order by relevance? pagination?
+    // TODO order by relevance?
     @RequestMapping(method = GET)
     public ResponseEntity<DimensionCollectionRepresentation> getAll(@RequestParam(name = "q", required = false) @Nullable final String q) {
-        return ResponseEntity.ok(new DimensionCollectionRepresentation(service.readPage(q).stream()
+        final Page<Dimension> page = service.readPage(q);
+        return ResponseEntity.ok(new DimensionCollectionRepresentation(page.getElements().stream()
             .map(DimensionRepresentation::valueOf)
             .collect(toList())));
     }

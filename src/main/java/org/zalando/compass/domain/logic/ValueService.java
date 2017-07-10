@@ -1,6 +1,7 @@
 package org.zalando.compass.domain.logic;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
@@ -16,16 +17,16 @@ public interface ValueService {
 
     boolean replace(String key, Value value, @Nullable String comment);
 
-    List<Value> readPage(String key, Map<String, JsonNode> filter);
+    Page<Value> readPage(String key, Map<String, JsonNode> filter);
 
     Value read(String key, Map<String, JsonNode> filter);
 
-    List<Revision> readPageRevisions(String key);
+    Page<Revision> readPageRevisions(String key);
 
     PageRevision<Value> readPageAt(String key, Map<String, JsonNode> filter, long revision);
 
     // TODO make clear that dimensions have to match 100%
-    List<Revision> readRevisions(String key, Map<String, JsonNode> dimensions);
+    Page<Revision> readRevisions(String key, Map<String, JsonNode> dimensions);
 
     // TODO make clear that dimensions have to match 100%
     ValueRevision readAt(String key, Map<String, JsonNode> dimensions, long revision);

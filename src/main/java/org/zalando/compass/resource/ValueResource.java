@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.ValueService;
+import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.NotFoundException;
@@ -105,7 +106,8 @@ class ValueResource {
     @RequestMapping(method = GET, path = "/values")
     public ValueCollectionRepresentation readAll(@PathVariable final String key, @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = parser.parse(query);
-        return new ValueCollectionRepresentation(service.readPage(key, filter).stream()
+        final Page<Value> page = service.readPage(key, filter);
+        return new ValueCollectionRepresentation(page.getElements().stream()
             .map(ValueRepresentation::valueOf).collect(toList()));
     }
 
@@ -120,7 +122,8 @@ class ValueResource {
                     .body(ValueRepresentation.valueOf(value));
         } catch (final NotFoundException e) {
             // TODO limit 1
-            final List<Revision> revisions = service.readRevisions(key, filter);
+            final Page<Revision> page = service.readRevisions(key, filter);
+            final List<Revision> revisions = page.getElements();
 
             if (revisions.isEmpty()) {
                 throw e;

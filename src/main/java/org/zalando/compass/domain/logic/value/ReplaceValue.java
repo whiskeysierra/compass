@@ -55,7 +55,6 @@ class ReplaceValue {
         final ValueLock lock = locking.lockValue(key, value.getDimensions());
         @Nullable final Value current = lock.getValue();
 
-        // TODO validate that all mentioned dimensions and key exists
         validator.check(lock.getDimensions(), value);
         validator.check(lock.getKey(), value);
 

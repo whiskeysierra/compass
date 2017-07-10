@@ -37,8 +37,8 @@ class DefaultDimensionService implements DimensionService {
     }
 
     @Override
-    public List<Dimension> readPage(@Nullable final String term) {
-        return read.readPage(term);
+    public Page<Dimension> readPage(@Nullable final String term) {
+        return new Page<>(read.readPage(term), null);
     }
 
     @Override

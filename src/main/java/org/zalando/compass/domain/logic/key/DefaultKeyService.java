@@ -37,8 +37,8 @@ class DefaultKeyService implements KeyService {
     }
 
     @Override
-    public List<Key> readPage(@Nullable final String term) {
-        return read.readPage(term);
+    public Page<Key> readPage(@Nullable final String term) {
+        return new Page<>(read.readPage(term), null);
     }
 
     @Override

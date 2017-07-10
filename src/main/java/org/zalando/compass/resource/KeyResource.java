@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.KeyService;
 import org.zalando.compass.domain.model.Key;
+import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.NotFoundException;
 
@@ -83,10 +84,11 @@ class KeyResource implements Reserved {
         }
     }
 
-    // TODO order by relevance? pagination?
+    // TODO order by relevance?
     @RequestMapping(method = GET)
     public ResponseEntity<KeyCollectionRepresentation> getAll(@RequestParam(name = "q", required = false) @Nullable final String q) {
-        return ResponseEntity.ok(new KeyCollectionRepresentation(service.readPage(q).stream()
+        final Page<Key> page = service.readPage(q);
+        return ResponseEntity.ok(new KeyCollectionRepresentation(page.getElements().stream()
                 .map(KeyRepresentation::valueOf)
                 .collect(toList())));
     }

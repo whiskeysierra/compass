@@ -7,14 +7,12 @@ import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 public interface KeyService {
 
     boolean replace(Key key, @Nullable String comment);
 
-    // TODO Page
-    List<Key> readPage(@Nullable String term);
+    Page<Key> readPage(@Nullable String term);
 
     Key read(String id);
 

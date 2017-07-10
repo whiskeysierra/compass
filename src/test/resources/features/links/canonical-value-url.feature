@@ -29,5 +29,3 @@ Feature: Canonical URLs
     Then "GET /keys/income-tax/value?before=2017-06-22T00:07:23Z&income=82000" responds "200 OK" with headers:
       | Content-Location                                                                      |
       | http://localhost:8080/keys/income-tax/value?before=2018-01-01T00:00:00Z&income=256303 |
-
-  # TODO header absent if request URI is already canonical?

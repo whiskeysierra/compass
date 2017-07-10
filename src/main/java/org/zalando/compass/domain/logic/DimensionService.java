@@ -7,14 +7,12 @@ import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 public interface DimensionService {
 
     boolean replace(Dimension dimension, @Nullable String comment);
 
-    // TODO Page
-    List<Dimension> readPage(@Nullable String term);
+    Page<Dimension> readPage(@Nullable String term);
 
     Dimension read(String id);
 
