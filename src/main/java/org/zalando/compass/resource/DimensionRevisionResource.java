@@ -59,9 +59,6 @@ class DimensionRevisionResource {
         final Revision rev = page.getRevision();
 
         return ResponseEntity.ok(new DimensionCollectionRevisionRepresentation(
-                linkTo(methodOn(DimensionResource.class).getAll(null)).toUri(),
-                null,
-                null,
                 new RevisionRepresentation(
                         rev.getId(),
                         rev.getTimestamp(),

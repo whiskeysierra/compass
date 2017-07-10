@@ -107,8 +107,10 @@ class ValueResource {
     public ValueCollectionRepresentation readAll(@PathVariable final String key, @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = parser.parse(query);
         final Page<Value> page = service.readPage(key, filter);
-        return new ValueCollectionRepresentation(page.getElements().stream()
-            .map(ValueRepresentation::valueOf).collect(toList()));
+        final List<ValueRepresentation> representations = page.getElements().stream()
+                .map(ValueRepresentation::valueOf).collect(toList());
+
+        return new ValueCollectionRepresentation(null, null, representations);
     }
 
     @RequestMapping(method = GET, path = "/value")

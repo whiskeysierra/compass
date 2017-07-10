@@ -1,11 +1,9 @@
 package org.zalando.compass.resource;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 
-import java.net.URI;
 import java.util.List;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -14,15 +12,6 @@ import static lombok.AccessLevel.PRIVATE;
 @Getter
 @AllArgsConstructor
 final class DimensionCollectionRevisionRepresentation {
-
-    @JsonProperty("latest-version")
-    URI latestVersion;
-
-    @JsonProperty("predecssor-version")
-    URI predecessorVersion;
-
-    @JsonProperty("successor-version")
-    URI successorVersion;
 
     // TODO without href
     RevisionRepresentation revision;

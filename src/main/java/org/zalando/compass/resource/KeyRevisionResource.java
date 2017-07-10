@@ -59,9 +59,6 @@ class KeyRevisionResource {
         final Revision rev = page.getRevision();
 
         return ResponseEntity.ok(new KeyCollectionRevisionRepresentation(
-                linkTo(methodOn(KeyResource.class).getAll(null)).toUri(),
-                null,
-                null,
                 new RevisionRepresentation(
                         rev.getId(),
                         rev.getTimestamp(),

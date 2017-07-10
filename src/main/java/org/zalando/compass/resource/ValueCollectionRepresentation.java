@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import org.zalando.compass.domain.model.Value;
 
+import java.net.URI;
 import java.util.List;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -14,6 +15,8 @@ import static lombok.AccessLevel.PRIVATE;
 @AllArgsConstructor
 final class ValueCollectionRepresentation {
 
+    URI prev;
+    URI next;
     List<ValueRepresentation> values;
 
 }

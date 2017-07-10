@@ -88,9 +88,11 @@ class KeyResource implements Reserved {
     @RequestMapping(method = GET)
     public ResponseEntity<KeyCollectionRepresentation> getAll(@RequestParam(name = "q", required = false) @Nullable final String q) {
         final Page<Key> page = service.readPage(q);
-        return ResponseEntity.ok(new KeyCollectionRepresentation(page.getElements().stream()
+        final List<KeyRepresentation> representations = page.getElements().stream()
                 .map(KeyRepresentation::valueOf)
-                .collect(toList())));
+                .collect(toList());
+
+        return ResponseEntity.ok(new KeyCollectionRepresentation(null, null, representations));
     }
 
     @RequestMapping(method = GET, path = "/{id}")
