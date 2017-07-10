@@ -16,6 +16,4 @@ Feature: Reading dimension
       | /schema/type | /relation | /description |
       | "string"     | "="       | ".."         |
     And "DELETE /dimensions/device" responds "204 No Content"
-    Then "GET /dimensions/device" responds "410 Gone" with headers:
-      | Location                                            |
-      | http://localhost:8080/dimensions/device/revisions/2 |
+    Then "GET /dimensions/device" responds "404 Not Found"

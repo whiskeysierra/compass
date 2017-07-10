@@ -19,19 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.KeyService;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Page;
-import org.zalando.compass.domain.model.Revision;
-import org.zalando.compass.domain.persistence.NotFoundException;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static java.util.stream.Collectors.toList;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.GONE;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -97,22 +91,7 @@ class KeyResource implements Reserved {
 
     @RequestMapping(method = GET, path = "/{id}")
     public ResponseEntity<KeyRepresentation> get(@PathVariable final String id) {
-        try {
-            return ResponseEntity.ok(KeyRepresentation.valueOf(service.read(id)));
-        } catch (final NotFoundException e) {
-            final List<Revision> revisions = service.readRevisions(id, 1, null).getElements();
-
-            if (revisions.isEmpty()) {
-                throw e;
-            }
-
-            final long revision = getOnlyElement(revisions).getId();
-
-            return ResponseEntity
-                    .status(GONE)
-                    .location(linkTo(methodOn(KeyRevisionResource.class).getRevision(id, revision)).toUri())
-                    .build();
-        }
+        return ResponseEntity.ok(KeyRepresentation.valueOf(service.read(id)));
     }
 
     @RequestMapping(method = PATCH, path = "/{id}", consumes = {APPLICATION_JSON_VALUE, JSON_MERGE_PATCH_VALUE})

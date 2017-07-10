@@ -206,7 +206,6 @@ public class HttpSteps {
                 .body(body)
                 .dispatch(status(),
                         on(HttpStatus.NO_CONTENT).call(route),
-                        on(HttpStatus.GONE).call(route),
                         anyStatus().dispatch(contentType(),
                                 on(APPLICATION_JSON).call(route),
                                 on(parseMediaType("application/*+json")).call(route)))

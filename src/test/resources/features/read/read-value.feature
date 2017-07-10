@@ -75,6 +75,4 @@ Feature: Read value
       | /value |
       | 0.19   |
     And "DELETE /keys/tax-rate/values?country=DE" responds "204 No Content"
-    Then "GET /keys/tax-rate/value?country=DE" responds "410 Gone" with headers:
-      | Location                                                         |
-      | http://localhost:8080/keys/tax-rate/value/revisions/5?country=DE |
+    Then "GET /keys/tax-rate/value?country=DE" responds "404 Not Found"

@@ -16,6 +16,4 @@ Feature: Read key
       | /schema/type | /description |
       | "number"     | ".."         |
     And "DELETE /keys/tax-rate" responds "204 No Content"
-    Then "GET /keys/tax-rate" responds "410 Gone" with headers:
-      | Location                                        |
-      | http://localhost:8080/keys/tax-rate/revisions/2 |
+    Then "GET /keys/tax-rate" responds "404 Not Found"

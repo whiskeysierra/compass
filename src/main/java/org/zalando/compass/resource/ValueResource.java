@@ -23,9 +23,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.ValueService;
 import org.zalando.compass.domain.model.Page;
-import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.domain.persistence.NotFoundException;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -41,7 +39,6 @@ import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.GONE;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
@@ -116,29 +113,11 @@ class ValueResource {
     @RequestMapping(method = GET, path = "/value")
     public ResponseEntity<ValueRepresentation> read(@PathVariable final String key, @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = parser.parse(query);
-        try {
-            final Value value = service.read(key, filter);
+        final Value value = service.read(key, filter);
 
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_LOCATION, canonicalUrl(key, value).toASCIIString())
-                    .body(ValueRepresentation.valueOf(value));
-        } catch (final NotFoundException e) {
-            // TODO limit 1
-            final Page<Revision> page = service.readRevisions(key, filter);
-            final List<Revision> revisions = page.getElements();
-
-            if (revisions.isEmpty()) {
-                throw e;
-            }
-
-            final Long revision = revisions.get(0).getId();
-            final Map<String, String> sorted = render(filter);
-
-            return ResponseEntity
-                    .status(GONE)
-                    .location(linkTo(methodOn(ValueRevisionResource.class).getRevision(key, revision, sorted)).toUri())
-                    .build();
-        }
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_LOCATION, canonicalUrl(key, value).toASCIIString())
+                .body(ValueRepresentation.valueOf(value));
     }
 
     @RequestMapping(method = PATCH, path = "/values", consumes = {APPLICATION_JSON_VALUE, JSON_PATCH_VALUE})
