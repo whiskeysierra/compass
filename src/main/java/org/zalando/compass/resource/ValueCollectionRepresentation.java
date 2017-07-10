@@ -15,8 +15,6 @@ import static lombok.AccessLevel.PRIVATE;
 @AllArgsConstructor
 final class ValueCollectionRepresentation {
 
-    URI prev;
-    URI next;
     List<ValueRepresentation> values;
 
 }

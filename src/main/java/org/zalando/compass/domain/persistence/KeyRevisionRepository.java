@@ -19,9 +19,9 @@ import static org.jooq.impl.DSL.max;
 import static org.jooq.impl.DSL.select;
 import static org.jooq.impl.DSL.selectOne;
 import static org.jooq.impl.DSL.trueCondition;
-import static org.jooq.impl.DSL.val;
 import static org.zalando.compass.domain.persistence.model.Tables.KEY_REVISION;
 import static org.zalando.compass.domain.persistence.model.Tables.REVISION;
+import static org.zalando.compass.library.Seek.field;
 
 @Repository
 public class KeyRevisionRepository {
@@ -58,20 +58,23 @@ public class KeyRevisionRepository {
                         .where(KEY_REVISION.REVISION.eq(REVISION.ID))
                         .and(trueCondition())))
                 .orderBy(REVISION.ID.desc())
-                // TODO .seekAfter(after == null ? null : val(after, Long.class))
+                .seekAfter(field(after, Long.class))
                 .limit(limit)
                 .fetch().map(this::mapRevisionWithoutType);
     }
 
-    public List<Key> findPage(final long revisionId) {
-        return  db.select(KEY_REVISION.fields())
-                    .from(KEY_REVISION)
-                    .where(KEY_REVISION.REVISION_TYPE.ne(RevisionType.DELETE))
-                    .and(KEY_REVISION.REVISION.eq(select(max(SELF.REVISION))
-                            .from(SELF)
-                            .where(SELF.ID.eq(KEY_REVISION.ID))
-                            .and(SELF.REVISION.le(revisionId))))
-                    .fetchInto(Key.class);
+    public List<Key> findPage(final long revisionId, final int limit, @Nullable final String after) {
+        return db.select(KEY_REVISION.fields())
+                .from(KEY_REVISION)
+                .where(KEY_REVISION.REVISION_TYPE.ne(RevisionType.DELETE))
+                .and(KEY_REVISION.REVISION.eq(select(max(SELF.REVISION))
+                        .from(SELF)
+                        .where(SELF.ID.eq(KEY_REVISION.ID))
+                        .and(SELF.REVISION.le(revisionId))))
+                .orderBy(KEY_REVISION.ID.asc())
+                .seekAfter(field(after, String.class))
+                .limit(limit)
+                .fetchInto(Key.class);
     }
 
     public List<Revision> findRevisions(final String id, final int limit, @Nullable final Long after) {
@@ -81,7 +84,7 @@ public class KeyRevisionRepository {
                 .join(KEY_REVISION).on(KEY_REVISION.REVISION.eq(REVISION.ID))
                 .where(KEY_REVISION.ID.eq(id))
                 .orderBy(REVISION.ID.desc())
-                .seekAfter(after == null ? null : val(after, Long.class))
+                .seekAfter(field(after, Long.class))
                 .limit(limit)
                 .fetch().map(this::mapRevisionWithType);
     }

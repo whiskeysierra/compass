@@ -37,14 +37,13 @@ class ReadDimensionRevision {
         return Pages.page(revisions, limit);
     }
 
-    PageRevision<Dimension> readPageAt(final long revisionId) {
+    PageRevision<Dimension> readPageAt(final long revisionId, final int limit, @Nullable final String after) {
         final Revision revision = revisionRepository.read(revisionId)
                 .orElseThrow(NotFoundException::new)
                 .withTypeUpdate();
 
-        final List<Dimension> dimensions = repository.findPage(revisionId);
-
-        return new PageRevision<>(revision, dimensions);
+        final List<Dimension> dimensions = repository.findPage(revisionId, limit + 1, after);
+        return Pages.page(dimensions, limit).toRevision(revision);
     }
 
     Page<Revision> readRevisions(final String id, final int limit, @Nullable final Long after) {

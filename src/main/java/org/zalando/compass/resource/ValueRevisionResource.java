@@ -13,7 +13,6 @@ import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -52,7 +51,7 @@ class ValueRevisionResource {
                 ))
                 .collect(toList());
 
-        return ResponseEntity.ok(new RevisionCollectionRepresentation(null, null, representations));
+        return ResponseEntity.ok(new RevisionCollectionRepresentation(null, representations));
     }
 
     @RequestMapping(method = GET, path = "/values/revisions/{revision}")
@@ -95,7 +94,7 @@ class ValueRevisionResource {
                 ))
                 .collect(toList());
 
-        return ResponseEntity.ok(new RevisionCollectionRepresentation(null, null, representations));
+        return ResponseEntity.ok(new RevisionCollectionRepresentation(null, representations));
     }
 
     @RequestMapping(method = GET, path = "/value/revisions/{revision}")

@@ -12,7 +12,7 @@ public interface DimensionService {
 
     boolean replace(Dimension dimension, @Nullable String comment);
 
-    Page<Dimension> readPage(@Nullable String term);
+    Page<Dimension> readPage(@Nullable String term, final int limit);
 
     Dimension read(String id);
 

@@ -12,7 +12,7 @@ public interface KeyService {
 
     boolean replace(Key key, @Nullable String comment);
 
-    Page<Key> readPage(@Nullable String term);
+    Page<Key> readPage(@Nullable String term, final int limit);
 
     Key read(String id);
 

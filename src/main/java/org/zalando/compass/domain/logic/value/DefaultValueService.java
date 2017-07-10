@@ -46,7 +46,7 @@ class DefaultValueService implements ValueService {
 
     @Override
     public Page<Value> readPage(final String key, final Map<String, JsonNode> filter) {
-        return new Page<>(read.readAll(key, filter), null);
+        return read.readAll(key, filter);
     }
 
     @Override
@@ -56,7 +56,7 @@ class DefaultValueService implements ValueService {
 
     @Override
     public Page<Revision> readPageRevisions(final String key) {
-        return new Page<>(readRevision.readPageRevisions(key), null);
+        return readRevision.readPageRevisions(key, 25, null);
     }
 
     @Override
@@ -66,7 +66,7 @@ class DefaultValueService implements ValueService {
 
     @Override
     public Page<Revision> readRevisions(final String key, final Map<String, JsonNode> dimensions) {
-        return new Page<>(readRevision.readRevisions(key, dimensions), null);
+        return readRevision.readRevisions(key, dimensions, 25, null);
     }
 
     @Override

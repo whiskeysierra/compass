@@ -19,4 +19,6 @@ public class PageRevision<T> {
     @Wither
     List<T> elements;
 
+    T next;
+
 }

@@ -67,6 +67,8 @@ class DimensionRevisionResource {
                         rev.getUser(),
                         rev.getComment()
                 ),
+                Optional.ofNullable(page.getNext()).map(next ->
+                    linkTo(methodOn(DimensionRevisionResource.class).getRevision(revision)).toUri()).orElse(null),
                 page.getElements().stream().map(DimensionRepresentation::valueOf).collect(toList())
         ));
     }
@@ -103,7 +105,6 @@ class DimensionRevisionResource {
                 .collect(toList());
 
         return ResponseEntity.ok(new RevisionCollectionRepresentation(
-                null,
                 Optional.ofNullable(page.getNext()).map(nexter).orElse(null),
                 revisions));
     }

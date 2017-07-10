@@ -11,7 +11,6 @@ import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 @Service
 class DefaultDimensionService implements DimensionService {
@@ -37,8 +36,8 @@ class DefaultDimensionService implements DimensionService {
     }
 
     @Override
-    public Page<Dimension> readPage(@Nullable final String term) {
-        return new Page<>(read.readPage(term), null);
+    public Page<Dimension> readPage(@Nullable final String term, final int limit) {
+        return read.readPage(term, limit, null);
     }
 
     @Override
@@ -53,7 +52,7 @@ class DefaultDimensionService implements DimensionService {
 
     @Override
     public PageRevision<Dimension> readPageAt(final long revision) {
-        return readRevision.readPageAt(revision);
+        return readRevision.readPageAt(revision, 25, null);
     }
 
     @Override

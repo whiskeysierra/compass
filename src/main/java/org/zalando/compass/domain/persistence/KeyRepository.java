@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import static org.jooq.impl.DSL.trueCondition;
 import static org.zalando.compass.domain.persistence.model.Tables.KEY;
+import static org.zalando.compass.library.Seek.field;
 
 @Repository
 public class KeyRepository {
@@ -32,6 +33,25 @@ public class KeyRepository {
                 .execute();
     }
 
+    public List<Key> findAll(@Nullable final String term, final int limit, @Nullable final String after) {
+        return db.select()
+                .from(KEY)
+                .where(toCondition(term))
+                .orderBy(KEY.ID.asc())
+                .seekAfter(field(after, String.class))
+                .limit(limit)
+                .fetchInto(Key.class);
+    }
+
+    private Condition toCondition(@Nullable final String term) {
+        if (term == null) {
+            return trueCondition();
+        }
+
+        return KEY.ID.likeIgnoreCase("%" + term + "%")
+                .or(KEY.DESCRIPTION.likeIgnoreCase("%" + term + "%"));
+    }
+
     public Optional<Key> find(final String id) {
         return doFind(id)
                 .fetchOptionalInto(Key.class);
@@ -47,23 +67,6 @@ public class KeyRepository {
         return db.select()
                 .from(KEY)
                 .where(KEY.ID.eq(id));
-    }
-
-    public List<Key> findAll(@Nullable final String term) {
-        return db.select()
-                .from(KEY)
-                .where(toCondition(term))
-                .orderBy(KEY.ID.asc())
-                .fetchInto(Key.class);
-    }
-
-    private Condition toCondition(@Nullable final String term) {
-        if (term == null) {
-            return trueCondition();
-        }
-
-        return KEY.ID.likeIgnoreCase("%" + term + "%")
-                .or(KEY.DESCRIPTION.likeIgnoreCase("%" + term + "%"));
     }
 
     public void update(final Key key) {

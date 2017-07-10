@@ -107,7 +107,7 @@ class ValueResource {
         final List<ValueRepresentation> representations = page.getElements().stream()
                 .map(ValueRepresentation::valueOf).collect(toList());
 
-        return new ValueCollectionRepresentation(null, null, representations);
+        return new ValueCollectionRepresentation(representations);
     }
 
     @RequestMapping(method = GET, path = "/value")

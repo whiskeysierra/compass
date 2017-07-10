@@ -80,13 +80,15 @@ class DimensionResource implements Reserved {
 
     // TODO order by relevance?
     @RequestMapping(method = GET)
-    public ResponseEntity<DimensionCollectionRepresentation> getAll(@RequestParam(name = "q", required = false) @Nullable final String q) {
-        final Page<Dimension> page = service.readPage(q);
+    public ResponseEntity<DimensionCollectionRepresentation> getAll(
+            @RequestParam(name = "q", required = false) @Nullable final String q) {
+        final Page<Dimension> page = service.readPage(q, 25);
+
         final List<DimensionRepresentation> representations = page.getElements().stream()
                 .map(DimensionRepresentation::valueOf)
                 .collect(toList());
 
-        return ResponseEntity.ok(new DimensionCollectionRepresentation(null, null, representations));
+        return ResponseEntity.ok(new DimensionCollectionRepresentation(null, representations));
     }
 
     @RequestMapping(method = GET, path = "/{id}")

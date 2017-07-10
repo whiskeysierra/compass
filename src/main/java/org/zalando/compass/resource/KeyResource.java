@@ -80,13 +80,15 @@ class KeyResource implements Reserved {
 
     // TODO order by relevance?
     @RequestMapping(method = GET)
-    public ResponseEntity<KeyCollectionRepresentation> getAll(@RequestParam(name = "q", required = false) @Nullable final String q) {
-        final Page<Key> page = service.readPage(q);
+    public ResponseEntity<KeyCollectionRepresentation> getAll(
+            @RequestParam(name = "q", required = false) @Nullable final String q) {
+        final Page<Key> page = service.readPage(q, 25);
+
         final List<KeyRepresentation> representations = page.getElements().stream()
                 .map(KeyRepresentation::valueOf)
                 .collect(toList());
 
-        return ResponseEntity.ok(new KeyCollectionRepresentation(null, null, representations));
+        return ResponseEntity.ok(new KeyCollectionRepresentation(null, representations));
     }
 
     @RequestMapping(method = GET, path = "/{id}")

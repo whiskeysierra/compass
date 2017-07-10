@@ -67,6 +67,8 @@ class KeyRevisionResource {
                         rev.getUser(),
                         rev.getComment()
                 ),
+                Optional.ofNullable(page.getNext()).map(next ->
+                        linkTo(methodOn(KeyRevisionResource.class).getRevision(revision)).toUri()).orElse(null),
                 page.getElements().stream().map(KeyRepresentation::valueOf).collect(toList())
         ));
     }
@@ -103,7 +105,6 @@ class KeyRevisionResource {
                 .collect(toList());
 
         return ResponseEntity.ok(new RevisionCollectionRepresentation(
-                null,
                 Optional.ofNullable(page.getNext()).map(nexter).orElse(null),
                 revisions));
     }

@@ -16,7 +16,9 @@ import org.zalando.compass.domain.persistence.model.enums.RevisionType;
 import org.zalando.compass.domain.persistence.model.tables.ValueDimensionRevision;
 import org.zalando.compass.domain.persistence.model.tables.records.ValueDimensionRevisionRecord;
 import org.zalando.compass.domain.persistence.model.tables.records.ValueRevisionRecord;
+import org.zalando.compass.library.Seek;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
@@ -85,7 +87,7 @@ public class ValueRevisionRepository {
         db.batch(queries).execute();
     }
 
-    public List<Revision> findPageRevisions(final String key) {
+    public List<Revision> findPageRevisions(final String key, final int limit, @Nullable final Long after) {
         return db.select(REVISION.fields())
                 .from(REVISION)
                 .where(exists(selectOne()
@@ -93,6 +95,8 @@ public class ValueRevisionRepository {
                         .where(VALUE_REVISION.KEY_ID.eq(key))
                         .and(VALUE_REVISION.REVISION.eq(REVISION.ID))))
                 .orderBy(REVISION.ID.desc())
+                .seekAfter(Seek.field(after, Long.class))
+                .limit(limit)
                 .fetch(this::mapRevisionWithoutType);
     }
 
@@ -148,7 +152,8 @@ public class ValueRevisionRepository {
                 .collect(toList());
     }
 
-    public List<Revision> findRevisions(final String key, final Map<String, JsonNode> dimensions) {
+    public List<Revision> findRevisions(final String key, final Map<String, JsonNode> dimensions, final int limit,
+            @Nullable final Long after) {
         return db.select(REVISION.fields())
                 .select(VALUE_REVISION.REVISION_TYPE)
                 .from(REVISION)
@@ -156,6 +161,8 @@ public class ValueRevisionRepository {
                 .where(VALUE_REVISION.KEY_ID.eq(key))
                 .and(exactMatch(dimensions))
                 .orderBy(REVISION.ID.desc())
+                .seekAfter(Seek.field(after, Long.class))
+                .limit(limit)
                 .fetch(this::mapRevisionWithType);
     }
 

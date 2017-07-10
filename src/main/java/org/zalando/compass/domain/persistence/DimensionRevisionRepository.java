@@ -19,9 +19,9 @@ import static org.jooq.impl.DSL.max;
 import static org.jooq.impl.DSL.select;
 import static org.jooq.impl.DSL.selectOne;
 import static org.jooq.impl.DSL.trueCondition;
-import static org.jooq.impl.DSL.val;
 import static org.zalando.compass.domain.persistence.model.Tables.DIMENSION_REVISION;
 import static org.zalando.compass.domain.persistence.model.Tables.REVISION;
+import static org.zalando.compass.library.Seek.field;
 
 @Repository
 public class DimensionRevisionRepository {
@@ -61,12 +61,12 @@ public class DimensionRevisionRepository {
                         .where(DIMENSION_REVISION.REVISION.eq(REVISION.ID))
                         .and(trueCondition())))
                 .orderBy(REVISION.ID.desc())
-                // TODO .seekAfter(after == null ? null : val(after, Long.class))
+                .seekAfter(field(after, Long.class))
                 .limit(limit)
                 .fetch().map(this::mapRevisionWithoutType);
     }
 
-    public List<Dimension> findPage(final long revisionId) {
+    public List<Dimension> findPage(final long revisionId, final int limit, @Nullable final String after) {
         return db.select(DIMENSION_REVISION.fields())
                 .from(DIMENSION_REVISION)
                 .where(DIMENSION_REVISION.REVISION_TYPE.ne(RevisionType.DELETE))
@@ -74,6 +74,9 @@ public class DimensionRevisionRepository {
                         .from(SELF)
                         .where(SELF.ID.eq(DIMENSION_REVISION.ID))
                         .and(SELF.REVISION.le(revisionId))))
+                .orderBy(DIMENSION_REVISION.ID.asc())
+                .seekAfter(field(after, String.class))
+                .limit(limit)
                 .fetchInto(Dimension.class);
     }
 
@@ -84,7 +87,7 @@ public class DimensionRevisionRepository {
                 .join(DIMENSION_REVISION).on(DIMENSION_REVISION.REVISION.eq(REVISION.ID))
                 .where(DIMENSION_REVISION.ID.eq(id))
                 .orderBy(REVISION.ID.desc())
-                .seekAfter(after == null ? null : val(after, Long.class))
+                .seekAfter(field(after, Long.class))
                 .limit(limit)
                 .fetch().map(this::mapRevisionWithType);
     }
@@ -112,12 +115,12 @@ public class DimensionRevisionRepository {
 
     private Revision mapRevisionWithType(final Record record) {
         return new Revision(
-                        record.get(REVISION.ID),
-                        record.get(REVISION.TIMESTAMP).atOffset(UTC),
-                        record.get(DIMENSION_REVISION.REVISION_TYPE),
-                        record.get(REVISION.USER),
-                        record.get(REVISION.COMMENT)
-                );
+                record.get(REVISION.ID),
+                record.get(REVISION.TIMESTAMP).atOffset(UTC),
+                record.get(DIMENSION_REVISION.REVISION_TYPE),
+                record.get(REVISION.USER),
+                record.get(REVISION.COMMENT)
+        );
     }
 
     private Revision mapRevisionWithoutType(final Record record) {

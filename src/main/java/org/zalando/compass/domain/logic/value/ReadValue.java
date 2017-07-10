@@ -3,6 +3,7 @@ package org.zalando.compass.domain.logic.value;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.KeyRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
@@ -28,21 +29,21 @@ class ReadValue {
         this.selector = selector;
     }
 
-    List<Value> readAll(final String key, final Map<String, JsonNode> filter) {
+    Page<Value> readAll(final String key, final Map<String, JsonNode> filter) {
         final List<Value> values = valueRepository.findAll(byKey(key));
 
         if (values.isEmpty()) {
             // the fact that we can delay this check (foreign key constraint) should not be known to this layer...
             keyRepository.find(key).orElseThrow(NotFoundException::new);
-            return values;
+            return new Page<>(values, null);
         }
 
         if (filter.isEmpty()) {
             // special case, just for reading many values
-            return values;
+            return new Page<>(values, null);
         }
 
-        return selector.select(values, filter);
+        return new Page<>(selector.select(values, filter), null);
     }
 
     Value read(final String key, final Map<String, JsonNode> filter) {

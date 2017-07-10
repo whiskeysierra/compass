@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 
+import java.net.URI;
 import java.util.List;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -13,8 +14,8 @@ import static lombok.AccessLevel.PRIVATE;
 @AllArgsConstructor
 final class DimensionCollectionRevisionRepresentation {
 
-    // TODO without href
     RevisionRepresentation revision;
+    URI next;
     List<DimensionRepresentation> dimensions;
 
 }

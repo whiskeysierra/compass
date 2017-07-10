@@ -17,6 +17,7 @@ import java.util.Set;
 
 import static org.jooq.impl.DSL.trueCondition;
 import static org.zalando.compass.domain.persistence.model.Tables.DIMENSION;
+import static org.zalando.compass.library.Seek.field;
 
 @Repository
 public class DimensionRepository {
@@ -62,11 +63,13 @@ public class DimensionRepository {
                 .orderBy(DIMENSION.ID.asc());
     }
 
-    public List<Dimension> findAll(@Nullable final String term) {
+    public List<Dimension> findAll(@Nullable final String term, final int limit, @Nullable final String after) {
         return db.select(DIMENSION.fields())
                 .from(DIMENSION)
                 .where(toCondition(term))
                 .orderBy(DIMENSION.ID.asc())
+                .seekAfter(field(after, String.class))
+                .limit(limit)
                 .fetchInto(Dimension.class);
     }
 
@@ -109,7 +112,6 @@ public class DimensionRepository {
         db.deleteFrom(DIMENSION)
                 .where(DIMENSION.ID.eq(dimension.getId()))
                 .execute();
-
     }
 
 }

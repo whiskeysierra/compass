@@ -16,4 +16,8 @@ public class Page<T> {
     List<T> elements;
     T next;
 
+    public PageRevision<T> toRevision(final Revision revision) {
+        return new PageRevision<>(revision, elements, next);
+    }
+
 }

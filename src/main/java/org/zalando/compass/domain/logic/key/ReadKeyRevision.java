@@ -37,19 +37,17 @@ class ReadKeyRevision {
         return Pages.page(revisions, limit);
     }
 
-    PageRevision<Key> readPageAt(final long revisionId) {
+    PageRevision<Key> readPageAt(final long revisionId, final int limit, @Nullable final String after) {
         final Revision revision = revisionRepository.read(revisionId)
                 .orElseThrow(NotFoundException::new)
                 .withTypeUpdate();
 
-        final List<Key> keys = repository.findPage(revisionId);
-
-        return new PageRevision<>(revision, keys);
+        final List<Key> keys = repository.findPage(revisionId, limit, after);
+        return Pages.page(keys, limit).toRevision(revision);
     }
 
     Page<Revision> readRevisions(final String id, final int limit, @Nullable final Long after) {
         final List<Revision> revisions = repository.findRevisions(id, limit + 1, after);
-
         return Pages.page(revisions, limit);
     }
 

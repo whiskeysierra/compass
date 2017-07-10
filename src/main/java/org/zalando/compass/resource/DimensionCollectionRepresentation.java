@@ -15,7 +15,6 @@ import static lombok.AccessLevel.PRIVATE;
 @AllArgsConstructor
 class DimensionCollectionRepresentation {
 
-    URI prev;
     URI next;
     List<DimensionRepresentation> dimensions;
 
