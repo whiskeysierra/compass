@@ -32,10 +32,9 @@ public class RevisionService {
         final String user = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
                 .map(Principal::getName).orElse("anonymous");
 
-        final Revision input = new Revision(null, timestamp, null, user, comment);
-        final long id = repository.create(input);
+        final long id = repository.create(timestamp, user, comment);
 
-        final Revision revision = input.withId(id);
+        final Revision revision = new Revision(id, timestamp, null, user, comment);
         log.info("Created revision [{}].", revision);
         return revision;
     }

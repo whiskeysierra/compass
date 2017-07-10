@@ -1,10 +1,10 @@
 package org.zalando.compass;
 
+import lombok.AllArgsConstructor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
-import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
@@ -24,6 +24,7 @@ public final class WitherTest<T, P> {
     public TestCase<T, P> test;
 
     @lombok.Value
+    @AllArgsConstructor
     private static final class TestCase<T, P> {
         T instance;
         BiFunction<T, P, T> with;
@@ -33,8 +34,7 @@ public final class WitherTest<T, P> {
     public static Iterable<TestCase<?, ?>> data() {
 
         return Arrays.asList(
-                new TestCase<>(new Revision(null, null, null, null, null), Revision::withId),
-                new TestCase<>(new Revision(null, null, null, null, null), Revision::withType),
+                new TestCase<>(new Revision(0L, null, null, null, null), Revision::withType),
                 new TestCase<>(new Value(null, null, null), Value::withDimensions),
                 new TestCase<>(new Value(null, null, null), Value::withIndex),
                 new TestCase<PageRevision<Object>, List<Object>>(new PageRevision<>(null, null), PageRevision::withElements)

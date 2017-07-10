@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Revision;
 
+import javax.annotation.Nullable;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -24,10 +25,10 @@ public class RevisionRepository {
         this.db = db;
     }
 
-    public long create(final Revision revision) {
+    public long create(final OffsetDateTime timestamp, final String user, @Nullable final String comment) {
         return db.insertInto(REVISION)
                 .columns(REVISION.TIMESTAMP, REVISION.USER, REVISION.COMMENT)
-                .values(toUTC(revision.getTimestamp()), revision.getUser(), revision.getComment())
+                .values(toUTC(timestamp), user, comment)
                 .returning(REVISION.ID)
                 .fetchOne().getId();
     }

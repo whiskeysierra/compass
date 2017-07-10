@@ -3,15 +3,12 @@ package org.zalando.compass.domain.model;
 import lombok.experimental.Wither;
 import org.zalando.compass.domain.persistence.model.enums.RevisionType;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 @lombok.Value
 public final class Revision {
 
-    // TODO long?
-    @Wither
-    Long id;
+    long id;
 
     OffsetDateTime timestamp;
 
