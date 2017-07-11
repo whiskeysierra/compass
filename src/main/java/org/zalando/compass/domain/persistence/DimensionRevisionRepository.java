@@ -8,8 +8,8 @@ import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.model.enums.RevisionType;
+import org.zalando.compass.library.pagination.PageQuery;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,7 +21,6 @@ import static org.jooq.impl.DSL.selectOne;
 import static org.jooq.impl.DSL.trueCondition;
 import static org.zalando.compass.domain.persistence.model.Tables.DIMENSION_REVISION;
 import static org.zalando.compass.domain.persistence.model.Tables.REVISION;
-import static org.zalando.compass.library.Seek.field;
 
 @Repository
 public class DimensionRevisionRepository {
@@ -53,42 +52,33 @@ public class DimensionRevisionRepository {
                 .execute();
     }
 
-    public List<Revision> findPageRevisions(final int limit, @Nullable final Long after) {
-        return db.select(REVISION.fields())
+    public List<Revision> findPageRevisions(final PageQuery<Long> query) {
+        return query.seek(db.select(REVISION.fields())
                 .from(REVISION)
                 .where(exists(selectOne()
                         .from(DIMENSION_REVISION)
                         .where(DIMENSION_REVISION.REVISION.eq(REVISION.ID))
-                        .and(trueCondition())))
-                .orderBy(REVISION.ID.desc())
-                .seekAfter(field(after, Long.class))
-                .limit(limit)
+                        .and(trueCondition()))), REVISION.ID.desc())
                 .fetch().map(this::mapRevisionWithoutType);
     }
 
-    public List<Dimension> findPage(final long revisionId, final int limit, @Nullable final String after) {
-        return db.select(DIMENSION_REVISION.fields())
+    public List<Dimension> findPage(final long revisionId, final PageQuery<String> query) {
+        return query.seek(db.select(DIMENSION_REVISION.fields())
                 .from(DIMENSION_REVISION)
                 .where(DIMENSION_REVISION.REVISION_TYPE.ne(RevisionType.DELETE))
                 .and(DIMENSION_REVISION.REVISION.eq(select(max(SELF.REVISION))
                         .from(SELF)
                         .where(SELF.ID.eq(DIMENSION_REVISION.ID))
-                        .and(SELF.REVISION.le(revisionId))))
-                .orderBy(DIMENSION_REVISION.ID.asc())
-                .seekAfter(field(after, String.class))
-                .limit(limit)
+                        .and(SELF.REVISION.le(revisionId)))), DIMENSION_REVISION.ID.asc())
                 .fetchInto(Dimension.class);
     }
 
-    public List<Revision> findRevisions(final String id, final int limit, @Nullable final Long after) {
-        return db.select(REVISION.fields())
+    public List<Revision> findRevisions(final String id, final PageQuery<Long> query) {
+        return query.seek(db.select(REVISION.fields())
                 .select(DIMENSION_REVISION.fields())
                 .from(REVISION)
                 .join(DIMENSION_REVISION).on(DIMENSION_REVISION.REVISION.eq(REVISION.ID))
-                .where(DIMENSION_REVISION.ID.eq(id))
-                .orderBy(REVISION.ID.desc())
-                .seekAfter(field(after, Long.class))
-                .limit(limit)
+                .where(DIMENSION_REVISION.ID.eq(id)), REVISION.ID.desc())
                 .fetch().map(this::mapRevisionWithType);
     }
 

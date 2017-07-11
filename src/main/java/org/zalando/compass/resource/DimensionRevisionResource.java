@@ -9,22 +9,22 @@ import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionRevision;
-import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
+import org.zalando.compass.library.pagination.PageQuery;
+import org.zalando.compass.library.pagination.PageResult;
 
 import javax.annotation.Nullable;
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.stream.Collectors.toList;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.zalando.compass.resource.Linking.link;
 
 @RestController
 @RequestMapping(path = "/dimensions")
@@ -39,23 +39,23 @@ class DimensionRevisionResource {
 
     @RequestMapping(method = GET, path = "/revisions")
     public ResponseEntity<RevisionCollectionRepresentation> getRevisions(
-            @Nullable @RequestParam(required = false, defaultValue = "25") final Integer limit,
+            @RequestParam(required = false, defaultValue = "25") final int limit,
             @Nullable @RequestParam(required = false) final Long after) {
 
-        // can actually never happen, just to satisfy IDEA
-        checkNotNull(limit, "Limit required");
-
         return paginate(
-                () -> service.readPageRevisions(limit, after),
-                rev -> linkTo(methodOn(DimensionRevisionResource.class).getRevisions(limit, rev.getId())).toUri(),
-                rev -> linkTo(methodOn(DimensionRevisionResource.class).getRevision(rev.getId())).toUri());
+                () -> service.readPageRevisions(PageQuery.create(after, null, limit)),
+                rev -> link(methodOn(DimensionRevisionResource.class).getRevisions(limit, rev.getId())),
+                // TODO fix
+                rev -> link(methodOn(DimensionRevisionResource.class).getRevisions(limit, null)),
+                rev -> link(methodOn(DimensionRevisionResource.class).getRevision(rev.getId())));
     }
 
     // TODO search by term
     @RequestMapping(method = GET, path = "/revisions/{revision}")
     public ResponseEntity<DimensionCollectionRevisionRepresentation> getRevision(@PathVariable final long revision) {
-
-        final PageRevision<Dimension> page = service.readPageAt(revision, 25, null);
+        // TODO feed with query parameters
+        final PageQuery<String> query = PageQuery.create(null, null, 25);
+        final PageRevision<Dimension> page = service.readPageAt(revision, query);
         final Revision rev = page.getRevision();
 
         return ResponseEntity.ok(new DimensionCollectionRevisionRepresentation(
@@ -67,31 +67,32 @@ class DimensionRevisionResource {
                         rev.getUser(),
                         rev.getComment()
                 ),
-                Optional.ofNullable(page.getNext()).map(next ->
-                    linkTo(methodOn(DimensionRevisionResource.class).getRevision(revision)).toUri()).orElse(null),
+                page.hasNext() ? link(methodOn(DimensionRevisionResource.class).getRevision(revision)) : null,
                 page.getElements().stream().map(DimensionRepresentation::valueOf).collect(toList())
         ));
     }
 
     @RequestMapping(method = GET, path = "/{id}/revisions")
     public ResponseEntity<RevisionCollectionRepresentation> getRevisions(@PathVariable final String id,
-            @Nullable @RequestParam(required = false, defaultValue = "25") final Integer limit,
-            @Nullable @RequestParam(required = false) final Long after) {
+            @RequestParam(required = false, defaultValue = "25") final int limit,
+            @Nullable @RequestParam(value = "_after", required = false) final Long after,
+            @Nullable @RequestParam(value = "_before", required = false) final Long before) {
 
-        // can actually never happen, just to satisfy IDEA
-        checkNotNull(limit, "Limit required");
+        final PageQuery<Long> query = PageQuery.create(after, before, limit);
 
         return paginate(
-                () -> service.readRevisions(id, limit, after),
+                () -> service.readRevisions(id, query),
                 // TODO should omit if limit is default value
-                rev -> linkTo(methodOn(DimensionRevisionResource.class).getRevisions(id, limit, rev.getId())).toUri(),
-                rev -> linkTo(methodOn(DimensionRevisionResource.class).getRevision(id, rev.getId())).toUri());
+                rev -> link(methodOn(DimensionRevisionResource.class).getRevisions(id, limit, rev.getId(), null)),
+                rev -> link(methodOn(DimensionRevisionResource.class).getRevisions(id, limit, null, rev.getId())),
+                rev -> link(methodOn(DimensionRevisionResource.class).getRevision(id, rev.getId())));
     }
 
     // TODO library?!
-    private ResponseEntity<RevisionCollectionRepresentation> paginate(final Supplier<Page<Revision>> reader,
-            final Function<Revision, URI> nexter, final Function<Revision, URI> linker) {
-        final Page<Revision> page = reader.get();
+    private ResponseEntity<RevisionCollectionRepresentation> paginate(final Supplier<PageResult<Revision>> reader,
+            final Function<Revision, URI> nexter, final Function<Revision, URI> prever,
+            final Function<Revision, URI> linker) {
+        final PageResult<Revision> page = reader.get();
 
         final List<RevisionRepresentation> revisions = page.getElements().stream()
                 .map(revision -> new RevisionRepresentation(
@@ -105,7 +106,9 @@ class DimensionRevisionResource {
                 .collect(toList());
 
         return ResponseEntity.ok(new RevisionCollectionRepresentation(
-                Optional.ofNullable(page.getNext()).map(nexter).orElse(null),
+                // direction would be null if we wouldn't paginate already
+                page.hasNext() ? nexter.apply(page.getTail()) : null,
+                page.hasPrevious() ? prever.apply(page.getHead()) : null,
                 revisions));
     }
 
@@ -119,8 +122,7 @@ class DimensionRevisionResource {
                 new RevisionRepresentation(
                         rev.getId(),
                         rev.getTimestamp(),
-                        null, // TOD generate links..
-
+                        link(methodOn(DimensionRevisionResource.class).getRevision(id, rev.getId())),
                         rev.getType(),
                         rev.getUser(),
                         rev.getComment()

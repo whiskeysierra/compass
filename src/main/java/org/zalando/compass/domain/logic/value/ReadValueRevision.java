@@ -3,7 +3,6 @@ package org.zalando.compass.domain.logic.value;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
@@ -11,7 +10,8 @@ import org.zalando.compass.domain.model.ValueRevision;
 import org.zalando.compass.domain.persistence.NotFoundException;
 import org.zalando.compass.domain.persistence.RevisionRepository;
 import org.zalando.compass.domain.persistence.ValueRevisionRepository;
-import org.zalando.compass.library.Pages;
+import org.zalando.compass.library.pagination.PageQuery;
+import org.zalando.compass.library.pagination.PageResult;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -34,12 +34,13 @@ class ReadValueRevision {
         this.selector = selector;
     }
 
-    public Page<Revision> readPageRevisions(final String key, final int limit, @Nullable final Long after) {
+    public PageResult<Revision> readPageRevisions(final String key, final int limit, @Nullable final Long after) {
         final List<Revision> revisions = repository.findPageRevisions(key, limit, after).stream()
                 .map(Revision::withTypeUpdate)
                 .collect(toList());
 
-        return Pages.page(revisions, limit);
+        final PageQuery<Long> query = PageQuery.create(after, null, limit);
+        return query.paginate(revisions);
     }
 
     public PageRevision<Value> readPageAt(final String key, final Map<String, JsonNode> filter, final long revisionId) {
@@ -50,20 +51,19 @@ class ReadValueRevision {
         final List<Value> values = repository.findPage(key, revisionId, true)
                 .stream().map(ValueRevision::toValue).collect(toList());
 
-        final PageRevision<Value> page = new PageRevision<>(revision, values, null);
-
         if (filter.isEmpty()) {
             // special case, just for reading many values
-            return page;
+            return new PageRevision<>(revision, PageResult.create(values, false, false));
         }
 
-        return page.withElements(selector.select(page.getElements(), filter));
+        return new PageRevision<>(revision, PageResult.create(selector.select(values, filter), false, false));
     }
 
-    public Page<Revision> readRevisions(final String key, final Map<String, JsonNode> dimensions, final int limit,
+    public PageResult<Revision> readRevisions(final String key, final Map<String, JsonNode> dimensions, final int limit,
             @Nullable final Long after) {
         final List<Revision> revisions = repository.findRevisions(key, dimensions, limit, after);
-        return Pages.page(revisions, limit);
+        final PageQuery<Long> query = PageQuery.create(after, null, limit);
+        return query.paginate(revisions);
     }
 
     public ValueRevision readAt(final String key, final Map<String, JsonNode> dimensions, final long revision) {

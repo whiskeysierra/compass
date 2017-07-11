@@ -36,8 +36,7 @@ public final class WitherTest<T, P> {
         return Arrays.asList(
                 new TestCase<>(new Revision(0L, null, null, null, null), Revision::withType),
                 new TestCase<>(new Value(null, null, null), Value::withDimensions),
-                new TestCase<>(new Value(null, null, null), Value::withIndex),
-                new TestCase<PageRevision<Object>, List<Object>>(new PageRevision<>(null, null, null), PageRevision::withElements)
+                new TestCase<>(new Value(null, null, null), Value::withIndex)
         );
     }
 

@@ -15,6 +15,7 @@ import static lombok.AccessLevel.PRIVATE;
 final class RevisionCollectionRepresentation {
 
     URI next;
+    URI prev;
     List<RevisionRepresentation> revisions;
 
 }

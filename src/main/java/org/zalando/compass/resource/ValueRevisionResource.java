@@ -8,19 +8,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.ValueService;
-import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
+import org.zalando.compass.library.pagination.PageResult;
 
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Collections.emptyMap;
+import static com.google.common.collect.ImmutableMap.of;
 import static java.util.stream.Collectors.toList;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.zalando.compass.resource.Linking.link;
 
 @RestController
 @RequestMapping(path = "/keys/{key}")
@@ -37,21 +37,21 @@ class ValueRevisionResource {
 
     @RequestMapping(method = GET, path = "/values/revisions")
     public ResponseEntity<RevisionCollectionRepresentation> getValuesRevisions(@PathVariable final String key) {
-        final Page<Revision> page = service.readPageRevisions(key);
+        final PageResult<Revision> page = service.readPageRevisions(key);
         final List<Revision> revisions = page.getElements();
 
         final List<RevisionRepresentation> representations = revisions.stream()
                 .map(revision -> new RevisionRepresentation(
                         revision.getId(),
                         revision.getTimestamp(),
-                        linkTo(methodOn(ValueRevisionResource.class).getValuesRevision(key, revision.getId(), emptyMap())).toUri(),
+                        link(methodOn(ValueRevisionResource.class).getValuesRevision(key, revision.getId(), of())),
                         revision.getType(),
                         revision.getUser(),
                         revision.getComment()
                 ))
                 .collect(toList());
 
-        return ResponseEntity.ok(new RevisionCollectionRepresentation(null, representations));
+        return ResponseEntity.ok(new RevisionCollectionRepresentation(null, null, representations));
     }
 
     @RequestMapping(method = GET, path = "/values/revisions/{revision}")
@@ -80,21 +80,21 @@ class ValueRevisionResource {
     public ResponseEntity<RevisionCollectionRepresentation> getValueRevisions(@PathVariable final String key,
             @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = parser.parse(query);
-        final Page<Revision> page = service.readRevisions(key, filter);
+        final PageResult<Revision> page = service.readRevisions(key, filter);
         final List<Revision> revisions = page.getElements();
 
         final List<RevisionRepresentation> representations = revisions.stream()
                 .map(revision -> new RevisionRepresentation(
                         revision.getId(),
                         revision.getTimestamp(),
-                        linkTo(methodOn(ValueRevisionResource.class).getRevision(key, revision.getId(), query)).toUri(),
+                        link(methodOn(ValueRevisionResource.class).getRevision(key, revision.getId(), query)),
                         revision.getType(),
                         revision.getUser(),
                         revision.getComment()
                 ))
                 .collect(toList());
 
-        return ResponseEntity.ok(new RevisionCollectionRepresentation(null, representations));
+        return ResponseEntity.ok(new RevisionCollectionRepresentation(null, null, representations));
     }
 
     @RequestMapping(method = GET, path = "/value/revisions/{revision}")

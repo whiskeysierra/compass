@@ -6,9 +6,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionRevision;
-import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
+import org.zalando.compass.library.pagination.PageQuery;
+import org.zalando.compass.library.pagination.PageResult;
 
 import javax.annotation.Nullable;
 
@@ -36,8 +37,8 @@ class DefaultDimensionService implements DimensionService {
     }
 
     @Override
-    public Page<Dimension> readPage(@Nullable final String term, final int limit, @Nullable final String after) {
-        return read.readPage(term, limit, after);
+    public PageResult<Dimension> readPage(@Nullable final String term, final PageQuery<String> query) {
+        return read.readPage(term, query);
     }
 
     @Override
@@ -46,18 +47,18 @@ class DefaultDimensionService implements DimensionService {
     }
 
     @Override
-    public Page<Revision> readPageRevisions(final int limit, @Nullable final Long after) {
-        return readRevision.readPageRevisions(limit, after);
+    public PageResult<Revision> readPageRevisions(final PageQuery<Long> query) {
+        return readRevision.readPageRevisions(query);
     }
 
     @Override
-    public PageRevision<Dimension> readPageAt(final long revision, final int limit, @Nullable final String after) {
-        return readRevision.readPageAt(revision, limit, after);
+    public PageRevision<Dimension> readPageAt(final long revision, final PageQuery<String> query) {
+        return readRevision.readPageAt(revision, query);
     }
 
     @Override
-    public Page<Revision> readRevisions(final String id, final int limit, @Nullable final Long after) {
-        return readRevision.readRevisions(id, limit, after);
+    public PageResult<Revision> readRevisions(final String id, final PageQuery<Long> query) {
+        return readRevision.readRevisions(id, query);
     }
 
     @Override

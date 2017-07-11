@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.ValueService;
-import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.model.Value;
 
 import javax.annotation.Nullable;
@@ -36,7 +35,6 @@ import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.collect.Streams.mapWithIndex;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
@@ -45,6 +43,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.PATCH;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
+import static org.zalando.compass.resource.Linking.link;
 import static org.zalando.compass.resource.MediaTypes.JSON_MERGE_PATCH_VALUE;
 import static org.zalando.compass.resource.MediaTypes.JSON_PATCH_VALUE;
 
@@ -103,8 +102,8 @@ class ValueResource {
     @RequestMapping(method = GET, path = "/values")
     public ValueCollectionRepresentation readAll(@PathVariable final String key, @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = parser.parse(query);
-        final Page<Value> page = service.readPage(key, filter);
-        final List<ValueRepresentation> representations = page.getElements().stream()
+        final List<Value> page = service.readPage(key, filter);
+        final List<ValueRepresentation> representations = page.stream()
                 .map(ValueRepresentation::valueOf).collect(toList());
 
         return new ValueCollectionRepresentation(representations);
@@ -176,7 +175,7 @@ class ValueResource {
 
     private URI canonicalUrl(final String key, final Value value) {
         final Map<String, String> query = render(value.getDimensions());
-        return linkTo(methodOn(ValueResource.class).read(key, query)).toUri();
+        return link(methodOn(ValueResource.class).read(key, query));
     }
 
     // TODO document sort

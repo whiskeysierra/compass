@@ -5,11 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.logic.ValueService;
-import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueRevision;
+import org.zalando.compass.library.pagination.PageResult;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -45,7 +45,7 @@ class DefaultValueService implements ValueService {
     }
 
     @Override
-    public Page<Value> readPage(final String key, final Map<String, JsonNode> filter) {
+    public List<Value> readPage(final String key, final Map<String, JsonNode> filter) {
         return read.readAll(key, filter);
     }
 
@@ -55,7 +55,7 @@ class DefaultValueService implements ValueService {
     }
 
     @Override
-    public Page<Revision> readPageRevisions(final String key) {
+    public PageResult<Revision> readPageRevisions(final String key) {
         return readRevision.readPageRevisions(key, 25, null);
     }
 
@@ -65,7 +65,7 @@ class DefaultValueService implements ValueService {
     }
 
     @Override
-    public Page<Revision> readRevisions(final String key, final Map<String, JsonNode> dimensions) {
+    public PageResult<Revision> readRevisions(final String key, final Map<String, JsonNode> dimensions) {
         return readRevision.readRevisions(key, dimensions, 25, null);
     }
 

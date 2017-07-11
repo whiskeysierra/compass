@@ -4,15 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionRevision;
-import org.zalando.compass.domain.model.Page;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.DimensionRevisionRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
 import org.zalando.compass.domain.persistence.RevisionRepository;
-import org.zalando.compass.library.Pages;
+import org.zalando.compass.library.pagination.PageQuery;
+import org.zalando.compass.library.pagination.PageResult;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -29,26 +28,27 @@ class ReadDimensionRevision {
         this.revisionRepository = revisionRepository;
     }
 
-    Page<Revision> readPageRevisions(final int limit, @Nullable final Long after) {
-        final List<Revision> revisions = repository.findPageRevisions(limit + 1, after).stream()
+    PageResult<Revision> readPageRevisions(final PageQuery<Long> query) {
+        final List<Revision> revisions = repository.findPageRevisions(query.increment()).stream()
                 .map(Revision::withTypeUpdate)
                 .collect(toList());
 
-        return Pages.page(revisions, limit);
+        return query.paginate(revisions);
     }
 
-    PageRevision<Dimension> readPageAt(final long revisionId, final int limit, @Nullable final String after) {
+    PageRevision<Dimension> readPageAt(final long revisionId, final PageQuery<String> query) {
         final Revision revision = revisionRepository.read(revisionId)
                 .orElseThrow(NotFoundException::new)
                 .withTypeUpdate();
 
-        final List<Dimension> dimensions = repository.findPage(revisionId, limit + 1, after);
-        return Pages.page(dimensions, limit).toRevision(revision);
+        final List<Dimension> dimensions = repository.findPage(revisionId, query.increment());
+        return new PageRevision<>(revision, query.paginate(dimensions));
     }
 
-    Page<Revision> readRevisions(final String id, final int limit, @Nullable final Long after) {
-        final List<Revision> revisions = repository.findRevisions(id, limit + 1, after);
-        return Pages.page(revisions, limit);
+    PageResult<Revision> readRevisions(final String id, final PageQuery<Long> query) {
+        final List<Revision> revisions = repository.findRevisions(id, query.increment());
+
+        return query.paginate(revisions);
     }
 
     DimensionRevision readAt(final String id, final long revision) {

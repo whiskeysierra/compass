@@ -7,6 +7,7 @@ import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Key;
+import org.zalando.compass.library.pagination.PageQuery;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -14,7 +15,6 @@ import java.util.Optional;
 
 import static org.jooq.impl.DSL.trueCondition;
 import static org.zalando.compass.domain.persistence.model.Tables.KEY;
-import static org.zalando.compass.library.Seek.field;
 
 @Repository
 public class KeyRepository {
@@ -33,13 +33,10 @@ public class KeyRepository {
                 .execute();
     }
 
-    public List<Key> findAll(@Nullable final String term, final int limit, @Nullable final String after) {
-        return db.select()
+    public List<Key> findAll(@Nullable final String term, final PageQuery<String> query) {
+        return query.seek(db.select()
                 .from(KEY)
-                .where(toCondition(term))
-                .orderBy(KEY.ID.asc())
-                .seekAfter(field(after, String.class))
-                .limit(limit)
+                .where(toCondition(term)), KEY.ID.asc())
                 .fetchInto(Key.class);
     }
 
