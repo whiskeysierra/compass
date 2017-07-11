@@ -61,3 +61,12 @@ Feature: Delete a value
       | /value |
       | 0.19   |
     When "DELETE /keys/tax-rate/value?foo=bar" responds "404 Not Found"
+
+  Scenario: Delete value for unknown key
+    Then "DELETE /keys/unknown/value" responds "404 Not Found"
+
+  Scenario: Delete absent value for unknown key
+    Given "PUT /keys/income-tax" responds "201 Created" when requested with:
+      | /schema/type | /description |
+      | "number"     | ".."         |
+    Then "DELETE /keys/income-tax/value" responds "404 Not Found"
