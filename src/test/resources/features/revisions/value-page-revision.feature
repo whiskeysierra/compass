@@ -18,7 +18,7 @@ Feature: /keys/{id}/values/revision/{revision}
     And "PUT /keys/tax-rate/value?country=DE" responds "200 OK" when requested with:
       | /value |
       | 0.19   |
-    And "DELETE /keys/tax-rate/values?country=DE" responds "204 No Content"
+    And "DELETE /keys/tax-rate/value?country=DE" responds "204 No Content"
     And "PUT /keys/tax-rate/values" responds "201 Created" when requested with an array at "/values":
       | /dimensions/country | /value |
       | "AT"                | 0.2    |

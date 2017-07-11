@@ -74,5 +74,5 @@ Feature: Read value
     When "PUT /keys/tax-rate/value?country=DE" responds "201 Created" when requested with:
       | /value |
       | 0.19   |
-    And "DELETE /keys/tax-rate/values?country=DE" responds "204 No Content"
+    And "DELETE /keys/tax-rate/value?country=DE" responds "204 No Content"
     Then "GET /keys/tax-rate/value?country=DE" responds "404 Not Found"

@@ -11,7 +11,7 @@ Feature: Delete a value
     And "PUT /keys/feature.active/values" responds "201 Created" when requested with an array at "/values":
       | /value |
       | true   |
-    When "DELETE /keys/tax-rate/values" responds "204 No Content"
+    When "DELETE /keys/tax-rate/value" responds "204 No Content"
     Then "GET /keys/tax-rate/values" responds "200 OK" with an empty array at "/values"
     And "GET /keys/feature.active/values" responds "200 OK" with an array at "/values":
       | /value |
@@ -32,7 +32,7 @@ Feature: Delete a value
     And "PUT /keys/feature.active/values" responds "201 Created" when requested with an array at "/values":
       | /value |
       | true   |
-    When "DELETE /keys/tax-rate/values?country=CH" responds "204 No Content"
+    When "DELETE /keys/tax-rate/value?country=CH" responds "204 No Content"
     Then "GET /keys/tax-rate/values" responds "200 OK" with an array at "/values":
       | /dimensions/country | /value |
       | "DE"                | 0.19   |
@@ -51,7 +51,7 @@ Feature: Delete a value
       | /dimensions/before          | /value |
       | "2007-01-01T00:00:00+02:00" | 0.16   |
     And "GET /keys/tax-rate/values?after=2006-12-31T23:59:59+01:00" responds "200 OK"
-    When "DELETE /keys/tax-rate/values?after=2006-12-31T23:59:59+01:00" responds "404 Not Found"
+    When "DELETE /keys/tax-rate/value?after=2006-12-31T23:59:59+01:00" responds "404 Not Found"
 
   Scenario: Delete value with unknown dimension should fail
     Given "PUT /keys/tax-rate" responds "201 Created" when requested with:
@@ -60,4 +60,4 @@ Feature: Delete a value
     And "PUT /keys/tax-rate/values" responds "201 Created" when requested with an array at "/values":
       | /value |
       | 0.19   |
-    When "DELETE /keys/tax-rate/values?foo=bar" responds "404 Not Found"
+    When "DELETE /keys/tax-rate/value?foo=bar" responds "404 Not Found"

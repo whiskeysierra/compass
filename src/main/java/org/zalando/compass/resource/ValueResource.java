@@ -164,8 +164,7 @@ class ValueResource {
         return replace(key, query, comment, patched);
     }
 
-    // TODO shouldn't this be singular?!
-    @RequestMapping(method = DELETE, path = "/values")
+    @RequestMapping(method = DELETE, path = "/value")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable final String key, @RequestParam final Map<String, String> query,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment) {
@@ -178,8 +177,9 @@ class ValueResource {
         return link(methodOn(ValueResource.class).read(key, query));
     }
 
+    // TODO move somewhere else
     // TODO document sort
-    private Map<String, String> render(final Map<String, JsonNode> filter) {
+    static Map<String, String> render(final Map<String, JsonNode> filter) {
         return ImmutableSortedMap.copyOf(
                 Maps.transformValues(filter, JsonNode::asText));
     }

@@ -23,6 +23,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.zalando.compass.resource.Linking.link;
 import static org.zalando.compass.resource.RevisionPaging.paginate;
+import static org.zalando.compass.resource.ValueResource.render;
 
 @RestController
 @RequestMapping(path = "/keys/{key}")
@@ -85,11 +86,12 @@ class ValueRevisionResource {
         final PageQuery<Long> query = PageQuery.create(after, before, limit);
 
         final PageResult<Revision> page = service.readRevisions(key, filter, query);
+        final Map<String, String> normalized = render(filter);
 
         return paginate(page,
-                rev -> link(methodOn(ValueRevisionResource.class).getValueRevisions(key, queryParams, limit, rev.getId(), null)),
-                rev -> link(methodOn(ValueRevisionResource.class).getValueRevisions(key, queryParams, limit, null, rev.getId())),
-                rev -> link(methodOn(ValueRevisionResource.class).getRevision(key, rev.getId(), queryParams)));
+                rev -> link(methodOn(ValueRevisionResource.class).getValueRevisions(key, normalized, limit, rev.getId(), null)),
+                rev -> link(methodOn(ValueRevisionResource.class).getValueRevisions(key, normalized, limit, null, rev.getId())),
+                rev -> link(methodOn(ValueRevisionResource.class).getRevision(key, rev.getId(), normalized)));
     }
 
     @RequestMapping(method = GET, path = "/value/revisions/{revision}")

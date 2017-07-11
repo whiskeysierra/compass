@@ -36,7 +36,13 @@ public class JsonQueryParser {
 
     public ImmutableMap<String, JsonNode> parse(final Map<String, String> filter) {
         final ImmutableMap.Builder<String, JsonNode> parsed = ImmutableMap.builder();
-        filter.forEach(throwingBiConsumer((key, value) -> parsed.put(key, fromJson(value))));
+        filter.forEach(throwingBiConsumer((key, value) -> {
+            // TODO exclude everything that is reserved here...
+            // TODO or drop everything that is not a dimension (requires a DB lookup)
+            if (!key.startsWith("_") && !"limit".equals(key)) {
+                parsed.put(key, fromJson(value));
+            }
+        }));
         return parsed.build();
     }
 
