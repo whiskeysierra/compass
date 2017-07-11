@@ -16,6 +16,7 @@ final class KeyCollectionRevisionRepresentation {
 
     RevisionRepresentation revision;
     URI next;
+    URI prev;
     List<KeyRepresentation> keys;
 
 }

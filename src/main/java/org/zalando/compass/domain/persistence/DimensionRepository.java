@@ -5,6 +5,7 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectSeekStep1;
+import org.jooq.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Dimension;
@@ -66,7 +67,7 @@ public class DimensionRepository {
     public List<Dimension> findAll(@Nullable final String term, final PageQuery<String> query) {
         return query.seek(db.select(DIMENSION.fields())
                 .from(DIMENSION)
-                .where(toCondition(term)), DIMENSION.ID.asc())
+                .where(toCondition(term)), DIMENSION.ID, SortOrder.ASC)
                 .fetchInto(Dimension.class);
     }
 

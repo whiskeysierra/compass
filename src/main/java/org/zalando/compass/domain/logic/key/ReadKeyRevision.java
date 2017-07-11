@@ -12,7 +12,6 @@ import org.zalando.compass.domain.persistence.RevisionRepository;
 import org.zalando.compass.library.pagination.PageQuery;
 import org.zalando.compass.library.pagination.PageResult;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -29,29 +28,27 @@ class ReadKeyRevision {
         this.revisionRepository = revisionRepository;
     }
 
-    PageResult<Revision> readPageRevisions(final int limit, @Nullable final Long after) {
-        final List<Revision> revisions = repository.findPageRevisions(limit + 1, after).stream()
+    PageResult<Revision> readPageRevisions(final PageQuery<Long> query) {
+        final List<Revision> revisions = repository.findPageRevisions(query.increment()).stream()
                 .map(Revision::withTypeUpdate)
                 .collect(toList());
 
-        final PageQuery<Long> query = PageQuery.create(after, null, limit);
         return query.paginate(revisions);
     }
 
-    PageRevision<Key> readPageAt(final long revisionId, final int limit, @Nullable final String after) {
+    PageRevision<Key> readPageAt(final long revisionId, final PageQuery<String> query) {
         final Revision revision = revisionRepository.read(revisionId)
                 .orElseThrow(NotFoundException::new)
                 .withTypeUpdate();
 
-        final PageQuery<String> query = PageQuery.create(after, null, limit);
-        final List<Key> keys = repository.findPage(revisionId, limit, after);
+        final List<Key> keys = repository.findPage(revisionId, query.increment());
+        final PageResult<Key> page = query.paginate(keys);
 
-        return new PageRevision<>(revision, query.paginate(keys));
+        return new PageRevision<>(revision, page);
     }
 
-    PageResult<Revision> readRevisions(final String id, final int limit, @Nullable final Long after) {
-        final List<Revision> revisions = repository.findRevisions(id, limit + 1, after);
-        final PageQuery<Long> query = PageQuery.create(after, null, limit);
+    PageResult<Revision> readRevisions(final String id, final PageQuery<Long> query) {
+        final List<Revision> revisions = repository.findRevisions(id, query.increment());
         return query.paginate(revisions);
     }
 

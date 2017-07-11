@@ -21,8 +21,7 @@ class ReadKey {
         this.repository = repository;
     }
 
-    PageResult<Key> readPage(@Nullable final String term, final int limit, @Nullable final String after) {
-        final PageQuery<String> query = PageQuery.create(after, null, limit);
+    PageResult<Key> readPage(@Nullable final String term, final PageQuery<String> query) {
         final List<Key> keys = repository.findAll(term, query.increment());
         return query.paginate(keys);
     }

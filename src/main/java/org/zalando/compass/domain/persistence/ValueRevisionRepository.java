@@ -8,6 +8,7 @@ import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Query;
 import org.jooq.Record;
+import org.jooq.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Revision;
@@ -16,9 +17,8 @@ import org.zalando.compass.domain.persistence.model.enums.RevisionType;
 import org.zalando.compass.domain.persistence.model.tables.ValueDimensionRevision;
 import org.zalando.compass.domain.persistence.model.tables.records.ValueDimensionRevisionRecord;
 import org.zalando.compass.domain.persistence.model.tables.records.ValueRevisionRecord;
-import org.zalando.compass.library.Seek;
+import org.zalando.compass.library.pagination.PageQuery;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
@@ -87,22 +87,18 @@ public class ValueRevisionRepository {
         db.batch(queries).execute();
     }
 
-    public List<Revision> findPageRevisions(final String key, final int limit, @Nullable final Long after) {
-        return db.select(REVISION.fields())
+    public List<Revision> findPageRevisions(final String key, final PageQuery<Long> query) {
+        return query.seek(db.select(REVISION.fields())
                 .from(REVISION)
                 .where(exists(selectOne()
                         .from(VALUE_REVISION)
                         .where(VALUE_REVISION.KEY_ID.eq(key))
-                        .and(VALUE_REVISION.REVISION.eq(REVISION.ID))))
-                .orderBy(REVISION.ID.desc())
-                .seekAfter(Seek.field(after, Long.class))
-                .limit(limit)
+                        .and(VALUE_REVISION.REVISION.eq(REVISION.ID)))), REVISION.ID, SortOrder.DESC)
                 .fetch(this::mapRevisionWithoutType);
     }
 
-    public List<ValueRevision> findPage(final String key, final long revisionId,
-            final boolean excludeDeleted) {
-
+    // TODO replace boolean parameter with something nicer
+    public List<ValueRevision> findPage(final String key, final long revisionId, final boolean excludeDeleted) {
         final Map<Record, List<ValueDimensionRevisionRecord>> map = db
                 .select(VALUE_REVISION.fields())
                 .select(REVISION.fields())
@@ -152,17 +148,15 @@ public class ValueRevisionRepository {
                 .collect(toList());
     }
 
-    public List<Revision> findRevisions(final String key, final Map<String, JsonNode> dimensions, final int limit,
-            @Nullable final Long after) {
-        return db.select(REVISION.fields())
+    public List<Revision> findRevisions(final String key, final Map<String, JsonNode> dimensions,
+            final PageQuery<Long> query) {
+
+        return query.seek(db.select(REVISION.fields())
                 .select(VALUE_REVISION.REVISION_TYPE)
                 .from(REVISION)
                 .join(VALUE_REVISION).on(VALUE_REVISION.REVISION.eq(REVISION.ID))
                 .where(VALUE_REVISION.KEY_ID.eq(key))
-                .and(exactMatch(dimensions))
-                .orderBy(REVISION.ID.desc())
-                .seekAfter(Seek.field(after, Long.class))
-                .limit(limit)
+                .and(exactMatch(dimensions)), REVISION.ID, SortOrder.DESC)
                 .fetch(this::mapRevisionWithType);
     }
 

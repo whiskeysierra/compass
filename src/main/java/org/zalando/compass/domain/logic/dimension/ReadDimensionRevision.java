@@ -42,12 +42,13 @@ class ReadDimensionRevision {
                 .withTypeUpdate();
 
         final List<Dimension> dimensions = repository.findPage(revisionId, query.increment());
-        return new PageRevision<>(revision, query.paginate(dimensions));
+        final PageResult<Dimension> page = query.paginate(dimensions);
+
+        return new PageRevision<>(revision, page);
     }
 
     PageResult<Revision> readRevisions(final String id, final PageQuery<Long> query) {
         final List<Revision> revisions = repository.findRevisions(id, query.increment());
-
         return query.paginate(revisions);
     }
 

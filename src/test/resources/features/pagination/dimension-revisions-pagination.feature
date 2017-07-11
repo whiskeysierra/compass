@@ -1,4 +1,4 @@
-Feature: Dimension revisions
+Feature: Dimension revisions pagination
 
   Background: Updated dimension
     Given "PUT /dimensions/device" responds "201 Created" when requested with:
@@ -58,3 +58,6 @@ Feature: Dimension revisions
     And "GET /dimensions/device/revisions?limit=2&_before=3" responds "200 OK" with:
       | /prev | /next                                                                |
       |       | "http://localhost:8080/dimensions/device/revisions?limit=2&_after=4" |
+
+  Scenario: Pagination with conflicting directions should fail
+    Then "GET /dimensions/device/revisions?_after=3&_before=1" responds "400 Bad Request"

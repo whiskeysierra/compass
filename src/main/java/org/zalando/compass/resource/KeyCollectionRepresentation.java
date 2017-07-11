@@ -16,6 +16,7 @@ import static lombok.AccessLevel.PRIVATE;
 final class KeyCollectionRepresentation {
 
     URI next;
+    URI prev;
     List<KeyRepresentation> keys;
 
 }

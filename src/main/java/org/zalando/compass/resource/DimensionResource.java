@@ -99,7 +99,7 @@ class DimensionResource implements Reserved {
                 page.hasNext() ?
                         link(methodOn(DimensionResource.class).getAll(q, limit, page.getTail().getId(), null)) : null,
                 page.hasPrevious() ?
-                        link(methodOn(DimensionResource.class).getAll(q, limit, null, page.getTail().getId())) : null,
+                        link(methodOn(DimensionResource.class).getAll(q, limit, null, page.getHead().getId())) : null,
                 representations));
     }
 

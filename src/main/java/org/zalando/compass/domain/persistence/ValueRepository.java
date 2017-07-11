@@ -13,9 +13,7 @@ import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.model.tables.records.ValueDimensionRecord;
 import org.zalando.compass.domain.persistence.model.tables.records.ValueRecord;
-import org.zalando.compass.library.Seek;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;

@@ -9,6 +9,7 @@ import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueRevision;
+import org.zalando.compass.library.pagination.PageQuery;
 import org.zalando.compass.library.pagination.PageResult;
 
 import javax.annotation.Nullable;
@@ -55,8 +56,8 @@ class DefaultValueService implements ValueService {
     }
 
     @Override
-    public PageResult<Revision> readPageRevisions(final String key) {
-        return readRevision.readPageRevisions(key, 25, null);
+    public PageResult<Revision> readPageRevisions(final String key, final PageQuery<Long> query) {
+        return readRevision.readPageRevisions(key, query);
     }
 
     @Override
@@ -65,8 +66,9 @@ class DefaultValueService implements ValueService {
     }
 
     @Override
-    public PageResult<Revision> readRevisions(final String key, final Map<String, JsonNode> dimensions) {
-        return readRevision.readRevisions(key, dimensions, 25, null);
+    public PageResult<Revision> readRevisions(final String key, final Map<String, JsonNode> dimensions,
+            final PageQuery<Long> query) {
+        return readRevision.readRevisions(key, dimensions, query);
     }
 
     @Override

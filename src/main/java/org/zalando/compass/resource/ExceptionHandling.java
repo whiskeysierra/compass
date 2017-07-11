@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.zalando.compass.domain.logic.BadArgumentException;
 import org.zalando.compass.domain.persistence.NotFoundException;
+import org.zalando.compass.library.pagination.IllegalPageQueryException;
 import org.zalando.problem.Problem;
 import org.zalando.problem.spring.web.advice.ProblemHandling;
 import org.zalando.problem.spring.web.advice.SpringAdviceTrait;
@@ -20,6 +21,13 @@ class ExceptionHandling implements ProblemHandling, SpringAdviceTrait {
             final BadArgumentException exception,
             final NativeWebRequest request) throws HttpMediaTypeNotAcceptableException {
 
+        return create(HttpStatus.BAD_REQUEST, exception, request);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Problem> handleIllegalPageQuery(
+            final IllegalPageQueryException exception,
+            final NativeWebRequest request) throws HttpMediaTypeNotAcceptableException {
         return create(HttpStatus.BAD_REQUEST, exception, request);
     }
 

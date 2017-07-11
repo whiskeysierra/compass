@@ -4,6 +4,7 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectConditionStep;
+import org.jooq.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Key;
@@ -36,7 +37,7 @@ public class KeyRepository {
     public List<Key> findAll(@Nullable final String term, final PageQuery<String> query) {
         return query.seek(db.select()
                 .from(KEY)
-                .where(toCondition(term)), KEY.ID.asc())
+                .where(toCondition(term)), KEY.ID, SortOrder.ASC)
                 .fetchInto(Key.class);
     }
 

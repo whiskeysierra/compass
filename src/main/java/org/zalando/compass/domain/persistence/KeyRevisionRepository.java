@@ -2,14 +2,15 @@ package org.zalando.compass.domain.persistence;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.KeyRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.model.enums.RevisionType;
+import org.zalando.compass.library.pagination.PageQuery;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,7 +22,6 @@ import static org.jooq.impl.DSL.selectOne;
 import static org.jooq.impl.DSL.trueCondition;
 import static org.zalando.compass.domain.persistence.model.Tables.KEY_REVISION;
 import static org.zalando.compass.domain.persistence.model.Tables.REVISION;
-import static org.zalando.compass.library.Seek.field;
 
 @Repository
 public class KeyRevisionRepository {
@@ -50,42 +50,33 @@ public class KeyRevisionRepository {
                 .execute();
     }
 
-    public List<Revision> findPageRevisions(final int limit, @Nullable final Long after) {
-        return db.select(REVISION.fields())
+    public List<Revision> findPageRevisions(final PageQuery<Long> query) {
+        return query.seek(db.select(REVISION.fields())
                 .from(REVISION)
                 .where(exists(selectOne()
                         .from(KEY_REVISION)
                         .where(KEY_REVISION.REVISION.eq(REVISION.ID))
-                        .and(trueCondition())))
-                .orderBy(REVISION.ID.desc())
-                .seekAfter(field(after, Long.class))
-                .limit(limit)
+                        .and(trueCondition()))), REVISION.ID, SortOrder.DESC)
                 .fetch().map(this::mapRevisionWithoutType);
     }
 
-    public List<Key> findPage(final long revisionId, final int limit, @Nullable final String after) {
-        return db.select(KEY_REVISION.fields())
+    public List<Key> findPage(final long revisionId, final PageQuery<String> query) {
+        return query.seek(db.select(KEY_REVISION.fields())
                 .from(KEY_REVISION)
                 .where(KEY_REVISION.REVISION_TYPE.ne(RevisionType.DELETE))
                 .and(KEY_REVISION.REVISION.eq(select(max(SELF.REVISION))
                         .from(SELF)
                         .where(SELF.ID.eq(KEY_REVISION.ID))
-                        .and(SELF.REVISION.le(revisionId))))
-                .orderBy(KEY_REVISION.ID.asc())
-                .seekAfter(field(after, String.class))
-                .limit(limit)
+                        .and(SELF.REVISION.le(revisionId)))), KEY_REVISION.ID, SortOrder.ASC)
                 .fetchInto(Key.class);
     }
 
-    public List<Revision> findRevisions(final String id, final int limit, @Nullable final Long after) {
-        return db.select(REVISION.fields())
+    public List<Revision> findRevisions(final String id, final PageQuery<Long> query) {
+        return query.seek(db.select(REVISION.fields())
                 .select(KEY_REVISION.REVISION_TYPE)
                 .from(REVISION)
                 .join(KEY_REVISION).on(KEY_REVISION.REVISION.eq(REVISION.ID))
-                .where(KEY_REVISION.ID.eq(id))
-                .orderBy(REVISION.ID.desc())
-                .seekAfter(field(after, Long.class))
-                .limit(limit)
+                .where(KEY_REVISION.ID.eq(id)), REVISION.ID, SortOrder.DESC)
                 .fetch().map(this::mapRevisionWithType);
     }
 

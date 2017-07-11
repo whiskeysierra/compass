@@ -11,19 +11,16 @@ import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.KeyRevision;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
+import org.zalando.compass.library.pagination.PageQuery;
 import org.zalando.compass.library.pagination.PageResult;
 
 import javax.annotation.Nullable;
-import java.net.URI;
-import java.util.List;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.zalando.compass.resource.Linking.link;
+import static org.zalando.compass.resource.RevisionPaging.paginate;
 
 @RestController
 @RequestMapping(path = "/keys")
@@ -39,19 +36,27 @@ class KeyRevisionResource {
     @RequestMapping(method = GET, path = "/revisions")
     public ResponseEntity<RevisionCollectionRepresentation> getRevisions(
             @RequestParam(required = false, defaultValue = "25") final int limit,
-            @Nullable @RequestParam(required = false) final Long after) {
+            @Nullable @RequestParam(value = "_after", required = false) final Long after,
+            @Nullable @RequestParam(value = "_before", required = false) final Long before) {
 
-        return paginate(
-                () -> service.readPageRevisions(limit, after),
-                rev -> link(methodOn(KeyRevisionResource.class).getRevisions(limit, rev.getId())),
-                rev -> link(methodOn(KeyRevisionResource.class).getRevision(rev.getId())));
+        final PageQuery<Long> query = PageQuery.create(after, before, limit);
+        final PageResult<Revision> page = service.readPageRevisions(query);
+
+        return paginate(page,
+                rev -> link(methodOn(KeyRevisionResource.class).getRevisions(limit, rev.getId(), null)),
+                rev -> link(methodOn(KeyRevisionResource.class).getRevisions(limit, null, rev.getId())),
+                rev -> link(methodOn(KeyRevisionResource.class).getRevision(rev.getId(), 25, null, null)));
     }
 
     // TODO search by term
     @RequestMapping(method = GET, path = "/revisions/{revision}")
-    public ResponseEntity<KeyCollectionRevisionRepresentation> getRevision(@PathVariable final long revision) {
+    public ResponseEntity<KeyCollectionRevisionRepresentation> getRevision(@PathVariable final long revision,
+            @RequestParam(required = false, defaultValue = "25") final int limit,
+            @Nullable @RequestParam(value = "_after", required = false) final String after,
+            @Nullable @RequestParam(value = "_before", required = false) final String before) {
 
-        final PageRevision<Key> page = service.readPageAt(revision, 25, null);
+        final PageQuery<String> query = PageQuery.create(after, before, limit);
+        final PageRevision<Key> page = service.readPageAt(revision, query);
         final Revision rev = page.getRevision();
 
         return ResponseEntity.ok(new KeyCollectionRevisionRepresentation(
@@ -63,7 +68,10 @@ class KeyRevisionResource {
                         rev.getUser(),
                         rev.getComment()
                 ),
-                page.hasNext() ? link(methodOn(KeyRevisionResource.class).getRevision(revision)) : null,
+                page.hasNext() ? link(methodOn(KeyRevisionResource.class)
+                        .getRevision(revision, limit, page.getTail().getId(), null)) : null,
+                page.hasPrevious() ? link(methodOn(KeyRevisionResource.class)
+                        .getRevision(revision, limit, null, page.getHead().getId())) : null,
                 page.getElements().stream().map(KeyRepresentation::valueOf).collect(toList())
         ));
     }
@@ -71,35 +79,17 @@ class KeyRevisionResource {
     @RequestMapping(method = GET, path = "/{id}/revisions")
     public ResponseEntity<RevisionCollectionRepresentation> getRevisions(@PathVariable final String id,
             @RequestParam(required = false, defaultValue = "25") final int limit,
-            @Nullable @RequestParam(required = false) final Long after) {
+            @Nullable @RequestParam(value = "_after", required = false) final Long after,
+            @Nullable @RequestParam(value = "_before", required = false) final Long before) {
 
-        return paginate(
-                () -> service.readRevisions(id, limit, after),
+        final PageQuery<Long> query = PageQuery.create(after, before, limit);
+        final PageResult<Revision> page = service.readRevisions(id, query);
+
+        return paginate(page,
                 // TODO should omit if limit is default value
-                rev -> link(methodOn(KeyRevisionResource.class).getRevisions(id, limit, rev.getId())),
+                rev -> link(methodOn(KeyRevisionResource.class).getRevisions(id, limit, rev.getId(), null)),
+                rev -> link(methodOn(KeyRevisionResource.class).getRevisions(id, limit, null, rev.getId())),
                 rev -> link(methodOn(KeyRevisionResource.class).getRevision(id, rev.getId())));
-    }
-
-    // TODO library?!
-    private ResponseEntity<RevisionCollectionRepresentation> paginate(final Supplier<PageResult<Revision>> reader,
-            final Function<Revision, URI> nexter, final Function<Revision, URI> linker) {
-        final PageResult<Revision> page = reader.get();
-
-        final List<RevisionRepresentation> revisions = page.getElements().stream()
-                .map(revision -> new RevisionRepresentation(
-                        revision.getId(),
-                        revision.getTimestamp(),
-                        linker.apply(revision),
-                        revision.getType(),
-                        revision.getUser(),
-                        revision.getComment()
-                ))
-                .collect(toList());
-
-        return ResponseEntity.ok(new RevisionCollectionRepresentation(
-                page.hasNext() ? nexter.apply(page.getTail()) : null,
-                null,
-                revisions));
     }
 
     @RequestMapping(method = GET, path = "/{id}/revisions/{revision}")

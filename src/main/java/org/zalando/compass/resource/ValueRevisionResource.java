@@ -11,9 +11,10 @@ import org.zalando.compass.domain.logic.ValueService;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
+import org.zalando.compass.library.pagination.PageQuery;
 import org.zalando.compass.library.pagination.PageResult;
 
-import java.util.List;
+import javax.annotation.Nullable;
 import java.util.Map;
 
 import static com.google.common.collect.ImmutableMap.of;
@@ -21,6 +22,7 @@ import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.zalando.compass.resource.Linking.link;
+import static org.zalando.compass.resource.RevisionPaging.paginate;
 
 @RestController
 @RequestMapping(path = "/keys/{key}")
@@ -36,22 +38,18 @@ class ValueRevisionResource {
     }
 
     @RequestMapping(method = GET, path = "/values/revisions")
-    public ResponseEntity<RevisionCollectionRepresentation> getValuesRevisions(@PathVariable final String key) {
-        final PageResult<Revision> page = service.readPageRevisions(key);
-        final List<Revision> revisions = page.getElements();
+    public ResponseEntity<RevisionCollectionRepresentation> getValuesRevisions(@PathVariable final String key,
+            @RequestParam(required = false, defaultValue = "25") final int limit,
+            @Nullable @RequestParam(value = "_after", required = false) final Long after,
+            @Nullable @RequestParam(value = "_before", required = false) final Long before) {
 
-        final List<RevisionRepresentation> representations = revisions.stream()
-                .map(revision -> new RevisionRepresentation(
-                        revision.getId(),
-                        revision.getTimestamp(),
-                        link(methodOn(ValueRevisionResource.class).getValuesRevision(key, revision.getId(), of())),
-                        revision.getType(),
-                        revision.getUser(),
-                        revision.getComment()
-                ))
-                .collect(toList());
+        final PageQuery<Long> query = PageQuery.create(after, before, limit);
+        final PageResult<Revision> page = service.readPageRevisions(key, query);
 
-        return ResponseEntity.ok(new RevisionCollectionRepresentation(null, null, representations));
+        return paginate(page,
+                rev -> link(methodOn(ValueRevisionResource.class).getValuesRevisions(key, limit, rev.getId(), null)),
+                rev -> link(methodOn(ValueRevisionResource.class).getValuesRevisions(key, limit, null, rev.getId())),
+                rev -> link(methodOn(ValueRevisionResource.class).getValuesRevision(key, rev.getId(), of())));
     }
 
     @RequestMapping(method = GET, path = "/values/revisions/{revision}")
@@ -78,23 +76,20 @@ class ValueRevisionResource {
 
     @RequestMapping(method = GET, path = "/value/revisions")
     public ResponseEntity<RevisionCollectionRepresentation> getValueRevisions(@PathVariable final String key,
-            @RequestParam final Map<String, String> query) {
-        final Map<String, JsonNode> filter = parser.parse(query);
-        final PageResult<Revision> page = service.readRevisions(key, filter);
-        final List<Revision> revisions = page.getElements();
+            @RequestParam final Map<String, String> queryParams,
+            @RequestParam(required = false, defaultValue = "25") final int limit,
+            @Nullable @RequestParam(value = "_after", required = false) final Long after,
+            @Nullable @RequestParam(value = "_before", required = false) final Long before) {
 
-        final List<RevisionRepresentation> representations = revisions.stream()
-                .map(revision -> new RevisionRepresentation(
-                        revision.getId(),
-                        revision.getTimestamp(),
-                        link(methodOn(ValueRevisionResource.class).getRevision(key, revision.getId(), query)),
-                        revision.getType(),
-                        revision.getUser(),
-                        revision.getComment()
-                ))
-                .collect(toList());
+        final Map<String, JsonNode> filter = parser.parse(queryParams);
+        final PageQuery<Long> query = PageQuery.create(after, before, limit);
 
-        return ResponseEntity.ok(new RevisionCollectionRepresentation(null, null, representations));
+        final PageResult<Revision> page = service.readRevisions(key, filter, query);
+
+        return paginate(page,
+                rev -> link(methodOn(ValueRevisionResource.class).getValueRevisions(key, queryParams, limit, rev.getId(), null)),
+                rev -> link(methodOn(ValueRevisionResource.class).getValueRevisions(key, queryParams, limit, null, rev.getId())),
+                rev -> link(methodOn(ValueRevisionResource.class).getRevision(key, rev.getId(), queryParams)));
     }
 
     @RequestMapping(method = GET, path = "/value/revisions/{revision}")

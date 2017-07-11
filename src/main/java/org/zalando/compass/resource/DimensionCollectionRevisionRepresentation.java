@@ -16,6 +16,7 @@ final class DimensionCollectionRevisionRepresentation {
 
     RevisionRepresentation revision;
     URI next;
+    URI prev;
     List<DimensionRepresentation> dimensions;
 
 }

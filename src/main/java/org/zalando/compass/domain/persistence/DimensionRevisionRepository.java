@@ -2,6 +2,7 @@ package org.zalando.compass.domain.persistence;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Dimension;
@@ -58,7 +59,7 @@ public class DimensionRevisionRepository {
                 .where(exists(selectOne()
                         .from(DIMENSION_REVISION)
                         .where(DIMENSION_REVISION.REVISION.eq(REVISION.ID))
-                        .and(trueCondition()))), REVISION.ID.desc())
+                        .and(trueCondition()))), REVISION.ID, SortOrder.DESC)
                 .fetch().map(this::mapRevisionWithoutType);
     }
 
@@ -69,7 +70,7 @@ public class DimensionRevisionRepository {
                 .and(DIMENSION_REVISION.REVISION.eq(select(max(SELF.REVISION))
                         .from(SELF)
                         .where(SELF.ID.eq(DIMENSION_REVISION.ID))
-                        .and(SELF.REVISION.le(revisionId)))), DIMENSION_REVISION.ID.asc())
+                        .and(SELF.REVISION.le(revisionId)))), DIMENSION_REVISION.ID, SortOrder.ASC)
                 .fetchInto(Dimension.class);
     }
 
@@ -78,7 +79,7 @@ public class DimensionRevisionRepository {
                 .select(DIMENSION_REVISION.fields())
                 .from(REVISION)
                 .join(DIMENSION_REVISION).on(DIMENSION_REVISION.REVISION.eq(REVISION.ID))
-                .where(DIMENSION_REVISION.ID.eq(id)), REVISION.ID.desc())
+                .where(DIMENSION_REVISION.ID.eq(id)), REVISION.ID, SortOrder.DESC)
                 .fetch().map(this::mapRevisionWithType);
     }
 

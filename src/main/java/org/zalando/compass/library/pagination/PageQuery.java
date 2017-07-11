@@ -1,15 +1,12 @@
 package org.zalando.compass.library.pagination;
 
-import com.google.gag.annotation.remark.Hack;
-import lombok.SneakyThrows;
 import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.SelectForUpdateStep;
 import org.jooq.SelectOrderByStep;
-import org.jooq.SortField;
+import org.jooq.SortOrder;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 
@@ -43,36 +40,28 @@ public interface PageQuery<P> {
         } else if (before == null) {
             return new DefaultPageQuery<>(after, limit, Direction.FORWARD);
         } else {
-            throw new AssertionError("After and before are mutually exclusive");
+            throw new IllegalPageQueryException("after and before are mutually exclusive");
         }
     }
 
     // TODO should probably be somewhere else...
-    default SelectForUpdateStep<Record> seek(final SelectOrderByStep<Record> step, final SortField<P> sort) {
-        final Field<P> field = extractField(sort);
+    default SelectForUpdateStep<Record> seek(final SelectOrderByStep<Record> step, final Field<P> field,
+            final SortOrder order) {
         final Field<P> pivot = getPivot() == null ? null : val(getPivot(), field.getType());
 
         if (getDirection() == BACKWARD) {
+            final SortOrder inverse = order == ASC ? DESC : ASC;
+
             return step
-                    .orderBy(field.sort(sort.getOrder() == ASC ? DESC : ASC))
+                    .orderBy(field.sort(inverse))
                     .seekAfter(pivot)
                     .limit(getLimit());
         } else {
             return step
-                    .orderBy(sort)
+                    .orderBy(field.sort(order))
                     .seekAfter(pivot)
                     .limit(getLimit());
         }
-    }
-
-    // TODO private!
-    @Hack
-    @SneakyThrows
-    @SuppressWarnings("unchecked")
-    default Field<P> extractField(final SortField<P> sort) {
-        final Method getField = sort.getClass().getDeclaredMethod("getField");
-        getField.setAccessible(true);
-        return (Field<P>) getField.invoke(sort);
     }
 
     default <T> PageResult<T> paginate(final List<T> elements) {

@@ -13,7 +13,6 @@ import org.zalando.compass.domain.persistence.ValueRevisionRepository;
 import org.zalando.compass.library.pagination.PageQuery;
 import org.zalando.compass.library.pagination.PageResult;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
@@ -34,12 +33,11 @@ class ReadValueRevision {
         this.selector = selector;
     }
 
-    public PageResult<Revision> readPageRevisions(final String key, final int limit, @Nullable final Long after) {
-        final List<Revision> revisions = repository.findPageRevisions(key, limit, after).stream()
+    public PageResult<Revision> readPageRevisions(final String key, final PageQuery<Long> query) {
+        final List<Revision> revisions = repository.findPageRevisions(key, query.increment()).stream()
                 .map(Revision::withTypeUpdate)
                 .collect(toList());
 
-        final PageQuery<Long> query = PageQuery.create(after, null, limit);
         return query.paginate(revisions);
     }
 
@@ -59,10 +57,9 @@ class ReadValueRevision {
         return new PageRevision<>(revision, PageResult.create(selector.select(values, filter), false, false));
     }
 
-    public PageResult<Revision> readRevisions(final String key, final Map<String, JsonNode> dimensions, final int limit,
-            @Nullable final Long after) {
-        final List<Revision> revisions = repository.findRevisions(key, dimensions, limit, after);
-        final PageQuery<Long> query = PageQuery.create(after, null, limit);
+    public PageResult<Revision> readRevisions(final String key, final Map<String, JsonNode> dimensions,
+            final PageQuery<Long> query) {
+        final List<Revision> revisions = repository.findRevisions(key, dimensions, query.increment());
         return query.paginate(revisions);
     }
 
