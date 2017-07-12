@@ -2,6 +2,7 @@ package org.zalando.compass.domain.logic.dimension;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
@@ -12,6 +13,8 @@ import org.zalando.compass.library.pagination.PageQuery;
 import org.zalando.compass.library.pagination.PageResult;
 
 import javax.annotation.Nullable;
+
+import static org.springframework.transaction.annotation.Isolation.SERIALIZABLE;
 
 @Service
 class DefaultDimensionService implements DimensionService {
@@ -30,7 +33,7 @@ class DefaultDimensionService implements DimensionService {
         this.delete = delete;
     }
 
-    @Transactional
+    @Transactional(isolation = SERIALIZABLE)
     @Override
     public boolean replace(final Dimension dimension, @Nullable final String comment) {
         return replace.replace(dimension, comment);

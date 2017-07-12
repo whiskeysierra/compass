@@ -16,6 +16,8 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
+import static org.springframework.transaction.annotation.Isolation.SERIALIZABLE;
+
 @Service
 class DefaultValueService implements ValueService {
 
@@ -33,13 +35,13 @@ class DefaultValueService implements ValueService {
         this.delete = delete;
     }
 
-    @Transactional
+    @Transactional(isolation = SERIALIZABLE)
     @Override
     public boolean replace(final String key, final List<Value> values, @Nullable final String comment) {
         return replace.replace(key, values, comment);
     }
 
-    @Transactional
+    @Transactional(isolation = SERIALIZABLE)
     @Override
     public boolean replace(final String key, final Value value, @Nullable final String comment) {
         return replace.replace(key, value, comment);

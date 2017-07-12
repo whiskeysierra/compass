@@ -60,7 +60,6 @@ class ReplaceValue {
 
         final Revision rev = revisionService.create(comment);
 
-        // TODO make sure this is transactional
         if (current == null) {
             create(key, value, rev);
             return true;
@@ -75,7 +74,6 @@ class ReplaceValue {
 
         final ValuesLock lock = locking.lock(key, values);
 
-        // TODO combine both into one set of violations
         validator.check(lock.getDimensions(), values);
         validator.check(lock.getKey(), values);
 

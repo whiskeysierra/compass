@@ -13,6 +13,8 @@ import org.zalando.compass.library.pagination.PageResult;
 
 import javax.annotation.Nullable;
 
+import static org.springframework.transaction.annotation.Isolation.SERIALIZABLE;
+
 @Service
 class DefaultKeyService implements KeyService {
 
@@ -30,7 +32,7 @@ class DefaultKeyService implements KeyService {
         this.delete = delete;
     }
 
-    @Transactional
+    @Transactional(isolation = SERIALIZABLE)
     @Override
     public boolean replace(final Key key, @Nullable final String comment) {
         return replace.replace(key, comment);

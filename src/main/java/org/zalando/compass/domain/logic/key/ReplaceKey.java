@@ -58,7 +58,6 @@ class ReplaceKey {
 
         final Revision revision = revisionService.create(comment);
 
-        // TODO make sure this is transactional
         if (current == null) {
 
             repository.create(key);

@@ -65,7 +65,6 @@ class ReplaceDimension {
 
         final Revision revision = revisionService.create(comment);
 
-        // TODO make sure this is transactional
         if (current == null) {
             validateRelation(dimension);
 

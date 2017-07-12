@@ -18,6 +18,4 @@ public class PageRevision<T> implements PageResult<T> {
     @Delegate
     PageResult<T> result;
 
-    // TODO overload constructor
-
 }
