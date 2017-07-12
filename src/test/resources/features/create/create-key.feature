@@ -1,4 +1,4 @@
-  Feature: Key creation
+Feature: Key creation
 
   Scenario: Creating a new key
     Given "GET /keys/example" responds "404 Not Found"
@@ -23,29 +23,29 @@
       | /schema/type | /description |
       | "any"        | false        |
     Then "400 Bad Request" was responded with an array at "/violations":
-      | /field          | /message                                                                                                          |
-      | "$.description" | "$.description: boolean found, string expected"                                                                   |
-      | "$.id"          | "$.id: does not match the regex pattern ^([a-z0-9]+(-[a-z0-9]+)*)([.]([a-z0-9]+(-[a-z0-9]+)*))*$"                 |
-      | "$.schema.type" | "$.schema.type: does not have a value in the enumeration [array, boolean, integer, null, number, object, string]" |
-      | "$.schema.type" | "$.schema.type: string found, array expected"                                                                     |
+      | /field         | /message                                                                                                         |
+      | "/description" | "/description: boolean found, string expected"                                                                   |
+      | "/id"          | "/id: does not match the regex pattern ^([a-z0-9]+(-[a-z0-9]+)*)([.]([a-z0-9]+(-[a-z0-9]+)*))*$"                 |
+      | "/schema/type" | "/schema/type: does not have a value in the enumeration [array, boolean, integer, null, number, object, string]" |
+      | "/schema/type" | "/schema/type: string found, array expected"                                                                     |
 
-    Scenario Outline: Creating a new key fails due to reserved keywords
-      When "PUT /keys/<key>" when requested with:
-        | /schema/type | /description                 |
-        | "string"     | "Lorem ipsum dolor sit amet" |
-      Then "405 Method Not Allowed" was responded with:
-        | /detail          |
-        | "ID is reserved" |
-      Examples:
-        | key       |
-        | cursor    |
-        | embed     |
-        | fields    |
-        | filter    |
-        | key       |
-        | limit     |
-        | offset    |
-        | q         |
-        | query     |
-        | revisions |
-        | sort      |
+  Scenario Outline: Creating a new key fails due to reserved keywords
+    When "PUT /keys/<key>" when requested with:
+      | /schema/type | /description                 |
+      | "string"     | "Lorem ipsum dolor sit amet" |
+    Then "405 Method Not Allowed" was responded with:
+      | /detail          |
+      | "ID is reserved" |
+    Examples:
+      | key       |
+      | cursor    |
+      | embed     |
+      | fields    |
+      | filter    |
+      | key       |
+      | limit     |
+      | offset    |
+      | q         |
+      | query     |
+      | revisions |
+      | sort      |

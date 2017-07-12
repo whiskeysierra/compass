@@ -29,7 +29,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -69,26 +68,29 @@ public class JsonSchemaValidator {
         }
     }
 
-    public List<Violation> validate(final String name, final JsonNode node) {
-        return validate(schemas.getUnchecked(name), node);
+    public List<Violation> validate(final String name, final JsonNode node, final String... at) {
+        return validate(schemas.getUnchecked(name), node, at);
     }
 
-    public List<Violation> validate(final JsonNode schema, final JsonNode node, final String... path) {
-        return validate(factory.getSchema(schema), node, path);
+    public List<Violation> validate(final JsonNode schema, final JsonNode node, final String... at) {
+        return validate(factory.getSchema(schema), node, at);
     }
 
-    private List<Violation> validate(final JsonValidator validator, final JsonNode node, final String... path) {
-        final Set<ValidationMessage> messages = validator.validate(node, node, join(path));
+    private List<Violation> validate(final JsonValidator validator, final JsonNode node, final String... at) {
+        final Set<ValidationMessage> messages = validator.validate(node, node, join(at));
 
         return messages.stream()
                 .sorted(comparing(ValidationMessage::getPath).thenComparing(ValidationMessage::getMessage))
-                .map(message -> new Violation(message.getPath(), message.getMessage()))
+                .map(message -> {
+                    final String path = message.getPath();
+                    final String pointer = path.replace('.', '/');
+                    return new Violation(pointer, message.getMessage().replace(path, pointer));
+                })
                 .collect(toList());
     }
 
     private String join(final String... properties) {
-        return stream(properties).collect(collectingAndThen(joining("."),
-                result -> result.isEmpty() ? "$" : "$." + result));
+        return stream(properties).collect(joining("/"));
     }
 
     private static final class SchemaLoader extends CacheLoader<String, JsonSchema> {
@@ -100,6 +102,7 @@ public class JsonSchemaValidator {
             this.factory = factory;
             this.definitions = mapper.readTree(getResource("api/api.yaml"));
 
+            // TODO also allow parameters (and responses?)
             final Set<String> ignored = Sets.newHashSet(definitions.fieldNames());
             ignored.remove("definitions");
             ObjectNode.class.cast(definitions).without(ignored);

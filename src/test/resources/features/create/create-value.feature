@@ -57,8 +57,8 @@ Feature: Value update
       | /value |
       | "19%"  |
     Then "400 Bad Request" was responded with an array at "/violations":
-      | /field    | /message                                 |
-      | "$.value" | "$.value: string found, number expected" |
+      | /field   | /message                                |
+      | "/value" | "/value: string found, number expected" |
 
   Scenario: Values and dimensions should support unions and null
     Given "PUT /dimensions/country" responds "201 Created" when requested with:

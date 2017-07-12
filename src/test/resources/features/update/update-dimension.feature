@@ -41,11 +41,11 @@ Feature: Dimension update
       | /id      | /schema/type | /relation | /description |
       | "device" | "any"        | 17        | false        |
     Then "400 Bad Request" was responded with an array at "/violations":
-      | /field          | /message                                                                                                          |
-      | "$.description" | "$.description: boolean found, string expected"                                                                   |
-      | "$.relation"    | "$.relation: integer found, string expected"                                                                      |
-      | "$.schema.type" | "$.schema.type: does not have a value in the enumeration [array, boolean, integer, null, number, object, string]" |
-      | "$.schema.type" | "$.schema.type: string found, array expected"                                                                     |
+      | /field         | /message                                                                                                         |
+      | "/description" | "/description: boolean found, string expected"                                                                   |
+      | "/relation"    | "/relation: integer found, string expected"                                                                      |
+      | "/schema/type" | "/schema/type: does not have a value in the enumeration [array, boolean, integer, null, number, object, string]" |
+      | "/schema/type" | "/schema/type: string found, array expected"                                                                     |
 
   Scenario: Update dimension with values
     Given "PUT /dimensions/country" responds "201 Created" when requested with:
@@ -79,7 +79,7 @@ Feature: Dimension update
       | /schema/type | /schema/pattern | /relation | /description |
       | "string"     | "[a-z]{2}"      | "="       | ".."         |
     Then "400 Bad Request" was responded with an array at "/violations":
-      | /message                                                          |
-      | "$.dimensions.country: does not match the regex pattern [a-z]{2}" |
-      | "$.dimensions.country: does not match the regex pattern [a-z]{2}" |
-      | "$.dimensions.country: does not match the regex pattern [a-z]{2}" |
+      | /message                                                         |
+      | "/dimensions/country: does not match the regex pattern [a-z]{2}" |
+      | "/dimensions/country: does not match the regex pattern [a-z]{2}" |
+      | "/dimensions/country: does not match the regex pattern [a-z]{2}" |

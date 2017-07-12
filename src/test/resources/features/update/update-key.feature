@@ -52,10 +52,10 @@ Feature: Key update
       | /id        | /schema/type | /description |
       | "tax-rate" | "any"        | false        |
     Then "400 Bad Request" was responded with an array at "/violations":
-      | /field          | /message                                                                                                          |
-      | "$.description" | "$.description: boolean found, string expected"                                                                   |
-      | "$.schema.type" | "$.schema.type: does not have a value in the enumeration [array, boolean, integer, null, number, object, string]" |
-      | "$.schema.type" | "$.schema.type: string found, array expected"                                                                     |
+      | /field         | /message                                                                                                         |
+      | "/description" | "/description: boolean found, string expected"                                                                   |
+      | "/schema/type" | "/schema/type: does not have a value in the enumeration [array, boolean, integer, null, number, object, string]" |
+      | "/schema/type" | "/schema/type: string found, array expected"                                                                     |
 
   Scenario: Updating a dimension's schema should fail if at least one value violates it
     Given "PUT /dimensions/country" responds "201 Created" when requested with:
@@ -73,7 +73,7 @@ Feature: Key update
       | /schema/type | /schema/minimum | /schema/maximum | /description |
       | "number"     | 0.0             | 1.0             | ".."         |
     Then "400 Bad Request" was responded with an array at "/violations":
-      | /message                                    |
-      | "$.value: must have a maximum value of 1.0" |
-      | "$.value: must have a maximum value of 1.0" |
-      | "$.value: must have a maximum value of 1.0" |
+      | /message                                   |
+      | "/value: must have a maximum value of 1.0" |
+      | "/value: must have a maximum value of 1.0" |
+      | "/value: must have a maximum value of 1.0" |

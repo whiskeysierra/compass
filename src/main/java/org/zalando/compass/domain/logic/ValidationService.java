@@ -66,7 +66,7 @@ public class ValidationService {
         }
 
         final JsonNode schema = dimension.getSchema();
-        return validator.validate(schema, node, "dimensions", dimension.getId());
+        return validator.validate(schema, node, "/dimensions", dimension.getId());
     }
 
     public void check(final Key key, final Collection<Value> values) {
@@ -82,7 +82,7 @@ public class ValidationService {
     private List<Violation> validate(final Key key, final Value value) {
         final JsonNode schema = key.getSchema();
         final JsonNode node = value.getValue();
-        return validator.validate(schema, node, "value");
+        return validator.validate(schema, node, "/value");
     }
 
     private void throwIfNotEmpty(final List<Violation> violations) {

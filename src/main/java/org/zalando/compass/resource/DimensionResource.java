@@ -84,11 +84,12 @@ class DimensionResource implements Reserved {
     @RequestMapping(method = GET)
     public ResponseEntity<DimensionCollectionRepresentation> getAll(
             @RequestParam(name = "q", required = false) @Nullable final String q,
-            @RequestParam(required = false, defaultValue = "25") final int limit,
+            @RequestParam(value = "limit", required = false, defaultValue = "25") final String limit,
             @Nullable @RequestParam(value = "_after", required = false) final String after,
-            @Nullable @RequestParam(value = "_before", required = false) final String before) {
+            @Nullable @RequestParam(value = "_before", required = false) final String before) throws IOException {
 
-        final Pagination<String> query = Pagination.create(after, before, limit);
+        final Integer l = reader.read("Limit", limit, int.class);
+        final Pagination<String> query = Pagination.create(after, before, l);
         final PageResult<Dimension> page = service.readPage(q, query);
 
         final List<DimensionRepresentation> representations = page.getElements().stream()

@@ -424,6 +424,13 @@ parameters:
     type: array
     items: {}
     collectionFormat: multi
+  Limit:
+    name: limit
+    in: query
+    type: integer
+    format: int32
+    minimum: 0
+    maximum: 100
 definitions:
   RelationPage:
     type: object
@@ -605,3 +612,9 @@ definitions:
       - comment
   JsonPatch:
     $ref: 'api/json-patch.json#'
+  # TODO should read from parameters
+  Limit:
+    type: integer
+    format: int32
+    minimum: 0
+    maximum: 100
