@@ -1,4 +1,4 @@
-package org.zalando.compass.domain.logic.value;
+package org.zalando.compass.domain.logic;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
@@ -46,13 +46,18 @@ class DeleteValue {
             throw new NotFoundException();
         }
 
-        repository.delete(key, filter);
-        log.info("Deleted value [{}, {}]", key, filter);
+        final Revision rev = revisionService.create(comment).withType(DELETE);
 
-        final Revision revision = revisionService.create(comment).withType(DELETE);
-        final ValueRevision valueRevision = value.toRevision(revision);
-        revisionRepository.create(key, valueRevision);
-        log.info("Created value revision [{}]", valueRevision);
+        delete(key, value, rev);
+    }
+
+    void delete(final String key, final Value value, final Revision rev) {
+        repository.delete(key, value.getDimensions());
+        log.info("Deleted value [{}, {}]", key, value.getDimensions());
+
+        final ValueRevision revision = value.toRevision(rev);
+        revisionRepository.create(key, revision);
+        log.info("Created value revision [{}]", revision);
     }
 
 }

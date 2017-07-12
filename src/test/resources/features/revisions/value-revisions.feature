@@ -91,3 +91,23 @@ Feature: /keys/{id}/value/revision
     Then "GET /keys/tax-rate/value/revisions?country=DE&after=2007-01-01T00:00:00Z" responds "200 OK" with an array at "/revisions":
       | /id | /timestamp             | /type    | /user       | /comment |
       | 5   | "2017-07-07T22:09:21Z" | "create" | "anonymous" |          |
+
+  Scenario: Read revisions of deleted value
+    Given "PUT /keys/tax-rate/value?country=DE" and "Comment: Added DE tax rate" responds "201 Created" when requested with:
+      | /value |
+      | 0.16   |
+    And "DELETE /keys/tax-rate/value?country=DE" and "Comment: Dropped DE tax rate" responds "204 No Content"
+    Then "GET /keys/tax-rate/value/revisions?country=DE" responds "200 OK" with an array at "/revisions":
+      | /id | /timestamp             | /type    | /user       | /comment              |
+      | 5   | "2017-07-07T22:09:21Z" | "delete" | "anonymous" | "Dropped DE tax rate" |
+      | 4   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | "Added DE tax rate"   |
+
+  Scenario: Read revisions of value of deleted key
+    Given "PUT /keys/tax-rate/value?country=DE" and "Comment: Added DE tax rate" responds "201 Created" when requested with:
+      | /value |
+      | 0.16   |
+    And "DELETE /keys/tax-rate" and "Comment: Dropped tax rates completely" responds "204 No Content"
+    Then "GET /keys/tax-rate/value/revisions?country=DE" responds "200 OK" with an array at "/revisions":
+      | /id | /timestamp             | /type    | /user       | /comment                       |
+      | 5   | "2017-07-07T22:09:21Z" | "delete" | "anonymous" | "Dropped tax rates completely" |
+      | 4   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | "Added DE tax rate"            |

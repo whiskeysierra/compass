@@ -1,4 +1,4 @@
-package org.zalando.compass.domain.logic.value;
+package org.zalando.compass.domain.logic;
 
 import com.google.common.base.Equivalence;
 import com.google.common.base.Equivalence.Wrapper;

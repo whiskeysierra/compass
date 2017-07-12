@@ -13,7 +13,7 @@ CREATE TABLE dimension (
 
 CREATE TABLE value (
   id BIGSERIAL PRIMARY KEY,
-  key_id TEXT NOT NULL REFERENCES key(id) ON DELETE CASCADE,
+  key_id TEXT NOT NULL REFERENCES key(id),
   index BIGSERIAL NOT NULL,
   value JSONB NOT NULL, -- adheres to key.schema
   UNIQUE (key_id, index) DEFERRABLE INITIALLY DEFERRED

@@ -1,9 +1,8 @@
-package org.zalando.compass.domain.logic.key;
+package org.zalando.compass.domain.logic;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.zalando.compass.domain.logic.KeyService;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.KeyRevision;
 import org.zalando.compass.domain.model.PageRevision;

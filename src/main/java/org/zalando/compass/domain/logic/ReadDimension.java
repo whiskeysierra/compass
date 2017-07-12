@@ -1,4 +1,4 @@
-package org.zalando.compass.domain.logic.dimension;
+package org.zalando.compass.domain.logic;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

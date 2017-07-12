@@ -1,10 +1,9 @@
-package org.zalando.compass.domain.logic.value;
+package org.zalando.compass.domain.logic;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableMap;
 import org.springframework.stereotype.Service;
-import org.zalando.compass.domain.logic.RelationService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Dimensional;
 import org.zalando.compass.domain.persistence.DimensionRepository;

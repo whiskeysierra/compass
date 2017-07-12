@@ -1,4 +1,4 @@
-package org.zalando.compass.domain.logic.value;
+package org.zalando.compass.domain.logic;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
