@@ -1,5 +1,6 @@
 package org.zalando.compass.domain.persistence;
 
+import com.google.common.io.Resources;
 import com.opentable.db.postgres.embedded.EmbeddedPostgres;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,19 +10,21 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Collections;
 
+import static com.google.common.io.Resources.getResource;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.singletonMap;
 
 @Configuration
 public class EmbeddedDataSourceConfiguration {
 
     @Bean
-    public DataSource dataSource(final EmbeddedPostgres postgres) throws SQLException {
+    public DataSource dataSource(final EmbeddedPostgres postgres) throws SQLException, IOException {
         final DataSource dataSource = postgres.getPostgresDatabase();
+        final String sql = Resources.toString(getResource("db/init.sql"), UTF_8);
 
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement("CREATE SCHEMA compass")) {
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.executeUpdate();
         }
 

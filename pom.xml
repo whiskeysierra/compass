@@ -480,7 +480,9 @@
                             <goal>execute</goal>
                         </goals>
                         <configuration>
-                            <sqlCommand>CREATE SCHEMA compass</sqlCommand>
+                            <srcFiles>
+                                <srcFile>src/test/resources/db/init.sql</srcFile>
+                            </srcFiles>
                         </configuration>
                     </execution>
                 </executions>
