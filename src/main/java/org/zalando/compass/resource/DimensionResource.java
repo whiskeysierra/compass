@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
-import org.zalando.compass.library.pagination.Pagination;
 import org.zalando.compass.library.pagination.PageResult;
+import org.zalando.compass.library.pagination.Pagination;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -111,13 +111,13 @@ class DimensionResource implements Reserved {
     @RequestMapping(method = PATCH, path = "/{id}", consumes = {APPLICATION_JSON_VALUE, JSON_MERGE_PATCH_VALUE})
     public ResponseEntity<DimensionRepresentation> update(@PathVariable final String id,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
-            @RequestBody final ObjectNode patch) throws IOException, JsonPatchException {
+            @RequestBody final ObjectNode content) throws IOException, JsonPatchException {
 
         final Dimension dimension = service.read(id);
-        final ObjectNode node = mapper.valueToTree(dimension);
+        final JsonNode node = mapper.valueToTree(dimension);
 
-        final JsonMergePatch mergePatch = JsonMergePatch.fromJson(patch);
-        final JsonNode patched = mergePatch.apply(node);
+        final JsonMergePatch patch = JsonMergePatch.fromJson(content);
+        final JsonNode patched = patch.apply(node);
         return replace(id, comment, patched);
     }
 

@@ -20,7 +20,7 @@ import org.zalando.problem.validation.ConstraintViolationProblemModule;
 import static com.fasterxml.jackson.core.JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN;
 
 @Configuration
-class JsonConfiguration {
+public class JsonConfiguration {
 
     @Bean
     @Primary

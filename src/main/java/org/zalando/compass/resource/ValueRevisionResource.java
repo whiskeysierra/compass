@@ -11,8 +11,8 @@ import org.zalando.compass.domain.logic.ValueService;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.library.pagination.Pagination;
 import org.zalando.compass.library.pagination.PageResult;
+import org.zalando.compass.library.pagination.Pagination;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -23,18 +23,17 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.zalando.compass.resource.Linking.link;
 import static org.zalando.compass.resource.RevisionPaging.paginate;
-import static org.zalando.compass.resource.ValueResource.render;
 
 @RestController
 @RequestMapping(path = "/keys/{key}")
 class ValueRevisionResource {
 
-    private final JsonQueryParser parser;
+    private final Querying querying;
     private final ValueService service;
 
     @Autowired
-    public ValueRevisionResource(final JsonQueryParser parser, final ValueService service) {
-        this.parser = parser;
+    public ValueRevisionResource(final Querying querying, final ValueService service) {
+        this.querying = querying;
         this.service = service;
     }
 
@@ -56,7 +55,7 @@ class ValueRevisionResource {
     @RequestMapping(method = GET, path = "/values/revisions/{revision}")
     public ResponseEntity<ValueCollectionRevisionRepresentation> getValuesRevision(@PathVariable final String key,
             @PathVariable final long revision, @RequestParam final Map<String, String> query) {
-        final Map<String, JsonNode> filter = parser.parse(query);
+        final Map<String, JsonNode> filter = querying.read(query);
         final PageRevision<Value> page = service.readPageAt(key, filter, revision);
         final Revision rev = page.getRevision();
 
@@ -82,11 +81,11 @@ class ValueRevisionResource {
             @Nullable @RequestParam(value = "_after", required = false) final Long after,
             @Nullable @RequestParam(value = "_before", required = false) final Long before) {
 
-        final Map<String, JsonNode> filter = parser.parse(queryParams);
+        final Map<String, JsonNode> filter = querying.read(queryParams);
         final Pagination<Long> query = Pagination.create(after, before, limit);
 
         final PageResult<Revision> page = service.readRevisions(key, filter, query);
-        final Map<String, String> normalized = render(filter);
+        final Map<String, String> normalized = querying.write(filter);
 
         return paginate(page,
                 rev -> link(methodOn(ValueRevisionResource.class).getValueRevisions(key, normalized, limit, rev.getId(), null)),
@@ -97,7 +96,7 @@ class ValueRevisionResource {
     @RequestMapping(method = GET, path = "/value/revisions/{revision}")
     public ResponseEntity<ValueRevisionRepresentation> getRevision(@PathVariable final String key, @PathVariable final long revision,
             @RequestParam final Map<String, String> query) {
-        final Map<String, JsonNode> filter = parser.parse(query);
+        final Map<String, JsonNode> filter = querying.read(query);
         return ResponseEntity.ok(ValueRevisionRepresentation.valueOf(service.readAt(key, filter, revision)));
     }
 

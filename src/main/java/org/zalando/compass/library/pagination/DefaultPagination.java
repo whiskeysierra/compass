@@ -71,20 +71,22 @@ final class DefaultPagination<P> implements Pagination<P> {
         final int size = elements.size();
 
         if (size > getLimit()) {
-            if (size <= 1) {
-                return PageResult.create(emptyList(), false, false);
-            }
-
             if (isBackward) {
                 final List<T> items = elements.subList(1, size);
-                return PageResult.create(items, true, true);
+                return createIfNotempty(items, true, true);
             } else {
                 final List<T> items = elements.subList(0, getLimit());
-                return PageResult.create(items, true, isForward);
+                return createIfNotempty(items, true, isForward);
             }
         } else {
-            return PageResult.create(elements, isBackward, isForward);
+            return createIfNotempty(elements, isBackward, isForward);
         }
+    }
+
+    public <T> PageResult<T> createIfNotempty(final List<T> elements, final boolean next, final boolean previous) {
+        return elements.isEmpty() ?
+                PageResult.create(emptyList(), false, false) :
+                PageResult.create(elements, next, previous);
     }
 
 }

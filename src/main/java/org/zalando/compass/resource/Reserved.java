@@ -17,6 +17,7 @@ interface Reserved {
             "/offset",
             "/q",
             "/query",
+            "/revision",
             "/revisions",
             "/sort",
     })

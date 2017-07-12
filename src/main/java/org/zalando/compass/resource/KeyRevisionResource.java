@@ -48,7 +48,6 @@ class KeyRevisionResource {
                 rev -> link(methodOn(KeyRevisionResource.class).getRevision(rev.getId(), 25, null, null)));
     }
 
-    // TODO search by term
     @RequestMapping(method = GET, path = "/revisions/{revision}")
     public ResponseEntity<KeyCollectionRevisionRepresentation> getRevision(@PathVariable final long revision,
             @RequestParam(required = false, defaultValue = "25") final int limit,

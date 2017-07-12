@@ -111,13 +111,13 @@ class KeyResource implements Reserved {
     @RequestMapping(method = PATCH, path = "/{id}", consumes = {APPLICATION_JSON_VALUE, JSON_MERGE_PATCH_VALUE})
     public ResponseEntity<KeyRepresentation> update(@PathVariable final String id,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
-            @RequestBody final ObjectNode patch) throws IOException, JsonPatchException {
+            @RequestBody final ObjectNode content) throws IOException, JsonPatchException {
 
         final Key key = service.read(id);
         final ObjectNode node = mapper.valueToTree(key);
 
-        final JsonMergePatch mergePatch = JsonMergePatch.fromJson(patch);
-        final JsonNode patched = mergePatch.apply(node);
+        final JsonMergePatch patch = JsonMergePatch.fromJson(content);
+        final JsonNode patched = patch.apply(node);
         return replace(id, comment, patched);
     }
 

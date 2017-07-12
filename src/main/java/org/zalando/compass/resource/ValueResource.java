@@ -8,8 +8,6 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSortedMap;
-import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -51,15 +49,15 @@ import static org.zalando.compass.resource.MediaTypes.JSON_PATCH_VALUE;
 @RequestMapping(path = "/keys/{key}")
 class ValueResource {
 
-    private final JsonQueryParser parser;
+    private final Querying querying;
     private final JsonReader reader;
     private final ObjectMapper mapper;
     private final ValueService service;
 
     @Autowired
-    public ValueResource(final JsonQueryParser parser, final JsonReader reader, final ObjectMapper mapper,
+    public ValueResource(final Querying querying, final JsonReader reader, final ObjectMapper mapper,
             final ValueService service) {
-        this.parser = parser;
+        this.querying = querying;
         this.reader = reader;
         this.mapper = mapper;
         this.service = service;
@@ -88,7 +86,7 @@ class ValueResource {
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final JsonNode node) throws IOException {
 
-        final ImmutableMap<String, JsonNode> dimensions = parser.parse(query);
+        final ImmutableMap<String, JsonNode> dimensions = querying.read(query);
         final Value value = reader.read(node, Value.class).withDimensions(dimensions);
 
         final boolean created = service.replace(key, value, comment);
@@ -101,7 +99,7 @@ class ValueResource {
 
     @RequestMapping(method = GET, path = "/values")
     public ValueCollectionRepresentation readAll(@PathVariable final String key, @RequestParam final Map<String, String> query) {
-        final Map<String, JsonNode> filter = parser.parse(query);
+        final Map<String, JsonNode> filter = querying.read(query);
         final List<Value> page = service.readPage(key, filter);
         final List<ValueRepresentation> representations = page.stream()
                 .map(ValueRepresentation::valueOf).collect(toList());
@@ -111,7 +109,7 @@ class ValueResource {
 
     @RequestMapping(method = GET, path = "/value")
     public ResponseEntity<ValueRepresentation> read(@PathVariable final String key, @RequestParam final Map<String, String> query) {
-        final Map<String, JsonNode> filter = parser.parse(query);
+        final Map<String, JsonNode> filter = querying.read(query);
         final Value value = service.read(key, filter);
 
         return ResponseEntity.ok()
@@ -137,14 +135,14 @@ class ValueResource {
     public ResponseEntity<ValueRepresentation> update(@PathVariable final String key,
             @RequestParam final Map<String, String> query,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
-            @RequestBody final ObjectNode patch) throws IOException, JsonPatchException {
+            @RequestBody final ObjectNode content) throws IOException, JsonPatchException {
 
-        final Map<String, JsonNode> filter = parser.parse(query);
+        final Map<String, JsonNode> filter = querying.read(query);
         final Value value = service.read(key, filter);
         final JsonNode node = mapper.valueToTree(value);
 
-        final JsonMergePatch jsonPatch = JsonMergePatch.fromJson(patch);
-        final JsonNode patched = jsonPatch.apply(node);
+        final JsonMergePatch patch = JsonMergePatch.fromJson(content);
+        final JsonNode patched = patch.apply(node);
         return replace(key, query, comment, patched);
     }
 
@@ -156,7 +154,7 @@ class ValueResource {
 
         final JsonPatch patch = reader.read(content, JsonPatch.class);
 
-        final Map<String, JsonNode> filter = parser.parse(query);
+        final Map<String, JsonNode> filter = querying.read(query);
         final Value value = service.read(key, filter);
         final JsonNode node = mapper.valueToTree(value);
 
@@ -168,20 +166,13 @@ class ValueResource {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable final String key, @RequestParam final Map<String, String> query,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment) {
-        final Map<String, JsonNode> filter = parser.parse(query);
+        final Map<String, JsonNode> filter = querying.read(query);
         service.delete(key, filter, comment);
     }
 
     private URI canonicalUrl(final String key, final Value value) {
-        final Map<String, String> query = render(value.getDimensions());
+        final Map<String, String> query = querying.write(value.getDimensions());
         return link(methodOn(ValueResource.class).read(key, query));
-    }
-
-    // TODO move somewhere else
-    // TODO document sort
-    static Map<String, String> render(final Map<String, JsonNode> filter) {
-        return ImmutableSortedMap.copyOf(
-                Maps.transformValues(filter, JsonNode::asText));
     }
 
 }
