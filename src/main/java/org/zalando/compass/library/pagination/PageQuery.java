@@ -68,24 +68,27 @@ public interface PageQuery<P> {
     default <T> PageResult<T> paginate(final List<T> elements) {
         @Nullable final Direction direction = getDirection();
 
-        if (direction == BACKWARD) {
+        final boolean isForward = direction == FORWARD;
+        final boolean isBackward = direction == BACKWARD;
+
+        if (isBackward) {
             Collections.reverse(elements);
         }
 
         final PageResult<T> page;
 
         if (elements.size() > getLimit()) {
-            if (direction == BACKWARD) {
+            if (isBackward) {
                 final List<T> items = elements.subList(1, elements.size());
                 page = PageResult.create(items, true, true);
             } else {
                 final List<T> items = elements.subList(0, getLimit());
-                page = PageResult.create(items, true, direction == FORWARD);
+                page = PageResult.create(items, true, isForward);
             }
         } else {
-            page = PageResult.create(elements, direction == BACKWARD, direction == FORWARD);
+            page = PageResult.create(elements, isBackward, isForward);
         }
-        
+
         if (page.getElements().isEmpty()) {
             return PageResult.create(emptyList(), false, false);
         }
