@@ -84,11 +84,12 @@ class KeyResource implements Reserved {
     @RequestMapping(method = GET)
     public ResponseEntity<KeyCollectionRepresentation> getAll(
             @RequestParam(name = "q", required = false) @Nullable final String q,
-            @RequestParam(required = false, defaultValue = "25") final int limit,
+            @RequestParam(required = false, defaultValue = "25") final String limit,
             @Nullable @RequestParam(value = "_after", required = false) final String after,
-            @Nullable @RequestParam(value = "_before", required = false) final String before) {
+            @Nullable @RequestParam(value = "_before", required = false) final String before) throws IOException {
 
-        final Pagination<String> query = Pagination.create(after, before, limit);
+        final Pagination<String> query = Pagination.create(after, before,
+                reader.read("Limit", limit, int.class));
         final PageResult<Key> page = service.readPage(q, query);
 
         final List<KeyRepresentation> representations = page.getElements().stream()

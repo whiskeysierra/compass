@@ -429,6 +429,7 @@ parameters:
     in: query
     type: integer
     format: int32
+    default: 25
     minimum: 0
     maximum: 100
 definitions:
@@ -612,9 +613,3 @@ definitions:
       - comment
   JsonPatch:
     $ref: 'api/json-patch.json#'
-  # TODO should read from parameters
-  Limit:
-    type: integer
-    format: int32
-    minimum: 0
-    maximum: 100

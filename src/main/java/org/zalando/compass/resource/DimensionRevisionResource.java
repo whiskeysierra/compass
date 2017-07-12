@@ -16,6 +16,8 @@ import org.zalando.compass.library.pagination.PageResult;
 
 import javax.annotation.Nullable;
 
+import java.io.IOException;
+
 import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -26,35 +28,40 @@ import static org.zalando.compass.resource.RevisionPaging.paginate;
 @RequestMapping(path = "/dimensions")
 class DimensionRevisionResource {
 
+    private final JsonReader reader;
     private final DimensionService service;
 
     @Autowired
-    public DimensionRevisionResource(final DimensionService service) {
+    public DimensionRevisionResource(JsonReader reader, final DimensionService service) {
+        this.reader = reader;
         this.service = service;
     }
 
     @RequestMapping(method = GET, path = "/revisions")
     public ResponseEntity<RevisionCollectionRepresentation> getRevisions(
-            @RequestParam(required = false, defaultValue = "25") final int limit,
+            // TODO share "25" a default limit constant somewhere
+            @RequestParam(required = false, defaultValue = "25") final String limit,
             @Nullable @RequestParam(value = "_after", required = false) final Long after,
-            @Nullable @RequestParam(value = "_before", required = false) final Long before) {
+            @Nullable @RequestParam(value = "_before", required = false) final Long before) throws IOException {
 
-        final Pagination<Long> query = Pagination.create(after, before, limit);
+        final Pagination<Long> query = Pagination.create(after, before,
+                reader.read("Limit", limit, int.class));
         final PageResult<Revision> page = service.readPageRevisions(query);
 
         return paginate(page,
                 rev -> link(methodOn(DimensionRevisionResource.class).getRevisions(limit, rev.getId(), null)),
                 rev -> link(methodOn(DimensionRevisionResource.class).getRevisions(limit, null, rev.getId())),
-                rev -> link(methodOn(DimensionRevisionResource.class).getRevision(rev.getId(), 25, null, null)));
+                rev -> link(methodOn(DimensionRevisionResource.class).getRevision(rev.getId(), "25", null, null)));
     }
 
     @RequestMapping(method = GET, path = "/revisions/{revision}")
     public ResponseEntity<DimensionCollectionRevisionRepresentation> getRevision(@PathVariable final long revision,
-            @RequestParam(required = false, defaultValue = "25") final int limit,
+            @RequestParam(required = false, defaultValue = "25") final String limit,
             @Nullable @RequestParam(value = "_after", required = false) final String after,
-            @Nullable @RequestParam(value = "_before", required = false) final String before) {
+            @Nullable @RequestParam(value = "_before", required = false) final String before) throws IOException {
 
-        final Pagination<String> query = Pagination.create(after, before, limit);
+        final Pagination<String> query = Pagination.create(after, before,
+                reader.read("Limit", limit, int.class));
         final PageRevision<Dimension> page = service.readPageAt(revision, query);
         final Revision rev = page.getRevision();
 
@@ -77,11 +84,12 @@ class DimensionRevisionResource {
 
     @RequestMapping(method = GET, path = "/{id}/revisions")
     public ResponseEntity<RevisionCollectionRepresentation> getRevisions(@PathVariable final String id,
-            @RequestParam(required = false, defaultValue = "25") final int limit,
+            @RequestParam(required = false, defaultValue = "25") final String limit,
             @Nullable @RequestParam(value = "_after", required = false) final Long after,
-            @Nullable @RequestParam(value = "_before", required = false) final Long before) {
+            @Nullable @RequestParam(value = "_before", required = false) final Long before) throws IOException {
 
-        final Pagination<Long> query = Pagination.create(after, before, limit);
+        final Pagination<Long> query = Pagination.create(after, before,
+                reader.read("Limit", limit, int.class));
         final PageResult<Revision> page = service.readRevisions(id, query);
 
         return paginate(page,

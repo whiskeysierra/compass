@@ -102,8 +102,8 @@ public class JsonSchemaValidator {
             this.factory = factory;
             this.definitions = mapper.readTree(getResource("api/api.yaml"));
 
-            // TODO also allow parameters (and responses?)
             final Set<String> ignored = Sets.newHashSet(definitions.fieldNames());
+            ignored.remove("parameters");
             ignored.remove("definitions");
             ObjectNode.class.cast(definitions).without(ignored);
         }
@@ -111,7 +111,8 @@ public class JsonSchemaValidator {
         @Override
         public JsonSchema load(final String name) throws Exception {
             final ObjectNode schema = definitions.deepCopy();
-            schema.put("$ref", "#/definitions/" + name);
+            final boolean isDefinition = schema.get("definitions").has(name);
+            schema.put("$ref", isDefinition ? "#/definitions/" + name : "#/parameters/" + name);
             return factory.getSchema(schema);
         }
 

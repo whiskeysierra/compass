@@ -4,7 +4,10 @@ import com.google.common.annotations.VisibleForTesting;
 import org.springframework.http.ResponseEntity;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.library.pagination.PageResult;
+import org.zalando.fauxpas.ThrowingFunction;
 
+import java.io.IOError;
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.function.Function;
@@ -17,8 +20,9 @@ public final class RevisionPaging {
 
     static ResponseEntity<RevisionCollectionRepresentation> paginate(
             final PageResult<Revision> page,
-            final Function<Revision, URI> next, final Function<Revision, URI> prev,
-            final Function<Revision, URI> linker) {
+            final ThrowingFunction<Revision, URI, IOException> next,
+            final ThrowingFunction<Revision, URI, IOException> prev,
+            final ThrowingFunction<Revision, URI, IOException> linker) {
         final List<RevisionRepresentation> revisions = page.getElements().stream()
                 .map(revision -> new RevisionRepresentation(
                         revision.getId(),

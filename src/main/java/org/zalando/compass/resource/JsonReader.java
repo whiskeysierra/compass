@@ -32,6 +32,7 @@ class JsonReader {
         return mapper.treeToValue(node, type);
     }
 
+    // TODO should this be in Querying?!
     public <T> T read(final String name, final String value, final Class<T> type) throws IOException {
         final JsonNode node = mapper.readTree(value);
 

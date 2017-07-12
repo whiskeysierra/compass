@@ -88,8 +88,8 @@ class DimensionResource implements Reserved {
             @Nullable @RequestParam(value = "_after", required = false) final String after,
             @Nullable @RequestParam(value = "_before", required = false) final String before) throws IOException {
 
-        final Integer l = reader.read("Limit", limit, int.class);
-        final Pagination<String> query = Pagination.create(after, before, l);
+        final Pagination<String> query = Pagination.create(after, before,
+                reader.read("Limit", limit, int.class));
         final PageResult<Dimension> page = service.readPage(q, query);
 
         final List<DimensionRepresentation> representations = page.getElements().stream()
