@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 
+import static java.util.Collections.emptyList;
 import static org.jooq.SortOrder.ASC;
 import static org.jooq.SortOrder.DESC;
 import static org.jooq.impl.DSL.val;
@@ -71,17 +72,25 @@ public interface PageQuery<P> {
             Collections.reverse(elements);
         }
 
+        final PageResult<T> page;
+
         if (elements.size() > getLimit()) {
             if (direction == BACKWARD) {
                 final List<T> items = elements.subList(1, elements.size());
-                return PageResult.create(items, true, true);
+                page = PageResult.create(items, true, true);
             } else {
                 final List<T> items = elements.subList(0, getLimit());
-                return PageResult.create(items, true, direction == FORWARD);
+                page = PageResult.create(items, true, direction == FORWARD);
             }
         } else {
-            return PageResult.create(elements, direction == BACKWARD, direction == FORWARD);
+            page = PageResult.create(elements, direction == BACKWARD, direction == FORWARD);
         }
+        
+        if (page.getElements().isEmpty()) {
+            return PageResult.create(emptyList(), false, false);
+        }
+
+        return page;
     }
 
 }
