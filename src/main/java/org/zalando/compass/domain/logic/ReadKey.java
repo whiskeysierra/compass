@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.persistence.KeyRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
-import org.zalando.compass.library.pagination.PageQuery;
+import org.zalando.compass.library.pagination.Pagination;
 import org.zalando.compass.library.pagination.PageResult;
 
 import javax.annotation.Nullable;
@@ -21,7 +21,7 @@ class ReadKey {
         this.repository = repository;
     }
 
-    PageResult<Key> readPage(@Nullable final String term, final PageQuery<String> query) {
+    PageResult<Key> readPage(@Nullable final String term, final Pagination<String> query) {
         final List<Key> keys = repository.findAll(term, query.increment());
         return query.paginate(keys);
     }

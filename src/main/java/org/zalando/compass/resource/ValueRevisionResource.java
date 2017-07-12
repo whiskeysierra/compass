@@ -11,7 +11,7 @@ import org.zalando.compass.domain.logic.ValueService;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.library.pagination.PageQuery;
+import org.zalando.compass.library.pagination.Pagination;
 import org.zalando.compass.library.pagination.PageResult;
 
 import javax.annotation.Nullable;
@@ -44,7 +44,7 @@ class ValueRevisionResource {
             @Nullable @RequestParam(value = "_after", required = false) final Long after,
             @Nullable @RequestParam(value = "_before", required = false) final Long before) {
 
-        final PageQuery<Long> query = PageQuery.create(after, before, limit);
+        final Pagination<Long> query = Pagination.create(after, before, limit);
         final PageResult<Revision> page = service.readPageRevisions(key, query);
 
         return paginate(page,
@@ -83,7 +83,7 @@ class ValueRevisionResource {
             @Nullable @RequestParam(value = "_before", required = false) final Long before) {
 
         final Map<String, JsonNode> filter = parser.parse(queryParams);
-        final PageQuery<Long> query = PageQuery.create(after, before, limit);
+        final Pagination<Long> query = Pagination.create(after, before, limit);
 
         final PageResult<Revision> page = service.readRevisions(key, filter, query);
         final Map<String, String> normalized = render(filter);

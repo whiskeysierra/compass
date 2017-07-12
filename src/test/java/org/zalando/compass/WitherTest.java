@@ -5,13 +5,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
-import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.library.pagination.PageQuery;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.function.BiFunction;
 
 import static org.hamcrest.Matchers.is;

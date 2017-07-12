@@ -9,7 +9,7 @@ import org.jooq.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Dimension;
-import org.zalando.compass.library.pagination.PageQuery;
+import org.zalando.compass.library.pagination.Pagination;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -64,7 +64,7 @@ public class DimensionRepository {
                 .orderBy(DIMENSION.ID.asc());
     }
 
-    public List<Dimension> findAll(@Nullable final String term, final PageQuery<String> query) {
+    public List<Dimension> findAll(@Nullable final String term, final Pagination<String> query) {
         return query.seek(db.select(DIMENSION.fields())
                 .from(DIMENSION)
                 .where(toCondition(term)), DIMENSION.ID, SortOrder.ASC)

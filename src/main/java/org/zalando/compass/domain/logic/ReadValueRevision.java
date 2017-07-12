@@ -10,7 +10,7 @@ import org.zalando.compass.domain.model.ValueRevision;
 import org.zalando.compass.domain.persistence.NotFoundException;
 import org.zalando.compass.domain.persistence.RevisionRepository;
 import org.zalando.compass.domain.persistence.ValueRevisionRepository;
-import org.zalando.compass.library.pagination.PageQuery;
+import org.zalando.compass.library.pagination.Pagination;
 import org.zalando.compass.library.pagination.PageResult;
 
 import java.util.List;
@@ -33,7 +33,7 @@ class ReadValueRevision {
         this.selector = selector;
     }
 
-    public PageResult<Revision> readPageRevisions(final String key, final PageQuery<Long> query) {
+    public PageResult<Revision> readPageRevisions(final String key, final Pagination<Long> query) {
         final List<Revision> revisions = repository.findPageRevisions(key, query.increment()).stream()
                 .map(Revision::withTypeUpdate)
                 .collect(toList());
@@ -58,7 +58,7 @@ class ReadValueRevision {
     }
 
     public PageResult<Revision> readRevisions(final String key, final Map<String, JsonNode> dimensions,
-            final PageQuery<Long> query) {
+            final Pagination<Long> query) {
         final List<Revision> revisions = repository.findRevisions(key, dimensions, query.increment());
         return query.paginate(revisions);
     }

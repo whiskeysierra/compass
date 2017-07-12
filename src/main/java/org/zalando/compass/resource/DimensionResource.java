@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
-import org.zalando.compass.library.pagination.PageQuery;
+import org.zalando.compass.library.pagination.Pagination;
 import org.zalando.compass.library.pagination.PageResult;
 
 import javax.annotation.Nullable;
@@ -88,7 +88,7 @@ class DimensionResource implements Reserved {
             @Nullable @RequestParam(value = "_after", required = false) final String after,
             @Nullable @RequestParam(value = "_before", required = false) final String before) {
 
-        final PageQuery<String> query = PageQuery.create(after, before, limit);
+        final Pagination<String> query = Pagination.create(after, before, limit);
         final PageResult<Dimension> page = service.readPage(q, query);
 
         final List<DimensionRepresentation> representations = page.getElements().stream()

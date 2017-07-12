@@ -17,7 +17,7 @@ import org.zalando.compass.domain.persistence.model.enums.RevisionType;
 import org.zalando.compass.domain.persistence.model.tables.ValueDimensionRevision;
 import org.zalando.compass.domain.persistence.model.tables.records.ValueDimensionRevisionRecord;
 import org.zalando.compass.domain.persistence.model.tables.records.ValueRevisionRecord;
-import org.zalando.compass.library.pagination.PageQuery;
+import org.zalando.compass.library.pagination.Pagination;
 
 import java.util.List;
 import java.util.Map;
@@ -87,7 +87,7 @@ public class ValueRevisionRepository {
         db.batch(queries).execute();
     }
 
-    public List<Revision> findPageRevisions(final String key, final PageQuery<Long> query) {
+    public List<Revision> findPageRevisions(final String key, final Pagination<Long> query) {
         return query.seek(db.select(REVISION.fields())
                 .from(REVISION)
                 .where(exists(selectOne()
@@ -149,7 +149,7 @@ public class ValueRevisionRepository {
     }
 
     public List<Revision> findRevisions(final String key, final Map<String, JsonNode> dimensions,
-            final PageQuery<Long> query) {
+            final Pagination<Long> query) {
 
         return query.seek(db.select(REVISION.fields())
                 .select(VALUE_REVISION.REVISION_TYPE)

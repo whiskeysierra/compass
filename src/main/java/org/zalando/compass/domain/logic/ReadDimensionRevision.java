@@ -9,7 +9,7 @@ import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.DimensionRevisionRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
 import org.zalando.compass.domain.persistence.RevisionRepository;
-import org.zalando.compass.library.pagination.PageQuery;
+import org.zalando.compass.library.pagination.Pagination;
 import org.zalando.compass.library.pagination.PageResult;
 
 import java.util.List;
@@ -28,7 +28,7 @@ class ReadDimensionRevision {
         this.revisionRepository = revisionRepository;
     }
 
-    PageResult<Revision> readPageRevisions(final PageQuery<Long> query) {
+    PageResult<Revision> readPageRevisions(final Pagination<Long> query) {
         final List<Revision> revisions = repository.findPageRevisions(query.increment()).stream()
                 .map(Revision::withTypeUpdate)
                 .collect(toList());
@@ -36,7 +36,7 @@ class ReadDimensionRevision {
         return query.paginate(revisions);
     }
 
-    PageRevision<Dimension> readPageAt(final long revisionId, final PageQuery<String> query) {
+    PageRevision<Dimension> readPageAt(final long revisionId, final Pagination<String> query) {
         final Revision revision = revisionRepository.read(revisionId)
                 .orElseThrow(NotFoundException::new)
                 .withTypeUpdate();
@@ -47,7 +47,7 @@ class ReadDimensionRevision {
         return new PageRevision<>(revision, page);
     }
 
-    PageResult<Revision> readRevisions(final String id, final PageQuery<Long> query) {
+    PageResult<Revision> readRevisions(final String id, final Pagination<Long> query) {
         final List<Revision> revisions = repository.findRevisions(id, query.increment());
         return query.paginate(revisions);
     }

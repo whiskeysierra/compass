@@ -9,7 +9,7 @@ import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.KeyRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.model.enums.RevisionType;
-import org.zalando.compass.library.pagination.PageQuery;
+import org.zalando.compass.library.pagination.Pagination;
 
 import java.util.List;
 import java.util.Optional;
@@ -50,7 +50,7 @@ public class KeyRevisionRepository {
                 .execute();
     }
 
-    public List<Revision> findPageRevisions(final PageQuery<Long> query) {
+    public List<Revision> findPageRevisions(final Pagination<Long> query) {
         return query.seek(db.select(REVISION.fields())
                 .from(REVISION)
                 .where(exists(selectOne()
@@ -60,7 +60,7 @@ public class KeyRevisionRepository {
                 .fetch().map(this::mapRevisionWithoutType);
     }
 
-    public List<Key> findPage(final long revisionId, final PageQuery<String> query) {
+    public List<Key> findPage(final long revisionId, final Pagination<String> query) {
         return query.seek(db.select(KEY_REVISION.fields())
                 .from(KEY_REVISION)
                 .where(KEY_REVISION.REVISION_TYPE.ne(RevisionType.DELETE))
@@ -71,7 +71,7 @@ public class KeyRevisionRepository {
                 .fetchInto(Key.class);
     }
 
-    public List<Revision> findRevisions(final String id, final PageQuery<Long> query) {
+    public List<Revision> findRevisions(final String id, final Pagination<Long> query) {
         return query.seek(db.select(REVISION.fields())
                 .select(KEY_REVISION.REVISION_TYPE)
                 .from(REVISION)

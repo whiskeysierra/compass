@@ -4,7 +4,7 @@ import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.KeyRevision;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
-import org.zalando.compass.library.pagination.PageQuery;
+import org.zalando.compass.library.pagination.Pagination;
 import org.zalando.compass.library.pagination.PageResult;
 
 import javax.annotation.Nullable;
@@ -13,15 +13,15 @@ public interface KeyService {
 
     boolean replace(Key key, @Nullable String comment);
 
-    PageResult<Key> readPage(@Nullable String term, final PageQuery<String> query);
+    PageResult<Key> readPage(@Nullable String term, final Pagination<String> query);
 
     Key read(String id);
 
-    PageResult<Revision> readPageRevisions(final PageQuery<Long> query);
+    PageResult<Revision> readPageRevisions(final Pagination<Long> query);
 
-    PageRevision<Key> readPageAt(long revision, final PageQuery<String> query);
+    PageRevision<Key> readPageAt(long revision, final Pagination<String> query);
 
-    PageResult<Revision> readRevisions(String id, final PageQuery<Long> query);
+    PageResult<Revision> readRevisions(String id, final Pagination<Long> query);
 
     KeyRevision readAt(String id, long revision);
 

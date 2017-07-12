@@ -7,7 +7,7 @@ import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionRevision;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
-import org.zalando.compass.library.pagination.PageQuery;
+import org.zalando.compass.library.pagination.Pagination;
 import org.zalando.compass.library.pagination.PageResult;
 
 import javax.annotation.Nullable;
@@ -37,31 +37,37 @@ class DefaultDimensionService implements DimensionService {
         return replace.replace(dimension, comment);
     }
 
+    @Transactional(readOnly = true)
     @Override
-    public PageResult<Dimension> readPage(@Nullable final String term, final PageQuery<String> query) {
+    public PageResult<Dimension> readPage(@Nullable final String term, final Pagination<String> query) {
         return read.readPage(term, query);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Dimension read(final String id) {
         return read.read(id);
     }
 
+    @Transactional(readOnly = true)
     @Override
-    public PageResult<Revision> readPageRevisions(final PageQuery<Long> query) {
+    public PageResult<Revision> readPageRevisions(final Pagination<Long> query) {
         return readRevision.readPageRevisions(query);
     }
 
+    @Transactional(readOnly = true)
     @Override
-    public PageRevision<Dimension> readPageAt(final long revision, final PageQuery<String> query) {
+    public PageRevision<Dimension> readPageAt(final long revision, final Pagination<String> query) {
         return readRevision.readPageAt(revision, query);
     }
 
+    @Transactional(readOnly = true)
     @Override
-    public PageResult<Revision> readRevisions(final String id, final PageQuery<Long> query) {
+    public PageResult<Revision> readRevisions(final String id, final Pagination<Long> query) {
         return readRevision.readRevisions(id, query);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public DimensionRevision readAt(final String id, final long revision) {
         return readRevision.readAt(id, revision);

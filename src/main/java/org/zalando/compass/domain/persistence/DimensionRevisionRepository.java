@@ -9,7 +9,7 @@ import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.model.enums.RevisionType;
-import org.zalando.compass.library.pagination.PageQuery;
+import org.zalando.compass.library.pagination.Pagination;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,7 +53,7 @@ public class DimensionRevisionRepository {
                 .execute();
     }
 
-    public List<Revision> findPageRevisions(final PageQuery<Long> query) {
+    public List<Revision> findPageRevisions(final Pagination<Long> query) {
         return query.seek(db.select(REVISION.fields())
                 .from(REVISION)
                 .where(exists(selectOne()
@@ -63,7 +63,7 @@ public class DimensionRevisionRepository {
                 .fetch().map(this::mapRevisionWithoutType);
     }
 
-    public List<Dimension> findPage(final long revisionId, final PageQuery<String> query) {
+    public List<Dimension> findPage(final long revisionId, final Pagination<String> query) {
         return query.seek(db.select(DIMENSION_REVISION.fields())
                 .from(DIMENSION_REVISION)
                 .where(DIMENSION_REVISION.REVISION_TYPE.ne(RevisionType.DELETE))
@@ -74,7 +74,7 @@ public class DimensionRevisionRepository {
                 .fetchInto(Dimension.class);
     }
 
-    public List<Revision> findRevisions(final String id, final PageQuery<Long> query) {
+    public List<Revision> findRevisions(final String id, final Pagination<Long> query) {
         return query.seek(db.select(REVISION.fields())
                 .select(DIMENSION_REVISION.fields())
                 .from(REVISION)

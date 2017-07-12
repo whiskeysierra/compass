@@ -8,7 +8,7 @@ import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueRevision;
-import org.zalando.compass.library.pagination.PageQuery;
+import org.zalando.compass.library.pagination.Pagination;
 import org.zalando.compass.library.pagination.PageResult;
 
 import javax.annotation.Nullable;
@@ -46,32 +46,38 @@ class DefaultValueService implements ValueService {
         return replace.replace(key, value, comment);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Value> readPage(final String key, final Map<String, JsonNode> filter) {
         return read.readAll(key, filter);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Value read(final String key, final Map<String, JsonNode> filter) {
         return read.read(key, filter);
     }
 
+    @Transactional(readOnly = true)
     @Override
-    public PageResult<Revision> readPageRevisions(final String key, final PageQuery<Long> query) {
+    public PageResult<Revision> readPageRevisions(final String key, final Pagination<Long> query) {
         return readRevision.readPageRevisions(key, query);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public PageRevision<Value> readPageAt(final String key, final Map<String, JsonNode> filter, final long revision) {
         return readRevision.readPageAt(key, filter, revision);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public PageResult<Revision> readRevisions(final String key, final Map<String, JsonNode> dimensions,
-            final PageQuery<Long> query) {
+            final Pagination<Long> query) {
         return readRevision.readRevisions(key, dimensions, query);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public ValueRevision readAt(final String key, final Map<String, JsonNode> dimensions, final long revision) {
         return readRevision.readAt(key, dimensions, revision);

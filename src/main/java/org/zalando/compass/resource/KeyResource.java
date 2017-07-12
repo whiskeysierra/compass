@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.KeyService;
 import org.zalando.compass.domain.model.Key;
-import org.zalando.compass.library.pagination.PageQuery;
+import org.zalando.compass.library.pagination.Pagination;
 import org.zalando.compass.library.pagination.PageResult;
 
 import javax.annotation.Nullable;
@@ -88,7 +88,7 @@ class KeyResource implements Reserved {
             @Nullable @RequestParam(value = "_after", required = false) final String after,
             @Nullable @RequestParam(value = "_before", required = false) final String before) {
 
-        final PageQuery<String> query = PageQuery.create(after, before, limit);
+        final Pagination<String> query = Pagination.create(after, before, limit);
         final PageResult<Key> page = service.readPage(q, query);
 
         final List<KeyRepresentation> representations = page.getElements().stream()
