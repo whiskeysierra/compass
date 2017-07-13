@@ -46,7 +46,7 @@ class ReadValueRevision {
                 .orElseThrow(NotFoundException::new)
                 .withTypeUpdate();
 
-        final List<Value> values = repository.findPage(key, revisionId, true)
+        final List<Value> values = repository.findPage(key, revisionId)
                 .stream().map(ValueRevision::toValue).collect(toList());
 
         if (filter.isEmpty()) {
@@ -64,7 +64,7 @@ class ReadValueRevision {
     }
 
     public ValueRevision readAt(final String key, final Map<String, JsonNode> dimensions, final long revision) {
-        final List<ValueRevision> values = repository.findPage(key, revision, false);
+        final List<ValueRevision> values = repository.findValueRevisions(key, revision);
         final List<ValueRevision> matched = selector.select(values, dimensions);
 
         return matched.stream()

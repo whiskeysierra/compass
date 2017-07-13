@@ -24,6 +24,7 @@ import java.util.Map;
 
 import static java.time.ZoneOffset.UTC;
 import static java.util.stream.Collectors.toList;
+import static org.jooq.impl.DSL.and;
 import static org.jooq.impl.DSL.exists;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.max;
@@ -97,8 +98,15 @@ public class ValueRevisionRepository {
                 .fetch(this::mapRevisionWithoutType);
     }
 
-    // TODO replace boolean parameter with something nicer
-    public List<ValueRevision> findPage(final String key, final long revisionId, final boolean excludeDeleted) {
+    public List<ValueRevision> findPage(final String key, final long revisionId) {
+        return find(key, revisionId, VALUE_REVISION.REVISION_TYPE.ne(RevisionType.DELETE));
+    }
+
+    public List<ValueRevision> findValueRevisions(final String key, final long revisionId) {
+        return find(key, revisionId, trueCondition());
+    }
+
+    private List<ValueRevision> find(final String key, final long revisionId, final Condition condition) {
         final Map<Record, List<ValueDimensionRevisionRecord>> map = db
                 .select(VALUE_REVISION.fields())
                 .select(REVISION.fields())
@@ -110,7 +118,7 @@ public class ValueRevisionRepository {
                 .and(VALUE_DIMENSION_REVISION.VALUE_REVISION.eq(VALUE_REVISION.REVISION))
                 .where(VALUE_REVISION.KEY_ID.eq(key))
                 .and(VALUE_REVISION.REVISION.le(revisionId))
-                .and(excludeDeleted ? VALUE_REVISION.REVISION_TYPE.ne(RevisionType.DELETE) : trueCondition())
+                .and(condition)
                 .and(VALUE_REVISION.REVISION.eq(select(max(VALUE_REVISION_SELF.REVISION))
                         .from(VALUE_REVISION_SELF)
                         .where(VALUE_REVISION_SELF.KEY_ID.eq(VALUE_REVISION.KEY_ID))

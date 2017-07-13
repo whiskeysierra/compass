@@ -7,9 +7,7 @@ import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Revision;
 
 import javax.annotation.Nullable;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.Optional;
 
 import static java.time.ZoneOffset.UTC;
@@ -28,14 +26,9 @@ public class RevisionRepository {
     public long create(final OffsetDateTime timestamp, final String user, @Nullable final String comment) {
         return db.insertInto(REVISION)
                 .columns(REVISION.TIMESTAMP, REVISION.USER, REVISION.COMMENT)
-                .values(toUTC(timestamp), user, comment)
+                .values(timestamp.toLocalDateTime(), user, comment)
                 .returning(REVISION.ID)
                 .fetchOne().getId();
-    }
-
-    // TODO why do we need this? The clock should be UTC already...
-    private LocalDateTime toUTC(final OffsetDateTime timestamp) {
-        return timestamp.atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
     }
 
     public Optional<Revision> read(final long id) {
