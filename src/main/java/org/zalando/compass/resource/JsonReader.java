@@ -8,6 +8,7 @@ import org.zalando.compass.library.JsonSchemaValidator;
 import org.zalando.problem.spring.web.advice.validation.ConstraintViolationProblem;
 import org.zalando.problem.spring.web.advice.validation.Violation;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 
@@ -33,7 +34,7 @@ class JsonReader {
     }
 
     // TODO should this be in Querying?!
-    public <T> T read(final String name, final String value, final Class<T> type) throws IOException {
+    public <T> T read(final String name, @Nullable final String value, final Class<T> type) throws IOException {
         final JsonNode node = mapper.readTree(value);
 
         validate(name, node, translate(name));

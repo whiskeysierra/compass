@@ -6,6 +6,7 @@ import org.jooq.Sequence;
 import org.jooq.Table;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.zalando.tracer.aspectj.Traced;
 
 import static org.zalando.compass.domain.persistence.model.Sequences.REVISION_ID_SEQ;
@@ -30,6 +31,7 @@ public class Reset {
         this.db = db;
     }
 
+    @Transactional
     @Traced
     @Before
     public void begin() {

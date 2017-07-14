@@ -38,7 +38,7 @@ Feature: /keys/{id}/values/revision/{revision}
       | "CH"                | 0.08   |
       | "FR"                | 0.2    |
 
-  Scenario: Read revisions with filter
+  Scenario: Read revision with filter
     Given "PUT /keys/tax-rate/values" responds "201 Created" when requested with an array at "/values":
       | /dimensions/country | /value |
       | "AT"                | 0.2    |

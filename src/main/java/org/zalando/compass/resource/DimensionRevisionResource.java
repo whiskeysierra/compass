@@ -39,7 +39,6 @@ class DimensionRevisionResource {
 
     @RequestMapping(method = GET, path = "/revisions")
     public ResponseEntity<RevisionCollectionRepresentation> getRevisions(
-            // TODO share "25" a default limit constant somewhere
             @RequestParam(required = false, defaultValue = "25") final String limit,
             @Nullable @RequestParam(value = "_after", required = false) final Long after,
             @Nullable @RequestParam(value = "_before", required = false) final Long before) throws IOException {
@@ -51,12 +50,12 @@ class DimensionRevisionResource {
         return paginate(page,
                 rev -> link(methodOn(DimensionRevisionResource.class).getRevisions(limit, rev.getId(), null)),
                 rev -> link(methodOn(DimensionRevisionResource.class).getRevisions(limit, null, rev.getId())),
-                rev -> link(methodOn(DimensionRevisionResource.class).getRevision(rev.getId(), "25", null, null)));
+                rev -> link(methodOn(DimensionRevisionResource.class).getRevision(rev.getId(), null, null, null)));
     }
 
     @RequestMapping(method = GET, path = "/revisions/{revision}")
     public ResponseEntity<DimensionCollectionRevisionRepresentation> getRevision(@PathVariable final long revision,
-            @RequestParam(required = false, defaultValue = "25") final String limit,
+            @Nullable@RequestParam(required = false, defaultValue = "25") final String limit,
             @Nullable @RequestParam(value = "_after", required = false) final String after,
             @Nullable @RequestParam(value = "_before", required = false) final String before) throws IOException {
 

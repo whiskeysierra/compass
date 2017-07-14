@@ -24,7 +24,6 @@ import java.util.Map;
 
 import static java.time.ZoneOffset.UTC;
 import static java.util.stream.Collectors.toList;
-import static org.jooq.impl.DSL.and;
 import static org.jooq.impl.DSL.exists;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.max;
@@ -106,6 +105,7 @@ public class ValueRevisionRepository {
         return find(key, revisionId, trueCondition());
     }
 
+    // TODO broken for list use case
     private List<ValueRevision> find(final String key, final long revisionId, final Condition condition) {
         final Map<Record, List<ValueDimensionRevisionRecord>> map = db
                 .select(VALUE_REVISION.fields())
@@ -130,8 +130,8 @@ public class ValueRevisionRepository {
                                 .and(LEFT.DIMENSION_VALUE.eq(RIGHT.DIMENSION_VALUE))
                                 .where(LEFT.VALUE_ID.eq(VALUE_REVISION.ID))
                                 .and(LEFT.VALUE_REVISION.eq(VALUE_REVISION.REVISION))
-                                .and(LEFT.DIMENSION_ID.isNull())
-                                .or(RIGHT.DIMENSION_ID.isNull())))))
+                                .and((LEFT.DIMENSION_ID.isNull())
+                                        .or(RIGHT.DIMENSION_ID.isNull()))))))
                 .orderBy(VALUE_REVISION.INDEX)
                 .fetchGroups(
                         ObjectArrays.concat(VALUE_REVISION.fields(), REVISION.fields(), Field.class),

@@ -13,12 +13,15 @@ spring:
     password: postgres
     tomcat:
       default-auto-commit: false
-      default-transaction-isolation: 2 # TRANSACTION_READ_COMMITTED
+      test-on-borrow: false
+      # TRANSACTION_READ_COMMITTED
+      default-transaction-isolation: 2
   jooq:
     sql-dialect: postgres
 
-flyway.schemas:
-  - compass
+flyway:
+  schemas:
+    - compass
 
 server:
   compression:

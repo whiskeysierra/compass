@@ -50,12 +50,12 @@ class KeyRevisionResource {
         return paginate(page,
                 rev -> link(methodOn(KeyRevisionResource.class).getRevisions(limit, rev.getId(), null)),
                 rev -> link(methodOn(KeyRevisionResource.class).getRevisions(limit, null, rev.getId())),
-                rev -> link(methodOn(KeyRevisionResource.class).getRevision(rev.getId(), "25", null, null)));
+                rev -> link(methodOn(KeyRevisionResource.class).getRevision(rev.getId(), null, null, null)));
     }
 
     @RequestMapping(method = GET, path = "/revisions/{revision}")
     public ResponseEntity<KeyCollectionRevisionRepresentation> getRevision(@PathVariable final long revision,
-            @RequestParam(required = false, defaultValue = "25") final String limit,
+            @Nullable @RequestParam(required = false, defaultValue = "25") final String limit,
             @Nullable @RequestParam(value = "_after", required = false) final String after,
             @Nullable @RequestParam(value = "_before", required = false) final String before) throws IOException {
 
