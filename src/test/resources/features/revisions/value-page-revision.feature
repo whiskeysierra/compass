@@ -19,11 +19,15 @@ Feature: /keys/{id}/values/revision/{revision}
       | /value |
       | 0.19   |
     And "DELETE /keys/tax-rate/value?country=DE" responds "204 No Content"
-    And "PUT /keys/tax-rate/values" responds "201 Created" when requested with an array at "/values":
-      | /dimensions/country | /value |
-      | "AT"                | 0.2    |
-      | "CH"                | 0.08   |
-      | "FR"                | 0.2    |
+    And "PUT /keys/tax-rate/value?country=AT" responds "201 Created" when requested with:
+      | /value |
+      | 0.2    |
+    And "PUT /keys/tax-rate/value?country=CH" responds "201 Created" when requested with:
+      | /value |
+      | 0.08   |
+    And "PUT /keys/tax-rate/value?country=FR" responds "201 Created" when requested with:
+      | /value |
+      | 0.2    |
     Then "GET /keys/tax-rate/values/revisions/4" responds "200 OK" with an array at "/values":
       | /dimensions/country | /value |
       | "DE"                | 0.16   |
@@ -33,6 +37,13 @@ Feature: /keys/{id}/values/revision/{revision}
     And "GET /keys/tax-rate/values/revisions/6" responds "200 OK" with an array at "/values":
       | /dimensions/country | /value |
     And "GET /keys/tax-rate/values/revisions/7" responds "200 OK" with an array at "/values":
+      | /dimensions/country | /value |
+      | "AT"                | 0.2    |
+    And "GET /keys/tax-rate/values/revisions/8" responds "200 OK" with an array at "/values":
+      | /dimensions/country | /value |
+      | "AT"                | 0.2    |
+      | "CH"                | 0.08   |
+    And "GET /keys/tax-rate/values/revisions/9" responds "200 OK" with an array at "/values":
       | /dimensions/country | /value |
       | "AT"                | 0.2    |
       | "CH"                | 0.08   |

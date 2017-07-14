@@ -41,7 +41,7 @@ import static org.zalando.compass.library.Tables.table;
 @Repository
 public class ValueRevisionRepository {
 
-    private static final org.zalando.compass.domain.persistence.model.tables.ValueRevision VALUE_REVISION_SELF =
+    private static final org.zalando.compass.domain.persistence.model.tables.ValueRevision SELF =
             VALUE_REVISION.as("self");
 
     private static final ValueDimensionRevision LEFT = VALUE_DIMENSION_REVISION.as("left");
@@ -105,7 +105,6 @@ public class ValueRevisionRepository {
         return find(key, revisionId, trueCondition());
     }
 
-    // TODO broken for list use case
     private List<ValueRevision> find(final String key, final long revisionId, final Condition condition) {
         final Map<Record, List<ValueDimensionRevisionRecord>> map = db
                 .select(VALUE_REVISION.fields())
@@ -117,12 +116,12 @@ public class ValueRevisionRepository {
                 .on(VALUE_DIMENSION_REVISION.VALUE_ID.eq(VALUE_REVISION.ID))
                 .and(VALUE_DIMENSION_REVISION.VALUE_REVISION.eq(VALUE_REVISION.REVISION))
                 .where(VALUE_REVISION.KEY_ID.eq(key))
-                .and(VALUE_REVISION.REVISION.le(revisionId))
                 .and(condition)
-                .and(VALUE_REVISION.REVISION.eq(select(max(VALUE_REVISION_SELF.REVISION))
-                        .from(VALUE_REVISION_SELF)
-                        .where(VALUE_REVISION_SELF.KEY_ID.eq(VALUE_REVISION.KEY_ID))
-                        .and(VALUE_REVISION_SELF.REVISION.le(revisionId))
+                .and(VALUE_REVISION.REVISION.eq(select(max(SELF.REVISION))
+                        .from(SELF)
+                        .where(SELF.KEY_ID.eq(VALUE_REVISION.KEY_ID))
+                        .and(SELF.INDEX.eq(VALUE_REVISION.INDEX))
+                        .and(SELF.REVISION.le(revisionId))
                         .and(notExists(selectOne()
                                 .from(LEFT)
                                 .fullOuterJoin(RIGHT)
@@ -130,7 +129,9 @@ public class ValueRevisionRepository {
                                 .and(LEFT.DIMENSION_VALUE.eq(RIGHT.DIMENSION_VALUE))
                                 .where(LEFT.VALUE_ID.eq(VALUE_REVISION.ID))
                                 .and(LEFT.VALUE_REVISION.eq(VALUE_REVISION.REVISION))
-                                .and((LEFT.DIMENSION_ID.isNull())
+                                .and(RIGHT.VALUE_ID.eq(SELF.ID))
+                                .and(RIGHT.VALUE_REVISION.eq(SELF.REVISION))
+                                .and(LEFT.DIMENSION_ID.isNull()
                                         .or(RIGHT.DIMENSION_ID.isNull()))))))
                 .orderBy(VALUE_REVISION.INDEX)
                 .fetchGroups(
