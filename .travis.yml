@@ -12,6 +12,7 @@ cache:
   directories:
     - $HOME/.m2
 
+install: pip3 install -U scm-source
 script: ./mvnw clean verify
 
 after_success:
