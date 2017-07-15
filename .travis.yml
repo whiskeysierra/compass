@@ -13,6 +13,10 @@ cache:
     - $HOME/.m2
 
 install: pip3 install -U scm-source
+
+before_script:
+  - sudo /etc/init.d/postgresql stop
+
 script: ./mvnw clean verify
 
 after_success:
