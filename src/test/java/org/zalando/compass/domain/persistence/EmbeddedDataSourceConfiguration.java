@@ -12,7 +12,7 @@ import java.io.IOException;
 @AutoConfigureBefore(DataSourceAutoConfiguration.class)
 public class EmbeddedDataSourceConfiguration {
 
-    @Bean(destroyMethod = "close")
+    // TODO remove @Bean(destroyMethod = "close")
     public EmbeddedPostgres embeddedPostgres() throws IOException {
         // 5432 is used by postgres 9.1 on travis
         return EmbeddedPostgres.builder().setPort(5433).start();
