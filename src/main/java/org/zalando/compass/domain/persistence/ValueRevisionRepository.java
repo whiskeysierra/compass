@@ -14,7 +14,6 @@ import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.ValueRevision;
 import org.zalando.compass.domain.persistence.model.enums.RevisionType;
-import org.zalando.compass.domain.persistence.model.tables.ValueDimensionRevision;
 import org.zalando.compass.domain.persistence.model.tables.records.ValueDimensionRevisionRecord;
 import org.zalando.compass.domain.persistence.model.tables.records.ValueRevisionRecord;
 import org.zalando.compass.library.pagination.Pagination;
@@ -24,9 +23,11 @@ import java.util.Map;
 
 import static java.time.ZoneOffset.UTC;
 import static java.util.stream.Collectors.toList;
+import static org.jooq.impl.DSL.arrayAgg;
 import static org.jooq.impl.DSL.exists;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.max;
+import static org.jooq.impl.DSL.name;
 import static org.jooq.impl.DSL.notExists;
 import static org.jooq.impl.DSL.select;
 import static org.jooq.impl.DSL.selectOne;
@@ -43,9 +44,6 @@ public class ValueRevisionRepository {
 
     private static final org.zalando.compass.domain.persistence.model.tables.ValueRevision SELF =
             VALUE_REVISION.as("self");
-
-    private static final ValueDimensionRevision LEFT = VALUE_DIMENSION_REVISION.as("left");
-    private static final ValueDimensionRevision RIGHT = VALUE_DIMENSION_REVISION.as("right");
 
     private final DSLContext db;
 
@@ -120,19 +118,8 @@ public class ValueRevisionRepository {
                 .and(VALUE_REVISION.REVISION.eq(select(max(SELF.REVISION))
                         .from(SELF)
                         .where(SELF.KEY_ID.eq(VALUE_REVISION.KEY_ID))
-                        .and(SELF.INDEX.eq(VALUE_REVISION.INDEX))
                         .and(SELF.REVISION.le(revisionId))
-                        .and(notExists(selectOne()
-                                .from(LEFT)
-                                .fullOuterJoin(RIGHT)
-                                .on(LEFT.DIMENSION_ID.eq(RIGHT.DIMENSION_ID))
-                                .and(LEFT.DIMENSION_VALUE.eq(RIGHT.DIMENSION_VALUE))
-                                .where(LEFT.VALUE_ID.eq(VALUE_REVISION.ID))
-                                .and(LEFT.VALUE_REVISION.eq(VALUE_REVISION.REVISION))
-                                .and(RIGHT.VALUE_ID.eq(SELF.ID))
-                                .and(RIGHT.VALUE_REVISION.eq(SELF.REVISION))
-                                .and(LEFT.DIMENSION_ID.isNull()
-                                        .or(RIGHT.DIMENSION_ID.isNull()))))))
+                        .and(dimensionsOf(SELF).isNotDistinctFrom(dimensionsOf(VALUE_REVISION)))))
                 .orderBy(VALUE_REVISION.INDEX)
                 .fetchGroups(
                         ObjectArrays.concat(VALUE_REVISION.fields(), REVISION.fields(), Field.class),
@@ -155,6 +142,14 @@ public class ValueRevisionRepository {
                             value.getValue());
                 })
                 .collect(toList());
+    }
+
+    private <T> Field<T> dimensionsOf(final org.zalando.compass.domain.persistence.model.tables.ValueRevision ref) {
+        return select(arrayAgg(field(name("t"))))
+                .from(select(VALUE_DIMENSION_REVISION.DIMENSION_ID, VALUE_DIMENSION_REVISION.DIMENSION_VALUE)
+                        .from(VALUE_DIMENSION_REVISION)
+                        .where(VALUE_DIMENSION_REVISION.VALUE_ID.eq(ref.ID))
+                        .and(VALUE_DIMENSION_REVISION.VALUE_REVISION.eq(ref.REVISION)).asTable("t")).asField();
     }
 
     public List<Revision> findRevisions(final String key, final Map<String, JsonNode> dimensions,

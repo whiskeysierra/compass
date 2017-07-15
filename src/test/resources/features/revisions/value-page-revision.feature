@@ -28,6 +28,9 @@ Feature: /keys/{id}/values/revision/{revision}
     And "PUT /keys/tax-rate/value?country=FR" responds "201 Created" when requested with:
       | /value |
       | 0.2    |
+    And "PATCH /keys/tax-rate/values" responds "200 OK" when requested with an array as "application/json-patch+json":
+      | /op    | /from       | /path       |
+      | "move" | "/values/2" | "/values/0" |
     Then "GET /keys/tax-rate/values/revisions/4" responds "200 OK" with an array at "/values":
       | /dimensions/country | /value |
       | "DE"                | 0.16   |
@@ -48,6 +51,11 @@ Feature: /keys/{id}/values/revision/{revision}
       | "AT"                | 0.2    |
       | "CH"                | 0.08   |
       | "FR"                | 0.2    |
+    And "GET /keys/tax-rate/values/revisions/10" responds "200 OK" with an array at "/values":
+      | /dimensions/country | /value |
+      | "FR"                | 0.2    |
+      | "AT"                | 0.2    |
+      | "CH"                | 0.08   |
 
   Scenario: Read revision with filter
     Given "PUT /keys/tax-rate/values" responds "201 Created" when requested with an array at "/values":

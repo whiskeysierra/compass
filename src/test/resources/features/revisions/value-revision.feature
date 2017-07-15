@@ -11,7 +11,15 @@ Feature: /keys/{id}/value/revision/{revision}
       | /schema/type | /description |
       | "boolean"    | ".."         |
 
-  Scenario: Read revision
+  Scenario: Read revision without dimensions
+    When "PUT /keys/tax-rate/value" and "Comment: Created DE tax rate" responds "201 Created" when requested with:
+      | /value |
+      | 0.19   |
+    Then "GET /keys/tax-rate/value/revisions/4" responds "200 OK" with:
+      | /revision/id | /revision/timestamp    | /revision/type | /revision/user | /revision/comment     | /value |
+      | 4            | "2017-07-07T22:09:21Z" | "create"       | "anonymous"    | "Created DE tax rate" | 0.19   |
+
+  Scenario: Read revision with dimensions
     When "PUT /keys/tax-rate/value?country=DE" and "Comment: Created DE tax rate" responds "201 Created" when requested with:
       | /value |
       | 0.16   |
