@@ -5,5 +5,4 @@ trap "docker stop ${DB}" EXIT INT TERM
 
 until curl -s "http://localhost:5432/" || [ $? -eq 52 ]; do sleep 1; done;
 
-# TODO without clean
-mvn clean spring-boot:run -D skipTests
+mvn spring-boot:run -D skipTests
