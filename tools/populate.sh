@@ -14,6 +14,13 @@ jq '{value:0.08}' | http PUT :8080/keys/tax-rate/value country==CH
 jq '{value:0.19}' | http PUT :8080/keys/tax-rate/value country==DE
 jq '{value:0.2}' | http PUT :8080/keys/tax-rate/value country==FR
 
+jq '{values:[
+  {dimensions:{country:"DE"},value:0.19},
+  {dimensions:{country:"AT"},value:0.2},
+  {dimensions:{country:"CH"},value:0.08},
+  {dimensions:{country:"FR"},value:0.2}
+]}' | http PUT :8080/keys/tax-rate/values
+
 jq '{schema:{type:"integer",format:"int64"},description:".."}' | http PUT :8080/keys/population
 
 jq '{values:[

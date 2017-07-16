@@ -16,6 +16,10 @@ spring:
       test-on-borrow: false
       # TRANSACTION_READ_COMMITTED
       default-transaction-isolation: 2
+
+      # https://stackoverflow.com/questions/23850585/how-to-start-spring-boot-app-without-depending-on-database
+      initial-size: 0
+      min-idle: 0
   jooq:
     sql-dialect: postgres
 

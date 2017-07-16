@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
-    url: jdbc:tc:postgresql:9.6://localhost:5433/postgres?currentSchema=compass
+    url: jdbc:tc:postgresql:9.6://localhost/postgres?currentSchema=compass
 
 rest.clients:
   local:
