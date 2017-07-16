@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.zalando.twintip.spring.SchemaResource;
 
@@ -20,6 +21,11 @@ class WebConfiguration extends WebMvcConfigurerAdapter {
     @Override
     public void configurePathMatch(final PathMatchConfigurer configurer) {
         configurer.setUseSuffixPatternMatch(false);
+    }
+
+    @Override
+    public void addResourceHandlers(final ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/api/*").addResourceLocations("classpath:/api/");
     }
 
     @Bean
