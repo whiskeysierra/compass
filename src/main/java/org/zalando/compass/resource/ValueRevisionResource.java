@@ -11,6 +11,7 @@ import org.zalando.compass.domain.logic.ValueService;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
+import org.zalando.compass.domain.model.ValueRevision;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
 
@@ -102,7 +103,18 @@ class ValueRevisionResource {
     public ResponseEntity<ValueRevisionRepresentation> getRevision(@PathVariable final String key, @PathVariable final long revision,
             @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = querying.read(query);
-        return ResponseEntity.ok(ValueRevisionRepresentation.valueOf(service.readAt(key, filter, revision)));
+        final ValueRevision value = service.readAt(key, filter, revision);
+        final Revision rev = value.getRevision();
+        return ResponseEntity.ok(new ValueRevisionRepresentation(value.getDimensions(),
+                new RevisionRepresentation(
+                        rev.getId(),
+                        rev.getTimestamp(),
+                        null,
+                        rev.getType(),
+                        rev.getUser(),
+                        rev.getComment()
+                ),
+                value.getValue()));
     }
 
 }

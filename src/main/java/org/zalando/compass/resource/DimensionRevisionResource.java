@@ -92,7 +92,6 @@ class DimensionRevisionResource {
         final PageResult<Revision> page = service.readRevisions(id, query);
 
         return paginate(page,
-                // TODO should omit if limit is default value
                 rev -> link(methodOn(DimensionRevisionResource.class).getRevisions(id, limit, rev.getId(), null)),
                 rev -> link(methodOn(DimensionRevisionResource.class).getRevisions(id, limit, null, rev.getId())),
                 rev -> link(methodOn(DimensionRevisionResource.class).getRevision(id, rev.getId())));
@@ -108,7 +107,7 @@ class DimensionRevisionResource {
                 new RevisionRepresentation(
                         rev.getId(),
                         rev.getTimestamp(),
-                        link(methodOn(DimensionRevisionResource.class).getRevision(id, rev.getId())),
+                        null,
                         rev.getType(),
                         rev.getUser(),
                         rev.getComment()

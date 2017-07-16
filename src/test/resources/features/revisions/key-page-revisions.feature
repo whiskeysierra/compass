@@ -17,16 +17,16 @@ Feature: /keys/revisions
 
   Scenario: Read revisions
     Then "GET /keys/revisions" responds "200 OK" with an array at "/revisions":
-      | /id | /timestamp             | /type    | /user       | /comment        |
-      | 5   | "2017-07-07T22:09:21Z" | "update" | "anonymous" |                 |
-      | 4   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | "Recreated key" |
-      | 3   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | "Deleted key"   |
-      | 2   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | "Updated key"   |
-      | 1   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | "Created key"   |
+      | /id | /timestamp             | /href                                    | /type    | /user       | /comment        |
+      | 5   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/revisions/5" | "update" | "anonymous" |                 |
+      | 4   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/revisions/4" | "update" | "anonymous" | "Recreated key" |
+      | 3   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/revisions/3" | "update" | "anonymous" | "Deleted key"   |
+      | 2   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/revisions/2" | "update" | "anonymous" | "Updated key"   |
+      | 1   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/revisions/1" | "update" | "anonymous" | "Created key"   |
 
   Scenario: Read revisions should support limit
     Then "GET /keys/revisions?limit=3" responds "200 OK" with an array at "/revisions":
-      | /id | /timestamp             | /type    | /user       | /comment        |
-      | 5   | "2017-07-07T22:09:21Z" | "update" | "anonymous" |                 |
-      | 4   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | "Recreated key" |
-      | 3   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | "Deleted key"   |
+      | /id | /timestamp             | /href                                    | /type    | /user       | /comment        |
+      | 5   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/revisions/5" | "update" | "anonymous" |                 |
+      | 4   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/revisions/4" | "update" | "anonymous" | "Recreated key" |
+      | 3   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/revisions/3" | "update" | "anonymous" | "Deleted key"   |

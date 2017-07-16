@@ -92,7 +92,6 @@ class KeyRevisionResource {
         final PageResult<Revision> page = service.readRevisions(id, query);
 
         return paginate(page,
-                // TODO should omit if limit is default value
                 rev -> link(methodOn(KeyRevisionResource.class).getRevisions(id, limit, rev.getId(), null)),
                 rev -> link(methodOn(KeyRevisionResource.class).getRevisions(id, limit, null, rev.getId())),
                 rev -> link(methodOn(KeyRevisionResource.class).getRevision(id, rev.getId())));
@@ -108,7 +107,7 @@ class KeyRevisionResource {
                 new RevisionRepresentation(
                         rev.getId(),
                         rev.getTimestamp(),
-                        link(methodOn(KeyRevisionResource.class).getRevision(id, rev.getId())),
+                        null,
                         rev.getType(),
                         rev.getUser(),
                         rev.getComment()

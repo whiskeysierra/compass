@@ -7,7 +7,6 @@ import java.net.URI;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
-// TODO LinkService?!
 @VisibleForTesting
 public class Linking {
 

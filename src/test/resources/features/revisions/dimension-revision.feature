@@ -11,11 +11,11 @@ Feature: /dimensions/{id}/revision/{revision}
 
   Scenario: Read revision
     Then "GET /dimensions/device/revisions/1" responds "200 OK" with:
-      | /id      | /revision/id | /revision/timestamp    | /revision/type | /revision/user | /revision/comment   | /schema/type | /relation | /description |
-      | "device" | 1            | "2017-07-07T22:09:21Z" | "create"       | "anonymous"    | "Created dimension" | "string"     | "="       | ".."         |
+      | /id      | /revision/id | /revision/timestamp    | /revision/href | /revision/type | /revision/user | /revision/comment   | /schema/type | /relation | /description |
+      | "device" | 1            | "2017-07-07T22:09:21Z" |                | "create"       | "anonymous"    | "Created dimension" | "string"     | "="       | ".."         |
     And "GET /dimensions/device/revisions/2" responds "200 OK" with:
-      | /id      | /revision/id | /revision/timestamp    | /revision/type | /revision/user | /revision/comment   | /schema/type | /relation | /description               |
-      | "device" | 2            | "2017-07-07T22:09:21Z" | "update"       | "anonymous"    | "Updated dimension" | "string"     | "~"       | "Client Device Identifier" |
+      | /id      | /revision/id | /revision/timestamp    | /revision/href | /revision/type | /revision/user | /revision/comment   | /schema/type | /relation | /description               |
+      | "device" | 2            | "2017-07-07T22:09:21Z" |                | "update"       | "anonymous"    | "Updated dimension" | "string"     | "~"       | "Client Device Identifier" |
     And "GET /dimensions/device/revisions/3" responds "200 OK" with:
-      | /id      | /revision/id | /revision/timestamp    | /revision/type | /revision/user | /revision/comment   | /schema/type | /relation | /description               |
-      | "device" | 3            | "2017-07-07T22:09:21Z" | "delete"       | "anonymous"    | "Deleted dimension" | "string"     | "~"       | "Client Device Identifier" |
+      | /id      | /revision/id | /revision/timestamp    | /revision/href | /revision/type | /revision/user | /revision/comment   | /schema/type | /relation | /description               |
+      | "device" | 3            | "2017-07-07T22:09:21Z" |                | "delete"       | "anonymous"    | "Deleted dimension" | "string"     | "~"       | "Client Device Identifier" |

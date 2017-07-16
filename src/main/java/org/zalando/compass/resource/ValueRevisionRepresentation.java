@@ -21,18 +21,4 @@ final class ValueRevisionRepresentation {
     RevisionRepresentation revision;
     JsonNode value;
 
-    static ValueRevisionRepresentation valueOf(final ValueRevision value) {
-        final Revision revision = value.getRevision();
-        return new ValueRevisionRepresentation(value.getDimensions(),
-                new RevisionRepresentation(
-                        revision.getId(),
-                        revision.getTimestamp(),
-                        null,
-                        revision.getType(),
-                        revision.getUser(),
-                        revision.getComment()
-                ),
-                value.getValue());
-    }
-
 }

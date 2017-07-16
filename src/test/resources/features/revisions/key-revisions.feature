@@ -17,15 +17,15 @@ Feature: /keys/{id}/revisions
 
   Scenario: Read revisions
     Then "GET /keys/device/revisions" responds "200 OK" with an array at "/revisions":
-      | /id | /timestamp             | /type    | /user       | /comment        |
-      | 5   | "2017-07-07T22:09:21Z" | "update" | "anonymous" |                 |
-      | 4   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | "Recreated key" |
-      | 3   | "2017-07-07T22:09:21Z" | "delete" | "anonymous" | "Deleted key"   |
-      | 2   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | "Updated key"   |
-      | 1   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | "Created key"   |
+      | /id | /timestamp             | /href                                           | /type    | /user       | /comment        |
+      | 5   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/device/revisions/5" | "update" | "anonymous" |                 |
+      | 4   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/device/revisions/4" | "create" | "anonymous" | "Recreated key" |
+      | 3   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/device/revisions/3" | "delete" | "anonymous" | "Deleted key"   |
+      | 2   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/device/revisions/2" | "update" | "anonymous" | "Updated key"   |
+      | 1   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/device/revisions/1" | "create" | "anonymous" | "Created key"   |
 
   Scenario: Read revisions should support limit
     Then "GET /keys/device/revisions?limit=2" responds "200 OK" with an array at "/revisions":
-      | /id | /timestamp             | /type    | /user       | /comment        |
-      | 5   | "2017-07-07T22:09:21Z" | "update" | "anonymous" |                 |
-      | 4   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | "Recreated key" |
+      | /id | /timestamp             | /href                                           | /type    | /user       | /comment        |
+      | 5   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/device/revisions/5" | "update" | "anonymous" |                 |
+      | 4   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/device/revisions/4" | "create" | "anonymous" | "Recreated key" |

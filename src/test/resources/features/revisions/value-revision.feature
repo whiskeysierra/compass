@@ -16,8 +16,8 @@ Feature: /keys/{id}/value/revision/{revision}
       | /value |
       | 0.19   |
     Then "GET /keys/tax-rate/value/revisions/4" responds "200 OK" with:
-      | /revision/id | /revision/timestamp    | /revision/type | /revision/user | /revision/comment     | /value |
-      | 4            | "2017-07-07T22:09:21Z" | "create"       | "anonymous"    | "Created DE tax rate" | 0.19   |
+      | /revision/id | /revision/timestamp    | /revision/href | /revision/type | /revision/user | /revision/comment     | /value |
+      | 4            | "2017-07-07T22:09:21Z" |                | "create"       | "anonymous"    | "Created DE tax rate" | 0.19   |
 
   Scenario: Read revision with dimensions
     When "PUT /keys/tax-rate/value?country=DE" and "Comment: Created DE tax rate" responds "201 Created" when requested with:
@@ -33,11 +33,11 @@ Feature: /keys/{id}/value/revision/{revision}
       | "CH"                | 0.08   |
       | "FR"                | 0.2    |
     Then "GET /keys/tax-rate/value/revisions/4?country=DE" responds "200 OK" with:
-      | /dimensions/country | /revision/id | /revision/timestamp    | /revision/type | /revision/user | /revision/comment     | /value |
-      | "DE"                | 4            | "2017-07-07T22:09:21Z" | "create"       | "anonymous"    | "Created DE tax rate" | 0.16   |
+      | /dimensions/country | /revision/id | /revision/timestamp    | /revision/href | /revision/type | /revision/user | /revision/comment     | /value |
+      | "DE"                | 4            | "2017-07-07T22:09:21Z" |                | "create"       | "anonymous"    | "Created DE tax rate" | 0.16   |
     And "GET /keys/tax-rate/value/revisions/5?country=DE" responds "200 OK" with:
-      | /dimensions/country | /revision/id | /revision/timestamp    | /revision/type | /revision/user | /revision/comment   | /value |
-      | "DE"                | 5            | "2017-07-07T22:09:21Z" | "update"       | "anonymous"    | "Fixed DE tax rate" | 0.19   |
+      | /dimensions/country | /revision/id | /revision/timestamp    | /revision/href | /revision/type | /revision/user | /revision/comment   | /value |
+      | "DE"                | 5            | "2017-07-07T22:09:21Z" |                | "update"       | "anonymous"    | "Fixed DE tax rate" | 0.19   |
     And "GET /keys/tax-rate/value/revisions/6?country=DE" responds "200 OK" with:
-      | /dimensions/country | /revision/id | /revision/timestamp    | /revision/type | /revision/user | /revision/comment     | /value |
-      | "DE"                | 6            | "2017-07-07T22:09:21Z" | "delete"       | "anonymous"    | "Dropped DE tax rate" | 0.19   |
+      | /dimensions/country | /revision/id | /revision/timestamp    | /revision/href | /revision/type | /revision/user | /revision/comment     | /value |
+      | "DE"                | 6            | "2017-07-07T22:09:21Z" |                | "delete"       | "anonymous"    | "Dropped DE tax rate" | 0.19   |

@@ -31,10 +31,10 @@ Feature: /keys/{id}/value/revision
       | /value |
       | true   |
     Then "GET /keys/tax-rate/value/revisions?country=DE" responds "200 OK" with an array at "/revisions":
-      | /id | /timestamp             | /type    | /user       | /comment                             |
-      | 6   | "2017-07-07T22:09:21Z" | "delete" | "anonymous" | "Dropped DE and created FR tax rate" |
-      | 5   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | "Reordered tax rates"                |
-      | 4   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | "DACH tax rates"                     |
+      | /id | /timestamp             | /href                                                              | /type    | /user       | /comment                             |
+      | 6   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/tax-rate/value/revisions/6?country=DE" | "delete" | "anonymous" | "Dropped DE and created FR tax rate" |
+      | 5   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/tax-rate/value/revisions/5?country=DE" | "update" | "anonymous" | "Reordered tax rates"                |
+      | 4   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/tax-rate/value/revisions/4?country=DE" | "create" | "anonymous" | "DACH tax rates"                     |
 
   Scenario: Update value and read revisions
     Given "PUT /keys/tax-rate/value?country=DE" and "Comment: Added DE tax rate" responds "201 Created" when requested with:
@@ -57,12 +57,12 @@ Feature: /keys/{id}/value/revision
       | /value |
       | true   |
     Then "GET /keys/tax-rate/value/revisions?country=DE" responds "200 OK" with an array at "/revisions":
-      | /id | /timestamp             | /type    | /user       | /comment                    |
-      | 8   | "2017-07-07T22:09:21Z" | "delete" | "anonymous" | "Dropped DE tax rate again" |
-      | 7   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | "Re-added DE tax rate"      |
-      | 6   | "2017-07-07T22:09:21Z" | "delete" | "anonymous" | "Dropped DE tax rate"       |
-      | 5   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | "Fixed DE tax rate"         |
-      | 4   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | "Added DE tax rate"         |
+      | /id | /timestamp             | /href                                                              | /type    | /user       | /comment                    |
+      | 8   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/tax-rate/value/revisions/8?country=DE" | "delete" | "anonymous" | "Dropped DE tax rate again" |
+      | 7   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/tax-rate/value/revisions/7?country=DE" | "create" | "anonymous" | "Re-added DE tax rate"      |
+      | 6   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/tax-rate/value/revisions/6?country=DE" | "delete" | "anonymous" | "Dropped DE tax rate"       |
+      | 5   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/tax-rate/value/revisions/5?country=DE" | "update" | "anonymous" | "Fixed DE tax rate"         |
+      | 4   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/tax-rate/value/revisions/4?country=DE" | "create" | "anonymous" | "Added DE tax rate"         |
 
   Scenario: Read value revisions without dimensions
     When "PUT /keys/tax-rate/value" responds "201 Created" when requested with:
@@ -73,10 +73,10 @@ Feature: /keys/{id}/value/revision
       | 0.19   |
     And "DELETE /keys/tax-rate/value" responds "204 No Content"
     Then "GET /keys/tax-rate/value/revisions" responds "200 OK" with an array at "/revisions":
-      | /id | /timestamp             | /type    | /user       | /comment |
-      | 6   | "2017-07-07T22:09:21Z" | "delete" | "anonymous" |          |
-      | 5   | "2017-07-07T22:09:21Z" | "update" | "anonymous" |          |
-      | 4   | "2017-07-07T22:09:21Z" | "create" | "anonymous" |          |
+      | /id | /timestamp             | /href                                                   | /type    | /user       | /comment |
+      | 6   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/tax-rate/value/revisions/6" | "delete" | "anonymous" |          |
+      | 5   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/tax-rate/value/revisions/5" | "update" | "anonymous" |          |
+      | 4   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/tax-rate/value/revisions/4" | "create" | "anonymous" |          |
 
   Scenario: Read value revisions with dimensions
     Given "PUT /dimensions/after" responds "201 Created" when requested with:
@@ -89,8 +89,8 @@ Feature: /keys/{id}/value/revision
       | /value |
       | 0.2    |
     Then "GET /keys/tax-rate/value/revisions?country=DE&after=2007-01-01T00:00:00Z" responds "200 OK" with an array at "/revisions":
-      | /id | /timestamp             | /type    | /user       | /comment |
-      | 5   | "2017-07-07T22:09:21Z" | "create" | "anonymous" |          |
+      | /id | /timestamp             | /href                                                                                         | /type    | /user       | /comment |
+      | 5   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/tax-rate/value/revisions/5?after=2007-01-01T00:00:00Z&country=DE" | "create" | "anonymous" |          |
 
   Scenario: Read revisions of deleted value
     Given "PUT /keys/tax-rate/value?country=DE" and "Comment: Added DE tax rate" responds "201 Created" when requested with:
@@ -98,9 +98,9 @@ Feature: /keys/{id}/value/revision
       | 0.16   |
     And "DELETE /keys/tax-rate/value?country=DE" and "Comment: Dropped DE tax rate" responds "204 No Content"
     Then "GET /keys/tax-rate/value/revisions?country=DE" responds "200 OK" with an array at "/revisions":
-      | /id | /timestamp             | /type    | /user       | /comment              |
-      | 5   | "2017-07-07T22:09:21Z" | "delete" | "anonymous" | "Dropped DE tax rate" |
-      | 4   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | "Added DE tax rate"   |
+      | /id | /timestamp             | /href                                                              | /type    | /user       | /comment              |
+      | 5   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/tax-rate/value/revisions/5?country=DE" | "delete" | "anonymous" | "Dropped DE tax rate" |
+      | 4   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/tax-rate/value/revisions/4?country=DE" | "create" | "anonymous" | "Added DE tax rate"   |
 
   Scenario: Read revisions of value of deleted key
     Given "PUT /keys/tax-rate/value?country=DE" and "Comment: Added DE tax rate" responds "201 Created" when requested with:
@@ -108,6 +108,6 @@ Feature: /keys/{id}/value/revision
       | 0.16   |
     And "DELETE /keys/tax-rate" and "Comment: Dropped tax rates completely" responds "204 No Content"
     Then "GET /keys/tax-rate/value/revisions?country=DE" responds "200 OK" with an array at "/revisions":
-      | /id | /timestamp             | /type    | /user       | /comment                       |
-      | 5   | "2017-07-07T22:09:21Z" | "delete" | "anonymous" | "Dropped tax rates completely" |
-      | 4   | "2017-07-07T22:09:21Z" | "create" | "anonymous" | "Added DE tax rate"            |
+      | /id | /timestamp             | /href                                                              | /type    | /user       | /comment                       |
+      | 5   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/tax-rate/value/revisions/5?country=DE" | "delete" | "anonymous" | "Dropped tax rates completely" |
+      | 4   | "2017-07-07T22:09:21Z" | "http://localhost:8080/keys/tax-rate/value/revisions/4?country=DE" | "create" | "anonymous" | "Added DE tax rate"            |

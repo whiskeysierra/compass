@@ -32,5 +32,5 @@ Feature: /keys/revisions/{revision}
 
   Scenario: Read revision metadata
     Then "GET /keys/revisions/1" responds "200 OK" with at "/revision":
-      | /id | /timestamp             | /type    | /user       | /comment      |
-      | 1   | "2017-07-07T22:09:21Z" | "update" | "anonymous" | "Created key" |
+      | /id | /timestamp             | /href | /type    | /user       | /comment      |
+      | 1   | "2017-07-07T22:09:21Z" |       | "update" | "anonymous" | "Created key" |

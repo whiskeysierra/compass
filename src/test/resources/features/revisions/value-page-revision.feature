@@ -73,5 +73,5 @@ Feature: /keys/{id}/values/revision/{revision}
       | /value |
       | 0.16   |
     Then "GET /keys/tax-rate/values/revisions/4" responds "200 OK" with at "/revision":
-      | /id | /timestamp             | /type    | /user       | /comment |
-      | 4   | "2017-07-07T22:09:21Z" | "update" | "anonymous" |          |
+      | /id | /timestamp             | /href | /type    | /user       | /comment |
+      | 4   | "2017-07-07T22:09:21Z" |       | "update" | "anonymous" |          |
