@@ -9,8 +9,8 @@ import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.KeyRevisionRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
 import org.zalando.compass.domain.persistence.RevisionRepository;
-import org.zalando.compass.library.pagination.Pagination;
 import org.zalando.compass.library.pagination.PageResult;
+import org.zalando.compass.library.pagination.Pagination;
 
 import java.util.List;
 

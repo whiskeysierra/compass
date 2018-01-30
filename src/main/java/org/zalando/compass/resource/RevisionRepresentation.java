@@ -8,7 +8,6 @@ import org.zalando.compass.domain.persistence.model.enums.RevisionType;
 import org.zalando.compass.library.LowerCaseConverter;
 
 import java.net.URI;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 import static lombok.AccessLevel.PRIVATE;

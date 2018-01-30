@@ -5,8 +5,8 @@ import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueRevision;
-import org.zalando.compass.library.pagination.Pagination;
 import org.zalando.compass.library.pagination.PageResult;
+import org.zalando.compass.library.pagination.Pagination;
 
 import javax.annotation.Nullable;
 import java.util.List;

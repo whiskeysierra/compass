@@ -7,7 +7,6 @@ import org.zalando.compass.Application;
 import org.zalando.compass.library.FixedClockConfiguration;
 import org.zuchini.junit.ZuchiniOptions;
 import org.zuchini.spring.SpringZuchini;
-import org.zuchini.spring.SpringZuchiniConfiguration;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.DEFINED_PORT;
 
@@ -19,7 +18,6 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 )
 @SpringBootTest(webEnvironment = DEFINED_PORT, classes = {
         Application.class,
-        SpringZuchiniConfiguration.class,
         FixedClockConfiguration.class,
 })
 @ActiveProfiles("test")

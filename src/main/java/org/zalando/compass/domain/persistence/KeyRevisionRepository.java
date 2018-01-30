@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.time.ZoneOffset.UTC;
+import static java.util.Arrays.asList;
 import static org.jooq.impl.DSL.exists;
 import static org.jooq.impl.DSL.max;
 import static org.jooq.impl.DSL.select;
@@ -61,7 +62,10 @@ public class KeyRevisionRepository {
     }
 
     public List<Key> findPage(final long revisionId, final Pagination<String> query) {
-        return query.seek(db.select(KEY_REVISION.fields())
+        return query.seek(db.select(asList(
+                KEY_REVISION.ID,
+                KEY_REVISION.SCHEMA,
+                KEY_REVISION.DESCRIPTION))
                 .from(KEY_REVISION)
                 .where(KEY_REVISION.REVISION_TYPE.ne(RevisionType.DELETE))
                 .and(KEY_REVISION.REVISION.eq(select(max(SELF.REVISION))
@@ -103,7 +107,7 @@ public class KeyRevisionRepository {
     private Revision mapRevisionWithType(final Record record) {
         return new Revision(
                 record.get(REVISION.ID),
-                record.get(REVISION.TIMESTAMP).atOffset(UTC),
+                record.get(REVISION.TIMESTAMP).withOffsetSameInstant(UTC),
                 record.get(KEY_REVISION.REVISION_TYPE),
                 record.get(REVISION.USER),
                 record.get(REVISION.COMMENT)
@@ -113,7 +117,7 @@ public class KeyRevisionRepository {
     private Revision mapRevisionWithoutType(final Record record) {
         return new Revision(
                 record.get(REVISION.ID),
-                record.get(REVISION.TIMESTAMP).atOffset(UTC),
+                record.get(REVISION.TIMESTAMP).withOffsetSameInstant(UTC),
                 null,
                 record.get(REVISION.USER),
                 record.get(REVISION.COMMENT)

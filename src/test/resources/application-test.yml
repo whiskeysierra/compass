@@ -3,7 +3,7 @@ spring:
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
     url: jdbc:tc:postgresql:9.6://localhost/postgres?currentSchema=compass
 
-rest.clients:
+riptide.clients:
   local:
     base-url: http://localhost:8080
     socket-timeout: 10 minutes

@@ -5,10 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
-import lombok.experimental.Wither;
-import org.zalando.compass.domain.model.Revision;
-import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.domain.model.ValueRevision;
 
 import static lombok.AccessLevel.PRIVATE;
 

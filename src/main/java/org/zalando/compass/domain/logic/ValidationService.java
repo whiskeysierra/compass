@@ -18,7 +18,7 @@ import java.util.List;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static org.zalando.problem.Status.BAD_REQUEST;
 
 @Service
 public class ValidationService {

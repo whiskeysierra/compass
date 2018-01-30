@@ -10,8 +10,8 @@ import org.zalando.compass.domain.model.ValueRevision;
 import org.zalando.compass.domain.persistence.NotFoundException;
 import org.zalando.compass.domain.persistence.RevisionRepository;
 import org.zalando.compass.domain.persistence.ValueRevisionRepository;
-import org.zalando.compass.library.pagination.Pagination;
 import org.zalando.compass.library.pagination.PageResult;
+import org.zalando.compass.library.pagination.Pagination;
 
 import java.util.List;
 import java.util.Map;

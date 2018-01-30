@@ -26,7 +26,7 @@ public class RevisionRepository {
     public long create(final OffsetDateTime timestamp, final String user, @Nullable final String comment) {
         return db.insertInto(REVISION)
                 .columns(REVISION.TIMESTAMP, REVISION.USER, REVISION.COMMENT)
-                .values(timestamp.toLocalDateTime(), user, comment)
+                .values(timestamp, user, comment)
                 .returning(REVISION.ID)
                 .fetchOne().getId();
     }
@@ -41,7 +41,7 @@ public class RevisionRepository {
     private Revision mapRevisionWithoutType(final Record record) {
         return new Revision(
                 record.get(REVISION.ID),
-                record.get(REVISION.TIMESTAMP).atOffset(UTC),
+                record.get(REVISION.TIMESTAMP).withOffsetSameInstant(UTC),
                 null,
                 record.get(REVISION.USER),
                 record.get(REVISION.COMMENT)

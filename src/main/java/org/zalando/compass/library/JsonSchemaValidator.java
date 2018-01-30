@@ -109,7 +109,7 @@ public class JsonSchemaValidator {
         }
 
         @Override
-        public JsonSchema load(final String name) throws Exception {
+        public JsonSchema load(final String name) {
             final ObjectNode schema = definitions.deepCopy();
             final boolean isDefinition = schema.get("definitions").has(name);
             schema.put("$ref", isDefinition ? "#/definitions/" + name : "#/parameters/" + name);

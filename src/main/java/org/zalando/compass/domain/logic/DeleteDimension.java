@@ -3,8 +3,6 @@ package org.zalando.compass.domain.logic;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.zalando.compass.domain.logic.Locking;
-import org.zalando.compass.domain.logic.RevisionService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionLock;
 import org.zalando.compass.domain.model.DimensionRevision;

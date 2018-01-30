@@ -14,8 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.zalando.riptide.Http;
 import org.zalando.riptide.Requester;
-import org.zalando.riptide.Rest;
 import org.zalando.riptide.Route;
 import org.zalando.riptide.capture.Capture;
 import org.zuchini.runner.tables.Datatable;
@@ -43,7 +43,7 @@ import static org.zalando.riptide.Bindings.on;
 import static org.zalando.riptide.Navigators.contentType;
 import static org.zalando.riptide.Navigators.status;
 import static org.zalando.riptide.Route.call;
-import static org.zalando.riptide.Route.responseEntityOf;
+import static org.zalando.riptide.Types.responseEntityOf;
 import static org.zuchini.runner.tables.DatatableMatchers.matchesTable;
 
 @Component
@@ -53,19 +53,20 @@ public class HttpSteps {
     private CompletableFuture<ResponseEntity<JsonNode>> lastResponse;
 
     private final TableMapper mapper;
-    private final Rest rest;
+    private final Http http;
 
     @Autowired
-    public HttpSteps(final TableMapper mapper, final Rest rest) {
+    public HttpSteps(final TableMapper mapper,
+            @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection") final Http http) {
         this.mapper = mapper;
-        this.rest = rest;
+        this.http = http;
     }
 
     @Given("^\"([A-Z]+) ([^ ]*)\"(?: and \"([^:]+): ([^\"]+)\")? responds \"(\\d+) ([^\"]+)\"$")
     public void responds(final HttpMethod method, final String uri, @Nullable final String headerName,
-            @Nullable final String headerValue, final int statusCode, final String reasonPhrase) throws IOException {
+            @Nullable final String headerValue, final int statusCode, final String reasonPhrase) {
 
-        final Requester requester = rest.execute(method, uri);
+        final Requester requester = http.execute(method, uri);
 
         if (headerName != null && headerValue != null) {
             requester.header(headerName, headerValue);
@@ -77,7 +78,7 @@ public class HttpSteps {
 
     @Given("^\"([A-Z]+) ([^ ]*)\" responds \"(\\d+) ([^\"]+)\" with headers:$")
     public void respondsWithHeaders(final HttpMethod method, final String uri, final int statusCode,
-            final String reasonPhrase, final Datatable expected) throws IOException {
+            final String reasonPhrase, final Datatable expected) {
 
         final ResponseEntity<JsonNode> response = requestAsync(method, uri).join();
         verifyStatus(response, statusCode, reasonPhrase);
@@ -118,7 +119,7 @@ public class HttpSteps {
             final Datatable table) throws IOException {
 
         mapper.map(table).stream()
-                .map(node -> requestAsync(rest.execute(method, uriTemplate, node.at(path).asText()), node))
+                .map(node -> requestAsync(http.execute(method, uriTemplate, node.at(path).asText()), node))
                 .map(CompletableFuture::join)
                 .forEach(response -> verifyStatus(response, statusCode, reasonPhrase));
     }
@@ -136,7 +137,7 @@ public class HttpSteps {
 
         final JsonNode body = produceBody(type, path, table);
 
-        final Requester requester = rest.execute(method, uri);
+        final Requester requester = http.execute(method, uri);
 
         if (headerName != null && headerValue != null) {
             requester.header(headerName, headerValue);
@@ -194,7 +195,7 @@ public class HttpSteps {
 
     @CheckReturnValue
     private CompletableFuture<ResponseEntity<JsonNode>> requestAsync(final HttpMethod method, final String uri) {
-        return requestAsync(rest.execute(method, uri), null);
+        return requestAsync(http.execute(method, uri), null);
     }
 
     @CheckReturnValue

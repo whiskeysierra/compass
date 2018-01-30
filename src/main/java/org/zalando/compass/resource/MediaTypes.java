@@ -1,7 +1,6 @@
 package org.zalando.compass.resource;
 
 import com.google.common.annotations.VisibleForTesting;
-import org.springframework.http.MediaType;
 
 @VisibleForTesting
 public final class MediaTypes {

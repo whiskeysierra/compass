@@ -6,12 +6,9 @@ import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.fauxpas.ThrowingFunction;
 
-import java.io.IOError;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toList;
 

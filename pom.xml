@@ -20,17 +20,15 @@
 
         <start-class>org.zalando.compass.Application</start-class>
 
-        <spring-boot.version>1.5.4.RELEASE</spring-boot.version>
-        <postgres.version>42.1.1</postgres.version>
-        <problem.version>0.11.0</problem.version>
-        <riptide.version>2.3.1</riptide.version>
-        <tracer.version>0.11.2</tracer.version>
-        <!-- TODO find out why > 0.12.0 breaks -->
-        <put-it-to-rest.version>0.12.0</put-it-to-rest.version>
-        <logbook.version>1.2.5</logbook.version>
+        <spring-boot.version>1.5.9.RELEASE</spring-boot.version>
+        <postgres.version>42.2.1</postgres.version>
+        <problem.version>0.20.1</problem.version>
+        <riptide.version>2.6.0</riptide.version>
+        <tracer.version>0.13.0</tracer.version>
+        <logbook.version>1.5.3</logbook.version>
         <stups-oauth2.version>1.0.15-GH-44</stups-oauth2.version>
-        <zuchini.version>0.2.0</zuchini.version>
-        <jooq.version>3.9.3</jooq.version>
+        <zuchini.version>0.4.0</zuchini.version>
+        <jooq.version>3.10.4</jooq.version>
     </properties>
 
     <dependencyManagement>
@@ -59,12 +57,12 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>22.0</version>
+            <version>23.6-jre</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.16.16</version>
+            <version>1.16.20</version>
             <scope>provided</scope>
         </dependency>
 
@@ -114,7 +112,7 @@
         <dependency>
             <groupId>org.zalando.zmon</groupId>
             <artifactId>zmon-actuator</artifactId>
-            <version>0.9.7</version>
+            <version>0.9.8</version>
         </dependency>
         <dependency>
             <groupId>org.jolokia</groupId>
@@ -145,7 +143,7 @@
         <dependency>
             <groupId>org.zalando</groupId>
             <artifactId>faux-pas</artifactId>
-            <version>0.3.1</version>
+            <version>0.6.0</version>
         </dependency>
 
         <!-- Jackson -->
@@ -182,7 +180,7 @@
         <dependency>
             <groupId>com.networknt</groupId>
             <artifactId>json-schema-validator</artifactId>
-            <version>0.1.7</version>
+            <version>0.1.8</version>
             <exclusions>
                 <exclusion>
                     <groupId>ch.qos.cal10n</groupId>
@@ -219,7 +217,7 @@
         <dependency>
             <groupId>org.zalando</groupId>
             <artifactId>problem-spring-web</artifactId>
-            <version>0.19.0</version>
+            <version>0.22.1</version>
         </dependency>
 
         <!-- Database -->
@@ -306,20 +304,19 @@
         <dependency>
             <groupId>nl.jqno.equalsverifier</groupId>
             <artifactId>equalsverifier</artifactId>
-            <version>2.3</version>
+            <version>2.4.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <!-- see https://github.com/spring-projects/spring-boot/issues/6520, use 2.0.93-beta -->
-            <version>2.8.9</version>
+            <version>2.13.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
-            <version>1.4.1</version>
+            <version>1.6.0</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -392,8 +389,8 @@
         </dependency>
         <dependency>
             <groupId>org.zalando</groupId>
-            <artifactId>put-it-to-rest</artifactId>
-            <version>${put-it-to-rest.version}</version>
+            <artifactId>riptide-spring-boot-starter</artifactId>
+            <version>${riptide.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -523,6 +520,7 @@
                         <generate>
                             <immutablePojos>true</immutablePojos>
                             <javaTimeTypes>true</javaTimeTypes>
+                            <deprecationOnUnknownTypes>false</deprecationOnUnknownTypes>
                         </generate>
                         <strategy>
                             <matchers>

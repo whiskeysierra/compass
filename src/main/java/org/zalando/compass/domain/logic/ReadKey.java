@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.persistence.KeyRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
-import org.zalando.compass.library.pagination.Pagination;
 import org.zalando.compass.library.pagination.PageResult;
+import org.zalando.compass.library.pagination.Pagination;
 
 import javax.annotation.Nullable;
 import java.util.List;

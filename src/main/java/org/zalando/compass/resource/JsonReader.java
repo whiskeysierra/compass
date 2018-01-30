@@ -14,7 +14,7 @@ import java.util.List;
 
 import static com.google.common.base.CaseFormat.LOWER_UNDERSCORE;
 import static com.google.common.base.CaseFormat.UPPER_CAMEL;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static org.zalando.problem.Status.BAD_REQUEST;
 
 @Component
 class JsonReader {

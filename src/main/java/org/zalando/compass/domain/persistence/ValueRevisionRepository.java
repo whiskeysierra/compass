@@ -189,7 +189,7 @@ public class ValueRevisionRepository {
     private Revision mapRevisionWithType(final Record record) {
         return new Revision(
                 record.get(REVISION.ID),
-                record.get(REVISION.TIMESTAMP).atOffset(UTC),
+                record.get(REVISION.TIMESTAMP).withOffsetSameInstant(UTC),
                 record.get(VALUE_REVISION.REVISION_TYPE),
                 record.get(REVISION.USER),
                 record.get(REVISION.COMMENT)
@@ -199,7 +199,7 @@ public class ValueRevisionRepository {
     private Revision mapRevisionWithoutType(final Record record) {
         return new Revision(
                 record.get(REVISION.ID),
-                record.get(REVISION.TIMESTAMP).atOffset(UTC),
+                record.get(REVISION.TIMESTAMP).withOffsetSameInstant(UTC),
                 null,
                 record.get(REVISION.USER),
                 record.get(REVISION.COMMENT)
