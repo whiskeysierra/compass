@@ -96,6 +96,11 @@
             <artifactId>spring-boot-starter-undertow</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>5.4.2.Final</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.hateoas</groupId>
             <artifactId>spring-hateoas</artifactId>
             <version>0.23.0.RELEASE</version>
@@ -422,8 +427,6 @@
                                 <ignoredResourcePattern>.*</ignoredResourcePattern>
                             </ignoredResourcePatterns>
                             <ignoredClassPatterns>
-                                <!-- since we have to classpath shadow it... -->
-                                <ignoredClassPattern>org.hibernate.validator.internal.metadata.descriptor.ConstraintDescriptorImpl</ignoredClassPattern>
                                 <ignoredClassPattern>org.testcontainers.shaded.com.google.*$</ignoredClassPattern>
                             </ignoredClassPatterns>
                         </configuration>
@@ -589,9 +592,6 @@
 
                         <!-- contains a main method that is impossible to cover -->
                         <exclude>org/zalando/compass/Application.class</exclude>
-
-                        <!-- copied to fix HV-1184 -->
-                        <exclude>org/hibernate/validator/internal/metadata/descriptor/ConstraintDescriptorImpl*.class</exclude>
 
                         <!-- TODO cover the following-->
                         <exclude>org/zalando/compass/library/PostgresJsonbBinding*.class</exclude>
