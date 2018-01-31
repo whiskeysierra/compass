@@ -36,9 +36,9 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertThat;
 
-public final class PrimitiveJsonNodeComparatorTest {
+public final class NaturalOrderJsonComparatorTest {
 
-    private final Comparator<JsonNode> unit = new PrimitiveJsonNodeComparator();
+    private final Comparator<JsonNode> unit = NaturalOrderJsonComparator.comparingJson();
 
     @Test
     public void shouldCompareNulls() {
@@ -100,6 +100,10 @@ public final class PrimitiveJsonNodeComparatorTest {
         test(objectNode("name", textNode("charlie")), objectNode("name", textNode("bob")), greater());
         test(objectNode("age", intNode(17)), objectNode("name", textNode("alice"), "age", intNode(17)), less());
         test(objectNode("name", textNode("alice")), objectNode("name", textNode("alice"), "age", intNode(17)), greater());
+        test(objectNode("name", textNode("alice"), "age", intNode(18)),
+                objectNode("name", textNode("bob"), "age", intNode(17)), greater());
+        test(objectNode("name", textNode("alice"), "age", intNode(18)),
+                objectNode("age", intNode(17), "name", textNode("bob")), greater());
     }
 
     @Test

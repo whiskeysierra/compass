@@ -13,7 +13,7 @@ import static java.util.EnumSet.allOf;
 abstract class Inequality implements Relation, Comparator<JsonNode> {
 
     private final Set<JsonType> supported = immutableEnumSet(allOf(JsonType.class));
-    private final Comparator<JsonNode> comparator = new PrimitiveJsonNodeComparator();
+    private final Comparator<JsonNode> comparator = NaturalOrderJsonComparator.comparingJson();
 
     @Override
     public Set<JsonType> supports() {
