@@ -1,11 +1,10 @@
 {
-  "id": "tax-rate",
-  "version-history": "http://localhost:8080/keys/tax-rate/revisions",
-  "schema": {
-    "type": "number",
-    "format": "decimal",
-    "minimum": 0.0,
-    "maximum": 1.0
-  },
-  "description": "The sales tax rate expressed as a factor."
+    "description": "The sales tax rate expressed as a factor.",
+    "id": "tax-rate",
+    "schema": {
+        "format": "decimal",
+        "maximum": 1,
+        "minimum": 0,
+        "type": "number"
+    }
 }

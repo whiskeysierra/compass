@@ -1,28 +1,18 @@
 {
-  "revisions": [
-    {
-      "id": 3,
-      "timestamp": "2017-07-03T00:47:32Z",
-      "href": "http://localhost:8080/keys/revisions/3",
-      "type": "update",
-      "user": "anonymous",
-      "comment": ".."
-    },
-    {
-      "id": 2,
-      "timestamp": "2017-07-02T01:42:11Z",
-      "href": "http://localhost:8080/keys/revisions/2",
-      "type": "update",
-      "user": "anonymous",
-      "comment": ".."
-    },
-    {
-      "id": 1,
-      "timestamp": "2017-07-02T01:35:17Z",
-      "href": "http://localhost:8080/keys/revisions/1",
-      "type": "update",
-      "user": "anonymous",
-      "comment": ".."
-    }
-  ]
+    "revisions": [
+        {
+            "href": "http://localhost:8080/keys/revisions/7",
+            "id": 7,
+            "timestamp": "2018-02-02T23:21:41.577Z",
+            "type": "update",
+            "user": "anonymous"
+        },
+        {
+            "href": "http://localhost:8080/keys/revisions/6",
+            "id": 6,
+            "timestamp": "2018-02-02T23:21:41.146Z",
+            "type": "update",
+            "user": "anonymous"
+        }
+    ]
 }

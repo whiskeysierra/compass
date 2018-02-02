@@ -1,0 +1,18 @@
+{
+    "revisions": [
+        {
+            "href": "http://localhost:8080/dimensions/before/revisions/5",
+            "id": 5,
+            "timestamp": "2018-02-02T23:21:40.681Z",
+            "type": "delete",
+            "user": "anonymous"
+        },
+        {
+            "href": "http://localhost:8080/dimensions/before/revisions/4",
+            "id": 4,
+            "timestamp": "2018-02-02T23:21:40.142Z",
+            "type": "create",
+            "user": "anonymous"
+        }
+    ]
+}

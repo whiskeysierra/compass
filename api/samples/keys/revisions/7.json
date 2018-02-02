@@ -10,5 +10,11 @@
                 "type": "number"
             }
         }
-    ]
+    ],
+    "revision": {
+        "id": 7,
+        "timestamp": "2018-02-02T23:21:41.577Z",
+        "type": "update",
+        "user": "anonymous"
+    }
 }

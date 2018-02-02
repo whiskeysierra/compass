@@ -1,28 +1,39 @@
 {
-  "revisions": [
-    {
-      "id": 3,
-      "timestamp": "2017-07-03T00:47:32Z",
-      "href": "http://localhost:8080/dimensions/revisions/3",
-      "type": "update",
-      "user": "anonymous",
-      "comment": ".."
-    },
-    {
-      "id": 2,
-      "timestamp": "2017-07-02T01:42:11Z",
-      "href": "http://localhost:8080/dimensions/revisions/2",
-      "type": "update",
-      "user": "anonymous",
-      "comment": ".."
-    },
-    {
-      "id": 1,
-      "timestamp": "2017-07-02T01:35:17Z",
-      "href": "http://localhost:8080/dimensions/revisions/1",
-      "type": "update",
-      "user": "anonymous",
-      "comment": ".."
-    }
-  ]
+    "revisions": [
+        {
+            "href": "http://localhost:8080/dimensions/revisions/5",
+            "id": 5,
+            "timestamp": "2018-02-02T23:21:40.681Z",
+            "type": "update",
+            "user": "anonymous"
+        },
+        {
+            "href": "http://localhost:8080/dimensions/revisions/4",
+            "id": 4,
+            "timestamp": "2018-02-02T23:21:40.142Z",
+            "type": "update",
+            "user": "anonymous"
+        },
+        {
+            "href": "http://localhost:8080/dimensions/revisions/3",
+            "id": 3,
+            "timestamp": "2018-02-02T23:21:39.711Z",
+            "type": "update",
+            "user": "anonymous"
+        },
+        {
+            "href": "http://localhost:8080/dimensions/revisions/2",
+            "id": 2,
+            "timestamp": "2018-02-02T23:21:39.268Z",
+            "type": "update",
+            "user": "anonymous"
+        },
+        {
+            "href": "http://localhost:8080/dimensions/revisions/1",
+            "id": 1,
+            "timestamp": "2018-02-02T23:21:38.675Z",
+            "type": "update",
+            "user": "anonymous"
+        }
+    ]
 }

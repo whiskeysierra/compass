@@ -1,39 +1,39 @@
 {
-  "relations": [
-    {
-      "id": "=",
-      "title": "Equality",
-      "description": "Matches values where the requested dimension values are equal to the configured ones."
-    },
-    {
-      "id": "<",
-      "title": "Less than ...",
-      "description": "Less than ..."
-    },
-    {
-      "id": ">",
-      "title": "Greater than",
-      "description": "Greater than ..."
-    },
-    {
-      "id": "<=",
-      "title": "Less than or equal",
-      "description": "Less than or equal ..."
-    },
-    {
-      "id": ">=",
-      "title": "Greater than or equal",
-      "description": "Greater than or equal ..."
-    },
-    {
-      "id": "~",
-      "title": "Regular Expression",
-      "description": "Matches regular expression"
-    },
-    {
-      "id": "^",
-      "title": "Prefix Match",
-      "description": "Longest Prefix Match"
-    }
-  ]
+    "relations": [
+        {
+            "description": "Matches values where the requested dimension values is strictly less than the configured one.",
+            "id": "<",
+            "title": "Less than"
+        },
+        {
+            "description": "Matches values where the requested dimension values is less than or equal to the configured one.",
+            "id": "<=",
+            "title": "Less than or equal"
+        },
+        {
+            "description": "Matches values where the requested dimension values are equal to the configured ones.",
+            "id": "=",
+            "title": "Equality"
+        },
+        {
+            "description": "Matches values where the requested dimension values is strictly greater than the configured one.",
+            "id": ">",
+            "title": "Greater than"
+        },
+        {
+            "description": "Matches values where the requested dimension values is greater than or equal to the configured one.",
+            "id": ">=",
+            "title": "Greater than or equal"
+        },
+        {
+            "description": "Matches values where the requested dimension values shares the longest prefix with the configured one. Prefix matching is useful for data structures that have a natural hierarchy, including but not limited to locales, geohashes and IP subnet masks.",
+            "id": "^",
+            "title": "Prefix match"
+        },
+        {
+            "description": "Matches values where the requested dimension values matches the configured regular expression.",
+            "id": "~",
+            "title": "Regular expression"
+        }
+    ]
 }

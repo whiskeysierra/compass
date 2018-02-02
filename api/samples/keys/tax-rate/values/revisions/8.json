@@ -1,4 +1,10 @@
 {
+    "revision": {
+        "id": 8,
+        "timestamp": "2018-02-02T23:21:42.046Z",
+        "type": "update",
+        "user": "anonymous"
+    },
     "values": [
         {
             "dimensions": {

@@ -1,0 +1,15 @@
+{
+    "description": "The sales tax rate expressed as a factor.",
+    "id": "tax-rate",
+    "revision": {
+        "href": "http://localhost:8080/keys/tax-rate/revisions/6",
+        "id": 6,
+        "timestamp": "2018-02-02T23:21:41.146Z",
+        "type": "create",
+        "user": "anonymous"
+    },
+    "schema": {
+        "format": "decimal",
+        "type": "number"
+    }
+}

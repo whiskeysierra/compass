@@ -1,28 +1,11 @@
 {
-  "revisions": [
-    {
-      "id": 3,
-      "timestamp": "2017-07-03T00:47:32Z",
-      "href": "http://localhost:8080/keys/tax-rate/values/revisions/3",
-      "type": "update",
-      "user": "anonymous",
-      "comment": ".."
-    },
-    {
-      "id": 2,
-      "timestamp": "2017-07-02T01:42:11Z",
-      "href": "http://localhost:8080/keys/tax-rate/values/revisions/2",
-      "type": "update",
-      "user": "anonymous",
-      "comment": ".."
-    },
-    {
-      "id": 1,
-      "timestamp": "2017-07-02T01:35:17Z",
-      "href": "http://localhost:8080/keys/tax-rate/values/revisions/1",
-      "type": "update",
-      "user": "anonymous",
-      "comment": ".."
-    }
-  ]
+    "revisions": [
+        {
+            "href": "http://localhost:8080/keys/tax-rate/values/revisions/8",
+            "id": 8,
+            "timestamp": "2018-02-02T23:21:42.046Z",
+            "type": "update",
+            "user": "anonymous"
+        }
+    ]
 }

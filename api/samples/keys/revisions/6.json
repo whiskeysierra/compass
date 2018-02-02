@@ -5,10 +5,14 @@
             "id": "tax-rate",
             "schema": {
                 "format": "decimal",
-                "maximum": 1,
-                "minimum": 0,
                 "type": "number"
             }
         }
-    ]
+    ],
+    "revision": {
+        "id": 6,
+        "timestamp": "2018-02-02T23:21:41.146Z",
+        "type": "update",
+        "user": "anonymous"
+    }
 }

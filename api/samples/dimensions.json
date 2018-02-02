@@ -1,23 +1,22 @@
 {
-  "version-history": "http://localhost:8080/dimensions/revisions",
-  "dimensions": [
-    {
-      "id": "before",
-      "schema": {
-        "type": "string",
-        "format": "date-time"
-      },
-      "relation": "<",
-      "description": ".."
-    },
-    {
-      "id": "after",
-      "schema": {
-        "type": "string",
-        "format": "date-time"
-      },
-      "relation": ">",
-      "description": ".."
-    }
-  ]
+    "dimensions": [
+        {
+            "description": "..",
+            "id": "after",
+            "relation": ">",
+            "schema": {
+                "format": "date-time",
+                "type": "string"
+            }
+        },
+        {
+            "description": "..",
+            "id": "country",
+            "relation": "=",
+            "schema": {
+                "pattern": "^[A-Z]{2}$",
+                "type": "string"
+            }
+        }
+    ]
 }

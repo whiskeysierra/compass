@@ -1,18 +1,15 @@
 {
-  "id": "country",
-  "latest-version": "http://localhost:8080/dimensions/country",
-  "successor-version": "http://localhost:8080/dimensions/country/revisions/2",
-  "revision": {
-    "id": 1,
-    "timestamp": "2017-07-02T01:35:17Z",
-    "type": "create",
-    "user": "anonymous",
-    "comment": ".."
-  },
-  "schema": {
-    "type": "string",
-    "pattern": "^[A-Z]{2}$"
-  },
-  "relation": "=",
-  "description": ".."
+    "description": "..",
+    "id": "country",
+    "relation": "=",
+    "revision": {
+        "href": "http://localhost:8080/dimensions/country/revisions/1",
+        "id": 1,
+        "timestamp": "2018-02-02T23:21:38.675Z",
+        "type": "create",
+        "user": "anonymous"
+    },
+    "schema": {
+        "type": "string"
+    }
 }

@@ -1,41 +1,19 @@
 {
-  "latest-version": "http://localhost:8080/dimensions",
-  "predecessor-version": "http://localhost:8080/dimensions/revisions/1",
-  "successor-version": "http://localhost:8080/dimensions/revisions/3",
-  "revision":{
-    "id": 2,
-    "timestamp": "2017-07-02T01:42:11Z",
-    "type": "update",
-    "user": "anonymous",
-    "comment": ".."
-  },
-  "dimensions": [
-    {
-      "id": "country",
-      "schema": {
-        "type": "string",
-        "pattern": "^[A-Z]{2}$"
-      },
-      "relation": "=",
-      "description": ".."
-    },
-    {
-      "id": "before",
-      "schema": {
-        "type": "string",
-        "format": "date-time"
-      },
-      "relation": "<",
-      "description": ".."
-    },
-    {
-      "id": "after",
-      "schema": {
-        "type": "string",
-        "format": "date-time"
-      },
-      "relation": ">",
-      "description": ".."
+    "dimensions": [
+        {
+            "description": "..",
+            "id": "country",
+            "relation": "=",
+            "schema": {
+                "pattern": "^[A-Z]{2}$",
+                "type": "string"
+            }
+        }
+    ],
+    "revision": {
+        "id": 2,
+        "timestamp": "2018-02-02T23:21:39.268Z",
+        "type": "update",
+        "user": "anonymous"
     }
-  ]
 }

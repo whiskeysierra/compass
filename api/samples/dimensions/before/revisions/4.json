@@ -1,0 +1,16 @@
+{
+    "description": "..",
+    "id": "before",
+    "relation": "<",
+    "revision": {
+        "href": "http://localhost:8080/dimensions/before/revisions/4",
+        "id": 4,
+        "timestamp": "2018-02-02T23:21:40.142Z",
+        "type": "create",
+        "user": "anonymous"
+    },
+    "schema": {
+        "format": "date-time",
+        "type": "string"
+    }
+}
