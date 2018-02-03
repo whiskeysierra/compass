@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 import javax.validation.ValidatorFactory;
 import java.time.Clock;
@@ -30,13 +29,6 @@ class ValidatorConfiguration {
             }
 
         };
-    }
-
-    @Bean
-    public MethodValidationPostProcessor methodValidationPostProcessor(final ValidatorFactory factory) {
-        final MethodValidationPostProcessor processor = new MethodValidationPostProcessor();
-        processor.setValidatorFactory(factory);
-        return processor;
     }
 
 }
