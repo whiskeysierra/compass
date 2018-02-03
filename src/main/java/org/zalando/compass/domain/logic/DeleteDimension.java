@@ -38,7 +38,7 @@ class DeleteDimension {
     }
 
     void delete(final String id, @Nullable final String comment) {
-        final DimensionLock lock = locking.lockDimensions(id);
+        final DimensionLock lock = locking.lockDimension(id);
 
         @Nullable final Dimension dimension = lock.getDimension();
 

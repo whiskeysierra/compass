@@ -2,9 +2,11 @@ package org.zalando.compass.domain.logic;
 
 import com.google.common.base.Equivalence;
 import com.google.common.base.Equivalence.Wrapper;
+import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueLock;
@@ -24,6 +26,7 @@ import static com.google.common.collect.Sets.intersection;
 import static com.google.common.collect.Streams.mapWithIndex;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static org.zalando.compass.domain.logic.BadArgumentException.checkArgument;
 import static org.zalando.compass.domain.persistence.model.enums.RevisionType.CREATE;
 import static org.zalando.compass.domain.persistence.model.enums.RevisionType.DELETE;
 import static org.zalando.compass.domain.persistence.model.enums.RevisionType.UPDATE;
@@ -69,7 +72,7 @@ class ReplaceValue {
     boolean replace(final String key, final List<Value> values, @Nullable final String comment) {
         log.info("Replacing values of key [{}]", key);
 
-        final ValuesLock lock = locking.lock(key, values);
+        final ValuesLock lock = locking.lockValues(key, values);
 
         validator.check(lock.getDimensions(), values);
         validator.check(lock.getKey(), values);

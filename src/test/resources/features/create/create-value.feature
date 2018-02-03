@@ -60,6 +60,22 @@ Feature: Value update
       | /field   | /message                                |
       | "/value" | "/value: string found, number expected" |
 
+  Scenario: Creating a value failed due to absent key
+    Then "PUT /keys/tax-rate/value" responds "404 Not Found" when requested with:
+      | /value |
+      | 0.19   |
+
+  Scenario: Creating a value failed due to absent dimension
+    Given "PUT /keys/tax-rate" responds "201 Created" when requested with:
+      | /schema/type | /description |
+      | "number"     | ".."         |
+    When "PUT /keys/tax-rate/value?country=DE" when requested with:
+      | /value |
+      | 0.19   |
+    Then "404 Not Found" was responded with:
+      | /detail                 |
+      | "Dimensions: [country]" |
+
   Scenario: Values and dimensions should support unions and null
     Given "PUT /dimensions/country" responds "201 Created" when requested with:
       | /schema/type/0 | /schema/type/1 | /relation | /description |
