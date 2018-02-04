@@ -1,0 +1,5 @@
+{
+    "description": "Matches values where the requested dimension values shares the longest prefix with the configured one. Prefix matching is useful for data structures that have a natural hierarchy, including but not limited to locales, geohashes and IP subnet masks.",
+    "id": "^",
+    "title": "Prefix match"
+}

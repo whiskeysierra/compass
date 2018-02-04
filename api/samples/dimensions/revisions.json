@@ -3,35 +3,35 @@
         {
             "href": "http://localhost:8080/dimensions/revisions/5",
             "id": 5,
-            "timestamp": "2018-02-02T23:21:40.681Z",
+            "timestamp": "2018-02-04T22:26:34.506Z",
             "type": "update",
             "user": "anonymous"
         },
         {
             "href": "http://localhost:8080/dimensions/revisions/4",
             "id": 4,
-            "timestamp": "2018-02-02T23:21:40.142Z",
+            "timestamp": "2018-02-04T22:26:34.055Z",
             "type": "update",
             "user": "anonymous"
         },
         {
             "href": "http://localhost:8080/dimensions/revisions/3",
             "id": 3,
-            "timestamp": "2018-02-02T23:21:39.711Z",
+            "timestamp": "2018-02-04T22:26:33.585Z",
             "type": "update",
             "user": "anonymous"
         },
         {
             "href": "http://localhost:8080/dimensions/revisions/2",
             "id": 2,
-            "timestamp": "2018-02-02T23:21:39.268Z",
+            "timestamp": "2018-02-04T22:26:32.994Z",
             "type": "update",
             "user": "anonymous"
         },
         {
             "href": "http://localhost:8080/dimensions/revisions/1",
             "id": 1,
-            "timestamp": "2018-02-02T23:21:38.675Z",
+            "timestamp": "2018-02-04T22:26:32.265Z",
             "type": "update",
             "user": "anonymous"
         }

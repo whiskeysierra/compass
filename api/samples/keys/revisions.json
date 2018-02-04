@@ -3,14 +3,14 @@
         {
             "href": "http://localhost:8080/keys/revisions/7",
             "id": 7,
-            "timestamp": "2018-02-02T23:21:41.577Z",
+            "timestamp": "2018-02-04T22:26:35.4Z",
             "type": "update",
             "user": "anonymous"
         },
         {
             "href": "http://localhost:8080/keys/revisions/6",
             "id": 6,
-            "timestamp": "2018-02-02T23:21:41.146Z",
+            "timestamp": "2018-02-04T22:26:34.938Z",
             "type": "update",
             "user": "anonymous"
         }

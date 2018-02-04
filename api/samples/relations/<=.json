@@ -1,0 +1,5 @@
+{
+    "description": "Matches values where the requested dimension values is less than or equal to the configured one.",
+    "id": "<=",
+    "title": "Less than or equal"
+}

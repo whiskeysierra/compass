@@ -97,39 +97,38 @@ echo '{
 }' | http PUT :8080/keys/tax-rate/values
 
 while read -r path; do
-    mkdir -p $(dirname ${path})
+    rm -rf ${path} ${path}.json
+    mkdir -p ${path}
     http --ignore-stdin --pretty=format :8080/${path} > ${path}.json
+    http --ignore-stdin :8080/${path} | jq -r ".${path}[].id" | while read id; do
+        http --ignore-stdin --pretty=format :8080/${path}/${id} > ${path}/${id}.json
+    done
 done << EOM
 relations
-relations/=
 dimensions
-dimensions/revisions
-dimensions/revisions/1
-dimensions/revisions/2
-dimensions/revisions/3
-dimensions/revisions/4
-dimensions/revisions/5
-dimensions/country
-dimensions/country/revisions
-dimensions/country/revisions/1
-dimensions/country/revisions/2
-dimensions/after/revisions
-dimensions/after/revisions/3
-dimensions/before/revisions
-dimensions/before/revisions/4
-dimensions/before/revisions/5
 keys
+EOM
+
+http --ignore-stdin :8080/keys | jq -r '.keys[].id' | while read key; do
+    for resource in value values; do
+        mkdir -p keys/${key}
+        http --ignore-stdin --pretty=format :8080/keys/${key}/${resource} > keys/${key}/${resource}.json
+    done
+done
+
+while read -r path; do
+    mkdir -p ${path}
+    http --ignore-stdin --pretty=format :8080/${path} > ${path}.json
+    http --ignore-stdin :8080/${path} | jq -r '.revisions[].id' | while read id; do
+        http --ignore-stdin --pretty=format :8080/${path}/${id} > ${path}/${id}.json
+    done
+done << EOM
+dimensions/revisions
+dimensions/country/revisions
+dimensions/after/revisions
+dimensions/before/revisions
 keys/revisions
-keys/revisions/6
-keys/revisions/7
-keys/tax-rate
 keys/tax-rate/revisions
-keys/tax-rate/revisions/6
-keys/tax-rate/revisions/7
-keys/tax-rate/value
 keys/tax-rate/value/revisions
-keys/tax-rate/value/revisions/8
-keys/tax-rate/values
 keys/tax-rate/values/revisions
-keys/tax-rate/values/revisions/8
 EOM

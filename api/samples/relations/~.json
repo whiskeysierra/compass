@@ -1,0 +1,5 @@
+{
+    "description": "Matches values where the requested dimension values matches the configured regular expression.",
+    "id": "~",
+    "title": "Regular expression"
+}

@@ -1,0 +1,9 @@
+{
+    "description": "..",
+    "id": "after",
+    "relation": ">",
+    "schema": {
+        "format": "date-time",
+        "type": "string"
+    }
+}
