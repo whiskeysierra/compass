@@ -20,7 +20,7 @@
 
         <start-class>org.zalando.compass.Application</start-class>
 
-        <spring-boot.version>1.5.9.RELEASE</spring-boot.version>
+        <spring-boot.version>2.0.1.RELEASE</spring-boot.version>
         <postgres.version>42.2.1</postgres.version>
         <problem.version>0.20.1</problem.version>
         <riptide.version>2.6.0</riptide.version>
