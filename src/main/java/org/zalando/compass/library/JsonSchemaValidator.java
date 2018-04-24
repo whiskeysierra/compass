@@ -8,6 +8,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Sets;
+import com.networknt.schema.Format;
+import com.networknt.schema.JsonMetaSchema;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.JsonType;
@@ -37,7 +39,8 @@ import static java.util.stream.Collectors.toSet;
 public class JsonSchemaValidator {
 
     private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-    private final JsonSchemaFactory factory = new JsonSchemaFactory(mapper);
+    private final JsonSchemaFactory factory = JsonSchemaFactory.builder(JsonSchemaFactory.getInstance())
+            .objectMapper(mapper).build();
     private final LoadingCache<String, JsonSchema> schemas = CacheBuilder.newBuilder().build(new SchemaLoader(mapper, factory));
 
     public JsonSchemaValidator() throws IOException {
@@ -103,9 +106,11 @@ public class JsonSchemaValidator {
             this.definitions = mapper.readTree(getResource("api/api.yaml"));
 
             final Set<String> ignored = Sets.newHashSet(definitions.fieldNames());
+            ignored.remove("id");
             ignored.remove("parameters");
             ignored.remove("definitions");
-            ObjectNode.class.cast(definitions).without(ignored);
+
+            ObjectNode.class.cast(definitions).remove(ignored);
         }
 
         @Override
