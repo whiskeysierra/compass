@@ -25,7 +25,7 @@ class ValidatorConfiguration {
 
             @Override
             protected void postProcessConfiguration(final javax.validation.Configuration<?> configuration) {
-                HibernateValidatorConfiguration.class.cast(configuration).timeProvider(clock::millis);
+                configuration.clockProvider(() -> clock);
             }
 
         };
