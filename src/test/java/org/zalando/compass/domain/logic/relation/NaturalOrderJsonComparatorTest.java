@@ -35,6 +35,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertThat;
+import static org.zalando.compass.domain.logic.relation.NaturalOrderJsonComparator.throwingCombiner;
 
 public final class NaturalOrderJsonComparatorTest {
 
@@ -137,6 +138,11 @@ public final class NaturalOrderJsonComparatorTest {
     @Test(expected = UnsupportedOperationException.class)
     public void shouldFailOnPojo() {
         unit.compare(new POJONode(new Object()), textNode(""));
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void shouldCoverThrowingMerger() {
+        throwingCombiner(nullNode(), nullNode());
     }
 
     private Matcher<Integer> less() {

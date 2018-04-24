@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ComparisonChain;
-import com.google.common.collect.ImmutableList;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
@@ -70,7 +69,7 @@ final class NaturalOrderJsonComparator implements Comparator<JsonNode> {
 
         return leftFieldNames.stream()
                 .reduce(start, (chain, name) ->
-                        chain.compare(left.get(name), right.get(name), this), this::throwingCombiner)
+                        chain.compare(left.get(name), right.get(name), this), NaturalOrderJsonComparator::throwingCombiner)
                 .result();
     }
 
@@ -82,7 +81,7 @@ final class NaturalOrderJsonComparator implements Comparator<JsonNode> {
 
     @VisibleForTesting
     @SuppressWarnings("unused")
-    <T> T throwingCombiner(final T left, final T right) {
+    static <T> T throwingCombiner(final T left, final T right) {
         throw new UnsupportedOperationException();
     }
 
