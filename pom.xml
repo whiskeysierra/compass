@@ -23,7 +23,7 @@
         <spring-boot.version>1.5.9.RELEASE</spring-boot.version>
         <postgres.version>42.2.2</postgres.version>
         <problem.version>0.20.3</problem.version>
-        <riptide.version>2.6.0</riptide.version>
+        <riptide.version>2.7.1</riptide.version>
         <tracer.version>0.15.1</tracer.version>
         <logbook.version>1.7.3</logbook.version>
         <stups-oauth2.version>1.0.15-GH-44</stups-oauth2.version>
