@@ -2,24 +2,20 @@ package org.zalando.compass.domain.logic.relation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.ImmutableList;
 
 import javax.annotation.Nonnull;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static com.google.common.collect.Comparators.lexicographical;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.nullsFirst;
-import static java.util.Spliterator.DISTINCT;
-import static java.util.Spliterator.IMMUTABLE;
-import static java.util.Spliterator.NONNULL;
-import static java.util.Spliterator.SIZED;
-import static java.util.Spliterators.spliterator;
-import static java.util.stream.StreamSupport.stream;
 
 final class NaturalOrderJsonComparator implements Comparator<JsonNode> {
 
@@ -59,29 +55,35 @@ final class NaturalOrderJsonComparator implements Comparator<JsonNode> {
             case NUMBER:
                 return comparing(JsonNode::decimalValue);
             case OBJECT:
-                return comparing(this::sortedFieldNames, lexicographical(String::compareTo))
-                        .thenComparing(this::compareFieldsRecursively);
+                return this::compareFieldsRecursively;
             default: // should've been "case STRING" but this is easier to cover
                 return comparing(JsonNode::asText);
         }
     }
 
     private int compareFieldsRecursively(final JsonNode left, final JsonNode right) {
-        return streamFields(left)
-                .sorted()
-                .mapToInt(name -> compare(left.get(name), right.get(name)))
-                .filter(result -> result != 0)
-                .findFirst().orElse(0);
+        final Collection<String> leftFieldNames = sortedFieldNames(left);
+        final Collection<String> rightFieldNames = sortedFieldNames(right);
+
+        final ComparisonChain start = ComparisonChain.start()
+                .compare(leftFieldNames, rightFieldNames, lexicographical(String::compareTo));
+
+        return leftFieldNames.stream()
+                .reduce(start, (chain, name) ->
+                        chain.compare(left.get(name), right.get(name), this), this::throwingCombiner)
+                .result();
     }
 
-    private Stream<String> streamFields(final JsonNode node) {
-        return stream(spliterator(node.fieldNames(), node.size(), DISTINCT | IMMUTABLE | NONNULL | SIZED), false);
-    }
-
-    private Iterable<String> sortedFieldNames(final JsonNode node) {
+    private Collection<String> sortedFieldNames(final JsonNode node) {
         final List<String> fieldNames = newArrayList(node.fieldNames());
         fieldNames.sort(naturalOrder());
         return fieldNames;
+    }
+
+    @VisibleForTesting
+    @SuppressWarnings("unused")
+    <T> T throwingCombiner(final T left, final T right) {
+        throw new UnsupportedOperationException();
     }
 
     public static Comparator<JsonNode> comparingJson() {
