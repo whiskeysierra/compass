@@ -17,6 +17,10 @@ import static org.jooq.impl.DSL.values;
 
 public final class Tables {
 
+    private Tables() {
+
+    }
+
     public static <K, V> Table<Record2<K, V>> table(final Map<K, V> dimensions,
             final Class<K> keyType, final Class<V> valueType) {
 

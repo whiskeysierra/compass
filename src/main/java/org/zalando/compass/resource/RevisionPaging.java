@@ -15,6 +15,10 @@ import static java.util.stream.Collectors.toList;
 @VisibleForTesting
 public final class RevisionPaging {
 
+    private RevisionPaging() {
+
+    }
+
     static ResponseEntity<RevisionCollectionRepresentation> paginate(
             final PageResult<Revision> page,
             final ThrowingFunction<Revision, URI, IOException> next,
