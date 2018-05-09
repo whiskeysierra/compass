@@ -4,6 +4,7 @@
 
 [![Build Status](https://img.shields.io/travis/zalando/compass.svg)](https://travis-ci.org/zalando/compass)
 [![Coverage Status](https://img.shields.io/coveralls/zalando/compass.svg)](https://coveralls.io/r/zalando/compass)
+[![Code Quality](https://img.shields.io/codacy/grade/ccbb2b8b85854dc6849c4b9de6fce224/master.svg)](https://www.codacy.com/app/whiskeysierra/compass)
 [![Release](https://img.shields.io/github/release/zalando/compass.svg)](https://github.com/zalando/compass/releases)
 [![Maven Central](https://img.shields.io/maven-central/v/org.zalando/compass-parent.svg)](https://maven-badges.herokuapp.com/maven-central/org.zalando/compass-parent)
 
