@@ -76,7 +76,7 @@ public final class QueryingTest {
     @Test
     public void shouldReadObjects() {
         assertThat(unit.read(map("price", "{\"amount\":25.0}")), is(map("price", new ObjectNode(instance,
-                map("amount", new DecimalNode(new BigDecimal(25.0)))))));
+                map("amount", new DecimalNode(new BigDecimal("25.0")))))));
     }
 
     @Test
