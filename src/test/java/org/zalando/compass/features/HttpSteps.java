@@ -144,7 +144,7 @@ public class HttpSteps {
         }
 
         if (contentType != null) {
-            requester.contentType(MediaType.parseMediaType(contentType));
+            requester.contentType(parseMediaType(contentType));
         }
 
         final CompletableFuture<ResponseEntity<JsonNode>> future = requestAsync(requester, body);
