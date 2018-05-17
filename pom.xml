@@ -20,7 +20,7 @@
 
         <start-class>org.zalando.compass.Application</start-class>
 
-        <spring-boot.version>1.5.9.RELEASE</spring-boot.version>
+        <spring-boot.version>2.0.2.RELEASE</spring-boot.version>
         <postgres.version>42.2.2</postgres.version>
         <problem.version>0.20.3</problem.version>
         <riptide.version>2.8.0</riptide.version>
@@ -117,17 +117,18 @@
             <groupId>org.springframework.hateoas</groupId>
             <artifactId>spring-hateoas</artifactId>
             <version>0.24.0.RELEASE</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-jcl</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Monitoring -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.zalando.zmon</groupId>
-            <artifactId>zmon-actuator</artifactId>
-            <version>0.9.8</version>
         </dependency>
         <dependency>
             <groupId>org.jolokia</groupId>
