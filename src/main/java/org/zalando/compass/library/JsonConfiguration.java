@@ -28,7 +28,6 @@ public class JsonConfiguration {
         final ObjectMapper mapper = new ObjectMapper();
 
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        mapper.disable(SerializationFeature.WRITE_NULL_MAP_VALUES);
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         mapper.configure(WRITE_BIGDECIMAL_AS_PLAIN, true);
 
