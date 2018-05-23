@@ -21,6 +21,7 @@
         <start-class>org.zalando.compass.Application</start-class>
 
         <spring-boot.version>2.0.2.RELEASE</spring-boot.version>
+        <spring-security.version>5.0.5.RELEASE</spring-security.version>
         <postgres.version>42.2.2</postgres.version>
         <problem.version>0.20.3</problem.version>
         <riptide.version>2.8.0</riptide.version>
@@ -100,6 +101,17 @@
                 <exclusion>
                     <groupId>org.jboss.spec.javax.annotation</groupId>
                     <artifactId>jboss-annotations-api_1.2_spec</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+            <version>${spring-security.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-jcl</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
