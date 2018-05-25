@@ -506,7 +506,7 @@
             <plugin>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
-                <version>5.0.7</version>
+                <version>5.1.0</version>
                 <configuration>
                     <url>jdbc:postgresql://localhost:2345/postgres?currentSchema=compass</url>
                     <user>postgres</user>
