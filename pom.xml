@@ -153,6 +153,10 @@
             <artifactId>spring-boot-starter-log4j2</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.zalando</groupId>
             <artifactId>tracer-spring-boot-starter</artifactId>
             <version>${tracer.version}</version>
@@ -261,6 +265,7 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
+            <version>5.1.1</version>
         </dependency>
         <dependency>
             <groupId>org.jooq</groupId>
@@ -506,10 +511,13 @@
             <plugin>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
-                <version>5.0.7</version>
+                <version>5.1.1</version>
                 <configuration>
-                    <url>jdbc:postgresql://localhost:2345/postgres?currentSchema=compass</url>
+                    <url>jdbc:postgresql://localhost:2345/postgres</url>
                     <user>postgres</user>
+                    <schemas>
+                        <schema>compass</schema>
+                    </schemas>
                 </configuration>
                 <executions>
                     <execution>

@@ -3,7 +3,7 @@
 while getopts :b opt; do
   case "$opt" in
     b)
-        mvn package -P release -D skipTests
+        ./mvnw clean package -P release -D skipTests
         ;;
     \?)
         echo "Invalid option: -$OPTARG" >&2
@@ -11,5 +11,5 @@ while getopts :b opt; do
     esac
 done
 
-docker-compose rm --stop --force
-docker-compose up
+docker-compose down
+docker-compose up --build --force-recreate

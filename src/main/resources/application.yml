@@ -20,12 +20,11 @@ spring:
       # https://stackoverflow.com/questions/23850585/how-to-start-spring-boot-app-without-depending-on-database
       initial-size: 0
       min-idle: 0
+  flyway:
+    schemas:
+      - compass
   jooq:
     sql-dialect: postgres
-
-flyway:
-  schemas:
-    - compass
 
 server:
   compression:
@@ -35,21 +34,22 @@ server:
       - application/*+json
   use-forward-headers: true
 
-security:
-  ignored: none
-
 twintip:
   mapping: /api
   yaml: "classpath:api/api.yaml"
 
 management:
-  add-application-context-header: false
+  server:
+    add-application-context-header: false
+    port: 7979
   health.db.enabled: false
-  port: 7979
-
-endpoints:
-  jmx.unique-names: true
-  jolokia.path: /jmx
+  endpoints:
+    jmx.unique-names: true
+    web:
+      base-path: ''
+      exposure.include: '*'
+      path-mapping:
+        jolokia: jmx
 
 tracer:
   stacked: true
