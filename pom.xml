@@ -29,7 +29,7 @@
         <logbook.version>1.8.1</logbook.version>
         <stups-oauth2.version>1.0.15-GH-44</stups-oauth2.version>
         <zuchini.version>0.4.0</zuchini.version>
-        <jooq.version>3.10.7</jooq.version>
+        <jooq.version>3.11.0</jooq.version>
     </properties>
 
     <dependencyManagement>
@@ -541,7 +541,7 @@
                     </jdbc>
                     <generator>
                         <database>
-                            <name>org.jooq.util.postgres.PostgresDatabase</name>
+                            <name>org.jooq.meta.postgres.PostgresDatabase</name>
                             <includes>.*</includes>
                             <excludes>schema_version</excludes>
                             <inputSchema>compass</inputSchema>
