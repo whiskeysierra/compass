@@ -1,5 +1,4 @@
 swagger: '2.0'
-id: 'file:api/api.yaml'
 info:
   title: Compass - Configuration Management API
   description: |

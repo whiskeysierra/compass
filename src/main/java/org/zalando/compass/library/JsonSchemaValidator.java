@@ -104,7 +104,6 @@ public class JsonSchemaValidator {
             this.definitions = mapper.readTree(getResource("api/api.yaml"));
 
             final Set<String> ignored = Sets.newHashSet(definitions.fieldNames());
-            ignored.remove("id");
             ignored.remove("parameters");
             ignored.remove("definitions");
 
@@ -116,6 +115,7 @@ public class JsonSchemaValidator {
             final ObjectNode schema = definitions.deepCopy();
             final boolean isDefinition = schema.get("definitions").has(name);
             schema.put("$ref", isDefinition ? "#/definitions/" + name : "#/parameters/" + name);
+            schema.put("id", "classpath:api/api.yaml");
             return factory.getSchema(schema);
         }
 

@@ -4,17 +4,11 @@
         <Console name="stdout" target="SYSTEM_OUT">
             <PatternLayout pattern="%date {%level} [%thread] [%X{X-Flow-ID}] [%logger] %message%n"/>
         </Console>
-        <File name="sql" fileName="sql.log">
-            <PatternLayout pattern="%date %message%n"/>
-        </File>
     </Appenders>
 
     <Loggers>
         <Logger name="org.zalando.logbook.Logbook" level="TRACE"/>
         <Logger name="org.zalando.compass" level="DEBUG"/>
-        <Logger name="org.jooq.tools.LoggerListener" level="DEBUG" additivity="false">
-            <AppenderRef ref="sql"/>
-        </Logger>
 
         <Root level="INFO">
             <AppenderRef ref="stdout"/>
