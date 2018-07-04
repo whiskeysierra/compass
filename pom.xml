@@ -27,7 +27,7 @@
         <logbook.version>1.8.1</logbook.version>
         <postgres.version>42.2.2</postgres.version>
         <problem.version>0.20.3</problem.version>
-        <riptide.version>2.8.0</riptide.version>
+        <riptide.version>2.8.1</riptide.version>
         <stups-oauth2.version>1.0.15-GH-44</stups-oauth2.version>
         <tracer.version>0.17.0</tracer.version>
         <zuchini.version>0.4.0</zuchini.version>
