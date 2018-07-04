@@ -11,15 +11,9 @@ spring:
     url: jdbc:postgresql://${DATASOURCE_HOST:localhost}/postgres?currentSchema=compass
     username: postgres
     password: postgres
-    tomcat:
-      default-auto-commit: false
-      test-on-borrow: false
-      # TRANSACTION_READ_COMMITTED
-      default-transaction-isolation: 2
-
-      # https://stackoverflow.com/questions/23850585/how-to-start-spring-boot-app-without-depending-on-database
-      initial-size: 0
-      min-idle: 0
+    hikari:
+      transaction-isolation: TRANSACTION_READ_COMMITTED
+      auto-commit: false
   flyway:
     schemas:
       - compass
