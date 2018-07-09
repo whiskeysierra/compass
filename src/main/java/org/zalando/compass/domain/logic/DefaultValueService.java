@@ -42,8 +42,20 @@ class DefaultValueService implements ValueService {
 
     @Transactional(isolation = SERIALIZABLE)
     @Override
+    public void create(final String key, final List<Value> values, @Nullable final String comment) {
+        replace.create(key, values, comment);
+    }
+
+    @Transactional(isolation = SERIALIZABLE)
+    @Override
     public boolean replace(final String key, final Value value, @Nullable final String comment) {
         return replace.replace(key, value, comment);
+    }
+
+    @Transactional(isolation = SERIALIZABLE)
+    @Override
+    public void create(final String key, final Value value, @Nullable final String comment) throws EntityAlreadyExistsException {
+        replace.create(key, value, comment);
     }
 
     @Transactional(readOnly = true)

@@ -37,6 +37,12 @@ class DefaultDimensionService implements DimensionService {
         return replace.replace(dimension, comment);
     }
 
+    @Transactional(isolation = SERIALIZABLE)
+    @Override
+    public void create(final Dimension dimension, @Nullable final String comment) {
+        replace.create(dimension, comment);
+    }
+
     @Transactional(readOnly = true)
     @Override
     public PageResult<Dimension> readPage(@Nullable final String term, final Pagination<String> query) {

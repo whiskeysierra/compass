@@ -12,6 +12,20 @@ Feature: Dimension creation
       | /id       | /schema/type | /relation | /description                 |
       | "example" | "string"     | "="       | "Lorem ipsum dolor sit amet" |
 
+  Scenario: Creating a new dimension succeeds when dimension doesn't exist
+    Given "GET /dimensions/example" responds "404 Not Found"
+    Then "PUT /dimensions/example" and "If-None-Match: *" responds "201 Created" when requested with:
+      | /id       | /schema/type | /relation | /description                 |
+      | "example" | "string"     | "="       | "Lorem ipsum dolor sit amet" |
+
+  Scenario: Creating a new dimension fails when dimension already exists
+    Given "PUT /dimensions/example" responds "201 Created" when requested with:
+      | /id       | /schema/type | /relation | /description                 |
+      | "example" | "string"     | "="       | "Lorem ipsum dolor sit amet" |
+    Then "PUT /dimensions/example" and "If-None-Match: *" responds "412 Precondition Failed" when requested with:
+      | /id       | /schema/type | /relation | /description                 |
+      | "example" | "string"     | "="       | "Lorem ipsum dolor sit amet" |
+
   Scenario: Creating a new dimension without id property
     Given "GET /dimensions/example" responds "404 Not Found"
     When "PUT /dimensions/example" responds "201 Created" when requested with:

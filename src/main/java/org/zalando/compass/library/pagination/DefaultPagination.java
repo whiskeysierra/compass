@@ -65,6 +65,7 @@ final class DefaultPagination<P> implements Pagination<P> {
         final boolean isBackward = direction == BACKWARD;
 
         if (isBackward) {
+            // TODO modifies input!
             Collections.reverse(elements);
         }
 

@@ -12,6 +12,20 @@ Feature: Key creation
       | /id       | /schema/type | /description                 |
       | "example" | "string"     | "Lorem ipsum dolor sit amet" |
 
+  Scenario: Creating a new key succeeds when key doesn't exist
+    Given "GET /keys/example" responds "404 Not Found"
+    Then "PUT /keys/example" and "If-None-Match: *" responds "201 Created" when requested with:
+      | /id       | /schema/type | /description                 |
+      | "example" | "string"     | "Lorem ipsum dolor sit amet" |
+
+  Scenario: Creating a new key fails when key already exists
+    Given "PUT /keys/example" responds "201 Created" when requested with:
+      | /id       | /schema/type | /description                 |
+      | "example" | "string"     | "Lorem ipsum dolor sit amet" |
+    Then "PUT /keys/example" and "If-None-Match: *" responds "412 Precondition Failed" when requested with:
+      | /id       | /schema/type | /description                 |
+      | "example" | "string"     | "Lorem ipsum dolor sit amet" |
+
   Scenario: Creating a new key failed due to id mismatch
     Given "GET /keys/foo" responds "404 Not Found"
     Then "PUT /keys/foo" responds "400 Bad Request" when requested with:

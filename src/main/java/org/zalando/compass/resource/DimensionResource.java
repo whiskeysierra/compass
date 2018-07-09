@@ -27,6 +27,7 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static org.springframework.http.HttpHeaders.IF_NONE_MATCH;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
@@ -56,19 +57,31 @@ class DimensionResource implements Reserved {
     }
 
     @RequestMapping(method = PUT, path = "/{id}")
-    public ResponseEntity<DimensionRepresentation> replace(@PathVariable final String id,
+    public ResponseEntity<DimensionRepresentation> createOrReplace(@PathVariable final String id,
+            @Nullable @RequestHeader(name = IF_NONE_MATCH, required = false) final String ifNoneMatch,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final JsonNode node) throws IOException {
 
         ensureConsistentId(id, node);
         final Dimension dimension = reader.read(node, Dimension.class);
 
-        final boolean created = service.replace(dimension, comment);
+        final boolean created = createOrReplace(dimension, comment, ifNoneMatch);
         final DimensionRepresentation representation = DimensionRepresentation.valueOf(dimension);
 
         return ResponseEntity
                 .status(created ? CREATED : OK)
                 .body(representation);
+    }
+
+    public boolean createOrReplace(final Dimension dimension, @Nullable final String comment,
+            @Nullable final String ifNoneMatch) {
+
+        if ("*".equals(ifNoneMatch)) {
+            service.create(dimension, comment);
+            return true;
+        } else {
+            return service.replace(dimension, comment);
+        }
     }
 
     private void ensureConsistentId(@PathVariable final String inUrl, final JsonNode node) {
@@ -119,7 +132,7 @@ class DimensionResource implements Reserved {
 
         final JsonMergePatch patch = JsonMergePatch.fromJson(content);
         final JsonNode patched = patch.apply(node);
-        return replace(id, comment, patched);
+        return createOrReplace(id, null, comment, patched);
     }
 
     @RequestMapping(method = PATCH, path = "/{id}", consumes = JSON_PATCH_VALUE)
@@ -133,7 +146,7 @@ class DimensionResource implements Reserved {
         final JsonNode node = mapper.valueToTree(dimension);
 
         final JsonNode patched = patch.apply(node);
-        return replace(id, comment, patched);
+        return createOrReplace(id, null, comment, patched);
     }
 
     @RequestMapping(method = DELETE, path = "/{id}")

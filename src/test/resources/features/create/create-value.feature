@@ -12,6 +12,56 @@ Feature: Value update
       | /dimensions | /value |
       | {}          | 0.19   |
 
+  Scenario: Creating a value succeeds when value doesn't exist
+    Given "PUT /keys/tax-rate" responds "201 Created" when requested with:
+      | /schema/type | /description |
+      | "number"     | ".."         |
+    And "GET /keys/tax-rate/values" responds "200 OK" with an empty array at "/values"
+    Then "PUT /keys/tax-rate/value" and "If-None-Match: *" responds "201 Created" when requested with:
+      | /value |
+      | 0.19   |
+
+  Scenario: Creating a value fails when value already exists
+    Given "PUT /keys/tax-rate" responds "201 Created" when requested with:
+      | /schema/type | /description |
+      | "number"     | ".."         |
+    And "GET /keys/tax-rate/values" responds "200 OK" with an empty array at "/values"
+    And "PUT /keys/tax-rate/value" responds "201 Created" when requested with:
+      | /value |
+      | 0.19   |
+    Then "PUT /keys/tax-rate/value" and "If-None-Match: *" responds "412 Precondition Failed" when requested with:
+      | /value |
+      | 0.19   |
+
+  Scenario: Creating values succeeds when values don't exist
+    Given "PUT /dimensions/country" responds "201 Created" when requested with:
+      | /schema/type/0 | /schema/type/1 | /relation | /description |
+      | "string"       | "null"         | "="       | ".."         |
+    And "PUT /keys/tax-rate" responds "201 Created" when requested with:
+      | /schema/type | /description |
+      | "number"     | ".."         |
+    And "GET /keys/tax-rate/values" responds "200 OK" with an empty array at "/values"
+    Then "PUT /keys/tax-rate/values" and "If-None-Match: *" responds "201 Created" when requested with an array at "/values":
+      | /dimensions/country | /value |
+      | "DE"                | 0.19   |
+      | "CH"                | 0.08   |
+
+  Scenario: Creating values fails when values already exist
+    Given "PUT /dimensions/country" responds "201 Created" when requested with:
+      | /schema/type/0 | /schema/type/1 | /relation | /description |
+      | "string"       | "null"         | "="       | ".."         |
+    And "PUT /keys/tax-rate" responds "201 Created" when requested with:
+      | /schema/type | /description |
+      | "number"     | ".."         |
+    And "GET /keys/tax-rate/values" responds "200 OK" with an empty array at "/values"
+    And "PUT /keys/tax-rate/value" responds "201 Created" when requested with:
+      | /dimensions/country | /value |
+      | "DE"                | 0.19   |
+    Then "PUT /keys/tax-rate/values" and "If-None-Match: *" responds "412 Precondition Failed" when requested with an array at "/values":
+      | /dimensions/country | /value |
+      | "DE"                | 0.19   |
+      | "CH"                | 0.08   |
+
   Scenario: Creating a value empty dimensions
     Given "PUT /keys/tax-rate" responds "201 Created" when requested with:
       | /schema/type | /description |

@@ -61,14 +61,7 @@ class ReplaceDimension {
         final Revision revision = revisionService.create(comment);
 
         if (current == null) {
-            validateRelation(dimension);
-
-            repository.create(dimension);
-            log.info("Created dimension [{}]", dimension);
-
-            final DimensionRevision dimensionRevision = dimension.toRevision(revision.withType(CREATE));
-            revisionRepository.create(dimensionRevision);
-            log.info("Created dimension revision [{}]", dimensionRevision);
+            create(dimension, revision);
 
             return true;
         } else {
@@ -90,6 +83,30 @@ class ReplaceDimension {
 
             return false;
         }
+    }
+
+    void create(final Dimension dimension, @Nullable final String comment) {
+        final DimensionLock lock = locking.lockDimension(dimension.getId());
+        @Nullable final Dimension current = lock.getDimension();
+
+        final Revision revision = revisionService.create(comment);
+
+        if (current == null) {
+            create(dimension, revision);
+        } else {
+            throw new EntityAlreadyExistsException("Dimension " + dimension.getId() + " already exists");
+        }
+    }
+
+    private void create(final Dimension dimension, final Revision revision) {
+        validateRelation(dimension);
+
+        repository.create(dimension);
+        log.info("Created dimension [{}]", dimension);
+
+        final DimensionRevision dimensionRevision = dimension.toRevision(revision.withType(CREATE));
+        revisionRepository.create(dimensionRevision);
+        log.info("Created dimension revision [{}]", dimensionRevision);
     }
 
     private void validateRelation(final Dimension dimension) {
