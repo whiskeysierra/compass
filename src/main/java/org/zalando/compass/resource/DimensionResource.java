@@ -129,7 +129,7 @@ class DimensionResource implements Reserved {
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final ObjectNode content) throws IOException, JsonPatchException {
 
-        final Dimension dimension = service.read(id).getEntity();
+        final Dimension dimension = service.readOnly(id);
         final JsonNode node = mapper.valueToTree(dimension);
 
         final JsonMergePatch patch = JsonMergePatch.fromJson(content);
@@ -144,7 +144,7 @@ class DimensionResource implements Reserved {
 
         final JsonPatch patch = reader.read(content, JsonPatch.class);
 
-        final Dimension dimension = service.read(id).getEntity();
+        final Dimension dimension = service.readOnly(id);
         final JsonNode node = mapper.valueToTree(dimension);
 
         final JsonNode patched = patch.apply(node);

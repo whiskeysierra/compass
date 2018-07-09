@@ -129,7 +129,7 @@ class KeyResource implements Reserved {
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final ObjectNode content) throws IOException, JsonPatchException {
 
-        final Key key = service.read(id).getEntity();
+        final Key key = service.readOnly(id);
         final ObjectNode node = mapper.valueToTree(key);
 
         final JsonMergePatch patch = JsonMergePatch.fromJson(content);
@@ -144,7 +144,7 @@ class KeyResource implements Reserved {
 
         final JsonPatch patch = reader.read(content, JsonPatch.class);
 
-        final Key key = service.read(id).getEntity();
+        final Key key = service.readOnly(id);
         final JsonNode node = mapper.valueToTree(key);
 
         final JsonNode patched = patch.apply(node);

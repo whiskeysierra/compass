@@ -53,9 +53,15 @@ class DefaultDimensionService implements DimensionService {
     @Transactional(readOnly = true)
     @Override
     public Revisioned<Dimension> read(final String id) {
-        final Dimension dimension = this.read.read(id);
+        final Dimension dimension = readOnly(id);
         final Revision revision = readRevision.readLatestRevision(id);
         return Revisioned.create(dimension, revision);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Dimension readOnly(final String id) {
+        return read.read(id);
     }
 
     @Transactional(readOnly = true)
@@ -82,7 +88,7 @@ class DefaultDimensionService implements DimensionService {
         return readRevision.readAt(id, revision);
     }
 
-    @Transactional
+    @Transactional // TODO isolation?!
     @Override
     public void delete(final String id, @Nullable final String comment) {
         delete.delete(id, comment);

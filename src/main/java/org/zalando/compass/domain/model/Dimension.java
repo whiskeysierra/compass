@@ -2,8 +2,6 @@ package org.zalando.compass.domain.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import java.time.OffsetDateTime;
-
 @lombok.Value
 public final class Dimension {
 

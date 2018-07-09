@@ -53,9 +53,15 @@ class DefaultKeyService implements KeyService {
     @Transactional(readOnly = true)
     @Override
     public Revisioned<Key> read(final String id) {
-        final Key key = read.read(id);
+        final Key key = readOnly(id);
         final Revision revision = readRevision.readLatestRevision(id);
         return Revisioned.create(key, revision);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Key readOnly(final String id) {
+        return read.read(id);
     }
 
     @Transactional(readOnly = true)
@@ -82,7 +88,7 @@ class DefaultKeyService implements KeyService {
         return readRevision.readAt(id, revision);
     }
 
-    @Transactional
+    @Transactional // TODO isolation?!
     @Override
     public void delete(final String id, @Nullable final String comment) {
         delete.delete(id, comment);

@@ -27,6 +27,8 @@ public interface ValueService {
 
     Revisioned<Value> read(String key, Map<String, JsonNode> filter);
 
+    Value readOnly(String key, Map<String, JsonNode> filter);
+
     PageResult<Revision> readPageRevisions(String key, final Pagination<Long> query);
 
     PageRevision<Value> readPageAt(String key, Map<String, JsonNode> filter, long revision);

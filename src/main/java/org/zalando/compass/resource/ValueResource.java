@@ -128,10 +128,10 @@ class ValueResource {
     public ResponseEntity<ValueCollectionRepresentation> readAll(@PathVariable final String key,
             @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = querying.read(query);
-        final Revisioned<List<Value>> page = service.readPage(key, filter);
+        final Revisioned<List<Value>> revisioned = service.readPage(key, filter);
 
-        return Conditional.build(page, values ->
-                new ValueCollectionRepresentation(page.getEntity().stream()
+        return Conditional.build(revisioned, page ->
+                new ValueCollectionRepresentation(page.stream()
                         .map(ValueRepresentation::valueOf).collect(toList())));
     }
 
@@ -169,7 +169,7 @@ class ValueResource {
             @RequestBody final ObjectNode content) throws IOException, JsonPatchException {
 
         final Map<String, JsonNode> filter = querying.read(query);
-        final Value value = service.read(key, filter).getEntity();
+        final Value value = service.readOnly(key, filter);
         final JsonNode node = mapper.valueToTree(value);
 
         final JsonMergePatch patch = JsonMergePatch.fromJson(content);
@@ -186,7 +186,7 @@ class ValueResource {
         final JsonPatch patch = reader.read(content, JsonPatch.class);
 
         final Map<String, JsonNode> filter = querying.read(query);
-        final Value value = service.read(key, filter).getEntity();
+        final Value value = service.readOnly(key, filter);
         final JsonNode node = mapper.valueToTree(value);
 
         final JsonNode patched = patch.apply(node);

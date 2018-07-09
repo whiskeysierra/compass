@@ -9,8 +9,6 @@ import org.jooq.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Dimension;
-import org.zalando.compass.domain.model.Revision;
-import org.zalando.compass.domain.model.Revisioned;
 import org.zalando.compass.library.pagination.Pagination;
 
 import javax.annotation.Nullable;
@@ -19,11 +17,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static java.time.ZoneOffset.UTC;
 import static org.jooq.impl.DSL.trueCondition;
 import static org.zalando.compass.domain.persistence.model.Tables.DIMENSION;
-import static org.zalando.compass.domain.persistence.model.Tables.DIMENSION_REVISION;
-import static org.zalando.compass.domain.persistence.model.Tables.REVISION;
 
 @Repository
 public class DimensionRepository {

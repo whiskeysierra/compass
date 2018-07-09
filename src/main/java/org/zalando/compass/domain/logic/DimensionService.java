@@ -20,6 +20,8 @@ public interface DimensionService {
 
     Revisioned<Dimension> read(String id);
 
+    Dimension readOnly(String id);
+
     PageResult<Revision> readPageRevisions(final Pagination<Long> query);
 
     PageRevision<Dimension> readPageAt(long revision, final Pagination<String> query);

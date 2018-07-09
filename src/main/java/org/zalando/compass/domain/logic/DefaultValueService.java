@@ -77,6 +77,14 @@ class DefaultValueService implements ValueService {
     @Transactional(readOnly = true)
     @Override
     public Revisioned<Value> read(final String key, final Map<String, JsonNode> filter) {
+        final Value value = readOnly(key, filter);
+        final Revision revision = readRevision.readLatestRevision(key, filter);
+        return Revisioned.create(value, revision);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Value readOnly(final String key, final Map<String, JsonNode> filter) {
         return read.read(key, filter);
     }
 
@@ -105,7 +113,7 @@ class DefaultValueService implements ValueService {
         return readRevision.readAt(key, dimensions, revision);
     }
 
-    @Transactional
+    @Transactional // TODO isolation?!
     @Override
     public void delete(final String key, final Map<String, JsonNode> filter, @Nullable final String comment) {
         delete.delete(key, filter, comment);

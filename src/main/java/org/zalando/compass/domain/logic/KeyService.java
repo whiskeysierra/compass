@@ -20,6 +20,8 @@ public interface KeyService {
 
     Revisioned<Key> read(String id);
 
+    Key readOnly(String id);
+
     PageResult<Revision> readPageRevisions(final Pagination<Long> query);
 
     PageRevision<Key> readPageAt(long revision, final Pagination<String> query);
