@@ -13,6 +13,8 @@ public interface KeyService {
 
     boolean replace(Key key, @Nullable String comment);
 
+    void create(Key key, @Nullable String comment) throws EntityAlreadyExistsException;
+
     PageResult<Key> readPage(@Nullable String term, final Pagination<String> query);
 
     Key read(String id);

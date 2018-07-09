@@ -27,6 +27,7 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static org.springframework.http.HttpHeaders.IF_NONE_MATCH;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
@@ -56,19 +57,31 @@ class KeyResource implements Reserved {
     }
 
     @RequestMapping(method = PUT, path = "/{id}")
-    public ResponseEntity<KeyRepresentation> replace(@PathVariable final String id,
+    public ResponseEntity<KeyRepresentation> createOrReplace(@PathVariable final String id,
+            @Nullable @RequestHeader(name = IF_NONE_MATCH, required = false) final String ifNoneMatch,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final JsonNode node) throws IOException {
 
         ensureConsistentId(id, node);
         final Key key = reader.read(node, Key.class);
 
-        final boolean created = service.replace(key, comment);
+        final boolean created = createOrReplace(key, comment, ifNoneMatch);
         final KeyRepresentation representation = KeyRepresentation.valueOf(key);
 
         return ResponseEntity
                 .status(created ? CREATED : OK)
                 .body(representation);
+    }
+
+    public boolean createOrReplace(final Key key, @Nullable final String comment,
+            @Nullable final String ifNoneMatch) {
+
+        if ("*".equals(ifNoneMatch)) {
+            service.create(key, comment);
+            return true;
+        } else {
+            return service.replace(key, comment);
+        }
     }
 
     private void ensureConsistentId(@PathVariable final String inUrl, final JsonNode node) {
@@ -119,7 +132,7 @@ class KeyResource implements Reserved {
 
         final JsonMergePatch patch = JsonMergePatch.fromJson(content);
         final JsonNode patched = patch.apply(node);
-        return replace(id, comment, patched);
+        return createOrReplace(id, null, comment, patched);
     }
 
     @RequestMapping(method = PATCH, path = "/{id}", consumes = JSON_PATCH_VALUE)
@@ -133,7 +146,7 @@ class KeyResource implements Reserved {
         final JsonNode node = mapper.valueToTree(key);
 
         final JsonNode patched = patch.apply(node);
-        return replace(id, comment, patched);
+        return createOrReplace(id, null, comment, patched);
     }
 
     @RequestMapping(method = DELETE, path = "/{id}")

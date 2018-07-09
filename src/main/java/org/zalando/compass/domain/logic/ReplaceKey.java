@@ -56,13 +56,7 @@ class ReplaceKey {
         final Revision revision = revisionService.create(comment);
 
         if (current == null) {
-
-            repository.create(key);
-            log.info("Created key [{}]", key);
-
-            final KeyRevision keyRevision = key.toRevision(revision.withType(CREATE));
-            revisionRepository.create(keyRevision);
-            log.info("Created key revision [{}]", keyRevision);
+            create(key, revision);
 
             return true;
         } else {
@@ -80,6 +74,28 @@ class ReplaceKey {
 
             return false;
         }
+    }
+
+    void create(final Key key, @Nullable final String comment) {
+        final KeyLock lock = locking.lockKey(key.getId());
+        @Nullable final Key current = lock.getKey();
+
+        final Revision revision = revisionService.create(comment);
+
+        if (current == null) {
+            create(key, revision);
+        } else {
+            throw new EntityAlreadyExistsException("Key " + key.getId() + " already exists");
+        }
+    }
+
+    private void create(final Key key, final Revision revision) {
+        repository.create(key);
+        log.info("Created key [{}]", key);
+
+        final KeyRevision keyRevision = key.toRevision(revision.withType(CREATE));
+        revisionRepository.create(keyRevision);
+        log.info("Created key revision [{}]", keyRevision);
     }
 
 }

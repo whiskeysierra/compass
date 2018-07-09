@@ -5,6 +5,7 @@ import com.google.common.base.Equivalence.Wrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueLock;
@@ -22,6 +23,7 @@ import java.util.Set;
 import static com.google.common.collect.Sets.difference;
 import static com.google.common.collect.Sets.intersection;
 import static com.google.common.collect.Streams.mapWithIndex;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.zalando.compass.domain.persistence.model.enums.RevisionType.CREATE;
@@ -49,11 +51,8 @@ class ReplaceValue {
     }
 
     boolean replace(final String key, final Value value, @Nullable final String comment) {
-        final ValueLock lock = locking.lockValue(key, value.getDimensions());
+        final ValueLock lock = lock(key, value);
         @Nullable final Value current = lock.getValue();
-
-        validator.check(lock.getDimensions(), value);
-        validator.check(lock.getKey(), value);
 
         final Revision rev = revisionService.create(comment);
 
@@ -66,18 +65,66 @@ class ReplaceValue {
         }
     }
 
+    void create(final String key, final Value value, @Nullable final String comment) {
+        final ValueLock lock = lock(key, value);
+        @Nullable final Value current = lock.getValue();
+
+        final Revision rev = revisionService.create(comment);
+
+        if (current == null) {
+            create(key, value, rev);
+        } else {
+            final String dimensions = lock.getDimensions().stream()
+                    .map(Dimension::getId)
+                    .collect(joining(", "));
+
+            throw new EntityAlreadyExistsException(
+                    "Value for key " + key + " and dimensions [" + dimensions + "] already exists");
+        }
+    }
+
     boolean replace(final String key, final List<Value> values, @Nullable final String comment) {
         log.info("Replacing values of key [{}]", key);
 
-        final ValuesLock lock = locking.lockValues(key, values);
-
-        validator.check(lock.getDimensions(), values);
-        validator.check(lock.getKey(), values);
+        final ValuesLock lock = lock(key, values);
 
         final List<Value> before = lock.getValues();
         final List<Value> after = preserveIndex(values);
 
         return replace(key, before, after, comment);
+    }
+
+    boolean create(final String key, final List<Value> values, @Nullable final String comment) {
+        log.info("Creating values of key [{}]", key);
+
+        final ValuesLock lock = lock(key, values);
+
+        final List<Value> before = lock.getValues();
+        final List<Value> after = preserveIndex(values);
+
+        if (before.isEmpty()) {
+            return replace(key, before, after, comment);
+        } else {
+            throw new EntityAlreadyExistsException();
+        }
+    }
+
+    private ValueLock lock(final String key, final Value value) {
+        final ValueLock lock = locking.lockValue(key, value.getDimensions());
+
+        validator.check(lock.getDimensions(), value);
+        validator.check(lock.getKey(), value);
+
+        return lock;
+    }
+
+    private ValuesLock lock(final String key, final List<Value> values) {
+        final ValuesLock lock = locking.lockValues(key, values);
+
+        validator.check(lock.getDimensions(), values);
+        validator.check(lock.getKey(), values);
+
+        return lock;
     }
 
     private boolean replace(final String key, final List<Value> left, final List<Value> right,
@@ -103,11 +150,11 @@ class ReplaceValue {
         return !creates.isEmpty();
     }
 
-    private List<Value> preserveIndex(final List<Value> values) {
+    private static List<Value> preserveIndex(final List<Value> values) {
         return mapWithIndex(values.stream(), Value::withIndex).collect(toList());
     }
 
-    private Set<Wrapper<Value>> wrap(final Collection<Value> values) {
+    private static Set<Wrapper<Value>> wrap(final Collection<Value> values) {
         final Equivalence<Value> equivalence = Equivalence.equals().onResultOf(Value::getDimensions);
         return values.stream().map(equivalence::wrap).collect(toSet());
     }

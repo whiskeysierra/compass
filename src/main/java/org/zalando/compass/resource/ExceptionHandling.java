@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.zalando.compass.domain.logic.BadArgumentException;
+import org.zalando.compass.domain.logic.EntityAlreadyExistsException;
 import org.zalando.compass.domain.persistence.NotFoundException;
 import org.zalando.compass.library.pagination.IllegalPageQueryException;
 import org.zalando.problem.Problem;
@@ -31,6 +32,12 @@ class ExceptionHandling implements ProblemHandling, SpringAdviceTrait {
     public ResponseEntity<Problem> handleNotFoundException(final NotFoundException exception,
             final NativeWebRequest request) {
         return create(HttpStatus.NOT_FOUND, exception, request);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Problem> handleEntityAlreadyExists(final EntityAlreadyExistsException exception,
+            final NativeWebRequest request) {
+        return create(HttpStatus.PRECONDITION_FAILED, exception, request);
     }
 
 }

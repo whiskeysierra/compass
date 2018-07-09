@@ -34,6 +34,7 @@ import static com.google.common.collect.Streams.mapWithIndex;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static org.springframework.http.HttpHeaders.IF_NONE_MATCH;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -65,8 +66,10 @@ class ValueResource {
 
     @RequestMapping(method = PUT, path = "/values")
     public ResponseEntity<ValueCollectionRepresentation> replaceAll(@PathVariable final String key,
+            @Nullable @RequestHeader(name = IF_NONE_MATCH, required = false) final String ifNoneMatch,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final JsonNode node) throws IOException {
+
         final ValueCollectionRepresentation representation = reader.read(node, ValueCollectionRepresentation.class);
         final List<ValueRepresentation> representations = representation.getValues();
 
@@ -74,27 +77,49 @@ class ValueResource {
                 .map(value -> value.withDimensions(firstNonNull(value.getDimensions(), ImmutableMap.of())));
         final List<Value> values = mapWithIndex(withDimensions, ValueRepresentation::toValue).collect(toList());
 
-        final boolean created = service.replace(key, values, comment);
+        final boolean created = createOrReplace(key, values, comment, ifNoneMatch);
 
         return ResponseEntity.status(created ? CREATED : OK)
                 .body(readAll(key, emptyMap()));
     }
 
+    private boolean createOrReplace(final String key, final List<Value> values, @Nullable final String comment,
+            @Nullable final String ifNoneMatch) {
+
+        if ("*".equals(ifNoneMatch)) {
+            service.create(key, values, comment);
+            return true;
+        } else {
+            return service.replace(key, values, comment);
+        }
+    }
+
     @RequestMapping(method = PUT, path = "/value")
-    public ResponseEntity<ValueRepresentation> replace(@PathVariable final String key,
+    public ResponseEntity<ValueRepresentation> createOrReplace(@PathVariable final String key,
             @RequestParam final Map<String, String> query,
+            @Nullable @RequestHeader(name = IF_NONE_MATCH, required = false) final String ifNoneMatch,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final JsonNode node) throws IOException {
 
         final ImmutableMap<String, JsonNode> dimensions = querying.read(query);
         final Value value = reader.read(node, Value.class).withDimensions(dimensions);
 
-        final boolean created = service.replace(key, value, comment);
+        final boolean created = createOrReplace(key, value, comment, ifNoneMatch);
 
         return ResponseEntity
                 .status(created ? CREATED : OK)
                 .location(canonicalUrl(key, value))
                 .body(ValueRepresentation.valueOf(value));
+    }
+
+    private boolean createOrReplace(final String key, final Value value, @Nullable final String comment,
+            @Nullable final String ifNoneMatch) {
+        if ("*".equals(ifNoneMatch)) {
+            service.create(key, value, comment);
+            return true;
+        } else {
+            return service.replace(key, value, comment);
+        }
     }
 
     @RequestMapping(method = GET, path = "/values")
@@ -128,7 +153,7 @@ class ValueResource {
         final JsonNode node = mapper.valueToTree(values);
 
         final JsonNode patched = patch.apply(node);
-        return replaceAll(key, comment, patched);
+        return replaceAll(key, null, comment, patched);
     }
 
     @RequestMapping(method = PATCH, path = "/value", consumes = {APPLICATION_JSON_VALUE, JSON_MERGE_PATCH_VALUE})
@@ -143,7 +168,7 @@ class ValueResource {
 
         final JsonMergePatch patch = JsonMergePatch.fromJson(content);
         final JsonNode patched = patch.apply(node);
-        return replace(key, query, comment, patched);
+        return createOrReplace(key, query, null, comment, patched);
     }
 
     @RequestMapping(method = PATCH, path = "/value", consumes = JSON_PATCH_VALUE)
@@ -159,7 +184,7 @@ class ValueResource {
         final JsonNode node = mapper.valueToTree(value);
 
         final JsonNode patched = patch.apply(node);
-        return replace(key, query, comment, patched);
+        return createOrReplace(key, query, null, comment, patched);
     }
 
     @RequestMapping(method = DELETE, path = "/value")

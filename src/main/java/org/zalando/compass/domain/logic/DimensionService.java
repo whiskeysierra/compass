@@ -13,6 +13,8 @@ public interface DimensionService {
 
     boolean replace(Dimension dimension, @Nullable String comment);
 
+    void create(final Dimension dimension, @Nullable String comment) throws EntityAlreadyExistsException;
+
     PageResult<Dimension> readPage(@Nullable String term, final Pagination<String> query);
 
     Dimension read(String id);

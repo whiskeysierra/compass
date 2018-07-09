@@ -37,6 +37,12 @@ class DefaultKeyService implements KeyService {
         return replace.replace(key, comment);
     }
 
+    @Transactional(isolation = SERIALIZABLE)
+    @Override
+    public void create(final Key key, @Nullable final String comment) throws EntityAlreadyExistsException {
+        replace.create(key, comment);
+    }
+
     @Transactional(readOnly = true)
     @Override
     public PageResult<Key> readPage(@Nullable final String term, final Pagination<String> query) {

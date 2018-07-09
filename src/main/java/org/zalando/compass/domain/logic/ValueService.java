@@ -16,7 +16,11 @@ public interface ValueService {
 
     boolean replace(String key, List<Value> values, @Nullable String comment);
 
+    void create(String key, List<Value> values, @Nullable String comment);
+
     boolean replace(String key, Value value, @Nullable String comment);
+
+    void create(String key, Value value, @Nullable String comment) throws EntityAlreadyExistsException;
 
     List<Value> readPage(String key, Map<String, JsonNode> filter);
 
