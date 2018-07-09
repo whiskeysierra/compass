@@ -3,6 +3,7 @@ package org.zalando.compass.domain.logic;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
+import org.zalando.compass.domain.model.Revisioned;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueRevision;
 import org.zalando.compass.library.pagination.PageResult;
@@ -22,9 +23,9 @@ public interface ValueService {
 
     void create(String key, Value value, @Nullable String comment) throws EntityAlreadyExistsException;
 
-    List<Value> readPage(String key, Map<String, JsonNode> filter);
+    Revisioned<List<Value>> readPage(String key, Map<String, JsonNode> filter);
 
-    Value read(String key, Map<String, JsonNode> filter);
+    Revisioned<Value> read(String key, Map<String, JsonNode> filter);
 
     PageResult<Revision> readPageRevisions(String key, final Pagination<Long> query);
 

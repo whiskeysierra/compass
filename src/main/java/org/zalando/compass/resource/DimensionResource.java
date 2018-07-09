@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
+import org.zalando.compass.domain.model.Revisioned;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
 
@@ -119,7 +120,8 @@ class DimensionResource implements Reserved {
 
     @RequestMapping(method = GET, path = "/{id}")
     public ResponseEntity<DimensionRepresentation> get(@PathVariable final String id) {
-        return ResponseEntity.ok(DimensionRepresentation.valueOf(service.read(id)));
+        final Revisioned<Dimension> revisioned = service.read(id);
+        return Conditional.build(revisioned, DimensionRepresentation::valueOf);
     }
 
     @RequestMapping(method = PATCH, path = "/{id}", consumes = {APPLICATION_JSON_VALUE, JSON_MERGE_PATCH_VALUE})
@@ -127,7 +129,7 @@ class DimensionResource implements Reserved {
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final ObjectNode content) throws IOException, JsonPatchException {
 
-        final Dimension dimension = service.read(id);
+        final Dimension dimension = service.read(id).getEntity();
         final JsonNode node = mapper.valueToTree(dimension);
 
         final JsonMergePatch patch = JsonMergePatch.fromJson(content);
@@ -142,7 +144,7 @@ class DimensionResource implements Reserved {
 
         final JsonPatch patch = reader.read(content, JsonPatch.class);
 
-        final Dimension dimension = service.read(id);
+        final Dimension dimension = service.read(id).getEntity();
         final JsonNode node = mapper.valueToTree(dimension);
 
         final JsonNode patched = patch.apply(node);

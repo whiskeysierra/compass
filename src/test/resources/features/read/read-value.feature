@@ -20,6 +20,14 @@ Feature: Read value
       | /value |
       | 0.16   |
 
+  Scenario: Last modified and ETag
+    Given "PUT /keys/tax-rate/value?country=DE" responds "201 Created" when requested with:
+      | /value |
+      | 0.19   |
+    Then "GET /keys/tax-rate/value?country=DE" responds "200 OK" with headers:
+      | ETag          | Last-Modified                 |
+      | "AAAAAAAAAAQ" | Fri, 07 Jul 2017 22:09:21 GMT |
+
   Scenario: Read value without dimensions
     And "PUT /keys/tax-rate/values" responds "201 Created" when requested with an array at "/values":
       | /value |

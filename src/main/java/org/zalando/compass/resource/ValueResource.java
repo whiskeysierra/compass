@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.ValueService;
+import org.zalando.compass.domain.model.Revisioned;
 import org.zalando.compass.domain.model.Value;
 
 import javax.annotation.Nullable;
@@ -79,8 +80,9 @@ class ValueResource {
 
         final boolean created = createOrReplace(key, values, comment, ifNoneMatch);
 
+        // TODO share logic via private method
         return ResponseEntity.status(created ? CREATED : OK)
-                .body(readAll(key, emptyMap()));
+                .body(readAll(key, emptyMap()).getBody());
     }
 
     private boolean createOrReplace(final String key, final List<Value> values, @Nullable final String comment,
@@ -123,21 +125,24 @@ class ValueResource {
     }
 
     @RequestMapping(method = GET, path = "/values")
-    public ValueCollectionRepresentation readAll(@PathVariable final String key, @RequestParam final Map<String, String> query) {
+    public ResponseEntity<ValueCollectionRepresentation> readAll(@PathVariable final String key,
+            @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = querying.read(query);
-        final List<Value> page = service.readPage(key, filter);
-        final List<ValueRepresentation> representations = page.stream()
-                .map(ValueRepresentation::valueOf).collect(toList());
+        final Revisioned<List<Value>> page = service.readPage(key, filter);
 
-        return new ValueCollectionRepresentation(representations);
+        return Conditional.build(page, values ->
+                new ValueCollectionRepresentation(page.getEntity().stream()
+                        .map(ValueRepresentation::valueOf).collect(toList())));
     }
 
     @RequestMapping(method = GET, path = "/value")
-    public ResponseEntity<ValueRepresentation> read(@PathVariable final String key, @RequestParam final Map<String, String> query) {
+    public ResponseEntity<ValueRepresentation> read(@PathVariable final String key,
+            @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = querying.read(query);
-        final Value value = service.read(key, filter);
+        final Revisioned<Value> revisioned = service.read(key, filter);
+        final Value value = revisioned.getEntity();
 
-        return ResponseEntity.ok()
+        return Conditional.builder(revisioned)
                 .header(HttpHeaders.CONTENT_LOCATION, canonicalUrl(key, value).toASCIIString())
                 .body(ValueRepresentation.valueOf(value));
     }
@@ -149,7 +154,8 @@ class ValueResource {
 
         final JsonPatch patch = reader.read(content, JsonPatch.class);
 
-        final ValueCollectionRepresentation values = readAll(key, emptyMap());
+        // TODO share logic via private method
+        final ValueCollectionRepresentation values = readAll(key, emptyMap()).getBody();
         final JsonNode node = mapper.valueToTree(values);
 
         final JsonNode patched = patch.apply(node);
@@ -163,7 +169,7 @@ class ValueResource {
             @RequestBody final ObjectNode content) throws IOException, JsonPatchException {
 
         final Map<String, JsonNode> filter = querying.read(query);
-        final Value value = service.read(key, filter);
+        final Value value = service.read(key, filter).getEntity();
         final JsonNode node = mapper.valueToTree(value);
 
         final JsonMergePatch patch = JsonMergePatch.fromJson(content);
@@ -180,7 +186,7 @@ class ValueResource {
         final JsonPatch patch = reader.read(content, JsonPatch.class);
 
         final Map<String, JsonNode> filter = querying.read(query);
-        final Value value = service.read(key, filter);
+        final Value value = service.read(key, filter).getEntity();
         final JsonNode node = mapper.valueToTree(value);
 
         final JsonNode patched = patch.apply(node);

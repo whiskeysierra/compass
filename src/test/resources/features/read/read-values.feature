@@ -9,12 +9,22 @@ Feature: Read values
       | "number"     | ".."         |
 
   Scenario: Read values
-    And "PUT /keys/tax-rate/values" responds "201 Created" when requested with an array at "/values":
+    Given "PUT /keys/tax-rate/values" responds "201 Created" when requested with an array at "/values":
       | /value |
       | 0.19   |
     When "GET /keys/tax-rate/values" responds "200 OK" with an array at "/values":
       | /value |
       | 0.19   |
+
+  Scenario: Last modified and ETag
+    Given "PUT /keys/tax-rate/values" responds "201 Created" when requested with an array at "/values":
+      | /dimensions/country | /value |
+      | "AT"                | 0.2    |
+      | "CH"                | 0.08   |
+      | "DE"                | 0.19   |
+    Then  "GET /keys/tax-rate/values" responds "200 OK" with headers:
+      | ETag          | Last-Modified                 |
+      | "AAAAAAAAAAM" | Fri, 07 Jul 2017 22:09:21 GMT |
 
   Scenario: Read empty values
     Then "GET /keys/tax-rate/values" responds "200 OK" with an empty array at "/values"

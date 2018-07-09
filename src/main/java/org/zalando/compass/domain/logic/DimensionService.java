@@ -4,6 +4,7 @@ import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionRevision;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
+import org.zalando.compass.domain.model.Revisioned;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
 
@@ -17,7 +18,7 @@ public interface DimensionService {
 
     PageResult<Dimension> readPage(@Nullable String term, final Pagination<String> query);
 
-    Dimension read(String id);
+    Revisioned<Dimension> read(String id);
 
     PageResult<Revision> readPageRevisions(final Pagination<Long> query);
 

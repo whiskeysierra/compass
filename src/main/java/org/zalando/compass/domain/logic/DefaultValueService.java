@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
+import org.zalando.compass.domain.model.Revisioned;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueRevision;
 import org.zalando.compass.library.pagination.PageResult;
@@ -60,13 +61,22 @@ class DefaultValueService implements ValueService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<Value> readPage(final String key, final Map<String, JsonNode> filter) {
-        return read.readAll(key, filter);
+    public Revisioned<List<Value>> readPage(final String key, final Map<String, JsonNode> filter) {
+        final List<Value> values = read.readAll(key, filter);
+
+        final PageResult<Revision> revisions = readRevision.readPageRevisions(key, Pagination.create(null, null, 1));
+
+        if (revisions.getElements().isEmpty()) {
+            return Revisioned.create(values, null);
+        }
+
+        final PageRevision<Value> revision = readRevision.readPageAt(key, filter, revisions.getHead().getId());
+        return Revisioned.create(values, revision.getRevision());
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Value read(final String key, final Map<String, JsonNode> filter) {
+    public Revisioned<Value> read(final String key, final Map<String, JsonNode> filter) {
         return read.read(key, filter);
     }
 

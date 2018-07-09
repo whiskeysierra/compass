@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.KeyService;
 import org.zalando.compass.domain.model.Key;
+import org.zalando.compass.domain.model.Revisioned;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
 
@@ -119,7 +120,8 @@ class KeyResource implements Reserved {
 
     @RequestMapping(method = GET, path = "/{id}")
     public ResponseEntity<KeyRepresentation> get(@PathVariable final String id) {
-        return ResponseEntity.ok(KeyRepresentation.valueOf(service.read(id)));
+        final Revisioned<Key> key = service.read(id);
+        return Conditional.build(key, KeyRepresentation::valueOf);
     }
 
     @RequestMapping(method = PATCH, path = "/{id}", consumes = {APPLICATION_JSON_VALUE, JSON_MERGE_PATCH_VALUE})
@@ -127,7 +129,7 @@ class KeyResource implements Reserved {
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final ObjectNode content) throws IOException, JsonPatchException {
 
-        final Key key = service.read(id);
+        final Key key = service.read(id).getEntity();
         final ObjectNode node = mapper.valueToTree(key);
 
         final JsonMergePatch patch = JsonMergePatch.fromJson(content);
@@ -142,7 +144,7 @@ class KeyResource implements Reserved {
 
         final JsonPatch patch = reader.read(content, JsonPatch.class);
 
-        final Key key = service.read(id);
+        final Key key = service.read(id).getEntity();
         final JsonNode node = mapper.valueToTree(key);
 
         final JsonNode patched = patch.apply(node);

@@ -7,6 +7,7 @@ import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.KeyRevision;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
+import org.zalando.compass.domain.model.Revisioned;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
 
@@ -51,8 +52,10 @@ class DefaultKeyService implements KeyService {
 
     @Transactional(readOnly = true)
     @Override
-    public Key read(final String id) {
-        return read.read(id);
+    public Revisioned<Key> read(final String id) {
+        final Key key = read.read(id);
+        final Revision revision = readRevision.readLatestRevision(id);
+        return Revisioned.create(key, revision);
     }
 
     @Transactional(readOnly = true)

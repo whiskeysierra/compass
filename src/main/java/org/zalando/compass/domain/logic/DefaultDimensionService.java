@@ -7,6 +7,7 @@ import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionRevision;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
+import org.zalando.compass.domain.model.Revisioned;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
 
@@ -51,8 +52,10 @@ class DefaultDimensionService implements DimensionService {
 
     @Transactional(readOnly = true)
     @Override
-    public Dimension read(final String id) {
-        return read.read(id);
+    public Revisioned<Dimension> read(final String id) {
+        final Dimension dimension = this.read.read(id);
+        final Revision revision = readRevision.readLatestRevision(id);
+        return Revisioned.create(dimension, revision);
     }
 
     @Transactional(readOnly = true)

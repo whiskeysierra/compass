@@ -4,6 +4,7 @@ import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.KeyRevision;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
+import org.zalando.compass.domain.model.Revisioned;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
 
@@ -17,7 +18,7 @@ public interface KeyService {
 
     PageResult<Key> readPage(@Nullable String term, final Pagination<String> query);
 
-    Key read(String id);
+    Revisioned<Key> read(String id);
 
     PageResult<Revision> readPageRevisions(final Pagination<Long> query);
 

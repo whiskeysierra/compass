@@ -57,6 +57,12 @@ class ReadValueRevision {
         return new PageRevision<>(revision, PageResult.create(selector.select(values, filter), false, false));
     }
 
+    // TODO this is rather inefficient
+    public Revision readLatestRevision(final String key, final Map<String, JsonNode> dimensions) {
+        final Revision revision = readPageRevisions(key, Pagination.create(null, null, 1)).getHead();
+        return readAt(key, dimensions, revision.getId()).getRevision();
+    }
+
     public PageResult<Revision> readRevisions(final String key, final Map<String, JsonNode> dimensions,
             final Pagination<Long> query) {
         final List<Revision> revisions = repository.findRevisions(key, dimensions, query.increment());
@@ -70,4 +76,5 @@ class ReadValueRevision {
         return matched.stream()
                 .findFirst().orElseThrow(NotFoundException::new);
     }
+
 }
