@@ -3,6 +3,7 @@ package org.zalando.compass.resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ResponseEntity.BodyBuilder;
 import org.zalando.compass.domain.model.Revisioned;
+import org.zalando.compass.library.http.ETag;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;

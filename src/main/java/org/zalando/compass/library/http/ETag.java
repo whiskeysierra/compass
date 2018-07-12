@@ -1,15 +1,18 @@
-package org.zalando.compass.resource;
+package org.zalando.compass.library.http;
 
-import com.google.common.primitives.Longs;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 
 import java.util.Base64;
 
+import static com.google.common.primitives.Longs.toByteArray;
+
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @AllArgsConstructor
-final class ETag {
+@Getter
+public final class ETag {
 
     private static final Base64.Encoder ENCODE = Base64.getUrlEncoder().withoutPadding();
 
@@ -17,7 +20,11 @@ final class ETag {
 
     @Override
     public String toString() {
-        return ENCODE.encodeToString(Longs.toByteArray(revision));
+        return Quoting.quote(encode(toByteArray(revision)));
+    }
+
+    public String encode(final byte[] bytes) {
+        return ENCODE.encodeToString(bytes);
     }
 
 }

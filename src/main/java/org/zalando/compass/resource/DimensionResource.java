@@ -8,6 +8,8 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,16 +21,26 @@ import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.DimensionService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Revisioned;
+import org.zalando.compass.library.http.Condition;
+import org.zalando.compass.library.http.Conditions;
+import org.zalando.compass.library.http.ETag;
+import org.zalando.compass.library.http.IfMatch;
+import org.zalando.compass.library.http.IfNoneMatch;
+import org.zalando.compass.library.http.IfUnmodifiedSince;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static org.springframework.http.HttpHeaders.IF_MATCH;
 import static org.springframework.http.HttpHeaders.IF_NONE_MATCH;
+import static org.springframework.http.HttpHeaders.IF_UNMODIFIED_SINCE;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
@@ -59,12 +71,22 @@ class DimensionResource implements Reserved {
 
     @RequestMapping(method = PUT, path = "/{id}")
     public ResponseEntity<DimensionRepresentation> createOrReplace(@PathVariable final String id,
-            @Nullable @RequestHeader(name = IF_NONE_MATCH, required = false) final String ifNoneMatch,
-            @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
-            @RequestBody final JsonNode node) throws IOException {
+            final HttpHeaders headers, @RequestBody final JsonNode node) throws IOException {
 
         ensureConsistentId(id, node);
         final Dimension dimension = reader.read(node, Dimension.class);
+
+        @Nullable final Condition<String> ifMatch = IfMatch.valueOf(headers.getIfMatch());
+        @Nullable final Condition<Instant> ifUnmodifiedSince = IfUnmodifiedSince.valueOf(headers.getIfUnmodifiedSince());
+        @Nullable final Condition<String> ifNoneMatch = IfNoneMatch.valueOf(headers.getIfNoneMatch());
+
+        final Condition<Revisioned<Dimension>> conditions = Conditions.<Revisioned<Dimension>>empty()
+                .or(ifMatch, rev -> new ETag(rev.getRevision()).toString())
+                .or(ifUnmodifiedSince, rev -> rev.getTimestamp().toInstant())
+                .or(ifNoneMatch, rev -> new ETag(rev.getRevision()).toString());
+
+
+        final String comment = headers.getFirst("Comment");
 
         final boolean created = createOrReplace(dimension, comment, ifNoneMatch);
         final DimensionRepresentation representation = DimensionRepresentation.valueOf(dimension);
@@ -134,7 +156,9 @@ class DimensionResource implements Reserved {
 
         final JsonMergePatch patch = JsonMergePatch.fromJson(content);
         final JsonNode patched = patch.apply(node);
-        return createOrReplace(id, null, comment, patched);
+
+        // TODO make sure we don't allow creation with PATCH by accident
+        return createOrReplace(id, null, null, null, comment, patched);
     }
 
     @RequestMapping(method = PATCH, path = "/{id}", consumes = JSON_PATCH_VALUE)
@@ -148,7 +172,9 @@ class DimensionResource implements Reserved {
         final JsonNode node = mapper.valueToTree(dimension);
 
         final JsonNode patched = patch.apply(node);
-        return createOrReplace(id, null, comment, patched);
+
+        // TODO make sure we don't allow creation with PATCH by accident
+        return createOrReplace(id, null, null, null, comment, patched);
     }
 
     @RequestMapping(method = DELETE, path = "/{id}")
