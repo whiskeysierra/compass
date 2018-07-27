@@ -21,7 +21,7 @@
         <start-class>org.zalando.compass.Application</start-class>
 
         <spring-boot.version>2.0.3.RELEASE</spring-boot.version>
-        <spring-security.version>5.0.6.RELEASE</spring-security.version>
+        <spring-security.version>5.0.7.RELEASE</spring-security.version>
         <jackson.version>2.9.6</jackson.version>
         <jooq.version>3.11.3</jooq.version>
         <logbook.version>1.9.0</logbook.version>
