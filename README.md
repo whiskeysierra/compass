@@ -2,6 +2,7 @@
 
 [![Compass](docs/compass.jpg)](http://pixabay.com/en/map-of-the-world-compass-antique-429784/)
 
+[![Stability: Experimental](https://masterminds.github.io/stability/experimental.svg)](https://masterminds.github.io/stability/experimental.html)
 [![Build Status](https://img.shields.io/travis/zalando/compass.svg)](https://travis-ci.org/zalando/compass)
 [![Coverage Status](https://img.shields.io/coveralls/zalando/compass.svg)](https://coveralls.io/r/zalando/compass)
 [![Code Quality](https://img.shields.io/codacy/grade/ccbb2b8b85854dc6849c4b9de6fce224/master.svg)](https://www.codacy.com/app/whiskeysierra/compass)
