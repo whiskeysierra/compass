@@ -23,7 +23,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <start-class>org.zalando.compass.Application</start-class>
         <spring-boot.version>2.0.5.RELEASE</spring-boot.version>
-        <spring-security.version>5.0.8.RELEASE</spring-security.version>
+        <spring-security.version>5.1.0.RELEASE</spring-security.version>
         <jackson.version>2.9.7</jackson.version>
         <jooq.version>3.11.5</jooq.version>
         <logbook.version>1.9.1</logbook.version>
