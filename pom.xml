@@ -493,6 +493,7 @@
                                 <ignoredResourcePattern>.*</ignoredResourcePattern>
                             </ignoredResourcePatterns>
                             <ignoredClassPatterns>
+                                <ignoredClassPattern>.*\.module-info</ignoredClassPattern>
                                 <ignoredClassPattern>org.testcontainers.shaded.com.google.*$</ignoredClassPattern>
                             </ignoredClassPatterns>
                         </configuration>
