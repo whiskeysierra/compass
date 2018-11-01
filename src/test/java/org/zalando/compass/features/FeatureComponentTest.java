@@ -16,10 +16,13 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
         stepDefinitionPackages = "org.zalando.compass.features",
         reportIndividualSteps = true
 )
-@SpringBootTest(webEnvironment = DEFINED_PORT, classes = {
-        Application.class,
-        FixedClockConfiguration.class,
-})
+@SpringBootTest(
+        webEnvironment = DEFINED_PORT,
+        classes = {
+                Application.class,
+                FixedClockConfiguration.class,
+        },
+        properties = "spring.main.allow-bean-definition-overriding: true")
 @ActiveProfiles("test")
 public class FeatureComponentTest {
 
