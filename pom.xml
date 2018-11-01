@@ -22,7 +22,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <start-class>org.zalando.compass.Application</start-class>
-        <spring-boot.version>2.0.6.RELEASE</spring-boot.version>
+        <spring-boot.version>2.1.0.RELEASE</spring-boot.version>
         <spring-security.version>5.1.1.RELEASE</spring-security.version>
         <jackson.version>2.9.7</jackson.version>
         <jooq.version>3.11.5</jooq.version>
@@ -317,6 +317,11 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.3.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-junit</artifactId>
             <version>2.0.0.0</version>
@@ -493,6 +498,7 @@
                                 <ignoredResourcePattern>.*</ignoredResourcePattern>
                             </ignoredResourcePatterns>
                             <ignoredClassPatterns>
+                                <ignoredClassPattern>.*\.module-info</ignoredClassPattern>
                                 <ignoredClassPattern>org.testcontainers.shaded.com.google.*$</ignoredClassPattern>
                             </ignoredClassPatterns>
                         </configuration>
