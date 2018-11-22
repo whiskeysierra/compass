@@ -52,19 +52,19 @@ public class ValueMatcherTest {
     private final ValueMatcher unit = new ValueMatcher();
 
     @Test
-    public void shouldMatchEquality() throws IOException {
+    public void shouldMatchEquality() {
         assertThat(unit.match(values, of(country, text("DE"))), is(asList(
                 of(country, text("DE")),
                 of())));
     }
 
     @Test
-    public void shouldMatchEqualityFallback() throws IOException {
+    public void shouldMatchEqualityFallback() {
         assertThat(unit.match(values, of(country, text("UK"))), is(singletonList(of())));
     }
 
     @Test
-    public void shouldMatchLessThan() throws IOException {
+    public void shouldMatchLessThan() {
         assertThat(unit.match(values, of(country, text("CH"), before, text("2013-12-20T11:47:19Z"))), is(asList(
                 of(country, text("CH"), before, text("2014-01-01T00:00:00Z")),
                 of(country, text("CH"), before, text("2015-01-01T00:00:00Z")),
@@ -73,7 +73,7 @@ public class ValueMatcherTest {
     }
 
     @Test
-    public void shouldMatchLessThanEqual() throws IOException {
+    public void shouldMatchLessThanEqual() {
         assertThat(unit.match(values, of(country, text("CH"), before, text("2014-01-01T00:00:00Z"))), is(asList(
                 of(country, text("CH"), before, text("2014-01-01T00:00:00Z")),
                 of(country, text("CH"), before, text("2015-01-01T00:00:00Z")),
@@ -82,7 +82,7 @@ public class ValueMatcherTest {
     }
 
     @Test
-    public void shouldMatchGreaterThan() throws IOException {
+    public void shouldMatchGreaterThan() {
         assertThat(unit.match(values, of(country, text("CH"), after, text("2019-12-20T11:47:19Z"))), is(asList(
                 of(country, text("CH"), after, text("2018-01-01T00:00:00Z")),
                 of(country, text("CH"), after, text("2017-01-01T00:00:00Z")),
@@ -92,7 +92,7 @@ public class ValueMatcherTest {
     }
 
     @Test
-    public void shouldMatchGreaterThanEqual() throws IOException {
+    public void shouldMatchGreaterThanEqual() {
         assertThat(unit.match(values, of(country, text("CH"), after, text("2018-01-01T00:00:00Z"))), is(asList(
                 of(country, text("CH"), after, text("2018-01-01T00:00:00Z")),
                 of(country, text("CH"), after, text("2017-01-01T00:00:00Z")),
@@ -102,37 +102,37 @@ public class ValueMatcherTest {
     }
 
     @Test
-    public void shouldMatchPrefix() throws IOException {
+    public void shouldMatchPrefix() {
         assertThat(unit.match(values, of(locale, text("de-AT"))),is(asList(
                 of(locale, text("de")),
                 of())));
     }
 
     @Test
-    public void shouldMatchMatches() throws IOException {
+    public void shouldMatchMatches() {
         assertThat(unit.match(values, of(email, text("user@zalando.de"))), is(asList(
                 of(email, text(".*@zalando\\.de")),
                 of())));
     }
 
     @Test
-    public void shouldMatchWithoutFilter() throws IOException {
+    public void shouldMatchWithoutFilter() {
         assertThat(unit.match(values, of()), is(singletonList(of())));
     }
 
     @Test
-    public void shouldMatchWithUnknownDimensions() throws IOException {
+    public void shouldMatchWithUnknownDimensions() {
         final RichDimension foo = new RichDimension("foo", stringSchema(), new Equality(), "");
         assertThat(unit.match(values, of(foo, text("bar"))), is(singletonList(of())));
     }
 
     @Test
-    public void shouldMatchWithoutMatchingDimensions() throws IOException {
+    public void shouldMatchWithoutMatchingDimensions() {
         assertThat(unit.match(values, of(postalCode, text("12345"))), is(singletonList(of())));
     }
 
     @Test
-    public void shouldMatchWithPartiallyUnknownDimensions() throws IOException {
+    public void shouldMatchWithPartiallyUnknownDimensions() {
         final RichDimension foo = new RichDimension("foo", stringSchema(), new Equality(), "");
         assertThat(unit.match(values, of(country, text("DE"),
                 foo, text("bar"))), is(asList(

@@ -55,7 +55,6 @@ Feature: Key update
       | /field         | /message                                                                                                         |
       | "/description" | "/description: boolean found, string expected"                                                                   |
       | "/schema/type" | "/schema/type: does not have a value in the enumeration [array, boolean, integer, null, number, object, string]" |
-      | "/schema/type" | "/schema/type: string found, array expected"                                                                     |
 
   Scenario: Updating a dimension's schema should fail if at least one value violates it
     Given "PUT /dimensions/country" responds "201 Created" when requested with:

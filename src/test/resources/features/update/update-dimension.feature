@@ -45,7 +45,6 @@ Feature: Dimension update
       | "/description" | "/description: boolean found, string expected"                                                                   |
       | "/relation"    | "/relation: integer found, string expected"                                                                      |
       | "/schema/type" | "/schema/type: does not have a value in the enumeration [array, boolean, integer, null, number, object, string]" |
-      | "/schema/type" | "/schema/type: string found, array expected"                                                                     |
 
   Scenario: Update dimension with values
     Given "PUT /dimensions/country" responds "201 Created" when requested with:
