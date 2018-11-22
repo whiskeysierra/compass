@@ -41,7 +41,6 @@ Feature: Key creation
       | "/description" | "/description: boolean found, string expected"                                                                   |
       | "/id"          | "/id: does not match the regex pattern ^([a-z0-9]+(-[a-z0-9]+)*)([.]([a-z0-9]+(-[a-z0-9]+)*))*$"                 |
       | "/schema/type" | "/schema/type: does not have a value in the enumeration [array, boolean, integer, null, number, object, string]" |
-      | "/schema/type" | "/schema/type: string found, array expected"                                                                     |
 
   Scenario Outline: Creating a new key fails due to reserved keywords
     When "PUT /keys/<key>" when requested with:
