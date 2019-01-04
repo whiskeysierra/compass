@@ -37,10 +37,10 @@ Feature: Key creation
       | /schema/type | /description |
       | "any"        | false        |
     Then "400 Bad Request" was responded with an array at "/violations":
-      | /field         | /message                                                                                                         |
-      | "/description" | "/description: boolean found, string expected"                                                                   |
-      | "/id"          | "/id: does not match the regex pattern ^([a-z0-9]+(-[a-z0-9]+)*)([.]([a-z0-9]+(-[a-z0-9]+)*))*$"                 |
-      | "/schema/type" | "/schema/type: does not have a value in the enumeration [array, boolean, integer, null, number, object, string]" |
+      | /field         | /message                                                                                         |
+      | "/description" | "/description: boolean found, string expected"                                                   |
+      | "/id"          | "/id: does not match the regex pattern ^([a-z0-9]+(-[a-z0-9]+)*)([.]([a-z0-9]+(-[a-z0-9]+)*))*$" |
+      | "/schema/type" | "/schema/type: should be valid to any of the schemas [array]"                                    |
 
   Scenario Outline: Creating a new key fails due to reserved keywords
     When "PUT /keys/<key>" when requested with:

@@ -41,10 +41,10 @@ Feature: Dimension update
       | /id      | /schema/type | /relation | /description |
       | "device" | "any"        | 17        | false        |
     Then "400 Bad Request" was responded with an array at "/violations":
-      | /field         | /message                                                                                                         |
-      | "/description" | "/description: boolean found, string expected"                                                                   |
-      | "/relation"    | "/relation: integer found, string expected"                                                                      |
-      | "/schema/type" | "/schema/type: does not have a value in the enumeration [array, boolean, integer, null, number, object, string]" |
+      | /field         | /message                                                      |
+      | "/description" | "/description: boolean found, string expected"                |
+      | "/relation"    | "/relation: integer found, string expected"                   |
+      | "/schema/type" | "/schema/type: should be valid to any of the schemas [array]" |
 
   Scenario: Update dimension with values
     Given "PUT /dimensions/country" responds "201 Created" when requested with:

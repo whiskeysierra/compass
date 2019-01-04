@@ -216,7 +216,7 @@
         <dependency>
             <groupId>com.networknt</groupId>
             <artifactId>json-schema-validator</artifactId>
-            <version>0.1.24</version>
+            <version>0.1.26</version>
             <exclusions>
                 <exclusion>
                     <groupId>ch.qos.cal10n</groupId>
