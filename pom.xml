@@ -26,7 +26,7 @@
         <spring-security.version>5.1.2.RELEASE</spring-security.version>
         <jackson.version>2.9.8</jackson.version>
         <jooq.version>3.11.9</jooq.version>
-        <logbook.version>1.12.0</logbook.version>
+        <logbook.version>1.12.1</logbook.version>
         <postgres.version>42.2.5</postgres.version>
         <problem.version>0.22.0</problem.version>
         <riptide.version>2.10.1</riptide.version>
