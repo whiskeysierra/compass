@@ -718,13 +718,7 @@ components:
           readOnly: true
           example: country
         schema:
-          description: The schema that applies to all values of this dimension across all values.
-          # $ref: 'json-schema.json#'
-          type: object
-          additionalProperties: true
-          example:
-            type: string
-            pattern: '^[A-Z]{2}$'
+          $ref: '#/components/schemas/JsonSchema'
         relation:
           description: |
             The underlying operator that is used to apply any matching and ordering semantics. For a complete list of
@@ -762,15 +756,7 @@ components:
           readOnly: true
           example: tax-rate
         schema:
-          description: The schema that applies to all values of this key.
-          # $ref: 'json-schema.json#'
-          type: object
-          additionalProperties: true
-          example:
-            type: number
-            format: decimal
-            minimum: 0.0
-            maximum: 1.0
+          $ref: '#/components/schemas/JsonSchema'
         description:
           type: string
           description: |
@@ -883,9 +869,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/Revisioned'
         - $ref: '#/components/schemas/Value'
+    JsonSchema:
+      $ref: 'resource:/api/json-schema.json'
     JsonPatch:
-      # $ref: 'json-patch.json#'
-      type: array
-      items:
-        type: object
-        additionalProperties: true
+      $ref: 'resource:/api/json-patch.json'

@@ -50,6 +50,7 @@ Feature: Dimension creation
       | "ECMA 262 regex ^([a-z0-9]+(-[a-z0-9]+)*)([.]([a-z0-9]+(-[a-z0-9]+)*))*$ does not match input string FOO"     |
       | "[Path '/description'] Instance type (boolean) does not match any allowed primitive type (allowed: [string])" |
       | "[Path '/relation'] Instance type (integer) does not match any allowed primitive type (allowed: [string])"    |
+      | "[Path '/schema/type'] Instance failed to match at least one required schema among 2"                         |
 
   Scenario Outline: Creating a new dimension fails due to reserved keywords
     When "PUT /dimensions/<dimension>" when requested with:

@@ -36,6 +36,7 @@ Feature: Dimension update
       | /message                                                                                                      |
       | "[Path '/description'] Instance type (boolean) does not match any allowed primitive type (allowed: [string])" |
       | "[Path '/relation'] Instance type (integer) does not match any allowed primitive type (allowed: [string])"    |
+      | "[Path '/schema/type'] Instance failed to match at least one required schema among 2"                         |
 
   Scenario: Update dimension with values
     Given "PUT /dimensions/country" responds "201 Created" when requested with:

@@ -46,6 +46,7 @@ Feature: Key update
     Then "400 Bad Request" was responded with an array at "/violations":
       | /message                                                                                                      |
       | "[Path '/description'] Instance type (boolean) does not match any allowed primitive type (allowed: [string])" |
+      | "[Path '/schema/type'] Instance failed to match at least one required schema among 2"                         |
 
   Scenario: Updating a dimension's schema should fail if at least one value violates it
     Given "PUT /dimensions/country" responds "201 Created" when requested with:
