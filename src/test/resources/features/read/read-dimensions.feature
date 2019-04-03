@@ -35,8 +35,8 @@ Feature: Read dimensions
 
   Scenario: Read dimensions with limit of 101
     Then "GET /dimensions?limit=101" responds "400 Bad Request" with an array at "/violations":
-      | /field  | /message                                  |
-      | "limit" | "limit: must have a maximum value of 100" |
+      | /message                                                                           |
+      | "Numeric instance is greater than the required maximum (maximum: 100, found: 101)" |
 
   Scenario: Read empty dimensions
     Then "GET /dimensions" responds "200 OK" with an empty array at "/dimensions"

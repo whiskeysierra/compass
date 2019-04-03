@@ -19,12 +19,12 @@ final class ValueRepresentation {
     ImmutableMap<String, JsonNode> dimensions;
     JsonNode value;
 
-    Value toValue(final long index) {
-        return new Value(dimensions, index, value);
-    }
-
     static ValueRepresentation valueOf(final Value value) {
         return new ValueRepresentation(value.getDimensions(), value.getValue());
+    }
+
+    Value toValue(final long index) {
+        return new Value(dimensions, index, value);
     }
 
 }

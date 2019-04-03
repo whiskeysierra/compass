@@ -30,10 +30,6 @@ public class ValidationService {
         this.validator = validator;
     }
 
-    public void check(final Dimension dimension, final Relation relation) {
-        throwIfNotEmpty(validator.check(relation.supports(), dimension.getSchema()));
-    }
-
     public void check(final Dimension dimension, final Collection<Value> values) {
         check(singleton(dimension), values);
     }
@@ -66,7 +62,7 @@ public class ValidationService {
         }
 
         final JsonNode schema = dimension.getSchema();
-        return validator.validate(schema, node, "/dimensions", dimension.getId());
+        return validator.validate(schema, node);
     }
 
     public void check(final Key key, final Collection<Value> values) {
@@ -82,7 +78,7 @@ public class ValidationService {
     private List<Violation> validate(final Key key, final Value value) {
         final JsonNode schema = key.getSchema();
         final JsonNode node = value.getValue();
-        return validator.validate(schema, node, "/value");
+        return validator.validate(schema, node);
     }
 
     private void throwIfNotEmpty(final List<Violation> violations) {

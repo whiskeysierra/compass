@@ -78,7 +78,7 @@ class Querying {
     }
 
     private String toText(final JsonNode node) throws JsonProcessingException {
-        return node.isValueNode() ? node.asText() : mapper.writeValueAsString(node) ;
+        return node.isValueNode() ? node.asText() : mapper.writeValueAsString(node);
     }
 
 }

@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionLock;
 import org.zalando.compass.domain.model.DimensionRevision;
-import org.zalando.compass.domain.model.Relation;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.persistence.DimensionRepository;
@@ -110,13 +109,8 @@ class ReplaceDimension {
     }
 
     private void validateRelation(final Dimension dimension) {
-        final Relation relation = readRelation(dimension);
-        validator.check(dimension, relation);
-    }
-
-    private Relation readRelation(final Dimension dimension) {
         try {
-            return relationService.read(dimension.getRelation());
+            relationService.read(dimension.getRelation());
         } catch (final NotFoundException e) {
             throw new BadArgumentException(e);
         }

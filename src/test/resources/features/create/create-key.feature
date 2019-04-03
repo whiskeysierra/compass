@@ -26,21 +26,14 @@ Feature: Key creation
       | /id       | /schema/type | /description                 |
       | "example" | "string"     | "Lorem ipsum dolor sit amet" |
 
-  Scenario: Creating a new key failed due to id mismatch
-    Given "GET /keys/foo" responds "404 Not Found"
-    Then "PUT /keys/foo" responds "400 Bad Request" when requested with:
-      | /id   | /schema/type | /description                 |
-      | "bar" | "string"     | "Lorem ipsum dolor sit amet" |
-
   Scenario: Creating a new key failed due to schema violation
     When "PUT /keys/FOO" when requested with:
       | /schema/type | /description |
       | "any"        | false        |
     Then "400 Bad Request" was responded with an array at "/violations":
-      | /field         | /message                                                                                         |
-      | "/description" | "/description: boolean found, string expected"                                                   |
-      | "/id"          | "/id: does not match the regex pattern ^([a-z0-9]+(-[a-z0-9]+)*)([.]([a-z0-9]+(-[a-z0-9]+)*))*$" |
-      | "/schema/type" | "/schema/type: should be valid to any of the schemas [array]"                                    |
+      | /message                                                                                                      |
+      | "ECMA 262 regex ^([a-z0-9]+(-[a-z0-9]+)*)([.]([a-z0-9]+(-[a-z0-9]+)*))*$ does not match input string FOO"     |
+      | "[Path '/description'] Instance type (boolean) does not match any allowed primitive type (allowed: [string])" |
 
   Scenario Outline: Creating a new key fails due to reserved keywords
     When "PUT /keys/<key>" when requested with:

@@ -2,12 +2,11 @@ package org.zalando.compass.resource;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.google.common.collect.ImmutableMap;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -49,29 +48,19 @@ import static org.zalando.compass.resource.MediaTypes.JSON_PATCH_VALUE;
 
 @RestController
 @RequestMapping(path = "/keys/{key}")
+@AllArgsConstructor(onConstructor = @__(@Autowired))
 class ValueResource {
 
     private final Querying querying;
-    private final JsonReader reader;
     private final ObjectMapper mapper;
     private final ValueService service;
-
-    @Autowired
-    public ValueResource(final Querying querying, final JsonReader reader, final ObjectMapper mapper,
-            final ValueService service) {
-        this.querying = querying;
-        this.reader = reader;
-        this.mapper = mapper;
-        this.service = service;
-    }
 
     @RequestMapping(method = PUT, path = "/values")
     public ResponseEntity<ValueCollectionRepresentation> replaceAll(@PathVariable final String key,
             @Nullable @RequestHeader(name = IF_NONE_MATCH, required = false) final String ifNoneMatch,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
-            @RequestBody final JsonNode node) throws IOException {
+            @RequestBody final ValueCollectionRepresentation representation) {
 
-        final ValueCollectionRepresentation representation = reader.read(node, ValueCollectionRepresentation.class);
         final List<ValueRepresentation> representations = representation.getValues();
 
         final Stream<ValueRepresentation> withDimensions = representations.stream()
@@ -101,10 +90,10 @@ class ValueResource {
             @RequestParam final Map<String, String> query,
             @Nullable @RequestHeader(name = IF_NONE_MATCH, required = false) final String ifNoneMatch,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
-            @RequestBody final JsonNode node) throws IOException {
+            @RequestBody final Value body) {
 
         final ImmutableMap<String, JsonNode> dimensions = querying.read(query);
-        final Value value = reader.read(node, Value.class).withDimensions(dimensions);
+        final Value value = body.withDimensions(dimensions);
 
         final boolean created = createOrReplace(key, value, comment, ifNoneMatch);
 
@@ -150,47 +139,50 @@ class ValueResource {
     @RequestMapping(method = PATCH, path = "/values", consumes = {APPLICATION_JSON_VALUE, JSON_PATCH_VALUE})
     public ResponseEntity<ValueCollectionRepresentation> updateAll(@PathVariable final String key,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
-            @RequestBody final ArrayNode content) throws IOException, JsonPatchException {
-
-        final JsonPatch patch = reader.read(content, JsonPatch.class);
+            @RequestBody final JsonPatch patch) throws IOException, JsonPatchException {
 
         // TODO share logic via private method
-        final ValueCollectionRepresentation values = readAll(key, emptyMap()).getBody();
-        final JsonNode node = mapper.valueToTree(values);
+        final ValueCollectionRepresentation before = readAll(key, emptyMap()).getBody();
+        final JsonNode node = mapper.valueToTree(before);
 
         final JsonNode patched = patch.apply(node);
-        return replaceAll(key, null, comment, patched);
+        final ValueCollectionRepresentation after = mapper.treeToValue(patched, ValueCollectionRepresentation.class);
+
+        return replaceAll(key, null, comment, after);
     }
 
     @RequestMapping(method = PATCH, path = "/value", consumes = {APPLICATION_JSON_VALUE, JSON_MERGE_PATCH_VALUE})
     public ResponseEntity<ValueRepresentation> update(@PathVariable final String key,
             @RequestParam final Map<String, String> query,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
-            @RequestBody final ObjectNode content) throws IOException, JsonPatchException {
+            @RequestBody final JsonMergePatch patch) throws IOException, JsonPatchException {
 
         final Map<String, JsonNode> filter = querying.read(query);
-        final Value value = service.readOnly(key, filter);
-        final JsonNode node = mapper.valueToTree(value);
 
-        final JsonMergePatch patch = JsonMergePatch.fromJson(content);
+        final Value before = service.readOnly(key, filter);
+        final JsonNode node = mapper.valueToTree(before);
+
         final JsonNode patched = patch.apply(node);
-        return createOrReplace(key, query, null, comment, patched);
+        final Value after = mapper.treeToValue(patched, Value.class);
+
+        return createOrReplace(key, query, null, comment, after);
     }
 
     @RequestMapping(method = PATCH, path = "/value", consumes = JSON_PATCH_VALUE)
     public ResponseEntity<ValueRepresentation> update(@PathVariable final String key,
             @RequestParam final Map<String, String> query,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
-            @RequestBody final ArrayNode content) throws IOException, JsonPatchException {
-
-        final JsonPatch patch = reader.read(content, JsonPatch.class);
+            @RequestBody final JsonPatch patch) throws IOException, JsonPatchException {
 
         final Map<String, JsonNode> filter = querying.read(query);
-        final Value value = service.readOnly(key, filter);
-        final JsonNode node = mapper.valueToTree(value);
+
+        final Value before = service.readOnly(key, filter);
+        final JsonNode node = mapper.valueToTree(before);
 
         final JsonNode patched = patch.apply(node);
-        return createOrReplace(key, query, null, comment, patched);
+        final Value after = mapper.treeToValue(patched, Value.class);
+
+        return createOrReplace(key, query, null, comment, after);
     }
 
     @RequestMapping(method = DELETE, path = "/value")

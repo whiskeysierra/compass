@@ -1,4 +1,4 @@
-swagger: '2.0'
+openapi: '3.0.2'
 info:
   title: Compass - Configuration Management API
   description: |
@@ -20,13 +20,6 @@ info:
     Keys can impose certain type restrictions on their values by defining a JSON schema. The same applies to dimensions
     and their values.
   version: "0.1.0"
-schemes:
-  - https
-consumes:
-  - application/json
-produces:
-  - application/json
-  - application/problem+json
 tags:
   - name: relations
   - name: dimensions
@@ -46,8 +39,10 @@ paths:
       responses:
         200:
           description: OK
-          schema:
-            $ref: '#/definitions/RelationPage'
+          content: 
+            application/json: 
+              schema:
+                $ref: '#/components/schemas/RelationCollection'
   /relations/{relation}:
     get:
       tags: [relations]
@@ -55,13 +50,16 @@ paths:
       parameters:
         - name: relation
           in: path
-          type: string
+          schema:
+            type: string
           required: true
       responses:
         200:
           description: OK
-          schema:
-            $ref: '#/definitions/Relation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Relation'
   /dimensions:
     get:
       tags: [dimensions]
@@ -70,35 +68,52 @@ paths:
         - name: q
           description: Search term
           in: query
-          type: string
+          schema:
+            type: string
+        - $ref: '#/components/parameters/Limit'
       description: |
         Read the complete list of all dimensions currently defined. This is intended to be used for display purposes.
       responses:
         200:
           description: OK
-          schema:
-            $ref: '#/definitions/DimensionCollectionRepresentation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DimensionCollection'
   /dimensions/revisions:
     get:
-      tags: [dimensions, history]
+      tags: [history]
       summary: Read revisions of all dimensions
       description: "" # TODO
+      parameters:
+        - $ref: '#/components/parameters/Limit'
       responses:
         200:
           description: OK
-          schema:
-            $ref: '#/definitions/RevisionCollectionRepresentation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevisionCollection'
 
   /dimensions/revisions/{revision}:
     get:
-      tags: [dimensions, history]
+      tags: [history]
       summary: Read historic version of all dimensions and optionally filter by search term
       parameters:
-        - $ref: '#/parameters/Revision'
+        - $ref: '#/components/parameters/Revision'
         - name: q
           description: Search term
           in: query
-          type: string
+          schema:
+            type: string
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevisionedDimensionCollection'
   /dimensions/{dimension}:
     put:
       tags: [dimensions]
@@ -112,61 +127,97 @@ paths:
         Since dimenions are used as query parameters when reading values there are certain reserved names that are not
         allowed.
       parameters:
-        - $ref: '#/parameters/DimensionId'
-        - name: dimension
-          in: body
-          schema:
-            $ref: '#/definitions/Dimension'
+        - $ref: '#/components/parameters/Dimension'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dimension' 
       responses:
         200:
           description: OK
-          schema:
-            $ref: '#/definitions/Dimension'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dimension'
         201:
           description: Created
-          schema:
-            $ref: '#/definitions/Dimension'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dimension'
     get:
       tags: [dimensions]
       summary: Read a dimension
       parameters:
-        - $ref: '#/parameters/DimensionId'
+        - $ref: '#/components/parameters/Dimension'
       responses:
         200:
           description: OK
-          schema:
-            $ref: '#/definitions/Dimension'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dimension'
     patch:
       tags: [dimensions]
       summary: Update a dimension
-      consumes:
-        - application/json
-        - application/merge-patch+json
-        - application/json-patch+json
       parameters:
-        - $ref: '#/parameters/DimensionId'
-        - name: dimension
-          in: body
-          schema:
-            $ref: '#/definitions/Dimension'
+        - $ref: '#/components/parameters/Dimension'
+      requestBody:
+        content:
+          application/json:
+            schema: # TODO
+              type: object
+              additionalProperties: true
+          application/merge-patch+json:
+            schema: # TODO
+              type: object
+              additionalProperties: true
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/JsonPatch'
       responses:
         200:
           description: OK
-          schema:
-            $ref: '#/definitions/Dimension'
+          content: 
+            application/json: 
+              schema:
+                $ref: '#/components/schemas/Dimension'
     delete:
       tags: [dimensions]
       summary: Delete a dimension
       description: Deleting a dimension that is still referenced by a value is not supported and will be rejected.
       parameters:
-        - $ref: '#/parameters/DimensionId'
+        - $ref: '#/components/parameters/Dimension'
       responses:
         204:
           description: No Content
   /dimensions/{dimension}/revisions:
-    {}
+    get:
+      tags: [history]
+      parameters:
+        - $ref: '#/components/parameters/Dimension'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevisionCollection'
   /dimensions/{dimension}/revisions/{revision}:
-    {}
+    get:
+      tags: [history]
+      parameters:
+        - $ref: '#/components/parameters/Dimension'
+        - $ref: '#/components/parameters/Revision'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevisionedDimension'
   /keys:
     get:
       tags: [keys]
@@ -175,12 +226,41 @@ paths:
         - name: q
           description: Search term
           in: query
-          type: string
+          schema:
+            type: string
+        - $ref: '#/components/parameters/Limit'
       responses:
         200:
           description: OK
-          schema:
-            $ref: '#/definitions/KeyCollectionRepresentation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyCollection'
+  /keys/revisions:
+    get:
+      tags: [history]
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevisionCollection'
+  /keys/revisions/{revision}:
+    get:
+      tags: [history]
+      parameters:
+        - $ref: '#/components/parameters/Revision'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevisionedKeyCollection'
   /keys/{key}:
     put:
       tags: [keys]
@@ -191,57 +271,99 @@ paths:
         A modification to an existing key's schema requires that all values of this key successfully validate against
         it. A violation of this rule will result in a rejected update.
       parameters:
-        - $ref: '#/parameters/Key'
-        - name: key
-          in: body
-          schema:
-            $ref: '#/definitions/Key'
+        - $ref: '#/components/parameters/Key'
+      requestBody:
+        content:
+          application/json: 
+            schema:
+              $ref: '#/components/schemas/Key'
       responses:
         200:
           description: OK
-          schema:
-            $ref: '#/definitions/Key'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Key'
         201:
           description: Created
-          schema:
-            $ref: '#/definitions/Key'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Key'
     get:
       tags: [keys]
       summary: Read a key
       parameters:
-        - $ref: '#/parameters/Key'
+        - $ref: '#/components/parameters/Key'
       responses:
         200:
           description: OK
-          schema:
-            $ref: '#/definitions/Key'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Key'
     patch:
       tags: [keys]
       summary: Update a key
-      consumes:
-        - application/json
-        - application/merge-patch+json
-        - application/json-patch+json
       parameters:
-        - $ref: '#/parameters/Key'
-        - name: key
-          in: body
-          schema:
-            $ref: '#/definitions/Key'
+        - $ref: '#/components/parameters/Key'
+      requestBody:
+        content:
+          application/json:
+            schema: # TODO
+              type: object
+              additionalProperties: true
+          application/merge-patch+json:
+            schema: # TODO
+              type: object
+              additionalProperties: true
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/JsonPatch'
+            
       responses:
         200:
           description: OK
-          schema:
-            $ref: '#/definitions/Key'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Key'
     delete:
       tags: [keys]
       summary: Delete a key
       description: Deleting a key will delete all of its values.
       parameters:
-        - $ref: '#/parameters/Key'
+        - $ref: '#/components/parameters/Key'
       responses:
         204:
           description: No Content
+  /keys/{key}/revisions:
+    get:
+      tags: [history]
+      parameters:
+        - $ref: '#/components/parameters/Key'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevisionCollection'
+  /keys/{key}/revisions/{revision}:
+    get:
+      tags: [history]
+      parameters:
+        - $ref: '#/components/parameters/Key'
+        - $ref: '#/components/parameters/Revision'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevisionedKey'
   /keys/{key}/values:
     put:
       tags: [values]
@@ -250,21 +372,25 @@ paths:
         If any value violates this key's schema or any dimensions values are violating their respective dimension's
         schema then the whole update will be rejected.
       parameters:
-        - $ref: '#/parameters/Key'
-        - name: values
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/ValueCollectionRepresentation'
+        - $ref: '#/components/parameters/Key'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValueCollection'
       responses:
         200:
           description: OK
-          schema:
-            $ref: '#/definitions/ValueCollectionRepresentation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValueCollection'
         201:
           description: Created
-          schema:
-            $ref: '#/definitions/ValueCollectionRepresentation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValueCollection'
     get:
       tags: [values]
       summary: Read values for the given key and optional dimensions.
@@ -277,30 +403,63 @@ paths:
 
         Values are always returned in insertion order. Ordering can be changed by replacing all values.
       parameters:
-        - $ref: '#/parameters/Key'
-        - $ref: '#/parameters/Filter'
+        - $ref: '#/components/parameters/Key'
+        - $ref: '#/components/parameters/Filter'
+        # TODO limit + pagination?!
       responses:
         200:
           description: OK
-          schema:
-            $ref: '#/definitions/ValueCollectionRepresentation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValueCollection'
     patch:
+      tags: [values]
       summary: Update values for the given key.
-      consumes:
-        - application/json
-        - application/json-patch+json
       parameters:
-        - $ref: '#/parameters/Key'
-        - name: values
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/JsonPatch'
+        - $ref: '#/components/parameters/Key'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonPatch'
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/JsonPatch'
       responses:
         200:
           description: OK
-          schema:
-            $ref: '#/definitions/ValueCollectionRepresentation'
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValueCollection'
+  /keys/{key}/values/revisions:
+    get:
+      tags: [history]
+      parameters:
+        - $ref: '#/components/parameters/Key'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevisionCollection'
+  /keys/{key}/values/revisions/{revision}:
+    get:
+      tags: [history]
+      parameters:
+        - $ref: '#/components/parameters/Key'
+        - $ref: '#/components/parameters/Revision'
+        # TODO limit + pagination?
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevisionedValueCollection'
   /keys/{key}/value:
     put:
       tags: [value]
@@ -315,24 +474,39 @@ paths:
 
         As a general statement: Reading is (or can be) fuzzy, but updates and deletes are not.
       parameters:
-        - $ref: '#/parameters/Key'
-        - $ref: '#/parameters/Filter'
-        - name: value
-          description: If dimensions are present in the body they have to match the query parameters.
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/Value'
+        - $ref: '#/components/parameters/Key'
+        - $ref: '#/components/parameters/Filter'
+      requestBody:
+        description: If dimensions are present in the body they have to match the query parameters.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Value'
       responses:
         200:
           description: OK
           headers:
             Location:
               description: Canonical URL of this value
-              type: string
-              format: uri
-          schema:
-            $ref: '#/definitions/Value'
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Value'
+        201:
+          description: OK
+          headers:
+            Location:
+              description: Canonical URL of this value
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Value'
     get:
       tags: [value]
       summary: Read a value of the given key and optional dimensions
@@ -347,37 +521,53 @@ paths:
         a given key and selected dimensions is based on that order. The first match will be returned. That implies
         that values should be ordered from fine- to coarse-grained or from specific to generic.
       parameters:
-        - $ref: '#/parameters/Key'
-        - $ref: '#/parameters/Filter'
+        - $ref: '#/components/parameters/Key'
+        - $ref: '#/components/parameters/Filter'
       responses:
         200:
           description: OK
           headers:
             Content-Location:
               description: Canonical URL of this value
-              type: string
-              format: uri
-          schema:
-            $ref: '#/definitions/Value'
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Value'
     patch:
+      tags: [value]
       summary: Update a value
-      consumes:
-        - application/json
-        - application/merge-patch+json
-        - application/json-patch+json
       parameters:
-        - $ref: '#/parameters/Key'
-        - $ref: '#/parameters/Filter'
+        - $ref: '#/components/parameters/Key'
+        - $ref: '#/components/parameters/Filter'
+      requestBody:
+        content:
+          application/json:
+            schema: # TODO
+              type: object
+              additionalProperties: true
+          application/merge-patch+json:
+            schema: # TODO
+              type: object
+              additionalProperties: true
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/JsonPatch'
       responses:
         200:
           description: OK
           headers:
             Content-Location:
               description: Canonical URL of this value
-              type: string
-              format: uri
-          schema:
-            $ref: '#/definitions/Value'
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Value'
     delete:
       tags: [value]
       summary: Delete a value
@@ -391,225 +581,311 @@ paths:
 
         As a general statement: Reading is (or can be) fuzzy, but updates and deletes are not.
       parameters:
-        - $ref: '#/parameters/Key'
-        - $ref: '#/parameters/Filter'
+        - $ref: '#/components/parameters/Key'
+        - $ref: '#/components/parameters/Filter'
       responses:
         204:
           description: No Content
-parameters:
-  DimensionId:
-    name: dimension
-    in: path
-    type: string
-    required: true
-  Key:
-    name: key
-    in: path
-    type: string
-    required: true
-  Revision:
-    name: revision
-    in: path
-    type: integer
-    format: int64
-    required: true
-  Filter:
-    name: '' # we have to specify a name here even though we support any and many of them.
-    description: |
-      A dynamic number of dimensions, e.g. `country=AT&after=2015-09-07T16:00:00`. The values have to match the schema
-      specified by their corresponding dimension. The correct JSON type is deducted based on "appearance" of the value,
-      e.g. if a value looks like a boolean it will be parsed as one. In order to prevent incorrect typing, e.g.
-      the value `true` should be parsed as a string, it needs to be wrapped in double quotes, `"true"`.
-    in: query
-    type: array
-    items: {}
-    collectionFormat: multi
-  Limit:
-    name: limit
-    in: query
-    type: integer
-    format: int32
-    default: 25
-    minimum: 0
-    maximum: 100
-definitions:
-  RelationPage:
-    type: object
-    properties:
-      relations:
-        type: array
-        items:
-          $ref: '#/definitions/Relation'
-    required:
-      - relations
-  Relation:
-    type: object
-    properties:
-      id:
-        description: The unique identifier for this relation.
-        type: string
-        minLength: 1
-        example: =
-      title:
-        description: The readable name for this relation
-        type: string
-        minLength: 1
-        example: equality
-      description:
-        description: |
-          A description of this relation that should define what characteristics is has in terms of matching values.
-        type: string
-        minLength: 1
-    required:
-      - id
-      - title
-      - description
-  ID:
-    type: string
-    pattern: '^([a-z0-9]+(-[a-z0-9]+)*)([.]([a-z0-9]+(-[a-z0-9]+)*))*$'
-    example: country
-  DimensionCollectionRepresentation:
-    type: object
-    properties:
-      dimensions:
-        type: array
-        items:
-          $ref: '#/definitions/Dimension'
-    required:
-      - dimensions
-  Dimension:
-    type: object
-    properties:
-      id:
-        description: The unique identifier for this dimension.
-        $ref: '#/definitions/ID'
-        readOnly: true
-        example: country
+  /keys/{key}/value/revisions:
+    get:
+      tags: [history]
+      parameters:
+        - $ref: '#/components/parameters/Key'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevisionCollection'
+  /keys/{key}/value/revisions/{revision}:
+    get:
+      tags: [history]
+      parameters:
+        - $ref: '#/components/parameters/Key'
+        - $ref: '#/components/parameters/Revision'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevisionedValue'
+components:
+  parameters:
+    Dimension:
+      name: dimension
+      in: path
       schema:
-        description: The schema that applies to all values of this dimension across all values.
-        $ref: 'json-schema.json#'
-        example:
-          type: string
-          pattern: '^[A-Z]{2}$'
-      relation:
-        description: |
-          The underlying operator that is used to apply any matching and ordering semantics. For a complete list of
-          available relations, use `GET /relations`.
         type: string
-        example: =
-      description:
-        description: |
-          A description of this key that should define what the dimension is about and what possible values it can have.
-          Alternatively this can be a URL to an accessible web page.
-        type: string
-        minLength: 1
-        example: ISO 3166-1 alpha-2 country code, see https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements
-    required:
-      - schema
-      - relation
-      - description
-  KeyCollectionRepresentation:
-    type: object
-    properties:
-      keys:
-        type: array
-        items:
-          $ref: '#/definitions/Key'
-    required:
-      - keys
-  Key:
-    type: object
-    properties:
-      id:
-        description: The unique identifier for this key. It can be namespaced.
-        $ref: '#/definitions/ID'
-        readOnly: true
-        example: tax-rate
+        pattern: '^([a-z0-9]+(-[a-z0-9]+)*)([.]([a-z0-9]+(-[a-z0-9]+)*))*$'
+      required: true
+    Key:
+      name: key
+      in: path
       schema:
-        description: The schema that applies to all values of this key.
-        $ref: 'json-schema.json#'
-        example:
-          type: number
-          format: decimal
-          minimum: 0.0
-          maximum: 1.0
-      description:
         type: string
-        description: |
-          A description of this key that should define what the key is about. Alternatively this can be a 
-          URL to an accessible web page.
-        minLength: 1
-        example: Tax rate as a factor in the range [0,1].
-    required:
-      - schema
-      - description
-  ValueCollectionRepresentation:
-    type: object
-    properties:
-      values:
-        type: array
-        items:
-          $ref: '#/definitions/Value'
-  Value:
-    type: object
-    properties:
-      dimensions:
-        type: object
-        # keys are dimension identifiers
-        # values are typed according to the dimension's schema
-        additionalProperties: true
-        readOnly: true
-        example:
-          country: DE
-          after: 2017-01-01T00:00:00
-        default: {}
-      value:
-        description: |
-          Actual value for this key and its dimensions. This may be of any type, i.e. everything from primitive values like boolean and integers to complex
-          structures is possible. Although complex objects can usually be flattened with the use of custom dimensions very efficiently.
-        example: 0.2
-    required:
-      - value
-    example:
-      dimensions:
-        country: DE
-        after: 2017-01-01T00:00:00
-      value: 0.2
-  RevisionCollectionRepresentation:
-    type: object
-    properties:
-      # TODO prev + next
-      revisions:
-        type: array
-        item:
-          $ref: '#/definitions/Revision'
-    required:
-      - revisions
-  Revision:
-    type: object
-    properties:
-      id:
+        pattern: '^([a-z0-9]+(-[a-z0-9]+)*)([.]([a-z0-9]+(-[a-z0-9]+)*))*$'
+      required: true
+    Revision:
+      name: revision
+      in: path
+      schema:
         type: integer
         format: int64
-      timestamp:
-        type: string
-        format: date-time
-      href:
-        type: string
-        format: uri
-      type:
-        type: string
-        enum: [create, update, deleted]
-      user:
-        type: string
-      comment:
-        type: string
-    required:
-      - id
-      - timestamp
-      - href
-      - type
-      - user
-      - comment
-  JsonPatch:
-    $ref: 'json-patch.json#'
+      required: true
+    Filter:
+      name: '' # we have to specify a name here even though we support any and many of them.
+      description: |
+        A dynamic number of dimensions, e.g. `country=AT&after=2015-09-07T16:00:00`. The values have to match the schema
+        specified by their corresponding dimension. The correct JSON type is deducted based on "appearance" of the value,
+        e.g. if a value looks like a boolean it will be parsed as one. In order to prevent incorrect typing, e.g.
+        the value `true` should be parsed as a string, it needs to be wrapped in double quotes, `"true"`.
+      in: query
+      schema:
+        type: array
+        items: {}
+      style: form
+      explode: true
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        format: int32
+        default: 25
+        minimum: 0
+        maximum: 100
+  schemas:
+    Page:
+      type: object
+      properties:
+        next:
+          type: string
+          format: uri
+        prev:
+          type: string
+          format: uri
+    RelationCollection:
+      type: object
+      properties:
+        relations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Relation'
+      required:
+        - relations
+    Relation:
+      type: object
+      properties:
+        id:
+          description: The unique identifier for this relation.
+          type: string
+          minLength: 1
+          example: =
+        title:
+          description: The readable name for this relation
+          type: string
+          minLength: 1
+          example: equality
+        description:
+          description: |
+            A description of this relation that should define what characteristics is has in terms of matching values.
+          type: string
+          minLength: 1
+      required:
+        - id
+        - title
+        - description
+    DimensionCollection:
+      allOf:
+        - $ref: '#/components/schemas/Page'
+        - type: object
+          properties:
+            dimensions:
+              type: array
+              items:
+                $ref: '#/components/schemas/Dimension'
+          required:
+            - dimensions
+    Dimension:
+      type: object
+      properties:
+        id:
+          description: The unique identifier for this dimension.
+          type: string
+          readOnly: true
+          example: country
+        schema:
+          description: The schema that applies to all values of this dimension across all values.
+          # $ref: 'json-schema.json#'
+          type: object
+          additionalProperties: true
+          example:
+            type: string
+            pattern: '^[A-Z]{2}$'
+        relation:
+          description: |
+            The underlying operator that is used to apply any matching and ordering semantics. For a complete list of
+            available relations, use `GET /relations`.
+          type: string
+          example: =
+        description:
+          description: |
+            A description of this key that should define what the dimension is about and what possible values it can have.
+            Alternatively this can be a URL to an accessible web page.
+          type: string
+          minLength: 1
+          example: ISO 3166-1 alpha-2 country code, see https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements
+      required:
+        - schema
+        - relation
+        - description
+    KeyCollection:
+      allOf:
+        - $ref: '#/components/schemas/Page'
+        - type: object
+          properties:
+            keys:
+              type: array
+              items:
+                $ref: '#/components/schemas/Key'
+          required:
+            - keys
+    Key:
+      type: object
+      properties:
+        id:
+          description: The unique identifier for this key. It can be namespaced.
+          type: string
+          readOnly: true
+          example: tax-rate
+        schema:
+          description: The schema that applies to all values of this key.
+          # $ref: 'json-schema.json#'
+          type: object
+          additionalProperties: true
+          example:
+            type: number
+            format: decimal
+            minimum: 0.0
+            maximum: 1.0
+        description:
+          type: string
+          description: |
+            A description of this key that should define what the key is about. Alternatively this can be a 
+            URL to an accessible web page.
+          minLength: 1
+          example: Tax rate as a factor in the range [0,1].
+      required:
+        - schema
+        - description
+    ValueCollection:
+      allOf:
+        - $ref: '#/components/schemas/Page'
+        - type: object
+          properties:
+            values:
+              type: array
+              items:
+                $ref: '#/components/schemas/Value'
+          required:
+            - values
+    Value:
+      type: object
+      properties:
+        dimensions:
+          type: object
+          # keys are dimension identifiers
+          # values are typed according to the dimension's schema
+          additionalProperties: true
+          readOnly: true
+          example:
+            country: DE
+            after: 2017-01-01T00:00:00
+        value:
+          description: |
+            Actual value for this key and its dimensions. This may be of any type, i.e. everything from primitive values like boolean and integers to complex
+            structures is possible. Although complex objects can usually be flattened with the use of custom dimensions very efficiently.
+          example: 0.2
+      required:
+        - value
+      example:
+        dimensions:
+          country: DE
+          after: 2017-01-01T00:00:00
+        value: 0.2
+    RevisionCollection:
+      allOf:
+        - $ref: '#/components/schemas/Page'
+        - type: object
+          properties:
+            revisions:
+              type: array
+              items:
+                $ref: '#/components/schemas/Revision'
+          required:
+            - revisions
+    Revision:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        timestamp:
+          type: string
+          format: date-time
+        href:
+          type: string
+          format: uri
+        type:
+          type: string
+          enum: [create, update, delete]
+        user:
+          type: string
+        comment:
+          type: string
+      required:
+        - id
+        - timestamp
+        # TODO - href
+        - type
+        - user
+    Revisioned:
+      type: object
+      properties:
+        revision:
+          $ref: '#/components/schemas/Revision'
+      required:
+        - revision
+    RevisionedDimensionCollection:
+      allOf:
+        - $ref: '#/components/schemas/Revisioned'
+        - $ref: '#/components/schemas/DimensionCollection'
+    RevisionedDimension:
+      allOf:
+        - $ref: '#/components/schemas/Revisioned'
+        - $ref: '#/components/schemas/Dimension'
+    RevisionedKeyCollection:
+      allOf:
+        - $ref: '#/components/schemas/Revisioned'
+        - $ref: '#/components/schemas/KeyCollection'
+    RevisionedKey:
+      allOf:
+        - $ref: '#/components/schemas/Revisioned'
+        - $ref: '#/components/schemas/Key'
+    RevisionedValueCollection:
+      allOf:
+        - $ref: '#/components/schemas/Revisioned'
+        - $ref: '#/components/schemas/ValueCollection'
+    RevisionedValue:
+      allOf:
+        - $ref: '#/components/schemas/Revisioned'
+        - $ref: '#/components/schemas/Value'
+    JsonPatch:
+      # $ref: 'json-patch.json#'
+      type: array
+      items:
+        type: object
+        additionalProperties: true

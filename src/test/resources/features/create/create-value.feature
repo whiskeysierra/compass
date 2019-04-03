@@ -95,8 +95,8 @@ Feature: Value update
       | /schema/type | /description |
       | "number"     | ".."         |
     When "PUT /keys/tax-rate/value?country=DE&before=2007-01-01T00:00:00Z" responds "201 Created" when requested with:
-      | /dimension/country | /dimension/before      | /value |
-      | "DE"               | "2007-01-01T00:00:00Z" | 0.16   |
+      | /dimensions/country | /dimensions/before     | /value |
+      | "DE"                | "2007-01-01T00:00:00Z" | 0.16   |
 
   Scenario: Creating a value failed due to schema violation
     Given "PUT /keys/tax-rate" responds "201 Created" when requested with:
@@ -107,8 +107,8 @@ Feature: Value update
       | /value |
       | "19%"  |
     Then "400 Bad Request" was responded with an array at "/violations":
-      | /field   | /message                                |
-      | "/value" | "/value: string found, number expected" |
+      | /message                                                                                       |
+      | "instance type (string) does not match any allowed primitive type (allowed: [integer,number])" |
 
   Scenario: Creating a value failed due to absent key
     Then "PUT /keys/tax-rate/value" responds "404 Not Found" when requested with:

@@ -1,5 +1,9 @@
 package org.zalando.compass.resource;
 
+import com.atlassian.oai.validator.report.ValidationReport;
+import com.atlassian.oai.validator.report.ValidationReport.Message;
+import com.atlassian.oai.validator.springmvc.InvalidRequestException;
+import com.atlassian.oai.validator.springmvc.InvalidResponseException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -10,8 +14,16 @@ import org.zalando.compass.domain.logic.EntityAlreadyExistsException;
 import org.zalando.compass.domain.persistence.NotFoundException;
 import org.zalando.compass.library.pagination.IllegalPageQueryException;
 import org.zalando.problem.Problem;
+import org.zalando.problem.Status;
 import org.zalando.problem.spring.web.advice.ProblemHandling;
 import org.zalando.problem.spring.web.advice.SpringAdviceTrait;
+import org.zalando.problem.spring.web.advice.validation.ConstraintViolationProblem;
+import org.zalando.problem.spring.web.advice.validation.Violation;
+
+import java.util.Comparator;
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 @ControllerAdvice
 class ExceptionHandling implements ProblemHandling, SpringAdviceTrait {
@@ -38,6 +50,28 @@ class ExceptionHandling implements ProblemHandling, SpringAdviceTrait {
     public ResponseEntity<Problem> handleEntityAlreadyExists(final EntityAlreadyExistsException exception,
             final NativeWebRequest request) {
         return create(HttpStatus.PRECONDITION_FAILED, exception, request);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Problem> handleInvalidRequestException(final InvalidRequestException exception,
+            final NativeWebRequest request) {
+        return create(exception, request, exception.getValidationReport());
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Problem> handleInvalidResponseException(final InvalidResponseException exception,
+            final NativeWebRequest request) {
+        return create(exception, request, exception.getValidationReport());
+    }
+
+    private ResponseEntity<Problem> create(final Exception exception, NativeWebRequest request,
+            ValidationReport report) {
+        final List<Violation> violations = report.getMessages().stream()
+                .sorted(Comparator.comparing(Message::getMessage))
+                .map(message -> new Violation("/", message.getMessage().replace("\"", "")))
+                .collect(toList());
+
+        return create(exception, new ConstraintViolationProblem(Status.BAD_REQUEST, violations), request);
     }
 
 }

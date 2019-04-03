@@ -36,14 +36,6 @@ Feature: Key update
       | /schema/minimum | /schema/maximum |
       | 0.0             | 1.0             |
 
-  Scenario: Updating a key failed due to id mismatch
-    Given "PUT /keys/tax-rate" responds "201 Created" when requested with:
-      | /schema/type | /description |
-      | "number"     | ".."         |
-    When "PUT /keys/tax-rate" responds "400 Bad Request" when requested with:
-      | /id   | /schema/type | /description                 |
-      | "bar" | "number"     | "Lorem ipsum dolor sit amet" |
-
   Scenario: Updating a key failed due to schema violation
     Given "PUT /keys/tax-rate" responds "201 Created" when requested with:
       | /schema/type | /description |
@@ -52,9 +44,8 @@ Feature: Key update
       | /id        | /schema/type | /description |
       | "tax-rate" | "any"        | false        |
     Then "400 Bad Request" was responded with an array at "/violations":
-      | /field         | /message                                                      |
-      | "/description" | "/description: boolean found, string expected"                |
-      | "/schema/type" | "/schema/type: should be valid to any of the schemas [array]" |
+      | /message                                                                                                      |
+      | "[Path '/description'] Instance type (boolean) does not match any allowed primitive type (allowed: [string])" |
 
   Scenario: Updating a dimension's schema should fail if at least one value violates it
     Given "PUT /dimensions/country" responds "201 Created" when requested with:
@@ -72,7 +63,7 @@ Feature: Key update
       | /schema/type | /schema/minimum | /schema/maximum | /description |
       | "number"     | 0.0             | 1.0             | ".."         |
     Then "400 Bad Request" was responded with an array at "/violations":
-      | /message                                   |
-      | "/value: must have a maximum value of 1.0" |
-      | "/value: must have a maximum value of 1.0" |
-      | "/value: must have a maximum value of 1.0" |
+      | /message                                                                        |
+      | "numeric instance is greater than the required maximum (maximum: 1, found: 20)" |
+      | "numeric instance is greater than the required maximum (maximum: 1, found: 8)"  |
+      | "numeric instance is greater than the required maximum (maximum: 1, found: 19)" |

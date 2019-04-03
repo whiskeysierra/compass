@@ -1,11 +1,7 @@
 package org.zalando.compass.domain.logic.relation;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.networknt.schema.JsonType;
 import org.zalando.compass.domain.model.Relation;
-
-import java.util.Collections;
-import java.util.Set;
 
 public final class PrefixMatch implements Relation {
 
@@ -24,11 +20,6 @@ public final class PrefixMatch implements Relation {
         return "Matches values where the requested dimension values shares the longest prefix with the configured one. " +
                 "Prefix matching is useful for data structures that have a natural hierarchy, including " +
                 "but not limited to locales, geohashes and IP subnet masks.";
-    }
-
-    @Override
-    public Set<JsonType> supports() {
-        return Collections.singleton(JsonType.STRING);
     }
 
     @Override

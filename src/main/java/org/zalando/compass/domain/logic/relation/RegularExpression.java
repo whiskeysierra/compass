@@ -4,11 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Function;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
-import com.networknt.schema.JsonType;
 import org.zalando.compass.domain.model.Relation;
 
-import java.util.Collections;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import static com.google.common.cache.CacheLoader.from;
@@ -32,11 +29,6 @@ public final class RegularExpression implements Relation {
     @Override
     public String getDescription() {
         return "Matches values where the requested dimension values matches the configured regular expression.";
-    }
-
-    @Override
-    public Set<JsonType> supports() {
-        return Collections.singleton(JsonType.STRING);
     }
 
     @Override

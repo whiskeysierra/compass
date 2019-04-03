@@ -25,14 +25,6 @@ Feature: Dimension update
       | /id       | /schema/type | /relation | /description                 |
       | "version" | "string"     | "="       | "Lorem ipsum dolor sit amet" |
 
-  Scenario: Updating a dimension failed due to id mismatch
-    Given "PUT /dimensions/device" responds "201 Created" when requested with:
-      | /schema/type | /relation | /description |
-      | "string"     | "="       | ".."         |
-    When "PUT /dimensions/device" responds "400 Bad Request" when requested with:
-      | /id   | /schema/type | /relation | /description                 |
-      | "bar" | "string"     | "="       | "Lorem ipsum dolor sit amet" |
-
   Scenario: Updating a dimension failed due to schema violation
     Given "PUT /dimensions/device" responds "201 Created" when requested with:
       | /schema/type | /relation | /description |
@@ -41,10 +33,9 @@ Feature: Dimension update
       | /id      | /schema/type | /relation | /description |
       | "device" | "any"        | 17        | false        |
     Then "400 Bad Request" was responded with an array at "/violations":
-      | /field         | /message                                                      |
-      | "/description" | "/description: boolean found, string expected"                |
-      | "/relation"    | "/relation: integer found, string expected"                   |
-      | "/schema/type" | "/schema/type: should be valid to any of the schemas [array]" |
+      | /message                                                                                                      |
+      | "[Path '/description'] Instance type (boolean) does not match any allowed primitive type (allowed: [string])" |
+      | "[Path '/relation'] Instance type (integer) does not match any allowed primitive type (allowed: [string])"    |
 
   Scenario: Update dimension with values
     Given "PUT /dimensions/country" responds "201 Created" when requested with:
@@ -78,7 +69,7 @@ Feature: Dimension update
       | /schema/type | /schema/pattern | /relation | /description |
       | "string"     | "[a-z]{2}"      | "="       | ".."         |
     Then "400 Bad Request" was responded with an array at "/violations":
-      | /message                                                         |
-      | "/dimensions/country: does not match the regex pattern [a-z]{2}" |
-      | "/dimensions/country: does not match the regex pattern [a-z]{2}" |
-      | "/dimensions/country: does not match the regex pattern [a-z]{2}" |
+      | /message                                                 |
+      | "ECMA 262 regex [a-z]{2} does not match input string AT" |
+      | "ECMA 262 regex [a-z]{2} does not match input string CH" |
+      | "ECMA 262 regex [a-z]{2} does not match input string DE" |
