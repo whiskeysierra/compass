@@ -29,8 +29,8 @@ Feature: Value update
 
   Scenario: Partially updating value (JSON Patch)
     When "PATCH /keys/tax-rate/value?country=DE" responds "200 OK" when requested with an array as "application/json-patch+json":
-      | /op       | /path                 | /value |
-      | "replace" | "/value"              | 0.25   |
+      | /op       | /path    | /value |
+      | "replace" | "/value" | 0.25   |
     And "GET /keys/tax-rate/values" responds "200 OK" with an array at "/values":
       | /dimensions/country | /value |
       | "AT"                | 0.2    |
@@ -39,8 +39,8 @@ Feature: Value update
 
   Scenario Outline: Partially updating values
     When "PATCH /keys/tax-rate/values?country=DE" responds "200 OK" when requested with an array as "<content-type>":
-      | /op       | /path                          | /value |
-      | "replace" | "/values/2/value"              | 0.25   |
+      | /op       | /path             | /value |
+      | "replace" | "/values/2/value" | 0.25   |
     And "GET /keys/tax-rate/values" responds "200 OK" with an array at "/values":
       | /dimensions/country | /value |
       | "AT"                | 0.2    |

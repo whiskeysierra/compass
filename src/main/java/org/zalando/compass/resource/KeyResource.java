@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.KeyService;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Revisioned;
+import org.zalando.compass.library.pagination.Cursor;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
 
@@ -38,6 +39,9 @@ import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.PATCH;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
+import static org.zalando.compass.library.pagination.Cursor.create;
+import static org.zalando.compass.library.pagination.Direction.BACKWARD;
+import static org.zalando.compass.library.pagination.Direction.FORWARD;
 import static org.zalando.compass.resource.Linking.link;
 import static org.zalando.compass.resource.MediaTypes.JSON_MERGE_PATCH_VALUE;
 import static org.zalando.compass.resource.MediaTypes.JSON_PATCH_VALUE;
@@ -45,7 +49,7 @@ import static org.zalando.compass.resource.MediaTypes.JSON_PATCH_VALUE;
 @RestController
 @RequestMapping(path = "/keys")
 @AllArgsConstructor(onConstructor = @__(@Autowired))
-class KeyResource implements Reserved {
+class KeyResource {
 
     private final ObjectMapper mapper;
     private final KeyService service;
@@ -81,10 +85,9 @@ class KeyResource implements Reserved {
     public ResponseEntity<KeyCollectionRepresentation> getAll(
             @RequestParam(name = "q", required = false) @Nullable final String q,
             @Nullable @RequestParam(required = false, defaultValue = "25") final Integer limit,
-            @Nullable @RequestParam(value = "_after", required = false) final String after,
-            @Nullable @RequestParam(value = "_before", required = false) final String before) {
+            @RequestParam(required = false, defaultValue = "") final Cursor<String> cursor) {
 
-        final Pagination<String> query = Pagination.create(after, before, requireNonNull(limit));
+        final Pagination<String> query = Pagination.create(cursor, requireNonNull(limit));
         final PageResult<Key> page = service.readPage(q, query);
 
         final List<KeyRepresentation> representations = page.getElements().stream()
@@ -93,9 +96,9 @@ class KeyResource implements Reserved {
 
         return ResponseEntity.ok(new KeyCollectionRepresentation(
                 page.hasNext() ?
-                        link(methodOn(KeyResource.class).getAll(q, limit, page.getTail().getId(), null)) : null,
+                        link(methodOn(KeyResource.class).getAll(q, limit, create(FORWARD, page.getTail().getId()))) : null,
                 page.hasPrevious() ?
-                        link(methodOn(KeyResource.class).getAll(q, limit, null, page.getHead().getId())) : null,
+                        link(methodOn(KeyResource.class).getAll(q, limit, create(BACKWARD, page.getHead().getId()))) : null,
                 representations));
     }
 

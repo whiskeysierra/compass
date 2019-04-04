@@ -21,8 +21,8 @@ public interface Pagination<P> {
     @Nullable
     Direction getDirection();
 
-    enum Direction {
-        FORWARD, BACKWARD
+    static <C> Pagination<C> create(final Cursor<C> cursor, int limit) {
+        return create(cursor.after(), cursor.before(), limit);
     }
 
     static <C> Pagination<C> create(@Nullable final C after, @Nullable final C before, final int limit) {

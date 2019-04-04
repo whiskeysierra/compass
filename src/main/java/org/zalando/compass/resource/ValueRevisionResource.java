@@ -13,6 +13,7 @@ import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueRevision;
+import org.zalando.compass.library.pagination.Cursor;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
 
@@ -24,6 +25,9 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.zalando.compass.library.pagination.Cursor.create;
+import static org.zalando.compass.library.pagination.Direction.BACKWARD;
+import static org.zalando.compass.library.pagination.Direction.FORWARD;
 import static org.zalando.compass.resource.Linking.link;
 import static org.zalando.compass.resource.RevisionPaging.paginate;
 
@@ -38,15 +42,14 @@ class ValueRevisionResource {
     @RequestMapping(method = GET, path = "/values/revisions")
     public ResponseEntity<RevisionCollectionRepresentation> getValuesRevisions(@PathVariable final String key,
             @Nullable @RequestParam(required = false, defaultValue = "25") final Integer limit,
-            @Nullable @RequestParam(value = "_after", required = false) final Long after,
-            @Nullable @RequestParam(value = "_before", required = false) final Long before) {
+            @RequestParam(required = false, defaultValue = "") final Cursor<Long> cursor) {
 
-        final Pagination<Long> query = Pagination.create(after, before, requireNonNull(limit));
+        final Pagination<Long> query = Pagination.create(cursor, requireNonNull(limit));
         final PageResult<Revision> page = service.readPageRevisions(key, query);
 
         return paginate(page,
-                rev -> link(methodOn(ValueRevisionResource.class).getValuesRevisions(key, limit, rev.getId(), null)),
-                rev -> link(methodOn(ValueRevisionResource.class).getValuesRevisions(key, limit, null, rev.getId())),
+                rev -> link(methodOn(ValueRevisionResource.class).getValuesRevisions(key, limit, create(FORWARD, rev.getId()))),
+                rev -> link(methodOn(ValueRevisionResource.class).getValuesRevisions(key, limit, create(BACKWARD, rev.getId()))),
                 rev -> link(methodOn(ValueRevisionResource.class).getValuesRevision(key, rev.getId(), of())));
     }
 
@@ -76,20 +79,17 @@ class ValueRevisionResource {
     public ResponseEntity<RevisionCollectionRepresentation> getValueRevisions(@PathVariable final String key,
             @RequestParam final Map<String, String> queryParams,
             @Nullable @RequestParam(required = false, defaultValue = "25") final Integer limit,
-            @Nullable @RequestParam(value = "_after", required = false) final Long after,
-            @Nullable @RequestParam(value = "_before", required = false) final Long before) {
+            @RequestParam(required = false, defaultValue = "") final Cursor<Long> cursor) {
 
         final Map<String, JsonNode> filter = querying.read(queryParams);
-        final Pagination<Long> query = Pagination.create(after, before, requireNonNull(limit));
+        final Pagination<Long> query = Pagination.create(cursor, requireNonNull(limit));
 
         final PageResult<Revision> page = service.readRevisions(key, filter, query);
         final Map<String, String> normalized = querying.write(filter);
 
         return paginate(page,
-                rev -> link(methodOn(ValueRevisionResource.class).getValueRevisions(key, normalized, limit, rev.getId(),
-                        null)),
-                rev -> link(methodOn(ValueRevisionResource.class).getValueRevisions(key, normalized, limit, null,
-                        rev.getId())),
+                rev -> link(methodOn(ValueRevisionResource.class).getValueRevisions(key, normalized, limit, create(FORWARD, rev.getId()))),
+                rev -> link(methodOn(ValueRevisionResource.class).getValueRevisions(key, normalized, limit, create(BACKWARD, rev.getId()))),
                 rev -> link(methodOn(ValueRevisionResource.class).getRevision(key, rev.getId(), normalized)));
     }
 

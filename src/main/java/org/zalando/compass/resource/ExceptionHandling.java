@@ -64,10 +64,11 @@ class ExceptionHandling implements ProblemHandling, SpringAdviceTrait {
         return create(exception, request, exception.getValidationReport());
     }
 
-    private ResponseEntity<Problem> create(final Exception exception, NativeWebRequest request,
-            ValidationReport report) {
+    private ResponseEntity<Problem> create(final Exception exception, final NativeWebRequest request,
+            final ValidationReport report) {
         final List<Violation> violations = report.getMessages().stream()
                 .sorted(Comparator.comparing(Message::getMessage))
+                // TODO message + additional info
                 .map(message -> new Violation("/", message.getMessage().replace("\"", "")))
                 .collect(toList());
 

@@ -47,7 +47,7 @@ Feature: Dimension creation
       | "any"        | 17        | false        |
     Then "400 Bad Request" was responded with an array at "/violations":
       | /message                                                                                                      |
-      | "ECMA 262 regex ^([a-z0-9]+(-[a-z0-9]+)*)([.]([a-z0-9]+(-[a-z0-9]+)*))*$ does not match input string FOO"     |
+      | "Instance failed to match all required schemas (matched only 1 out of 2)"                                     |
       | "[Path '/description'] Instance type (boolean) does not match any allowed primitive type (allowed: [string])" |
       | "[Path '/relation'] Instance type (integer) does not match any allowed primitive type (allowed: [string])"    |
       | "[Path '/schema/type'] Instance failed to match at least one required schema among 2"                         |
@@ -56,9 +56,9 @@ Feature: Dimension creation
     When "PUT /dimensions/<dimension>" when requested with:
       | /schema/type | /relation | /description                 |
       | "string"     | "="       | "Lorem ipsum dolor sit amet" |
-    Then "405 Method Not Allowed" was responded with:
-      | /detail          |
-      | "ID is reserved" |
+    Then "400 Bad Request" was responded with an array at "/violations":
+      | /message                                                                  |
+      | "Instance failed to match all required schemas (matched only 1 out of 2)" |
     Examples:
       | dimension |
       | cursor    |

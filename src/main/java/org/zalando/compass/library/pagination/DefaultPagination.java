@@ -10,16 +10,16 @@ import org.jooq.SelectOrderByStep;
 import org.jooq.SortOrder;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
 import java.util.List;
 
+import static com.google.common.collect.Lists.reverse;
 import static java.util.Collections.emptyList;
 import static lombok.AccessLevel.PRIVATE;
 import static org.jooq.SortOrder.ASC;
 import static org.jooq.SortOrder.DESC;
 import static org.jooq.impl.DSL.val;
-import static org.zalando.compass.library.pagination.Pagination.Direction.BACKWARD;
-import static org.zalando.compass.library.pagination.Pagination.Direction.FORWARD;
+import static org.zalando.compass.library.pagination.Direction.BACKWARD;
+import static org.zalando.compass.library.pagination.Direction.FORWARD;
 
 @FieldDefaults(makeFinal = true, level = PRIVATE)
 @Getter
@@ -45,7 +45,7 @@ final class DefaultPagination<P> implements Pagination<P> {
                 .limit(getLimit());
     }
 
-    public Field<P> pivotOf(final Class<P> type) {
+    private Field<P> pivotOf(final Class<P> type) {
         return getPivot() == null ? null : val(getPivot(), type);
     }
 
@@ -65,26 +65,29 @@ final class DefaultPagination<P> implements Pagination<P> {
         final boolean isBackward = direction == BACKWARD;
 
         if (isBackward) {
-            // TODO modifies input!
-            Collections.reverse(elements);
+            return getPageResult(reverse(elements), isForward, isBackward);
         }
 
+        return getPageResult(elements, isForward, isBackward);
+    }
+
+    private <T> PageResult<T> getPageResult(final List<T> elements, final boolean isForward, final boolean isBackward) {
         final int size = elements.size();
 
         if (size > getLimit()) {
             if (isBackward) {
                 final List<T> items = elements.subList(1, size);
-                return createIfNotempty(items, true, true);
+                return createIfNotEmpty(items, true, true);
             } else {
                 final List<T> items = elements.subList(0, getLimit());
-                return createIfNotempty(items, true, isForward);
+                return createIfNotEmpty(items, true, isForward);
             }
         } else {
-            return createIfNotempty(elements, isBackward, isForward);
+            return createIfNotEmpty(elements, isBackward, isForward);
         }
     }
 
-    public <T> PageResult<T> createIfNotempty(final List<T> elements, final boolean next, final boolean previous) {
+    public <T> PageResult<T> createIfNotEmpty(final List<T> elements, final boolean next, final boolean previous) {
         return elements.isEmpty() ?
                 PageResult.create(emptyList(), false, false) :
                 PageResult.create(elements, next, previous);

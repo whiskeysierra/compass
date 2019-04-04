@@ -618,15 +618,13 @@ components:
       name: dimension
       in: path
       schema:
-        type: string
-        pattern: '^([a-z0-9]+(-[a-z0-9]+)*)([.]([a-z0-9]+(-[a-z0-9]+)*))*$'
+        $ref: '#/components/schemas/ID'
       required: true
     Key:
       name: key
       in: path
       schema:
-        type: string
-        pattern: '^([a-z0-9]+(-[a-z0-9]+)*)([.]([a-z0-9]+(-[a-z0-9]+)*))*$'
+        $ref: '#/components/schemas/ID'
       required: true
     Revision:
       name: revision
@@ -658,6 +656,26 @@ components:
         minimum: 0
         maximum: 100
   schemas:
+    ID:
+      type: string
+      allOf:
+        - type: string
+          pattern: '^([a-z0-9]+(-[a-z0-9]+)*)([.]([a-z0-9]+(-[a-z0-9]+)*))*$'
+        - not:
+            type: string
+            enum:
+              - cursor
+              - embed
+              - fields
+              - filter
+              - key
+              - limit
+              - offset
+              - q
+              - query
+              - revision
+              - revisions
+              - sort
     Page:
       type: object
       properties:

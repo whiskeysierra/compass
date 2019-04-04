@@ -12,6 +12,7 @@ import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.KeyRevision;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
+import org.zalando.compass.library.pagination.Cursor;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
 
@@ -21,6 +22,9 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.zalando.compass.library.pagination.Cursor.create;
+import static org.zalando.compass.library.pagination.Direction.BACKWARD;
+import static org.zalando.compass.library.pagination.Direction.FORWARD;
 import static org.zalando.compass.resource.Linking.link;
 import static org.zalando.compass.resource.RevisionPaging.paginate;
 
@@ -34,25 +38,23 @@ class KeyRevisionResource {
     @RequestMapping(method = GET, path = "/revisions")
     public ResponseEntity<RevisionCollectionRepresentation> getRevisions(
             @Nullable @RequestParam(required = false, defaultValue = "25") final Integer limit,
-            @Nullable @RequestParam(value = "_after", required = false) final Long after,
-            @Nullable @RequestParam(value = "_before", required = false) final Long before) {
+            @RequestParam(required = false, defaultValue = "") final Cursor<Long> cursor) {
 
-        final Pagination<Long> query = Pagination.create(after, before, requireNonNull(limit));
+        final Pagination<Long> query = Pagination.create(cursor, requireNonNull(limit));
         final PageResult<Revision> page = service.readPageRevisions(query);
 
         return paginate(page,
-                rev -> link(methodOn(KeyRevisionResource.class).getRevisions(limit, rev.getId(), null)),
-                rev -> link(methodOn(KeyRevisionResource.class).getRevisions(limit, null, rev.getId())),
-                rev -> link(methodOn(KeyRevisionResource.class).getRevision(rev.getId(), null, null, null)));
+                rev -> link(methodOn(KeyRevisionResource.class).getRevisions(limit, create(FORWARD, rev.getId()))),
+                rev -> link(methodOn(KeyRevisionResource.class).getRevisions(limit, create(BACKWARD, rev.getId()))),
+                rev -> link(methodOn(KeyRevisionResource.class).getRevision(rev.getId(), null, null)));
     }
 
     @RequestMapping(method = GET, path = "/revisions/{revision}")
     public ResponseEntity<KeyCollectionRevisionRepresentation> getRevision(@PathVariable final long revision,
             @Nullable @RequestParam(required = false, defaultValue = "25") final Integer limit,
-            @Nullable @RequestParam(value = "_after", required = false) final String after,
-            @Nullable @RequestParam(value = "_before", required = false) final String before) {
+            @RequestParam(required = false, defaultValue = "") final Cursor<String> cursor) {
 
-        final Pagination<String> query = Pagination.create(after, before, requireNonNull(limit));
+        final Pagination<String> query = Pagination.create(cursor, requireNonNull(limit));
         final PageRevision<Key> page = service.readPageAt(revision, query);
         final Revision rev = page.getRevision();
 
@@ -66,9 +68,9 @@ class KeyRevisionResource {
                         rev.getComment()
                 ),
                 page.hasNext() ? link(methodOn(KeyRevisionResource.class)
-                        .getRevision(revision, limit, page.getTail().getId(), null)) : null,
+                        .getRevision(revision, limit, create(FORWARD, page.getTail().getId()))) : null,
                 page.hasPrevious() ? link(methodOn(KeyRevisionResource.class)
-                        .getRevision(revision, limit, null, page.getHead().getId())) : null,
+                        .getRevision(revision, limit, create(BACKWARD, page.getHead().getId()))) : null,
                 page.getElements().stream().map(KeyRepresentation::valueOf).collect(toList())
         ));
     }
@@ -76,15 +78,14 @@ class KeyRevisionResource {
     @RequestMapping(method = GET, path = "/{id}/revisions")
     public ResponseEntity<RevisionCollectionRepresentation> getRevisions(@PathVariable final String id,
             @Nullable @RequestParam(required = false, defaultValue = "25") final Integer limit,
-            @Nullable @RequestParam(value = "_after", required = false) final Long after,
-            @Nullable @RequestParam(value = "_before", required = false) final Long before) {
+            @RequestParam(required = false, defaultValue = "") final Cursor<Long> cursor) {
 
-        final Pagination<Long> query = Pagination.create(after, before, requireNonNull(limit));
+        final Pagination<Long> query = Pagination.create(cursor, requireNonNull(limit));
         final PageResult<Revision> page = service.readRevisions(id, query);
 
         return paginate(page,
-                rev -> link(methodOn(KeyRevisionResource.class).getRevisions(id, limit, rev.getId(), null)),
-                rev -> link(methodOn(KeyRevisionResource.class).getRevisions(id, limit, null, rev.getId())),
+                rev -> link(methodOn(KeyRevisionResource.class).getRevisions(id, limit, create(FORWARD, rev.getId()))),
+                rev -> link(methodOn(KeyRevisionResource.class).getRevisions(id, limit, create(BACKWARD, rev.getId()))),
                 rev -> link(methodOn(KeyRevisionResource.class).getRevision(id, rev.getId())));
     }
 

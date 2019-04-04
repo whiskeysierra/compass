@@ -24,43 +24,40 @@ Feature: Value page revisions pagination
       | 6   | "update" | "anonymous" |
       | 5   | "update" | "anonymous" |
     And "GET /keys/device/values/revisions?limit=2" responds "200 OK" with:
-      | /prev | /next                                                                 |
-      |       | "http://localhost:8080/keys/device/values/revisions?limit=2&_after=5" |
-    And "GET /keys/device/values/revisions?limit=2&_after=5" responds "200 OK" with an array at "/revisions":
+      | /prev | /next                                                                                    |
+      |       | "http://localhost:8080/keys/device/values/revisions?limit=2&cursor=eyJkIjoiPiIsInAiOjV9" |
+    And "GET /keys/device/values/revisions?limit=2&cursor=eyJkIjoiPiIsInAiOjV9" responds "200 OK" with an array at "/revisions":
       | /id | /type    | /user       |
       | 4   | "update" | "anonymous" |
       | 3   | "update" | "anonymous" |
-    And "GET /keys/device/values/revisions?limit=2&_after=5" responds "200 OK" with:
-      | /prev                                                                  | /next                                                                 |
-      | "http://localhost:8080/keys/device/values/revisions?limit=2&_before=4" | "http://localhost:8080/keys/device/values/revisions?limit=2&_after=3" |
-    And "GET /keys/device/values/revisions?limit=2&_after=3" responds "200 OK" with an array at "/revisions":
+    And "GET /keys/device/values/revisions?limit=2&cursor=eyJkIjoiPiIsInAiOjV9" responds "200 OK" with:
+      | /prev                                                                                    | /next                                                                                    |
+      | "http://localhost:8080/keys/device/values/revisions?limit=2&cursor=eyJkIjoiPCIsInAiOjR9" | "http://localhost:8080/keys/device/values/revisions?limit=2&cursor=eyJkIjoiPiIsInAiOjN9" |
+    And "GET /keys/device/values/revisions?limit=2&cursor=eyJkIjoiPiIsInAiOjN9" responds "200 OK" with an array at "/revisions":
       | /id | /type    | /user       |
       | 2   | "update" | "anonymous" |
-    And "GET /keys/device/values/revisions?limit=2&_after=3" responds "200 OK" with:
-      | /prev                                                                  | /next |
-      | "http://localhost:8080/keys/device/values/revisions?limit=2&_before=2" |       |
+    And "GET /keys/device/values/revisions?limit=2&cursor=eyJkIjoiPiIsInAiOjN9" responds "200 OK" with:
+      | /prev                                                                                    | /next |
+      | "http://localhost:8080/keys/device/values/revisions?limit=2&cursor=eyJkIjoiPCIsInAiOjJ9" |       |
 
   Scenario: Read value page revisions should paginate backward
-    Then "GET /keys/device/values/revisions?limit=2&_after=3" responds "200 OK" with an array at "/revisions":
+    Then "GET /keys/device/values/revisions?limit=2&cursor=eyJkIjoiPiIsInAiOjN9" responds "200 OK" with an array at "/revisions":
       | /id | /type    | /user       |
       | 2   | "update" | "anonymous" |
-    And "GET /keys/device/values/revisions?limit=2&_after=3" responds "200 OK" with:
-      | /prev                                                                  | /next |
-      | "http://localhost:8080/keys/device/values/revisions?limit=2&_before=2" |       |
-    And "GET /keys/device/values/revisions?limit=2&_before=2" responds "200 OK" with an array at "/revisions":
+    And "GET /keys/device/values/revisions?limit=2&cursor=eyJkIjoiPiIsInAiOjN9" responds "200 OK" with:
+      | /prev                                                                                    | /next |
+      | "http://localhost:8080/keys/device/values/revisions?limit=2&cursor=eyJkIjoiPCIsInAiOjJ9" |       |
+    And "GET /keys/device/values/revisions?limit=2&cursor=eyJkIjoiPCIsInAiOjJ9" responds "200 OK" with an array at "/revisions":
       | /id | /type    | /user       |
       | 4   | "update" | "anonymous" |
       | 3   | "update" | "anonymous" |
-    And "GET /keys/device/values/revisions?limit=2&_before=2" responds "200 OK" with:
-      | /prev                                                                  | /next                                                                 |
-      | "http://localhost:8080/keys/device/values/revisions?limit=2&_before=4" | "http://localhost:8080/keys/device/values/revisions?limit=2&_after=3" |
-    And "GET /keys/device/values/revisions?limit=2&_before=4" responds "200 OK" with an array at "/revisions":
+    And "GET /keys/device/values/revisions?limit=2&cursor=eyJkIjoiPCIsInAiOjJ9" responds "200 OK" with:
+      | /prev                                                                                    | /next                                                                                    |
+      | "http://localhost:8080/keys/device/values/revisions?limit=2&cursor=eyJkIjoiPCIsInAiOjR9" | "http://localhost:8080/keys/device/values/revisions?limit=2&cursor=eyJkIjoiPiIsInAiOjN9" |
+    And "GET /keys/device/values/revisions?limit=2&cursor=eyJkIjoiPCIsInAiOjR9" responds "200 OK" with an array at "/revisions":
       | /id | /type    | /user       |
       | 6   | "update" | "anonymous" |
       | 5   | "update" | "anonymous" |
-    And "GET /keys/device/values/revisions?limit=2&_before=4" responds "200 OK" with:
-      | /prev | /next                                                                 |
-      |       | "http://localhost:8080/keys/device/values/revisions?limit=2&_after=5" |
-
-  Scenario: Pagination with conflicting directions should fail
-    Then "GET /keys/device/values/revisions?_after=3&_before=1" responds "400 Bad Request"
+    And "GET /keys/device/values/revisions?limit=2&cursor=eyJkIjoiPCIsInAiOjR9" responds "200 OK" with:
+      | /prev | /next                                                                                    |
+      |       | "http://localhost:8080/keys/device/values/revisions?limit=2&cursor=eyJkIjoiPiIsInAiOjV9" |

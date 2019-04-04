@@ -26,10 +26,10 @@ Feature: Read dimensions
     Then "GET /dimensions?limit=0" responds "200 OK" with:
       | /dimensions | /next | /prev |
       | []          |       |       |
-    And "GET /dimensions?limit=0&_after=device" responds "200 OK" with:
+    And "GET /dimensions?limit=0&cursor=eyJkIjoiPiIsInAiOiJkZXZpY2UifQ" responds "200 OK" with:
       | /dimensions | /next | /prev |
       | []          |       |       |
-    And "GET /dimensions?limit=0&_before=language" responds "200 OK" with:
+    And "GET /dimensions?limit=0&cursor=eyJkIjoiPCIsInAiOiJsYW5ndWFnZSJ9" responds "200 OK" with:
       | /dimensions | /next | /prev |
       | []          |       |       |
 

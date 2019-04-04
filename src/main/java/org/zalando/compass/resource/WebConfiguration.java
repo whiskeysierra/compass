@@ -26,7 +26,7 @@ import static java.util.Arrays.asList;
 class WebConfiguration implements WebMvcConfigurer {
 
     @Override
-    public void addInterceptors(InterceptorRegistry registry) {
+    public void addInterceptors(final InterceptorRegistry registry) {
         registry.addInterceptor(new OpenApiValidationInterceptor(OpenApiInteractionValidator
                 .createFor("/api/api.yaml")
                 // This is needed if your spec uses composition via {@code allOf}, {@code anyOf} or {@code oneOf}.

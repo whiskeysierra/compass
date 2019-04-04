@@ -23,43 +23,40 @@ Feature: Dimension pagination
       | "age"     |
       | "country" |
     And "GET /dimensions?limit=2" responds "200 OK" with:
-      | /prev | /next                                                     |
-      |       | "http://localhost:8080/dimensions?limit=2&_after=country" |
-    And "GET /dimensions?limit=2&_after=country" responds "200 OK" with an array at "/dimensions":
+      | /prev | /next                                                                             |
+      |       | "http://localhost:8080/dimensions?limit=2&cursor=eyJkIjoiPiIsInAiOiJjb3VudHJ5In0" |
+    And "GET /dimensions?limit=2&cursor=eyJkIjoiPiIsInAiOiJjb3VudHJ5In0" responds "200 OK" with an array at "/dimensions":
       | /id        |
       | "device"   |
       | "language" |
-    And "GET /dimensions?limit=2&_after=country" responds "200 OK" with:
-      | /prev                                                     | /next                                                      |
-      | "http://localhost:8080/dimensions?limit=2&_before=device" | "http://localhost:8080/dimensions?limit=2&_after=language" |
-    And "GET /dimensions?limit=2&_after=language" responds "200 OK" with an array at "/dimensions":
+    And "GET /dimensions?limit=2&cursor=eyJkIjoiPiIsInAiOiJjb3VudHJ5In0" responds "200 OK" with:
+      | /prev                                                                            | /next                                                                              |
+      | "http://localhost:8080/dimensions?limit=2&cursor=eyJkIjoiPCIsInAiOiJkZXZpY2UifQ" | "http://localhost:8080/dimensions?limit=2&cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSJ9" |
+    And "GET /dimensions?limit=2&cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSJ9" responds "200 OK" with an array at "/dimensions":
       | /id        |
       | "location" |
-    And "GET /dimensions?limit=2&_after=language" responds "200 OK" with:
-      | /prev                                                       | /next |
-      | "http://localhost:8080/dimensions?limit=2&_before=location" |       |
+    And "GET /dimensions?limit=2&cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSJ9" responds "200 OK" with:
+      | /prev                                                                              | /next |
+      | "http://localhost:8080/dimensions?limit=2&cursor=eyJkIjoiPCIsInAiOiJsb2NhdGlvbiJ9" |       |
 
   Scenario: Read dimension revisions should paginate backward
-    Then "GET /dimensions?limit=2&_after=language" responds "200 OK" with an array at "/dimensions":
+    Then "GET /dimensions?limit=2&cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSJ9" responds "200 OK" with an array at "/dimensions":
       | /id        |
       | "location" |
-    And "GET /dimensions?limit=2&_after=language" responds "200 OK" with:
-      | /prev                                                       | /next |
-      | "http://localhost:8080/dimensions?limit=2&_before=location" |       |
-    And "GET /dimensions?limit=2&_before=location" responds "200 OK" with an array at "/dimensions":
+    And "GET /dimensions?limit=2&cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSJ9" responds "200 OK" with:
+      | /prev                                                                              | /next |
+      | "http://localhost:8080/dimensions?limit=2&cursor=eyJkIjoiPCIsInAiOiJsb2NhdGlvbiJ9" |       |
+    And "GET /dimensions?limit=2&cursor=eyJkIjoiPCIsInAiOiJsb2NhdGlvbiJ9" responds "200 OK" with an array at "/dimensions":
       | /id        |
       | "device"   |
       | "language" |
-    And "GET /dimensions?limit=2&_before=location" responds "200 OK" with:
-      | /prev                                                       | /next                                                    |
-      | "http://localhost:8080/dimensions?limit=2&_before=device" | "http://localhost:8080/dimensions?limit=2&_after=language" |
-    And "GET /dimensions?limit=2&_before=device" responds "200 OK" with an array at "/dimensions":
+    And "GET /dimensions?limit=2&cursor=eyJkIjoiPCIsInAiOiJsb2NhdGlvbiJ9" responds "200 OK" with:
+      | /prev                                                                            | /next                                                                              |
+      | "http://localhost:8080/dimensions?limit=2&cursor=eyJkIjoiPCIsInAiOiJkZXZpY2UifQ" | "http://localhost:8080/dimensions?limit=2&cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSJ9" |
+    And "GET /dimensions?limit=2&cursor=eyJkIjoiPCIsInAiOiJkZXZpY2UifQ" responds "200 OK" with an array at "/dimensions":
       | /id       |
       | "age"     |
       | "country" |
-    And "GET /dimensions?limit=2&_before=device" responds "200 OK" with:
-      | /prev | /next                                                     |
-      |       | "http://localhost:8080/dimensions?limit=2&_after=country" |
-
-  Scenario: Pagination with conflicting directions should fail
-    Then "GET /dimensions?_after=3&_before=1" responds "400 Bad Request"
+    And "GET /dimensions?limit=2&cursor=eyJkIjoiPCIsInAiOiJkZXZpY2UifQ" responds "200 OK" with:
+      | /prev | /next                                                                             |
+      |       | "http://localhost:8080/dimensions?limit=2&cursor=eyJkIjoiPiIsInAiOiJjb3VudHJ5In0" |
