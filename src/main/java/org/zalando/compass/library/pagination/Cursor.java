@@ -18,6 +18,10 @@ public interface Cursor<P> {
         return getDirection() == Direction.FORWARD ? getPivot() : null;
     }
 
+    static <P> Cursor<P> empty() {
+        return create(null, null);
+    }
+
     static <P> Cursor<P> create(@Nullable final Direction direction, @Nullable final P pivot) {
         return new DefaultCursor<>(direction, pivot);
     }

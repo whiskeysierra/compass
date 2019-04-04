@@ -9,6 +9,7 @@ import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Revisioned;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueRevision;
+import org.zalando.compass.library.pagination.Cursor;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
 
@@ -64,7 +65,7 @@ class DefaultValueService implements ValueService {
     public Revisioned<List<Value>> readPage(final String key, final Map<String, JsonNode> filter) {
         final List<Value> values = read.readAll(key, filter);
 
-        final PageResult<Revision> revisions = readRevision.readPageRevisions(key, Pagination.create(null, null, 1));
+        final PageResult<Revision> revisions = readRevision.readPageRevisions(key, Pagination.create(Cursor.empty(), 1));
 
         if (revisions.getElements().isEmpty()) {
             return Revisioned.create(values, null);

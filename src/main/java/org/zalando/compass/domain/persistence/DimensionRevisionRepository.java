@@ -85,7 +85,7 @@ public class DimensionRevisionRepository {
                 .from(REVISION)
                 .join(DIMENSION_REVISION).on(DIMENSION_REVISION.REVISION.eq(REVISION.ID))
                 .where(DIMENSION_REVISION.ID.eq(id)), REVISION.ID, SortOrder.DESC)
-                .fetch().map(this::mapRevisionWithType);
+                .fetch(this::mapRevisionWithType);
     }
 
     public Optional<DimensionRevision> find(final String id, final long revision) {

@@ -22,7 +22,6 @@ class ReadDimension {
     }
 
     PageResult<Dimension> readPage(@Nullable final String term, final Pagination<String> query) {
-        // TODO the increment is needed to make subList work - they should be way closer together
         final List<Dimension> dimensions = repository.findAll(term, query.increment());
         return query.paginate(dimensions);
     }

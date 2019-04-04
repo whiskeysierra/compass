@@ -9,6 +9,7 @@ import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.persistence.KeyRevisionRepository;
 import org.zalando.compass.domain.persistence.NotFoundException;
 import org.zalando.compass.domain.persistence.RevisionRepository;
+import org.zalando.compass.library.pagination.Cursor;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
 
@@ -48,7 +49,7 @@ class ReadKeyRevision {
     }
 
     Revision readLatestRevision(final String id) {
-        return readRevisions(id, Pagination.create(null, null, 1)).getHead();
+        return readRevisions(id, Pagination.create(Cursor.empty(), 1)).getHead();
     }
 
     PageResult<Revision> readRevisions(final String id, final Pagination<Long> query) {

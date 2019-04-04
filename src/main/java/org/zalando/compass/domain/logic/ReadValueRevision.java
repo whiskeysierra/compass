@@ -10,6 +10,7 @@ import org.zalando.compass.domain.model.ValueRevision;
 import org.zalando.compass.domain.persistence.NotFoundException;
 import org.zalando.compass.domain.persistence.RevisionRepository;
 import org.zalando.compass.domain.persistence.ValueRevisionRepository;
+import org.zalando.compass.library.pagination.Cursor;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
 
@@ -59,7 +60,7 @@ class ReadValueRevision {
 
     // TODO this is rather inefficient
     public Revision readLatestRevision(final String key, final Map<String, JsonNode> dimensions) {
-        final Revision revision = readPageRevisions(key, Pagination.create(null, null, 1)).getHead();
+        final Revision revision = readPageRevisions(key, Pagination.create(Cursor.empty(), 1)).getHead();
         return readAt(key, dimensions, revision.getId()).getRevision();
     }
 
