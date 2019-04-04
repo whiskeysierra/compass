@@ -6,8 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.RelationService;
 import org.zalando.compass.domain.model.Relation;
-
-import java.io.IOException;
+import org.zalando.compass.resource.model.RelationPage;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
@@ -28,7 +27,7 @@ class RelationResource {
     }
 
     @RequestMapping(method = GET, path = "/{id}")
-    public Relation get(@PathVariable final String id) throws IOException {
+    public Relation get(@PathVariable final String id) {
         return service.read(id);
     }
 

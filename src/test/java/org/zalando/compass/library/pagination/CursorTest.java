@@ -8,14 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class CursorTest {
 
     @Test
-    public void shouldCreateFromNull() {
-        final Cursor<Long> cursor = Cursor.valueOf(null);
-
-        assertNull(cursor.getDirection());
-        assertNull(cursor.getPivot());
-    }
-
-    @Test
     public void shouldCreateFromEmptyString() {
         final Cursor<Long> cursor = Cursor.valueOf("");
 

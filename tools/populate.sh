@@ -21,7 +21,7 @@ jq '{values:[
   {dimensions:{country:"FR"},value:0.2}
 ]}' | http PUT :8080/keys/tax-rate/values
 
-jq '{schema:{type:"integer",format:"int64"},description:".."}' | http PUT :8080/keys/population
+jq '{schema:{type:"integer"},description:".."}' | http PUT :8080/keys/population
 
 jq '{values:[
     {dimensions:{country:"AD"},value:84000},

@@ -1,4 +1,4 @@
-package org.zalando.compass.resource;
+package org.zalando.compass.resource.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
@@ -13,17 +13,17 @@ import static lombok.AccessLevel.PRIVATE;
 @FieldDefaults(makeFinal = true, level = PRIVATE)
 @Getter
 @AllArgsConstructor
-final class ValueRepresentation {
+public final class ValueRepresentation {
 
     @Wither
     ImmutableMap<String, JsonNode> dimensions;
     JsonNode value;
 
-    static ValueRepresentation valueOf(final Value value) {
+    public static ValueRepresentation valueOf(final Value value) {
         return new ValueRepresentation(value.getDimensions(), value.getValue());
     }
 
-    Value toValue(final long index) {
+    public Value toValue(final long index) {
         return new Value(dimensions, index, value);
     }
 

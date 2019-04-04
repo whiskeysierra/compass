@@ -3,6 +3,7 @@ package org.zalando.compass.library.pagination;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.zalando.compass.library.pagination.CursorCodec.CODEC;
@@ -17,6 +18,9 @@ public final class DefaultCursor<P> implements Cursor<P> {
 
     @Getter
     private final P pivot;
+
+    @Getter
+    private final Map<String, String> query;
 
     @Override
     public String toString() {

@@ -1,4 +1,4 @@
-package org.zalando.compass.resource;
+package org.zalando.compass.resource.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,11 +12,10 @@ import static lombok.AccessLevel.PRIVATE;
 @FieldDefaults(makeFinal = true, level = PRIVATE)
 @Getter
 @AllArgsConstructor
-final class KeyCollectionRevisionRepresentation {
+public final class DimensionCollectionRepresentation {
 
-    RevisionRepresentation revision;
     URI next;
     URI prev;
-    List<KeyRepresentation> keys;
+    List<DimensionRepresentation> dimensions;
 
 }

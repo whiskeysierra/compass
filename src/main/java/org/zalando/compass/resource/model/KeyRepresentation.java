@@ -1,4 +1,4 @@
-package org.zalando.compass.resource;
+package org.zalando.compass.resource.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
@@ -11,13 +11,13 @@ import static lombok.AccessLevel.PRIVATE;
 @FieldDefaults(makeFinal = true, level = PRIVATE)
 @Getter
 @AllArgsConstructor
-final class KeyRepresentation {
+public final class KeyRepresentation {
 
     String id;
     JsonNode schema;
     String description;
 
-    static KeyRepresentation valueOf(final Key key) {
+    public static KeyRepresentation valueOf(final Key key) {
         return new KeyRepresentation(
                 key.getId(),
                 key.getSchema(),

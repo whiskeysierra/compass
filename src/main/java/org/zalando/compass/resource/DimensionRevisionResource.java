@@ -15,16 +15,17 @@ import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.library.pagination.Cursor;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
+import org.zalando.compass.resource.model.DimensionCollectionRevisionRepresentation;
+import org.zalando.compass.resource.model.DimensionRepresentation;
+import org.zalando.compass.resource.model.DimensionRevisionRepresentation;
+import org.zalando.compass.resource.model.RevisionCollectionRepresentation;
+import org.zalando.compass.resource.model.RevisionRepresentation;
 
 import javax.annotation.Nullable;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.zalando.compass.library.pagination.Cursor.create;
-import static org.zalando.compass.library.pagination.Direction.BACKWARD;
-import static org.zalando.compass.library.pagination.Direction.FORWARD;
 import static org.zalando.compass.resource.Linking.link;
 import static org.zalando.compass.resource.RevisionPaging.paginate;
 
@@ -43,9 +44,8 @@ class DimensionRevisionResource {
         final Pagination<Long> query = Pagination.create(cursor, requireNonNull(limit));
         final PageResult<Revision> page = service.readPageRevisions(query);
 
-        return paginate(page,
-                rev -> link(methodOn(DimensionRevisionResource.class).getRevisions(limit, create(FORWARD, rev.getId()))),
-                rev -> link(methodOn(DimensionRevisionResource.class).getRevisions(limit, create(BACKWARD, rev.getId()))),
+        return paginate(page, cursor,
+                c -> link(methodOn(DimensionRevisionResource.class).getRevisions(limit, c)),
                 rev -> link(methodOn(DimensionRevisionResource.class).getRevision(rev.getId(), null, null)));
     }
 
@@ -56,23 +56,14 @@ class DimensionRevisionResource {
 
         final Pagination<String> query = Pagination.create(cursor, requireNonNull(limit));
         final PageRevision<Dimension> page = service.readPageAt(revision, query);
-        final Revision rev = page.getRevision();
 
-        return ResponseEntity.ok(new DimensionCollectionRevisionRepresentation(
-                new RevisionRepresentation(
-                        rev.getId(),
-                        rev.getTimestamp(),
-                        null,
-                        rev.getType(),
-                        rev.getUser(),
-                        rev.getComment()
-                ),
-                page.hasNext() ? link(methodOn(DimensionRevisionResource.class)
-                        .getRevision(revision, limit, create(FORWARD, page.getTail().getId()))) : null,
-                page.hasPrevious() ? link(methodOn(DimensionRevisionResource.class)
-                        .getRevision(revision, limit, create(BACKWARD, page.getHead().getId()))) : null,
-                page.getElements().stream().map(DimensionRepresentation::valueOf).collect(toList())
-        ));
+        return ResponseEntity.ok(page.render((next, prev, elements) ->
+                new DimensionCollectionRevisionRepresentation(
+                        RevisionRepresentation.valueOf(page.getRevision()), next, prev, elements),
+                cursor,
+                Dimension::getId,
+                c -> link(methodOn(DimensionRevisionResource.class).getRevision(revision, limit, c)),
+                DimensionRepresentation::valueOf));
     }
 
     @RequestMapping(method = GET, path = "/{id}/revisions")
@@ -83,9 +74,8 @@ class DimensionRevisionResource {
         final Pagination<Long> query = Pagination.create(cursor, requireNonNull(limit));
         final PageResult<Revision> page = service.readRevisions(id, query);
 
-        return paginate(page,
-                rev -> link(methodOn(DimensionRevisionResource.class).getRevisions(id, limit, create(FORWARD, rev.getId()))),
-                rev -> link(methodOn(DimensionRevisionResource.class).getRevisions(id, limit, create(BACKWARD, rev.getId()))),
+        return paginate(page, cursor,
+                c -> link(methodOn(DimensionRevisionResource.class).getRevisions(id, limit, c)),
                 rev -> link(methodOn(DimensionRevisionResource.class).getRevision(id, rev.getId())));
     }
 
@@ -93,21 +83,7 @@ class DimensionRevisionResource {
     public ResponseEntity<DimensionRevisionRepresentation> getRevision(@PathVariable final String id,
             @PathVariable final long revision) {
         final DimensionRevision dimension = service.readAt(id, revision);
-        final Revision rev = dimension.getRevision();
-        return ResponseEntity.ok(new DimensionRevisionRepresentation(
-                dimension.getId(),
-                new RevisionRepresentation(
-                        rev.getId(),
-                        rev.getTimestamp(),
-                        null,
-                        rev.getType(),
-                        rev.getUser(),
-                        rev.getComment()
-                ),
-                dimension.getSchema(),
-                dimension.getRelation(),
-                dimension.getDescription()
-        ));
+        return ResponseEntity.ok(DimensionRevisionRepresentation.valueOf(dimension));
     }
 
 }

@@ -18,6 +18,7 @@ import static org.jooq.impl.DSL.val;
 import static org.zalando.compass.library.pagination.Direction.BACKWARD;
 import static org.zalando.compass.library.pagination.Direction.FORWARD;
 
+// TODO forward and backward pagination?!
 @AllArgsConstructor
 final class DefaultPagination<P> implements Pagination<P> {
 

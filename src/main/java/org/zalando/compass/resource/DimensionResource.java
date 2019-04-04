@@ -21,13 +21,14 @@ import org.zalando.compass.domain.model.Revisioned;
 import org.zalando.compass.library.pagination.Cursor;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
+import org.zalando.compass.resource.model.DimensionCollectionRepresentation;
+import org.zalando.compass.resource.model.DimensionRepresentation;
+import org.zalando.fauxpas.ThrowingUnaryOperator;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.util.List;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.http.HttpHeaders.IF_NONE_MATCH;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -38,9 +39,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.PATCH;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
-import static org.zalando.compass.library.pagination.Cursor.create;
-import static org.zalando.compass.library.pagination.Direction.BACKWARD;
-import static org.zalando.compass.library.pagination.Direction.FORWARD;
 import static org.zalando.compass.resource.Linking.link;
 import static org.zalando.compass.resource.MediaTypes.JSON_MERGE_PATCH_VALUE;
 import static org.zalando.compass.resource.MediaTypes.JSON_PATCH_VALUE;
@@ -89,16 +87,10 @@ class DimensionResource {
         final Pagination<String> query = Pagination.create(cursor, requireNonNull(limit));
         final PageResult<Dimension> page = service.readPage(q, query);
 
-        final List<DimensionRepresentation> representations = page.getElements().stream()
-                .map(DimensionRepresentation::valueOf)
-                .collect(toList());
-
-        return ResponseEntity.ok(new DimensionCollectionRepresentation(
-                page.hasNext() ?
-                        link(methodOn(DimensionResource.class).getAll(q, limit, create(FORWARD, page.getTail().getId()))) : null,
-                page.hasPrevious() ?
-                        link(methodOn(DimensionResource.class).getAll(q, limit, create(BACKWARD, page.getHead().getId()))) : null,
-                representations));
+        return ResponseEntity.ok(
+                page.render(DimensionCollectionRepresentation::new, cursor, Dimension::getId,
+                        prev -> link(methodOn(DimensionResource.class).getAll(q, limit, prev)),
+                        DimensionRepresentation::valueOf));
     }
 
     @RequestMapping(method = GET, path = "/{id}")
@@ -112,13 +104,7 @@ class DimensionResource {
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final JsonMergePatch patch) throws IOException, JsonPatchException {
 
-        final Dimension before = service.readOnly(id);
-        final JsonNode node = mapper.valueToTree(before);
-
-        final JsonNode patched = patch.apply(node);
-        final Dimension after = mapper.treeToValue(patched, Dimension.class);
-
-        return createOrReplace(id, null, comment, after);
+        return patch(id, comment, patch::apply);
     }
 
     @RequestMapping(method = PATCH, path = "/{id}", consumes = JSON_PATCH_VALUE)
@@ -126,10 +112,15 @@ class DimensionResource {
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final JsonPatch patch) throws IOException, JsonPatchException {
 
+        return patch(id, comment, patch::apply);
+    }
+
+    private ResponseEntity<DimensionRepresentation> patch(final String id, final @Nullable String comment,
+            final ThrowingUnaryOperator<JsonNode, JsonPatchException> patch) throws IOException, JsonPatchException {
         final Dimension before = service.readOnly(id);
         final JsonNode node = mapper.valueToTree(before);
 
-        final JsonNode patched = patch.apply(node);
+        final JsonNode patched = patch.tryApply(node);
         final Dimension after = mapper.treeToValue(patched, Dimension.class);
 
         return createOrReplace(id, null, comment, after);

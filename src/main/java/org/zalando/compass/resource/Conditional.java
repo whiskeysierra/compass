@@ -28,11 +28,11 @@ final class Conditional {
         return builder;
     }
 
-    private static <T> String eTag(final Long revision) {
+    private static String eTag(final Long revision) {
         return new ETag(revision).toString();
     }
 
-    private static <T> long lastModified(final OffsetDateTime timestamp) {
+    private static long lastModified(final OffsetDateTime timestamp) {
         return timestamp.toInstant().toEpochMilli();
     }
 

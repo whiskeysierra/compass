@@ -1,10 +1,9 @@
-package org.zalando.compass.resource;
+package org.zalando.compass.resource.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 
-import java.net.URI;
 import java.util.List;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -12,10 +11,9 @@ import static lombok.AccessLevel.PRIVATE;
 @FieldDefaults(makeFinal = true, level = PRIVATE)
 @Getter
 @AllArgsConstructor
-class DimensionCollectionRepresentation {
+public final class ValueCollectionRevisionRepresentation {
 
-    URI next;
-    URI prev;
-    List<DimensionRepresentation> dimensions;
+    RevisionRepresentation revision;
+    List<ValueRepresentation> values;
 
 }

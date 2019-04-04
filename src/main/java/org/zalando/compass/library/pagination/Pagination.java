@@ -16,6 +16,7 @@ public interface Pagination<P> {
         return new DefaultPagination<>(cursor.getPivot(), limit, cursor.getDirection());
     }
 
+    // TODO find a way that enforces increment, seek + paginate in one step
     SelectForUpdateStep<Record> seek(SelectOrderByStep<Record> step, Field<P> field, SortOrder order);
 
     <T> PageResult<T> paginate(List<T> elements);

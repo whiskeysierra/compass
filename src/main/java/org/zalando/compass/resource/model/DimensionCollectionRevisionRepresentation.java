@@ -1,20 +1,22 @@
-package org.zalando.compass.resource;
+package org.zalando.compass.resource.model;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
+
+import java.net.URI;
+import java.util.List;
 
 import static lombok.AccessLevel.PRIVATE;
 
 @FieldDefaults(makeFinal = true, level = PRIVATE)
 @Getter
 @AllArgsConstructor
-final class KeyRevisionRepresentation {
+public final class DimensionCollectionRevisionRepresentation {
 
-    String id;
     RevisionRepresentation revision;
-    JsonNode schema;
-    String description;
+    URI next;
+    URI prev;
+    List<DimensionRepresentation> dimensions;
 
 }

@@ -1,5 +1,6 @@
-package org.zalando.compass.resource;
+package org.zalando.compass.resource.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
@@ -10,10 +11,9 @@ import static lombok.AccessLevel.PRIVATE;
 
 @FieldDefaults(makeFinal = true, level = PRIVATE)
 @Getter
-@AllArgsConstructor
-final class ValueCollectionRevisionRepresentation {
+@AllArgsConstructor(onConstructor = @__(@JsonCreator))
+public final class ValueCollectionRepresentation {
 
-    RevisionRepresentation revision;
     List<ValueRepresentation> values;
 
 }

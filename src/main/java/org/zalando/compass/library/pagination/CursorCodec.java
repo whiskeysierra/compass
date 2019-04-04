@@ -1,14 +1,18 @@
 package org.zalando.compass.library.pagination;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Base64;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+@Slf4j
 final class CursorCodec {
 
     static final CursorCodec CODEC = new CursorCodec();
@@ -24,7 +28,11 @@ final class CursorCodec {
 
     @Nullable
     <P> String encode(final Cursor<P> cursor) {
-        return toBase64(toJSON(cursor));
+        try {
+            return toBase64(toJSON(cursor));
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     <P> Cursor<P> decode(final String cursor) {
@@ -35,25 +43,18 @@ final class CursorCodec {
         try {
             return fromJSON(fromBase64(cursor));
         } catch (final Exception e) {
+            log.warn("Received cursor '{}' is invalid, ignoring it", cursor, e);
             return Cursor.create(null, null);
         }
     }
 
-    private <P> String toJSON(final Cursor<P> cursor) {
-        try {
-            return mapper.writeValueAsString(cursor);
-        } catch (final IOException e) {
-            throw new IllegalArgumentException(e);
-        }
+    private <P> String toJSON(final Cursor<P> cursor) throws JsonProcessingException {
+        return mapper.writeValueAsString(cursor);
     }
 
     @SuppressWarnings("unchecked")
-    private <P> Cursor<P> fromJSON(final String json) {
-        try {
-            return mapper.readValue(json, Cursor.class);
-        } catch (final IOException e) {
-            throw new IllegalArgumentException(e);
-        }
+    private <P> Cursor<P> fromJSON(final String json) throws IOException {
+        return mapper.readValue(json, Cursor.class);
     }
 
     private String toBase64(final String json) {

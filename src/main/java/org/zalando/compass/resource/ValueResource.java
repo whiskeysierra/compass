@@ -21,6 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.logic.ValueService;
 import org.zalando.compass.domain.model.Revisioned;
 import org.zalando.compass.domain.model.Value;
+import org.zalando.compass.resource.model.ValueCollectionRepresentation;
+import org.zalando.compass.resource.model.ValueRepresentation;
+import org.zalando.fauxpas.ThrowingUnaryOperator;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -157,15 +160,7 @@ class ValueResource {
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final JsonMergePatch patch) throws IOException, JsonPatchException {
 
-        final Map<String, JsonNode> filter = querying.read(query);
-
-        final Value before = service.readOnly(key, filter);
-        final JsonNode node = mapper.valueToTree(before);
-
-        final JsonNode patched = patch.apply(node);
-        final Value after = mapper.treeToValue(patched, Value.class);
-
-        return createOrReplace(key, query, null, comment, after);
+        return patch(key, query, comment, patch::apply);
     }
 
     @RequestMapping(method = PATCH, path = "/value", consumes = JSON_PATCH_VALUE)
@@ -174,12 +169,18 @@ class ValueResource {
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final JsonPatch patch) throws IOException, JsonPatchException {
 
+        return patch(key, query, comment, patch::apply);
+    }
+
+    private ResponseEntity<ValueRepresentation> patch(final String key, final Map<String, String> query,
+            final @Nullable String comment,
+            final ThrowingUnaryOperator<JsonNode, JsonPatchException> patch) throws IOException, JsonPatchException {
         final Map<String, JsonNode> filter = querying.read(query);
 
         final Value before = service.readOnly(key, filter);
         final JsonNode node = mapper.valueToTree(before);
 
-        final JsonNode patched = patch.apply(node);
+        final JsonNode patched = patch.tryApply(node);
         final Value after = mapper.treeToValue(patched, Value.class);
 
         return createOrReplace(key, query, null, comment, after);
