@@ -50,7 +50,6 @@ import static org.zalando.compass.resource.MediaTypes.JSON_MERGE_PATCH_VALUE;
 import static org.zalando.compass.resource.MediaTypes.JSON_PATCH_VALUE;
 
 @RestController
-@RequestMapping(path = "/keys/{key}")
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 class ValueResource {
 
@@ -58,8 +57,9 @@ class ValueResource {
     private final ObjectMapper mapper;
     private final ValueService service;
 
-    @RequestMapping(method = PUT, path = "/values")
-    public ResponseEntity<ValueCollectionRepresentation> replaceAll(@PathVariable final String key,
+    @RequestMapping(method = PUT, path = "/keys/{key}/values")
+    public ResponseEntity<ValueCollectionRepresentation> replaceAll(
+            @PathVariable final String key,
             @Nullable @RequestHeader(name = IF_NONE_MATCH, required = false) final String ifNoneMatch,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final ValueCollectionRepresentation representation) {
@@ -88,8 +88,9 @@ class ValueResource {
         }
     }
 
-    @RequestMapping(method = PUT, path = "/value")
-    public ResponseEntity<ValueRepresentation> createOrReplace(@PathVariable final String key,
+    @RequestMapping(method = PUT, path = "/keys/{key}/value")
+    public ResponseEntity<ValueRepresentation> createOrReplace(
+            @PathVariable final String key,
             @RequestParam final Map<String, String> query,
             @Nullable @RequestHeader(name = IF_NONE_MATCH, required = false) final String ifNoneMatch,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
@@ -116,7 +117,7 @@ class ValueResource {
         }
     }
 
-    @RequestMapping(method = GET, path = "/values")
+    @RequestMapping(method = GET, path = "/keys/{key}/values")
     public ResponseEntity<ValueCollectionRepresentation> readAll(@PathVariable final String key,
             @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = querying.read(query);
@@ -127,7 +128,7 @@ class ValueResource {
                         .map(ValueRepresentation::valueOf).collect(toList())));
     }
 
-    @RequestMapping(method = GET, path = "/value")
+    @RequestMapping(method = GET, path = "/keys/{key}/value")
     public ResponseEntity<ValueRepresentation> read(@PathVariable final String key,
             @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = querying.read(query);
@@ -139,7 +140,7 @@ class ValueResource {
                 .body(ValueRepresentation.valueOf(value));
     }
 
-    @RequestMapping(method = PATCH, path = "/values", consumes = {APPLICATION_JSON_VALUE, JSON_PATCH_VALUE})
+    @RequestMapping(method = PATCH, path = "/keys/{key}/values", consumes = {APPLICATION_JSON_VALUE, JSON_PATCH_VALUE})
     public ResponseEntity<ValueCollectionRepresentation> updateAll(@PathVariable final String key,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final JsonPatch patch) throws IOException, JsonPatchException {
@@ -154,7 +155,7 @@ class ValueResource {
         return replaceAll(key, null, comment, after);
     }
 
-    @RequestMapping(method = PATCH, path = "/value", consumes = {APPLICATION_JSON_VALUE, JSON_MERGE_PATCH_VALUE})
+    @RequestMapping(method = PATCH, path = "/keys/{key}/value", consumes = {APPLICATION_JSON_VALUE, JSON_MERGE_PATCH_VALUE})
     public ResponseEntity<ValueRepresentation> update(@PathVariable final String key,
             @RequestParam final Map<String, String> query,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
@@ -163,7 +164,7 @@ class ValueResource {
         return patch(key, query, comment, patch::apply);
     }
 
-    @RequestMapping(method = PATCH, path = "/value", consumes = JSON_PATCH_VALUE)
+    @RequestMapping(method = PATCH, path = "/keys/{key}/value", consumes = JSON_PATCH_VALUE)
     public ResponseEntity<ValueRepresentation> update(@PathVariable final String key,
             @RequestParam final Map<String, String> query,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
@@ -186,7 +187,7 @@ class ValueResource {
         return createOrReplace(key, query, null, comment, after);
     }
 
-    @RequestMapping(method = DELETE, path = "/value")
+    @RequestMapping(method = DELETE, path = "/keys/{key}/value")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable final String key, @RequestParam final Map<String, String> query,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment) {

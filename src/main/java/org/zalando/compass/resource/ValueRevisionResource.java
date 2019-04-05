@@ -22,12 +22,10 @@ import org.zalando.compass.resource.model.ValueCollectionRevisionRepresentation;
 import org.zalando.compass.resource.model.ValueRepresentation;
 import org.zalando.compass.resource.model.ValueRevisionRepresentation;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static java.util.Collections.emptyMap;
-import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -35,19 +33,19 @@ import static org.zalando.compass.resource.Linking.link;
 import static org.zalando.compass.resource.RevisionPaging.paginate;
 
 @RestController
-@RequestMapping(path = "/keys/{key}")
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 class ValueRevisionResource {
 
     private final Querying querying;
     private final ValueService service;
 
-    @RequestMapping(method = GET, path = "/values/revisions")
-    public ResponseEntity<RevisionCollectionRepresentation> getValuesRevisions(@PathVariable final String key,
-            @Nullable @RequestParam(required = false, defaultValue = "25") final Integer limit,
+    @RequestMapping(method = GET, path = "/keys/{key}/values/revisions")
+    public ResponseEntity<RevisionCollectionRepresentation> getValuesRevisions(
+            @PathVariable final String key,
+            @RequestParam(required = false, defaultValue = "25") final Integer limit,
             @RequestParam(required = false, defaultValue = "") final Cursor<Long> cursor) {
 
-        final Pagination<Long> query = Pagination.create(cursor, requireNonNull(limit));
+        final Pagination<Long> query = cursor.paginate(limit);
         final PageResult<Revision> page = service.readPageRevisions(key, query);
 
         return paginate(page, cursor,
@@ -55,9 +53,12 @@ class ValueRevisionResource {
                 rev -> link(methodOn(ValueRevisionResource.class).getValuesRevision(key, rev.getId(), of())));
     }
 
-    @RequestMapping(method = GET, path = "/values/revisions/{revision}")
-    public ResponseEntity<ValueCollectionRevisionRepresentation> getValuesRevision(@PathVariable final String key,
-            @PathVariable final long revision, @RequestParam final Map<String, String> query) {
+    @RequestMapping(method = GET, path = "/keys/{key}/values/revisions/{revision}")
+    public ResponseEntity<ValueCollectionRevisionRepresentation> getValuesRevision(
+            @PathVariable final String key,
+            @PathVariable final long revision, 
+            @RequestParam final Map<String, String> query) {
+        
         final Map<String, JsonNode> filter = querying.read(query);
         final PageRevision<Value> page = service.readPageAt(key, filter, revision);
 
@@ -68,14 +69,15 @@ class ValueRevisionResource {
                         .collect(toList())));
     }
 
-    @RequestMapping(method = GET, path = "/value/revisions")
-    public ResponseEntity<RevisionCollectionRepresentation> getValueRevisions(@PathVariable final String key,
+    @RequestMapping(method = GET, path = "/keys/{key}/value/revisions")
+    public ResponseEntity<RevisionCollectionRepresentation> getValueRevisions(
+            @PathVariable final String key,
             @RequestParam final Map<String, String> queryParams,
-            @Nullable @RequestParam(required = false, defaultValue = "25") final Integer limit,
+            @RequestParam(required = false, defaultValue = "25") final Integer limit,
             @RequestParam(required = false, defaultValue = "") final Cursor<Long> cursor) {
 
         final Map<String, JsonNode> filter = querying.read(queryParams);
-        final Pagination<Long> query = Pagination.create(cursor, requireNonNull(limit));
+        final Pagination<Long> query = cursor.paginate(limit);
 
         final PageResult<Revision> page = service.readRevisions(key, filter, query);
         final Map<String, String> normalized = querying.write(filter);
@@ -85,10 +87,12 @@ class ValueRevisionResource {
                 rev -> link(methodOn(ValueRevisionResource.class).getRevision(key, rev.getId(), normalized)));
     }
 
-    @RequestMapping(method = GET, path = "/value/revisions/{revision}")
-    public ResponseEntity<ValueRevisionRepresentation> getRevision(@PathVariable final String key,
+    @RequestMapping(method = GET, path = "/keys/{key}/value/revisions/{revision}")
+    public ResponseEntity<ValueRevisionRepresentation> getRevision(
+            @PathVariable final String key,
             @PathVariable final long revision,
             @RequestParam final Map<String, String> query) {
+        
         final Map<String, JsonNode> filter = querying.read(query);
         final ValueRevision value = service.readAt(key, filter, revision);
         return ResponseEntity.ok(ValueRevisionRepresentation.valueOf(value));

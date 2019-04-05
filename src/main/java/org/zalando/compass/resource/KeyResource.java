@@ -28,7 +28,6 @@ import org.zalando.compass.resource.model.KeyRepresentation;
 import javax.annotation.Nullable;
 import java.io.IOException;
 
-import static java.util.Objects.requireNonNull;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.http.HttpHeaders.IF_NONE_MATCH;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -44,15 +43,15 @@ import static org.zalando.compass.resource.MediaTypes.JSON_MERGE_PATCH_VALUE;
 import static org.zalando.compass.resource.MediaTypes.JSON_PATCH_VALUE;
 
 @RestController
-@RequestMapping(path = "/keys")
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 class KeyResource {
 
     private final ObjectMapper mapper;
     private final KeyService service;
 
-    @RequestMapping(method = PUT, path = "/{id}")
-    public ResponseEntity<KeyRepresentation> createOrReplace(@PathVariable final String id,
+    @RequestMapping(method = PUT, path = "/keys/{id}")
+    public ResponseEntity<KeyRepresentation> createOrReplace(
+            @PathVariable final String id,
             @Nullable @RequestHeader(name = IF_NONE_MATCH, required = false) final String ifNoneMatch,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final Key body) {
@@ -78,13 +77,13 @@ class KeyResource {
         }
     }
 
-    @RequestMapping(method = GET)
+    @RequestMapping(method = GET, path = "/keys")
     public ResponseEntity<KeyCollectionRepresentation> getAll(
             @RequestParam(name = "q", required = false) @Nullable final String q,
-            @Nullable @RequestParam(required = false, defaultValue = "25") final Integer limit,
+            @RequestParam(required = false, defaultValue = "25") final Integer limit,
             @RequestParam(required = false, defaultValue = "") final Cursor<String> cursor) {
 
-        final Pagination<String> query = Pagination.create(cursor, requireNonNull(limit));
+        final Pagination<String> query = cursor.paginate(limit);
         final PageResult<Key> page = service.readPage(q, query);
 
         return ResponseEntity.ok(page.render(KeyCollectionRepresentation::new,
@@ -93,13 +92,13 @@ class KeyResource {
                 KeyRepresentation::valueOf));
     }
 
-    @RequestMapping(method = GET, path = "/{id}")
+    @RequestMapping(method = GET, path = "/keys/{id}")
     public ResponseEntity<KeyRepresentation> get(@PathVariable final String id) {
         final Revisioned<Key> revisioned = service.read(id);
         return Conditional.build(revisioned, KeyRepresentation::valueOf);
     }
 
-    @RequestMapping(method = PATCH, path = "/{id}", consumes = {APPLICATION_JSON_VALUE, JSON_MERGE_PATCH_VALUE})
+    @RequestMapping(method = PATCH, path = "/keys/{id}", consumes = {APPLICATION_JSON_VALUE, JSON_MERGE_PATCH_VALUE})
     public ResponseEntity<KeyRepresentation> update(@PathVariable final String id,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final JsonMergePatch patch) throws IOException, JsonPatchException {
@@ -113,7 +112,7 @@ class KeyResource {
         return createOrReplace(id, null, comment, after);
     }
 
-    @RequestMapping(method = PATCH, path = "/{id}", consumes = JSON_PATCH_VALUE)
+    @RequestMapping(method = PATCH, path = "/keys/{id}", consumes = JSON_PATCH_VALUE)
     public ResponseEntity<KeyRepresentation> update(@PathVariable final String id,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final JsonPatch patch) throws IOException, JsonPatchException {
@@ -127,7 +126,7 @@ class KeyResource {
         return createOrReplace(id, null, comment, after);
     }
 
-    @RequestMapping(method = DELETE, path = "/{id}")
+    @RequestMapping(method = DELETE, path = "/keys/{id}")
     @ResponseStatus(NO_CONTENT)
     public void delete(@PathVariable final String id,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment) {

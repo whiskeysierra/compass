@@ -12,8 +12,9 @@ public interface Pagination<P> {
 
     Pagination<P> increment();
 
+    @Deprecated
     static <C> Pagination<C> create(final Cursor<C> cursor, int limit) {
-        return new DefaultPagination<>(cursor.getPivot(), limit, cursor.getDirection());
+        return cursor.paginate(limit);
     }
 
     // TODO find a way that enforces increment, seek + paginate in one step

@@ -20,7 +20,7 @@ final class CursorCodec {
     private final ObjectMapper mapper = new ObjectMapper()
             .disable(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES)
             .enable(DeserializationFeature.USE_LONG_FOR_INTS)
-            .addMixIn(Cursor.class, CursorMixIn.class)
+            .addMixIn(DefaultCursor.class, DefaultCursorMixIn.class)
             .addMixIn(Direction.class, DirectionMixIn.class);
 
     private final Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
@@ -37,14 +37,14 @@ final class CursorCodec {
 
     <P> Cursor<P> decode(final String cursor) {
         if (cursor.isEmpty()) {
-            return Cursor.create(null, null);
+            return Cursor.empty();
         }
 
         try {
             return fromJSON(fromBase64(cursor));
         } catch (final Exception e) {
             log.warn("Received cursor '{}' is invalid, ignoring it", cursor, e);
-            return Cursor.create(null, null);
+            return Cursor.empty();
         }
     }
 
@@ -54,7 +54,7 @@ final class CursorCodec {
 
     @SuppressWarnings("unchecked")
     private <P> Cursor<P> fromJSON(final String json) throws IOException {
-        return mapper.readValue(json, Cursor.class);
+        return mapper.readValue(json, DefaultCursor.class);
     }
 
     private String toBase64(final String json) {

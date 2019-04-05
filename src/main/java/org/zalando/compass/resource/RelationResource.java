@@ -11,7 +11,6 @@ import org.zalando.compass.resource.model.RelationPage;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @RestController
-@RequestMapping(path = "/relations")
 class RelationResource {
 
     private final RelationService service;
@@ -21,12 +20,12 @@ class RelationResource {
         this.service = service;
     }
 
-    @RequestMapping(method = GET)
+    @RequestMapping(method = GET, path = "/relations")
     public RelationPage getRelations() {
         return new RelationPage(service.readAll());
     }
 
-    @RequestMapping(method = GET, path = "/{id}")
+    @RequestMapping(method = GET, path = "/relations/{id}")
     public Relation get(@PathVariable final String id) {
         return service.read(id);
     }

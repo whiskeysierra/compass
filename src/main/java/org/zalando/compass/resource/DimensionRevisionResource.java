@@ -21,27 +21,23 @@ import org.zalando.compass.resource.model.DimensionRevisionRepresentation;
 import org.zalando.compass.resource.model.RevisionCollectionRepresentation;
 import org.zalando.compass.resource.model.RevisionRepresentation;
 
-import javax.annotation.Nullable;
-
-import static java.util.Objects.requireNonNull;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.zalando.compass.resource.Linking.link;
 import static org.zalando.compass.resource.RevisionPaging.paginate;
 
 @RestController
-@RequestMapping(path = "/dimensions")
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 class DimensionRevisionResource {
 
     private final DimensionService service;
 
-    @RequestMapping(method = GET, path = "/revisions")
+    @RequestMapping(method = GET, path = "/dimensions/revisions")
     public ResponseEntity<RevisionCollectionRepresentation> getRevisions(
-            @Nullable @RequestParam(required = false, defaultValue = "25") final Integer limit,
+            @RequestParam(required = false, defaultValue = "25") final Integer limit,
             @RequestParam(required = false, defaultValue = "") final Cursor<Long> cursor) {
 
-        final Pagination<Long> query = Pagination.create(cursor, requireNonNull(limit));
+        final Pagination<Long> query = cursor.paginate(limit);
         final PageResult<Revision> page = service.readPageRevisions(query);
 
         return paginate(page, cursor,
@@ -49,12 +45,13 @@ class DimensionRevisionResource {
                 rev -> link(methodOn(DimensionRevisionResource.class).getRevision(rev.getId(), null, null)));
     }
 
-    @RequestMapping(method = GET, path = "/revisions/{revision}")
-    public ResponseEntity<DimensionCollectionRevisionRepresentation> getRevision(@PathVariable final long revision,
-            @Nullable @RequestParam(required = false, defaultValue = "25") final Integer limit,
+    @RequestMapping(method = GET, path = "/dimensions/revisions/{revision}")
+    public ResponseEntity<DimensionCollectionRevisionRepresentation> getRevision(
+            @PathVariable final long revision,
+            @RequestParam(required = false, defaultValue = "25") final Integer limit,
             @RequestParam(required = false, defaultValue = "") final Cursor<String> cursor) {
 
-        final Pagination<String> query = Pagination.create(cursor, requireNonNull(limit));
+        final Pagination<String> query = cursor.paginate(limit);
         final PageRevision<Dimension> page = service.readPageAt(revision, query);
 
         return ResponseEntity.ok(page.render((next, prev, elements) ->
@@ -66,12 +63,13 @@ class DimensionRevisionResource {
                 DimensionRepresentation::valueOf));
     }
 
-    @RequestMapping(method = GET, path = "/{id}/revisions")
-    public ResponseEntity<RevisionCollectionRepresentation> getRevisions(@PathVariable final String id,
-            @Nullable @RequestParam(required = false, defaultValue = "25") final Integer limit,
+    @RequestMapping(method = GET, path = "/dimensions/{id}/revisions")
+    public ResponseEntity<RevisionCollectionRepresentation> getRevisions(
+            @PathVariable final String id,
+            @RequestParam(required = false, defaultValue = "25") final Integer limit,
             @RequestParam(required = false, defaultValue = "") final Cursor<Long> cursor) {
 
-        final Pagination<Long> query = Pagination.create(cursor, requireNonNull(limit));
+        final Pagination<Long> query = cursor.paginate(limit);
         final PageResult<Revision> page = service.readRevisions(id, query);
 
         return paginate(page, cursor,
@@ -79,9 +77,11 @@ class DimensionRevisionResource {
                 rev -> link(methodOn(DimensionRevisionResource.class).getRevision(id, rev.getId())));
     }
 
-    @RequestMapping(method = GET, path = "/{id}/revisions/{revision}")
-    public ResponseEntity<DimensionRevisionRepresentation> getRevision(@PathVariable final String id,
+    @RequestMapping(method = GET, path = "/dimensions/{id}/revisions/{revision}")
+    public ResponseEntity<DimensionRevisionRepresentation> getRevision(
+            @PathVariable final String id,
             @PathVariable final long revision) {
+
         final DimensionRevision dimension = service.readAt(id, revision);
         return ResponseEntity.ok(DimensionRevisionRepresentation.valueOf(dimension));
     }

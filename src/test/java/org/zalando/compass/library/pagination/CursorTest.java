@@ -2,8 +2,8 @@ package org.zalando.compass.library.pagination;
 
 import org.junit.Test;
 
+import static java.util.Collections.emptyMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class CursorTest {
 
@@ -11,38 +11,37 @@ public class CursorTest {
     public void shouldCreateFromEmptyString() {
         final Cursor<Long> cursor = Cursor.valueOf("");
 
-        assertNull(cursor.getDirection());
-        assertNull(cursor.getPivot());
+        assertEquals(Cursor.empty(), cursor);
     }
 
     @Test
     public void shouldCreateBackward() {
-        final Cursor<Long> cursor = Cursor.create(Direction.BACKWARD, 3L);
+        final Cursor<Long> cursor = new DefaultCursor<>(Direction.BACKWARD, 3L, emptyMap());
 
         assertEquals("eyJkIjoiPCIsInAiOjN9", cursor.toString());
     }
 
     @Test
     public void shouldCreateForward() {
-        final Cursor<Long> cursor = Cursor.create(Direction.FORWARD, 4L);
+        final Cursor<Long> cursor = new DefaultCursor<>(Direction.FORWARD, 4L, emptyMap());
 
         assertEquals("eyJkIjoiPiIsInAiOjR9", cursor.toString());
     }
 
     @Test
     public void shouldParseBackward() {
-        final Cursor<Long> cursor = Cursor.valueOf("eyJkIjoiPCIsInAiOjN9");
+        final Cursor<Long> actual = Cursor.valueOf("eyJkIjoiPCIsInAiOjN9");
+        final Cursor<Long> expected = new DefaultCursor<>(Direction.BACKWARD, 3L, emptyMap());
 
-        assertEquals(Direction.BACKWARD, cursor.getDirection());
-        assertEquals(3L, cursor.getPivot());
+        assertEquals(expected, actual);
     }
 
     @Test
     public void shouldParseForward() {
-        final Cursor<Long> cursor = Cursor.valueOf("eyJkIjoiPiIsInAiOjR9");
+        final Cursor<Long> actual = Cursor.valueOf("eyJkIjoiPiIsInAiOjR9");
+        final Cursor<Long> expected = new DefaultCursor<>(Direction.FORWARD, 4L, emptyMap());
 
-        assertEquals(Direction.FORWARD, cursor.getDirection());
-        assertEquals(4L, cursor.getPivot());
+        assertEquals(expected, actual);
     }
 
 }

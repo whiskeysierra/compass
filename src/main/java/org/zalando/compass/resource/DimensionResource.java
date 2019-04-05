@@ -28,7 +28,6 @@ import org.zalando.fauxpas.ThrowingUnaryOperator;
 import javax.annotation.Nullable;
 import java.io.IOException;
 
-import static java.util.Objects.requireNonNull;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.http.HttpHeaders.IF_NONE_MATCH;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -44,15 +43,15 @@ import static org.zalando.compass.resource.MediaTypes.JSON_MERGE_PATCH_VALUE;
 import static org.zalando.compass.resource.MediaTypes.JSON_PATCH_VALUE;
 
 @RestController
-@RequestMapping(path = "/dimensions")
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 class DimensionResource {
 
     private final ObjectMapper mapper;
     private final DimensionService service;
 
-    @RequestMapping(method = PUT, path = "/{id}")
-    public ResponseEntity<DimensionRepresentation> createOrReplace(@PathVariable final String id,
+    @RequestMapping(method = PUT, path = "/dimensions/{id}")
+    public ResponseEntity<DimensionRepresentation> createOrReplace(
+            @PathVariable final String id,
             @Nullable @RequestHeader(name = IF_NONE_MATCH, required = false) final String ifNoneMatch,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final Dimension body) {
@@ -78,13 +77,13 @@ class DimensionResource {
         }
     }
 
-    @RequestMapping(method = GET)
+    @RequestMapping(method = GET, path = "/dimensions")
     public ResponseEntity<DimensionCollectionRepresentation> getAll(
             @RequestParam(name = "q", required = false) @Nullable final String q,
-            @Nullable @RequestParam(required = false, defaultValue = "25") final Integer limit,
+            @RequestParam(required = false, defaultValue = "25") final Integer limit,
             @RequestParam(required = false, defaultValue = "") final Cursor<String> cursor) {
 
-        final Pagination<String> query = Pagination.create(cursor, requireNonNull(limit));
+        final Pagination<String> query = cursor.paginate(limit);
         final PageResult<Dimension> page = service.readPage(q, query);
 
         return ResponseEntity.ok(
@@ -93,22 +92,24 @@ class DimensionResource {
                         DimensionRepresentation::valueOf));
     }
 
-    @RequestMapping(method = GET, path = "/{id}")
+    @RequestMapping(method = GET, path = "/dimensions/{id}")
     public ResponseEntity<DimensionRepresentation> get(@PathVariable final String id) {
         final Revisioned<Dimension> revisioned = service.read(id);
         return Conditional.build(revisioned, DimensionRepresentation::valueOf);
     }
 
-    @RequestMapping(method = PATCH, path = "/{id}", consumes = {APPLICATION_JSON_VALUE, JSON_MERGE_PATCH_VALUE})
-    public ResponseEntity<DimensionRepresentation> update(@PathVariable final String id,
+    @RequestMapping(method = PATCH, path = "/dimensions/{id}", consumes = {APPLICATION_JSON_VALUE, JSON_MERGE_PATCH_VALUE})
+    public ResponseEntity<DimensionRepresentation> update(
+            @PathVariable final String id,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final JsonMergePatch patch) throws IOException, JsonPatchException {
 
         return patch(id, comment, patch::apply);
     }
 
-    @RequestMapping(method = PATCH, path = "/{id}", consumes = JSON_PATCH_VALUE)
-    public ResponseEntity<DimensionRepresentation> update(@PathVariable final String id,
+    @RequestMapping(method = PATCH, path = "/dimensions/{id}", consumes = JSON_PATCH_VALUE)
+    public ResponseEntity<DimensionRepresentation> update(
+            @PathVariable final String id,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final JsonPatch patch) throws IOException, JsonPatchException {
 
@@ -126,7 +127,7 @@ class DimensionResource {
         return createOrReplace(id, null, comment, after);
     }
 
-    @RequestMapping(method = DELETE, path = "/{id}")
+    @RequestMapping(method = DELETE, path = "/dimensions/{id}")
     @ResponseStatus(NO_CONTENT)
     public void delete(@PathVariable final String id,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment) {
