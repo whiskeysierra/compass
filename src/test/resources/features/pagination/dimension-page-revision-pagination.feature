@@ -24,39 +24,39 @@ Feature: Dimension pagination
       | "country" |
     And "GET /dimensions/revisions/5?limit=2" responds "200 OK" with:
       | /prev | /next                                                                                         |
-      |       | "http://localhost:8080/dimensions/revisions/5?limit=2&cursor=eyJkIjoiPiIsInAiOiJjb3VudHJ5In0" |
-    And "GET /dimensions/revisions/5?limit=2&cursor=eyJkIjoiPiIsInAiOiJjb3VudHJ5In0" responds "200 OK" with an array at "/dimensions":
+      |       | "http://localhost:8080/dimensions/revisions/5?cursor=eyJkIjoiPiIsInAiOiJjb3VudHJ5IiwibCI6Mn0" |
+    And "GET /dimensions/revisions/5?cursor=eyJkIjoiPiIsInAiOiJjb3VudHJ5IiwibCI6Mn0" responds "200 OK" with an array at "/dimensions":
       | /id        |
       | "device"   |
       | "language" |
-    And "GET /dimensions/revisions/5?limit=2&cursor=eyJkIjoiPiIsInAiOiJjb3VudHJ5In0" responds "200 OK" with:
+    And "GET /dimensions/revisions/5?cursor=eyJkIjoiPiIsInAiOiJjb3VudHJ5IiwibCI6Mn0" responds "200 OK" with:
       | /prev                                                                                        | /next                                                                                          |
-      | "http://localhost:8080/dimensions/revisions/5?limit=2&cursor=eyJkIjoiPCIsInAiOiJkZXZpY2UifQ" | "http://localhost:8080/dimensions/revisions/5?limit=2&cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSJ9" |
-    And "GET /dimensions/revisions/5?limit=2&cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSJ9" responds "200 OK" with an array at "/dimensions":
+      | "http://localhost:8080/dimensions/revisions/5?cursor=eyJkIjoiPCIsInAiOiJkZXZpY2UiLCJsIjoyfQ" | "http://localhost:8080/dimensions/revisions/5?cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSIsImwiOjJ9" |
+    And "GET /dimensions/revisions/5?cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSIsImwiOjJ9" responds "200 OK" with an array at "/dimensions":
       | /id        |
       | "location" |
-    And "GET /dimensions/revisions/5?limit=2&cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSJ9" responds "200 OK" with:
+    And "GET /dimensions/revisions/5?cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSIsImwiOjJ9" responds "200 OK" with:
       | /prev                                                                                          | /next |
-      | "http://localhost:8080/dimensions/revisions/5?limit=2&cursor=eyJkIjoiPCIsInAiOiJsb2NhdGlvbiJ9" |       |
+      | "http://localhost:8080/dimensions/revisions/5?cursor=eyJkIjoiPCIsInAiOiJsb2NhdGlvbiIsImwiOjJ9" |       |
 
   Scenario: Read dimension revisions should paginate backward
-    Then "GET /dimensions/revisions/5?limit=2&cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSJ9" responds "200 OK" with an array at "/dimensions":
+    Then "GET /dimensions/revisions/5?cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSIsImwiOjJ9" responds "200 OK" with an array at "/dimensions":
       | /id        |
       | "location" |
-    And "GET /dimensions/revisions/5?limit=2&cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSJ9" responds "200 OK" with:
+    And "GET /dimensions/revisions/5?cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSIsImwiOjJ9" responds "200 OK" with:
       | /prev                                                                                          | /next |
-      | "http://localhost:8080/dimensions/revisions/5?limit=2&cursor=eyJkIjoiPCIsInAiOiJsb2NhdGlvbiJ9" |       |
-    And "GET /dimensions/revisions/5?limit=2&cursor=eyJkIjoiPCIsInAiOiJsb2NhdGlvbiJ9" responds "200 OK" with an array at "/dimensions":
+      | "http://localhost:8080/dimensions/revisions/5?cursor=eyJkIjoiPCIsInAiOiJsb2NhdGlvbiIsImwiOjJ9" |       |
+    And "GET /dimensions/revisions/5?cursor=eyJkIjoiPCIsInAiOiJsb2NhdGlvbiIsImwiOjJ9" responds "200 OK" with an array at "/dimensions":
       | /id        |
       | "device"   |
       | "language" |
-    And "GET /dimensions/revisions/5?limit=2&cursor=eyJkIjoiPCIsInAiOiJsb2NhdGlvbiJ9" responds "200 OK" with:
+    And "GET /dimensions/revisions/5?cursor=eyJkIjoiPCIsInAiOiJsb2NhdGlvbiIsImwiOjJ9" responds "200 OK" with:
       | /prev                                                                                        | /next                                                                                          |
-      | "http://localhost:8080/dimensions/revisions/5?limit=2&cursor=eyJkIjoiPCIsInAiOiJkZXZpY2UifQ" | "http://localhost:8080/dimensions/revisions/5?limit=2&cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSJ9" |
-    And "GET /dimensions/revisions/5?limit=2&cursor=eyJkIjoiPCIsInAiOiJkZXZpY2UifQ" responds "200 OK" with an array at "/dimensions":
+      | "http://localhost:8080/dimensions/revisions/5?cursor=eyJkIjoiPCIsInAiOiJkZXZpY2UiLCJsIjoyfQ" | "http://localhost:8080/dimensions/revisions/5?cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSIsImwiOjJ9" |
+    And "GET /dimensions/revisions/5?cursor=eyJkIjoiPCIsInAiOiJkZXZpY2UiLCJsIjoyfQ" responds "200 OK" with an array at "/dimensions":
       | /id       |
       | "age"     |
       | "country" |
-    And "GET /dimensions/revisions/5?limit=2&cursor=eyJkIjoiPCIsInAiOiJkZXZpY2UifQ" responds "200 OK" with:
+    And "GET /dimensions/revisions/5?cursor=eyJkIjoiPCIsInAiOiJkZXZpY2UiLCJsIjoyfQ" responds "200 OK" with:
       | /prev | /next                                                                                         |
-      |       | "http://localhost:8080/dimensions/revisions/5?limit=2&cursor=eyJkIjoiPiIsInAiOiJjb3VudHJ5In0" |
+      |       | "http://localhost:8080/dimensions/revisions/5?cursor=eyJkIjoiPiIsInAiOiJjb3VudHJ5IiwibCI6Mn0" |

@@ -1,5 +1,6 @@
 package org.zalando.compass.library.pagination;
 
+import javax.annotation.Nullable;
 import java.net.URI;
 import java.util.List;
 import java.util.function.Function;
@@ -23,22 +24,22 @@ public interface PageResult<T> {
     }
 
     interface Pager<T, P> {
-        P page(URI next, URI prev, List<T> elements);
+        P page(@Nullable URI next, @Nullable URI prev, List<T> elements);
     }
 
-    default <C, P> P render(
+    default <C, P, F> P render(
             final Pager<T, P> pager,
-            final Cursor<C> cursor,
+            final Cursor<C, F> cursor,
             final Function<T, C> id,
-            final Function<Cursor<C>, URI> linker) {
+            final Function<Cursor<C, F>, URI> linker) {
         return render(pager, cursor, id, linker, identity());
     }
 
-    default <C, P, N> P render(
+    default <C, P, N, F> P render(
             final Pager<N, P> pager,
-            final Cursor<C> cursor,
+            final Cursor<C, F> cursor,
             final Function<T, C> id,
-            final Function<Cursor<C>, URI> linker,
+            final Function<Cursor<C, F>, URI> linker,
             final Function<T, N> mapper) {
         return pager.page(
                 hasNext() ? linker.apply(cursor.next(id.apply(getTail()))) : null,

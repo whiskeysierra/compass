@@ -2,44 +2,74 @@ package org.zalando.compass.library.pagination;
 
 import org.junit.Test;
 
-import static java.util.Collections.emptyMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CursorTest {
 
     @Test
-    public void shouldCreateFromEmptyString() {
-        final Cursor<Long> cursor = Cursor.valueOf("");
-
-        assertEquals(Cursor.empty(), cursor);
-    }
-
-    @Test
-    public void shouldCreateBackward() {
-        final Cursor<Long> cursor = new DefaultCursor<>(Direction.BACKWARD, 3L, emptyMap());
-
-        assertEquals("eyJkIjoiPCIsInAiOjN9", cursor.toString());
-    }
-
-    @Test
-    public void shouldCreateForward() {
-        final Cursor<Long> cursor = new DefaultCursor<>(Direction.FORWARD, 4L, emptyMap());
-
-        assertEquals("eyJkIjoiPiIsInAiOjR9", cursor.toString());
-    }
-
-    @Test
-    public void shouldParseBackward() {
-        final Cursor<Long> actual = Cursor.valueOf("eyJkIjoiPCIsInAiOjN9");
-        final Cursor<Long> expected = new DefaultCursor<>(Direction.BACKWARD, 3L, emptyMap());
+    public void shouldParseFromEmptyString() {
+        final Cursor<String, Void> actual = Cursor.valueOf("", String.class);
+        final Cursor<String, Void> expected = Cursor.initial();
 
         assertEquals(expected, actual);
     }
 
     @Test
-    public void shouldParseForward() {
-        final Cursor<Long> actual = Cursor.valueOf("eyJkIjoiPiIsInAiOjR9");
-        final Cursor<Long> expected = new DefaultCursor<>(Direction.FORWARD, 4L, emptyMap());
+    public void shouldRenderBackwardCursor() {
+        final Cursor<Long, Void> cursor = new BackwardCursor<>(3L, null, 25);
+
+        assertEquals("eyJkIjoiPCIsInAiOjMsImwiOjI1fQ", cursor.toString());
+    }
+
+    @Test
+    public void shouldRenderForwardCursor() {
+        final Cursor<Long, Void> cursor = new ForwardCursor<>(4L, null, 25);
+
+        assertEquals("eyJkIjoiPiIsInAiOjQsImwiOjI1fQ", cursor.toString());
+    }
+
+    @Test
+    public void shouldRenderBackwardCursorWithQuery() {
+        final Cursor<Long, String> cursor = new BackwardCursor<>(3L, "test", 25);
+
+        assertEquals("eyJkIjoiPCIsInAiOjMsInEiOiJ0ZXN0IiwibCI6MjV9", cursor.toString());
+    }
+
+    @Test
+    public void shouldRenderForwardCursorWithQuery() {
+        final Cursor<Long, String> cursor = new ForwardCursor<>(4L, "test", 25);
+
+        assertEquals("eyJkIjoiPiIsInAiOjQsInEiOiJ0ZXN0IiwibCI6MjV9", cursor.toString());
+    }
+
+    @Test
+    public void shouldParseBackwardCursor() {
+        final Cursor<Long, Void> actual = Cursor.valueOf("eyJkIjoiPCIsInAiOjMsImwiOjI1fQ", Long.class);
+        final Cursor<Long, Void> expected = new BackwardCursor<>(3L, null, 25);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void shouldParseForwardCursor() {
+        final Cursor<Long, Void> actual = Cursor.valueOf("eyJkIjoiPiIsInAiOjQsImwiOjI1fQ", Long.class);
+        final Cursor<Long, Void> expected = new ForwardCursor<>(4L, null, 25);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void shouldParseBackwardCursorWithQuery() {
+        final Cursor<Long, String> actual = Cursor.valueOf("eyJkIjoiPCIsInAiOjMsInEiOiJ0ZXN0IiwibCI6MjV9", Long.class, String.class);
+        final Cursor<Long, String> expected = new BackwardCursor<>(3L, "test", 25);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void shouldParseForwardCursorWithQuery() {
+        final Cursor<Long, String> actual = Cursor.valueOf("eyJkIjoiPiIsInAiOjQsInEiOiJ0ZXN0IiwibCI6MjV9", Long.class, String.class);
+        final Cursor<Long, String> expected = new ForwardCursor<>(4L, "test", 25);
 
         assertEquals(expected, actual);
     }

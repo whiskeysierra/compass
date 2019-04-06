@@ -21,7 +21,6 @@ import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Revisioned;
 import org.zalando.compass.library.pagination.Cursor;
 import org.zalando.compass.library.pagination.PageResult;
-import org.zalando.compass.library.pagination.Pagination;
 import org.zalando.compass.resource.model.KeyCollectionRepresentation;
 import org.zalando.compass.resource.model.KeyRepresentation;
 
@@ -81,14 +80,15 @@ class KeyResource {
     public ResponseEntity<KeyCollectionRepresentation> getAll(
             @RequestParam(name = "q", required = false) @Nullable final String q,
             @RequestParam(required = false, defaultValue = "25") final Integer limit,
-            @RequestParam(required = false, defaultValue = "") final Cursor<String> cursor) {
+            @RequestParam(name = "cursor", required = false, defaultValue = "") final Cursor<String, String> original) {
 
-        final Pagination<String> query = cursor.paginate(limit);
-        final PageResult<Key> page = service.readPage(q, query);
+        final Cursor<String, String> cursor = original.with(q, limit);
+        // TODO get rid of q parameter
+        final PageResult<Key> page = service.readPage(q, cursor.paginate());
 
         return ResponseEntity.ok(page.render(KeyCollectionRepresentation::new,
                 cursor, Key::getId,
-                c -> link(methodOn(KeyResource.class).getAll(q, limit, c)),
+                c -> link(methodOn(KeyResource.class).getAll(null, null, c)),
                 KeyRepresentation::valueOf));
     }
 

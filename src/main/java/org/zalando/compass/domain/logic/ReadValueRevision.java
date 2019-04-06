@@ -60,7 +60,7 @@ class ReadValueRevision {
 
     // TODO this is rather inefficient
     public Revision readLatestRevision(final String key, final Map<String, JsonNode> dimensions) {
-        final Revision revision = readPageRevisions(key, Pagination.create(Cursor.empty(), 1)).getHead();
+        final Revision revision = readPageRevisions(key, Cursor.<Long, Void>initial().with(null, 1).paginate()).getHead();
         return readAt(key, dimensions, revision.getId()).getRevision();
     }
 

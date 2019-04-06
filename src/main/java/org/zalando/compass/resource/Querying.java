@@ -77,7 +77,11 @@ class Querying {
         }
     }
 
-    ImmutableSortedMap<String, String> write(final Map<String, JsonNode> filter) {
+    ImmutableSortedMap<String, String> write(@Nullable final Map<String, JsonNode> filter) {
+        if (filter == null) {
+            return ImmutableSortedMap.of();
+        }
+
         final ThrowingFunction<JsonNode, String, JsonProcessingException> toText = this::toText;
         return ImmutableSortedMap.copyOf(transformValues(filter, throwingFunction(toText)::apply));
     }

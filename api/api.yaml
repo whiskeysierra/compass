@@ -132,7 +132,8 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Dimension' 
+              $ref: '#/components/schemas/Dimension'
+        required: true
       responses:
         200:
           description: OK
@@ -176,6 +177,7 @@ paths:
           application/json-patch+json:
             schema:
               $ref: '#/components/schemas/JsonPatch'
+        required: true
       responses:
         200:
           description: OK
@@ -277,6 +279,7 @@ paths:
           application/json: 
             schema:
               $ref: '#/components/schemas/Key'
+        required: true
       responses:
         200:
           description: OK
@@ -320,7 +323,7 @@ paths:
           application/json-patch+json:
             schema:
               $ref: '#/components/schemas/JsonPatch'
-            
+        required: true
       responses:
         200:
           description: OK
@@ -378,6 +381,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ValueCollection'
+        required: true
       responses:
         200:
           description: OK
@@ -426,6 +430,7 @@ paths:
           application/json-patch+json:
             schema:
               $ref: '#/components/schemas/JsonPatch'
+        required: true
       responses:
         200:
           description: OK
@@ -482,6 +487,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Value'
+        required: true
       responses:
         200:
           description: OK
@@ -555,6 +561,7 @@ paths:
           application/json-patch+json:
             schema:
               $ref: '#/components/schemas/JsonPatch'
+        required: true
       responses:
         200:
           description: OK

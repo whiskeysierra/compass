@@ -20,7 +20,6 @@ import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Revisioned;
 import org.zalando.compass.library.pagination.Cursor;
 import org.zalando.compass.library.pagination.PageResult;
-import org.zalando.compass.library.pagination.Pagination;
 import org.zalando.compass.resource.model.DimensionCollectionRepresentation;
 import org.zalando.compass.resource.model.DimensionRepresentation;
 import org.zalando.fauxpas.ThrowingUnaryOperator;
@@ -81,14 +80,15 @@ class DimensionResource {
     public ResponseEntity<DimensionCollectionRepresentation> getAll(
             @RequestParam(name = "q", required = false) @Nullable final String q,
             @RequestParam(required = false, defaultValue = "25") final Integer limit,
-            @RequestParam(required = false, defaultValue = "") final Cursor<String> cursor) {
+            @RequestParam(name = "cursor", required = false, defaultValue = "") final Cursor<String, String> original) {
 
-        final Pagination<String> query = cursor.paginate(limit);
-        final PageResult<Dimension> page = service.readPage(q, query);
+        final Cursor<String, String> cursor = original.with(q, limit);
+        // TODO get rid of q parameter
+        final PageResult<Dimension> page = service.readPage(q, cursor.paginate());
 
         return ResponseEntity.ok(
                 page.render(DimensionCollectionRepresentation::new, cursor, Dimension::getId,
-                        prev -> link(methodOn(DimensionResource.class).getAll(q, limit, prev)),
+                        c -> link(methodOn(DimensionResource.class).getAll(null, null, c)),
                         DimensionRepresentation::valueOf));
     }
 

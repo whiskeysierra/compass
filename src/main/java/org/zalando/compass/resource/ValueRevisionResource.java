@@ -15,7 +15,6 @@ import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueRevision;
 import org.zalando.compass.library.pagination.Cursor;
 import org.zalando.compass.library.pagination.PageResult;
-import org.zalando.compass.library.pagination.Pagination;
 import org.zalando.compass.resource.model.RevisionCollectionRepresentation;
 import org.zalando.compass.resource.model.RevisionRepresentation;
 import org.zalando.compass.resource.model.ValueCollectionRevisionRepresentation;
@@ -43,13 +42,13 @@ class ValueRevisionResource {
     public ResponseEntity<RevisionCollectionRepresentation> getValuesRevisions(
             @PathVariable final String key,
             @RequestParam(required = false, defaultValue = "25") final Integer limit,
-            @RequestParam(required = false, defaultValue = "") final Cursor<Long> cursor) {
+            @RequestParam(name = "cursor", required = false, defaultValue = "") final Cursor<Long, Void> original) {
 
-        final Pagination<Long> query = cursor.paginate(limit);
-        final PageResult<Revision> page = service.readPageRevisions(key, query);
+        final Cursor<Long, Void> cursor = original.with(null, limit);
+        final PageResult<Revision> page = service.readPageRevisions(key, cursor.paginate());
 
         return paginate(page, cursor,
-                c -> link(methodOn(ValueRevisionResource.class).getValuesRevisions(key, limit, c)),
+                c -> link(methodOn(ValueRevisionResource.class).getValuesRevisions(key, null, c)),
                 rev -> link(methodOn(ValueRevisionResource.class).getValuesRevision(key, rev.getId(), of())));
     }
 
@@ -74,16 +73,17 @@ class ValueRevisionResource {
             @PathVariable final String key,
             @RequestParam final Map<String, String> queryParams,
             @RequestParam(required = false, defaultValue = "25") final Integer limit,
-            @RequestParam(required = false, defaultValue = "") final Cursor<Long> cursor) {
+            @RequestParam(name = "cursor", required = false, defaultValue = "") final Cursor<Long, Map<String, JsonNode>> original) {
 
         final Map<String, JsonNode> filter = querying.read(queryParams);
-        final Pagination<Long> query = cursor.paginate(limit);
 
-        final PageResult<Revision> page = service.readRevisions(key, filter, query);
-        final Map<String, String> normalized = querying.write(filter);
+        final Cursor<Long, Map<String, JsonNode>> cursor = original.with(filter, limit);
+        // TODO remove filter parameter!
+        final PageResult<Revision> page = service.readRevisions(key, cursor.getQuery(), cursor.paginate());
+        final Map<String, String> normalized = querying.write(cursor.getQuery());
 
-        return paginate(page, cursor.withQuery(normalized),
-                c -> link(methodOn(ValueRevisionResource.class).getValueRevisions(key, emptyMap(), limit, c)),
+        return paginate(page, cursor,
+                c -> link(methodOn(ValueRevisionResource.class).getValueRevisions(key, emptyMap(), null, c)),
                 rev -> link(methodOn(ValueRevisionResource.class).getRevision(key, rev.getId(), normalized)));
     }
 

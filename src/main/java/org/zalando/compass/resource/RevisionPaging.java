@@ -1,5 +1,6 @@
 package org.zalando.compass.resource;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.annotations.VisibleForTesting;
 import org.springframework.http.ResponseEntity;
 import org.zalando.compass.domain.model.Revision;
@@ -11,6 +12,7 @@ import org.zalando.fauxpas.ThrowingFunction;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Map;
 
 @VisibleForTesting
 final class RevisionPaging {
@@ -19,10 +21,10 @@ final class RevisionPaging {
 
     }
 
-    static ResponseEntity<RevisionCollectionRepresentation> paginate(
+    static <Q> ResponseEntity<RevisionCollectionRepresentation> paginate(
             final PageResult<Revision> page,
-            final Cursor<Long> cursor,
-            final ThrowingFunction<Cursor<Long>, URI, IOException> pageLinker,
+            final Cursor<Long, Q> cursor,
+            final ThrowingFunction<Cursor<Long, Q>, URI, IOException> pageLinker,
             final ThrowingFunction<Revision, URI, IOException> itemLinker) {
 
         final RevisionCollectionRepresentation representation = page.render(

@@ -12,7 +12,6 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.zalando.compass.domain.logic.BadArgumentException;
 import org.zalando.compass.domain.logic.EntityAlreadyExistsException;
 import org.zalando.compass.domain.persistence.NotFoundException;
-import org.zalando.compass.library.pagination.IllegalPageQueryException;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 import org.zalando.problem.spring.web.advice.ProblemHandling;
@@ -30,12 +29,6 @@ class ExceptionHandling implements ProblemHandling, SpringAdviceTrait {
 
     @ExceptionHandler
     public ResponseEntity<Problem> handleBadArgument(final BadArgumentException exception,
-            final NativeWebRequest request) {
-        return create(HttpStatus.BAD_REQUEST, exception, request);
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<Problem> handleIllegalPageQuery(final IllegalPageQueryException exception,
             final NativeWebRequest request) {
         return create(HttpStatus.BAD_REQUEST, exception, request);
     }

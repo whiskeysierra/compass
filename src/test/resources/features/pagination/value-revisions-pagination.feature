@@ -25,39 +25,39 @@ Feature: Value revisions pagination
       | 5   | "update" | "anonymous" |
     And "GET /keys/device/value/revisions?limit=2" responds "200 OK" with:
       | /prev | /next                                                                                   |
-      |       | "http://localhost:8080/keys/device/value/revisions?limit=2&cursor=eyJkIjoiPiIsInAiOjV9" |
-    And "GET /keys/device/value/revisions?limit=2&cursor=eyJkIjoiPiIsInAiOjV9" responds "200 OK" with an array at "/revisions":
+      |       | "http://localhost:8080/keys/device/value/revisions?cursor=eyJkIjoiPiIsInAiOjUsImwiOjJ9" |
+    And "GET /keys/device/value/revisions?cursor=eyJkIjoiPiIsInAiOjUsImwiOjJ9" responds "200 OK" with an array at "/revisions":
       | /id | /type    | /user       |
       | 4   | "update" | "anonymous" |
       | 3   | "update" | "anonymous" |
-    And "GET /keys/device/value/revisions?limit=2&cursor=eyJkIjoiPiIsInAiOjV9" responds "200 OK" with:
+    And "GET /keys/device/value/revisions?cursor=eyJkIjoiPiIsInAiOjUsImwiOjJ9" responds "200 OK" with:
       | /prev                                                                                   | /next                                                                                   |
-      | "http://localhost:8080/keys/device/value/revisions?limit=2&cursor=eyJkIjoiPCIsInAiOjR9" | "http://localhost:8080/keys/device/value/revisions?limit=2&cursor=eyJkIjoiPiIsInAiOjN9" |
-    And "GET /keys/device/value/revisions?limit=2&cursor=eyJkIjoiPiIsInAiOjN9" responds "200 OK" with an array at "/revisions":
+      | "http://localhost:8080/keys/device/value/revisions?cursor=eyJkIjoiPCIsInAiOjQsImwiOjJ9" | "http://localhost:8080/keys/device/value/revisions?cursor=eyJkIjoiPiIsInAiOjMsImwiOjJ9" |
+    And "GET /keys/device/value/revisions?cursor=eyJkIjoiPiIsInAiOjMsImwiOjJ9" responds "200 OK" with an array at "/revisions":
       | /id | /type    | /user       |
       | 2   | "create" | "anonymous" |
-    And "GET /keys/device/value/revisions?limit=2&cursor=eyJkIjoiPiIsInAiOjN9" responds "200 OK" with:
+    And "GET /keys/device/value/revisions?cursor=eyJkIjoiPiIsInAiOjMsImwiOjJ9" responds "200 OK" with:
       | /prev                                                                                   | /next |
-      | "http://localhost:8080/keys/device/value/revisions?limit=2&cursor=eyJkIjoiPCIsInAiOjJ9" |       |
+      | "http://localhost:8080/keys/device/value/revisions?cursor=eyJkIjoiPCIsInAiOjIsImwiOjJ9" |       |
 
   Scenario: Read value revisions should paginate backward
-    Then "GET /keys/device/value/revisions?limit=2&cursor=eyJkIjoiPiIsInAiOjN9" responds "200 OK" with an array at "/revisions":
+    Then "GET /keys/device/value/revisions?cursor=eyJkIjoiPiIsInAiOjMsImwiOjJ9" responds "200 OK" with an array at "/revisions":
       | /id | /type    | /user       |
       | 2   | "create" | "anonymous" |
-    And "GET /keys/device/value/revisions?limit=2&cursor=eyJkIjoiPiIsInAiOjN9" responds "200 OK" with:
+    And "GET /keys/device/value/revisions?cursor=eyJkIjoiPiIsInAiOjMsImwiOjJ9" responds "200 OK" with:
       | /prev                                                                                   | /next |
-      | "http://localhost:8080/keys/device/value/revisions?limit=2&cursor=eyJkIjoiPCIsInAiOjJ9" |       |
-    And "GET /keys/device/value/revisions?limit=2&cursor=eyJkIjoiPCIsInAiOjJ9" responds "200 OK" with an array at "/revisions":
+      | "http://localhost:8080/keys/device/value/revisions?cursor=eyJkIjoiPCIsInAiOjIsImwiOjJ9" |       |
+    And "GET /keys/device/value/revisions?cursor=eyJkIjoiPCIsInAiOjIsImwiOjJ9" responds "200 OK" with an array at "/revisions":
       | /id | /type    | /user       |
       | 4   | "update" | "anonymous" |
       | 3   | "update" | "anonymous" |
-    And "GET /keys/device/value/revisions?limit=2&cursor=eyJkIjoiPCIsInAiOjJ9" responds "200 OK" with:
+    And "GET /keys/device/value/revisions?cursor=eyJkIjoiPCIsInAiOjIsImwiOjJ9" responds "200 OK" with:
       | /prev                                                                                   | /next                                                                                   |
-      | "http://localhost:8080/keys/device/value/revisions?limit=2&cursor=eyJkIjoiPCIsInAiOjR9" | "http://localhost:8080/keys/device/value/revisions?limit=2&cursor=eyJkIjoiPiIsInAiOjN9" |
-    And "GET /keys/device/value/revisions?limit=2&cursor=eyJkIjoiPCIsInAiOjR9" responds "200 OK" with an array at "/revisions":
+      | "http://localhost:8080/keys/device/value/revisions?cursor=eyJkIjoiPCIsInAiOjQsImwiOjJ9" | "http://localhost:8080/keys/device/value/revisions?cursor=eyJkIjoiPiIsInAiOjMsImwiOjJ9" |
+    And "GET /keys/device/value/revisions?cursor=eyJkIjoiPCIsInAiOjQsImwiOjJ9" responds "200 OK" with an array at "/revisions":
       | /id | /type    | /user       |
       | 6   | "delete" | "anonymous" |
       | 5   | "update" | "anonymous" |
-    And "GET /keys/device/value/revisions?limit=2&cursor=eyJkIjoiPCIsInAiOjR9" responds "200 OK" with:
+    And "GET /keys/device/value/revisions?cursor=eyJkIjoiPCIsInAiOjQsImwiOjJ9" responds "200 OK" with:
       | /prev | /next                                                                                   |
-      |       | "http://localhost:8080/keys/device/value/revisions?limit=2&cursor=eyJkIjoiPiIsInAiOjV9" |
+      |       | "http://localhost:8080/keys/device/value/revisions?cursor=eyJkIjoiPiIsInAiOjUsImwiOjJ9" |

@@ -49,7 +49,7 @@ class ReadDimensionRevision {
     }
 
     Revision readLatestRevision(final String id) {
-        return readRevisions(id, Pagination.create(Cursor.empty(), 1)).getHead();
+        return readRevisions(id, Cursor.<Long, Void>initial().with(null, 1).paginate()).getHead();
     }
 
     PageResult<Revision> readRevisions(final String id, final Pagination<Long> query) {

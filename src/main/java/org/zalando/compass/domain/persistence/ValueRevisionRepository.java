@@ -165,7 +165,8 @@ public class ValueRevisionRepository {
     }
 
     private Condition exactMatch(final Map<String, JsonNode> dimensions) {
-        if (dimensions.isEmpty()) {
+        // TODO handle null query in cursor cleanly!
+        if (dimensions == null || dimensions.isEmpty()) {
             return notExists(selectOne()
                     .from(VALUE_DIMENSION_REVISION)
                     .where(VALUE_DIMENSION_REVISION.VALUE_ID.eq(VALUE_REVISION.ID))

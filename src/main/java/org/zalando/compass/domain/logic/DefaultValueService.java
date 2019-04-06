@@ -65,7 +65,8 @@ class DefaultValueService implements ValueService {
     public Revisioned<List<Value>> readPage(final String key, final Map<String, JsonNode> filter) {
         final List<Value> values = read.readAll(key, filter);
 
-        final PageResult<Revision> revisions = readRevision.readPageRevisions(key, Pagination.create(Cursor.empty(), 1));
+        final PageResult<Revision> revisions = readRevision.readPageRevisions(key,
+                Cursor.<Long, Void>initial().with(null, 1).paginate());
 
         if (revisions.getElements().isEmpty()) {
             return Revisioned.create(values, null);

@@ -24,39 +24,39 @@ Feature: Key pagination
       | "country" |
     And "GET /keys?limit=2" responds "200 OK" with:
       | /prev | /next                                                                       |
-      |       | "http://localhost:8080/keys?limit=2&cursor=eyJkIjoiPiIsInAiOiJjb3VudHJ5In0" |
-    And "GET /keys?limit=2&cursor=eyJkIjoiPiIsInAiOiJjb3VudHJ5In0" responds "200 OK" with an array at "/keys":
+      |       | "http://localhost:8080/keys?cursor=eyJkIjoiPiIsInAiOiJjb3VudHJ5IiwibCI6Mn0" |
+    And "GET /keys?cursor=eyJkIjoiPiIsInAiOiJjb3VudHJ5IiwibCI6Mn0" responds "200 OK" with an array at "/keys":
       | /id        |
       | "device"   |
       | "language" |
-    And "GET /keys?limit=2&cursor=eyJkIjoiPiIsInAiOiJjb3VudHJ5In0" responds "200 OK" with:
+    And "GET /keys?cursor=eyJkIjoiPiIsInAiOiJjb3VudHJ5IiwibCI6Mn0" responds "200 OK" with:
       | /prev                                                                      | /next                                                                        |
-      | "http://localhost:8080/keys?limit=2&cursor=eyJkIjoiPCIsInAiOiJkZXZpY2UifQ" | "http://localhost:8080/keys?limit=2&cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSJ9" |
-    And "GET /keys?limit=2&cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSJ9" responds "200 OK" with an array at "/keys":
+      | "http://localhost:8080/keys?cursor=eyJkIjoiPCIsInAiOiJkZXZpY2UiLCJsIjoyfQ" | "http://localhost:8080/keys?cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSIsImwiOjJ9" |
+    And "GET /keys?cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSIsImwiOjJ9" responds "200 OK" with an array at "/keys":
       | /id        |
       | "location" |
-    And "GET /keys?limit=2&cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSJ9" responds "200 OK" with:
+    And "GET /keys?cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSIsImwiOjJ9" responds "200 OK" with:
       | /prev                                                                        | /next |
-      | "http://localhost:8080/keys?limit=2&cursor=eyJkIjoiPCIsInAiOiJsb2NhdGlvbiJ9" |       |
+      | "http://localhost:8080/keys?cursor=eyJkIjoiPCIsInAiOiJsb2NhdGlvbiIsImwiOjJ9" |       |
 
   Scenario: Read key revisions should paginate backward
-    Then "GET /keys?limit=2&cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSJ9" responds "200 OK" with an array at "/keys":
+    Then "GET /keys?cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSIsImwiOjJ9" responds "200 OK" with an array at "/keys":
       | /id        |
       | "location" |
-    And "GET /keys?limit=2&cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSJ9" responds "200 OK" with:
+    And "GET /keys?cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSIsImwiOjJ9" responds "200 OK" with:
       | /prev                                                                        | /next |
-      | "http://localhost:8080/keys?limit=2&cursor=eyJkIjoiPCIsInAiOiJsb2NhdGlvbiJ9" |       |
-    And "GET /keys?limit=2&cursor=eyJkIjoiPCIsInAiOiJsb2NhdGlvbiJ9" responds "200 OK" with an array at "/keys":
+      | "http://localhost:8080/keys?cursor=eyJkIjoiPCIsInAiOiJsb2NhdGlvbiIsImwiOjJ9" |       |
+    And "GET /keys?cursor=eyJkIjoiPCIsInAiOiJsb2NhdGlvbiIsImwiOjJ9" responds "200 OK" with an array at "/keys":
       | /id        |
       | "device"   |
       | "language" |
-    And "GET /keys?limit=2&cursor=eyJkIjoiPCIsInAiOiJsb2NhdGlvbiJ9" responds "200 OK" with:
+    And "GET /keys?cursor=eyJkIjoiPCIsInAiOiJsb2NhdGlvbiIsImwiOjJ9" responds "200 OK" with:
       | /prev                                                                      | /next                                                                        |
-      | "http://localhost:8080/keys?limit=2&cursor=eyJkIjoiPCIsInAiOiJkZXZpY2UifQ" | "http://localhost:8080/keys?limit=2&cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSJ9" |
-    And "GET /keys?limit=2&cursor=eyJkIjoiPCIsInAiOiJkZXZpY2UifQ" responds "200 OK" with an array at "/keys":
+      | "http://localhost:8080/keys?cursor=eyJkIjoiPCIsInAiOiJkZXZpY2UiLCJsIjoyfQ" | "http://localhost:8080/keys?cursor=eyJkIjoiPiIsInAiOiJsYW5ndWFnZSIsImwiOjJ9" |
+    And "GET /keys?cursor=eyJkIjoiPCIsInAiOiJkZXZpY2UiLCJsIjoyfQ" responds "200 OK" with an array at "/keys":
       | /id       |
       | "age"     |
       | "country" |
-    And "GET /keys?limit=2&cursor=eyJkIjoiPCIsInAiOiJkZXZpY2UifQ" responds "200 OK" with:
+    And "GET /keys?cursor=eyJkIjoiPCIsInAiOiJkZXZpY2UiLCJsIjoyfQ" responds "200 OK" with:
       | /prev | /next                                                                       |
-      |       | "http://localhost:8080/keys?limit=2&cursor=eyJkIjoiPiIsInAiOiJjb3VudHJ5In0" |
+      |       | "http://localhost:8080/keys?cursor=eyJkIjoiPiIsInAiOiJjb3VudHJ5IiwibCI6Mn0" |

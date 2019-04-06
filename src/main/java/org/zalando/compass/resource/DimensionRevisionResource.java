@@ -14,7 +14,6 @@ import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.library.pagination.Cursor;
 import org.zalando.compass.library.pagination.PageResult;
-import org.zalando.compass.library.pagination.Pagination;
 import org.zalando.compass.resource.model.DimensionCollectionRevisionRepresentation;
 import org.zalando.compass.resource.model.DimensionRepresentation;
 import org.zalando.compass.resource.model.DimensionRevisionRepresentation;
@@ -35,13 +34,13 @@ class DimensionRevisionResource {
     @RequestMapping(method = GET, path = "/dimensions/revisions")
     public ResponseEntity<RevisionCollectionRepresentation> getRevisions(
             @RequestParam(required = false, defaultValue = "25") final Integer limit,
-            @RequestParam(required = false, defaultValue = "") final Cursor<Long> cursor) {
+            @RequestParam(name = "cursor", required = false, defaultValue = "") final Cursor<Long, Void> original) {
 
-        final Pagination<Long> query = cursor.paginate(limit);
-        final PageResult<Revision> page = service.readPageRevisions(query);
+        final Cursor<Long, Void> cursor = original.with(null, limit);
+        final PageResult<Revision> page = service.readPageRevisions(cursor.paginate());
 
         return paginate(page, cursor,
-                c -> link(methodOn(DimensionRevisionResource.class).getRevisions(limit, c)),
+                c -> link(methodOn(DimensionRevisionResource.class).getRevisions(null, c)),
                 rev -> link(methodOn(DimensionRevisionResource.class).getRevision(rev.getId(), null, null)));
     }
 
@@ -49,17 +48,17 @@ class DimensionRevisionResource {
     public ResponseEntity<DimensionCollectionRevisionRepresentation> getRevision(
             @PathVariable final long revision,
             @RequestParam(required = false, defaultValue = "25") final Integer limit,
-            @RequestParam(required = false, defaultValue = "") final Cursor<String> cursor) {
+            @RequestParam(name = "cursor", required = false, defaultValue = "") final Cursor<String, Void> original) {
 
-        final Pagination<String> query = cursor.paginate(limit);
-        final PageRevision<Dimension> page = service.readPageAt(revision, query);
+        final Cursor<String, Void> cursor = original.with(null, limit);
+        final PageRevision<Dimension> page = service.readPageAt(revision, cursor.paginate());
 
         return ResponseEntity.ok(page.render((next, prev, elements) ->
                 new DimensionCollectionRevisionRepresentation(
                         RevisionRepresentation.valueOf(page.getRevision()), next, prev, elements),
                 cursor,
                 Dimension::getId,
-                c -> link(methodOn(DimensionRevisionResource.class).getRevision(revision, limit, c)),
+                c -> link(methodOn(DimensionRevisionResource.class).getRevision(revision, null, c)),
                 DimensionRepresentation::valueOf));
     }
 
@@ -67,13 +66,13 @@ class DimensionRevisionResource {
     public ResponseEntity<RevisionCollectionRepresentation> getRevisions(
             @PathVariable final String id,
             @RequestParam(required = false, defaultValue = "25") final Integer limit,
-            @RequestParam(required = false, defaultValue = "") final Cursor<Long> cursor) {
+            @RequestParam(name = "cursor", required = false, defaultValue = "") final Cursor<Long, Void> original) {
 
-        final Pagination<Long> query = cursor.paginate(limit);
-        final PageResult<Revision> page = service.readRevisions(id, query);
+        final Cursor<Long, Void> cursor = original.with(null, limit);
+        final PageResult<Revision> page = service.readRevisions(id, cursor.paginate());
 
         return paginate(page, cursor,
-                c -> link(methodOn(DimensionRevisionResource.class).getRevisions(id, limit, c)),
+                c -> link(methodOn(DimensionRevisionResource.class).getRevisions(id, null, c)),
                 rev -> link(methodOn(DimensionRevisionResource.class).getRevision(id, rev.getId())));
     }
 
