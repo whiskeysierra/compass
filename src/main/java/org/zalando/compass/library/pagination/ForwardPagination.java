@@ -28,12 +28,8 @@ final class ForwardPagination<P> implements Pagination<P> {
 
         return step
                 .orderBy(field.sort(order))
-                .seekAfter(pivotOf(field.getType()))
+                .seekAfter(val(pivot, field.getType()))
                 .limit(limit);
-    }
-
-    private Field<P> pivotOf(final Class<P> type) {
-        return pivot == null ? null : val(pivot, type);
     }
 
     @Override

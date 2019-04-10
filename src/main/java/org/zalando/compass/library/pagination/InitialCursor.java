@@ -38,10 +38,4 @@ final class InitialCursor<P, Q> implements Cursor<P, Q> {
         return new InitialPagination<>(limit);
     }
 
-    @Override
-    public String toString() {
-        // this cursor is never rendered anywhere
-        return "";
-    }
-
 }

@@ -20,7 +20,8 @@ final class CursorConverter implements GenericConverter {
 
     @Nullable
     @Override
-    public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+    public Object convert(@Nullable final Object source, final TypeDescriptor sourceType,
+            final TypeDescriptor targetType) {
         if (source == null) {
             return null;
         }

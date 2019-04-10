@@ -38,12 +38,8 @@ final class BackwardPagination<P> implements Pagination<P> {
 
         return step
                 .orderBy(field.sort(invert(order)))
-                .seekAfter(pivotOf(field.getType()))
+                .seekAfter(val(pivot, field.getType()))
                 .limit(limit);
-    }
-
-    private Field<P> pivotOf(final Class<P> type) {
-        return pivot == null ? null : val(pivot, type);
     }
 
     private SortOrder invert(final SortOrder order) {
