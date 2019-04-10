@@ -27,6 +27,8 @@ public interface PageResult<T> {
         P page(@Nullable URI next, @Nullable URI prev, List<T> elements);
     }
 
+    // TODO PageResult<R> map(Function<T, R> mapper)
+
     default <C, P, F> P render(
             final Pager<T, P> pager,
             final Cursor<C, F> cursor,

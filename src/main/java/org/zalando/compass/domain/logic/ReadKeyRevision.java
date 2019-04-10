@@ -49,6 +49,7 @@ class ReadKeyRevision {
     }
 
     Revision readLatestRevision(final String id) {
+        // TODO don't use pagination for this, we're fetching one to much
         return readRevisions(id, Cursor.<Long, Void>initial().with(null, 1).paginate()).getHead();
     }
 
