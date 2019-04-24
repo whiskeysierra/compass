@@ -523,17 +523,15 @@
                 <configuration>
                     <images>
                         <image>
-                            <name>postgres:9.6</name>
+                            <name>postgres:11</name>
                             <run>
                                 <ports>
                                     <port>2345:5432</port>
                                 </ports>
                                 <wait>
-                                    <tcp>
-                                        <ports>
-                                            <port>5432</port>
-                                        </ports>
-                                    </tcp>
+                                    <healthy>true</healthy>
+                                    <log>database system is ready to accept connections</log>
+                                    <time>20000</time>
                                 </wait>
                             </run>
                         </image>
