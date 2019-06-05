@@ -5,11 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Key;
-import org.zalando.compass.domain.model.Relation;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.library.JsonSchemaValidator;
-import org.zalando.problem.spring.web.advice.validation.ConstraintViolationProblem;
-import org.zalando.problem.spring.web.advice.validation.Violation;
+import org.zalando.problem.violations.ConstraintViolationProblem;
+import org.zalando.problem.violations.Violation;
 
 import javax.annotation.Nullable;
 import java.util.Collection;

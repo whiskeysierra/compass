@@ -7,7 +7,7 @@ import com.github.fge.jsonschema.main.JsonSchema;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
-import org.zalando.problem.spring.web.advice.validation.Violation;
+import org.zalando.problem.violations.Violation;
 
 import java.util.List;
 

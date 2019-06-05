@@ -16,8 +16,8 @@ import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 import org.zalando.problem.spring.web.advice.ProblemHandling;
 import org.zalando.problem.spring.web.advice.SpringAdviceTrait;
-import org.zalando.problem.spring.web.advice.validation.ConstraintViolationProblem;
-import org.zalando.problem.spring.web.advice.validation.Violation;
+import org.zalando.problem.violations.ConstraintViolationProblem;
+import org.zalando.problem.violations.Violation;
 
 import java.util.Comparator;
 import java.util.List;
