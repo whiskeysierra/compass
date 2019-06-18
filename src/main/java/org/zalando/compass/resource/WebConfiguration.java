@@ -1,6 +1,7 @@
 package org.zalando.compass.resource;
 
 import com.atlassian.oai.validator.OpenApiInteractionValidator;
+import com.atlassian.oai.validator.report.LevelResolver;
 import com.atlassian.oai.validator.springmvc.OpenApiValidationFilter;
 import com.atlassian.oai.validator.springmvc.OpenApiValidationInterceptor;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,7 +19,7 @@ import org.zalando.twintip.spring.SchemaResource;
 
 import javax.servlet.Filter;
 
-import static com.atlassian.oai.validator.report.LevelResolverFactory.withAdditionalPropertiesIgnored;
+import static com.atlassian.oai.validator.report.ValidationReport.Level.IGNORE;
 import static java.util.Arrays.asList;
 
 @Configuration
@@ -29,8 +30,13 @@ class WebConfiguration implements WebMvcConfigurer {
     public void addInterceptors(final InterceptorRegistry registry) {
         registry.addInterceptor(new OpenApiValidationInterceptor(OpenApiInteractionValidator
                 .createFor("/api/api.yaml")
-                // This is needed if your spec uses composition via {@code allOf}, {@code anyOf} or {@code oneOf}.
-                .withLevelResolver(withAdditionalPropertiesIgnored())
+                .withLevelResolver(
+                        LevelResolver.create()
+                                // This is needed if your spec uses composition via {@code allOf}, {@code anyOf} or {@code oneOf}.
+                                .withLevel("validation.schema.additionalProperties", IGNORE)
+                                // This is needed because we use dynamic query parameters
+                                .withLevel("validation.request.parameter.query.unexpected", IGNORE)
+                                .build())
                 .build()));
     }
 
