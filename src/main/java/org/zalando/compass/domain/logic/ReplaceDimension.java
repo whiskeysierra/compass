@@ -1,26 +1,32 @@
 package org.zalando.compass.domain.logic;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.zalando.compass.domain.BadArgumentException;
+import org.zalando.compass.domain.EntityAlreadyExistsException;
+import org.zalando.compass.domain.NotFoundException;
+import org.zalando.compass.domain.RelationService;
+import org.zalando.compass.domain.ValidationService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionLock;
 import org.zalando.compass.domain.model.DimensionRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.domain.persistence.DimensionRepository;
-import org.zalando.compass.domain.persistence.DimensionRevisionRepository;
-import org.zalando.compass.domain.persistence.NotFoundException;
+import org.zalando.compass.domain.repository.DimensionRepository;
+import org.zalando.compass.domain.repository.DimensionRevisionRepository;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-import static org.zalando.compass.domain.persistence.model.enums.RevisionType.CREATE;
-import static org.zalando.compass.domain.persistence.model.enums.RevisionType.UPDATE;
-import static org.zalando.compass.library.Changed.changed;
+import static org.zalando.compass.domain.logic.Changed.changed;
+import static org.zalando.compass.infrastructure.database.model.enums.RevisionType.CREATE;
+import static org.zalando.compass.infrastructure.database.model.enums.RevisionType.UPDATE;
 
 @Slf4j
 @Component
+@AllArgsConstructor(onConstructor = @__(@Autowired))
 class ReplaceDimension {
 
     private final Locking locking;
@@ -29,22 +35,6 @@ class ReplaceDimension {
     private final DimensionRepository repository;
     private final RevisionService revisionService;
     private final DimensionRevisionRepository revisionRepository;
-
-    @Autowired
-    ReplaceDimension(
-            final Locking locking,
-            final RelationService relationService,
-            final ValidationService validator,
-            final DimensionRepository repository,
-            final RevisionService revisionService,
-            final DimensionRevisionRepository revisionRepository) {
-        this.locking = locking;
-        this.relationService = relationService;
-        this.validator = validator;
-        this.repository = repository;
-        this.revisionService = revisionService;
-        this.revisionRepository = revisionRepository;
-    }
 
     /**
      *

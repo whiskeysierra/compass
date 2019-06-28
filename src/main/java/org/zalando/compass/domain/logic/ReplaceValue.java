@@ -2,18 +2,21 @@ package org.zalando.compass.domain.logic;
 
 import com.google.common.base.Equivalence;
 import com.google.common.base.Equivalence.Wrapper;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.zalando.compass.domain.EntityAlreadyExistsException;
+import org.zalando.compass.domain.ValidationService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueLock;
 import org.zalando.compass.domain.model.ValueRevision;
 import org.zalando.compass.domain.model.ValuesLock;
-import org.zalando.compass.domain.persistence.ValueRepository;
-import org.zalando.compass.domain.persistence.ValueRevisionRepository;
-import org.zalando.compass.domain.persistence.model.enums.RevisionType;
+import org.zalando.compass.domain.repository.ValueRepository;
+import org.zalando.compass.domain.repository.ValueRevisionRepository;
+import org.zalando.compass.infrastructure.database.model.enums.RevisionType;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -26,12 +29,13 @@ import static com.google.common.collect.Streams.mapWithIndex;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static org.zalando.compass.domain.persistence.model.enums.RevisionType.CREATE;
-import static org.zalando.compass.domain.persistence.model.enums.RevisionType.DELETE;
-import static org.zalando.compass.domain.persistence.model.enums.RevisionType.UPDATE;
+import static org.zalando.compass.infrastructure.database.model.enums.RevisionType.CREATE;
+import static org.zalando.compass.infrastructure.database.model.enums.RevisionType.DELETE;
+import static org.zalando.compass.infrastructure.database.model.enums.RevisionType.UPDATE;
 
 @Slf4j
 @Component
+@AllArgsConstructor(onConstructor = @__(@Autowired))
 class ReplaceValue {
 
     private final Locking locking;
@@ -39,16 +43,6 @@ class ReplaceValue {
     private final ValueRepository repository;
     private final RevisionService revisionService;
     private final ValueRevisionRepository revisionRepository;
-
-    @Autowired
-    ReplaceValue(final Locking locking, final ValidationService validator, final ValueRepository repository,
-            final RevisionService revisionService, final ValueRevisionRepository revisionRepository) {
-        this.validator = validator;
-        this.repository = repository;
-        this.locking = locking;
-        this.revisionService = revisionService;
-        this.revisionRepository = revisionRepository;
-    }
 
     boolean replace(final String key, final Value value, @Nullable final String comment) {
         final ValueLock lock = lock(key, value);

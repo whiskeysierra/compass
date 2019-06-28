@@ -1,24 +1,26 @@
 package org.zalando.compass.domain.logic;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.zalando.compass.domain.NotFoundException;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.KeyLock;
 import org.zalando.compass.domain.model.KeyRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.domain.persistence.KeyRepository;
-import org.zalando.compass.domain.persistence.KeyRevisionRepository;
-import org.zalando.compass.domain.persistence.NotFoundException;
+import org.zalando.compass.domain.repository.KeyRepository;
+import org.zalando.compass.domain.repository.KeyRevisionRepository;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-import static org.zalando.compass.domain.persistence.model.enums.RevisionType.DELETE;
+import static org.zalando.compass.infrastructure.database.model.enums.RevisionType.DELETE;
 
 @Slf4j
 @Component
+@AllArgsConstructor(onConstructor = @__(@Autowired))
 class DeleteKey {
 
     private final Locking locking;
@@ -26,20 +28,6 @@ class DeleteKey {
     private final RevisionService revisionService;
     private final DeleteValue deleteValue;
     private final KeyRevisionRepository keyRevisionRepository;
-
-    @Autowired
-    DeleteKey(
-            final Locking locking,
-            final KeyRepository keyRepository,
-            final RevisionService revisionService,
-            final DeleteValue deleteValue,
-            final KeyRevisionRepository keyRevisionRepository) {
-        this.locking = locking;
-        this.keyRepository = keyRepository;
-        this.revisionService = revisionService;
-        this.deleteValue = deleteValue;
-        this.keyRevisionRepository = keyRevisionRepository;
-    }
 
     void delete(final String id, @Nullable final String comment) {
         final KeyLock lock = locking.lockKey(id);

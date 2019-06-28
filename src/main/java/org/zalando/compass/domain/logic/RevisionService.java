@@ -1,11 +1,12 @@
 package org.zalando.compass.domain.logic;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import org.zalando.compass.domain.model.Revision;
-import org.zalando.compass.domain.persistence.RevisionRepository;
+import org.zalando.compass.domain.repository.RevisionRepository;
 
 import javax.annotation.Nullable;
 import java.security.Principal;
@@ -14,17 +15,12 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 
 @Slf4j
-@Repository
+@Service
+@AllArgsConstructor(onConstructor = @__(@Autowired))
 public class RevisionService {
 
     private final Clock clock;
     private final RevisionRepository repository;
-
-    @Autowired
-    public RevisionService(final Clock clock, final RevisionRepository repository) {
-        this.clock = clock;
-        this.repository = repository;
-    }
 
     public Revision create(@Nullable final String comment) {
         final OffsetDateTime timestamp = OffsetDateTime.now(clock);

@@ -2,6 +2,7 @@ package org.zalando.compass.domain.logic;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.model.Dimension;
@@ -11,10 +12,10 @@ import org.zalando.compass.domain.model.KeyLock;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValueLock;
 import org.zalando.compass.domain.model.ValuesLock;
-import org.zalando.compass.domain.persistence.DimensionRepository;
-import org.zalando.compass.domain.persistence.KeyRepository;
-import org.zalando.compass.domain.persistence.NotFoundException;
-import org.zalando.compass.domain.persistence.ValueRepository;
+import org.zalando.compass.domain.repository.DimensionRepository;
+import org.zalando.compass.domain.repository.KeyRepository;
+import org.zalando.compass.domain.NotFoundException;
+import org.zalando.compass.domain.repository.ValueRepository;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -22,9 +23,9 @@ import java.util.Map;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
-import static org.zalando.compass.domain.persistence.NotFoundException.exists;
-import static org.zalando.compass.domain.persistence.ValueCriteria.byDimension;
-import static org.zalando.compass.domain.persistence.ValueCriteria.byKey;
+import static org.zalando.compass.domain.NotFoundException.exists;
+import static org.zalando.compass.domain.repository.ValueCriteria.byDimension;
+import static org.zalando.compass.domain.repository.ValueCriteria.byKey;
 
 /**
  * Centralizes locking of entities. In order to avoid deadlocks we ensure the following order of locks:
@@ -38,37 +39,28 @@ import static org.zalando.compass.domain.persistence.ValueCriteria.byKey;
  * All ordered by id, respectively.
  */
 @Component
-public class Locking {
+@AllArgsConstructor(onConstructor = @__(@Autowired))
+class Locking {
 
     private final DimensionRepository dimensionRepository;
     private final KeyRepository keyRepository;
     private final ValueRepository valueRepository;
 
-    @Autowired
-    Locking(
-            final DimensionRepository dimensionRepository,
-            final KeyRepository keyRepository,
-            final ValueRepository valueRepository) {
-        this.dimensionRepository = dimensionRepository;
-        this.keyRepository = keyRepository;
-        this.valueRepository = valueRepository;
-    }
-
-    public DimensionLock lockDimension(final String id) {
+    DimensionLock lockDimension(final String id) {
         @Nullable final Dimension current = dimensionRepository.lock(id).orElse(null);
         final List<Value> values = valueRepository.lockAll(byDimension(id));
 
         return new DimensionLock(current, values);
     }
 
-    public KeyLock lockKey(final String id) {
+    KeyLock lockKey(final String id) {
         @Nullable final Key current = keyRepository.lock(id).orElse(null);
         final List<Value> values = valueRepository.lockAll(byKey(id));
 
         return new KeyLock(current, values);
     }
 
-    public ValueLock lockValue(final String keyId, final Map<String, JsonNode> filter) {
+    ValueLock lockValue(final String keyId, final Map<String, JsonNode> filter) {
         final List<Dimension> dimensions = lockDimensions(filter.keySet());
         final Key key = keyRepository.lock(keyId).orElseThrow(NotFoundException::new);
         @Nullable final Value current = valueRepository.lock(keyId, filter).orElse(null);
@@ -76,7 +68,7 @@ public class Locking {
         return new ValueLock(dimensions, key, current);
     }
 
-    public ValuesLock lockValues(final String keyId, final List<Value> values) {
+    ValuesLock lockValues(final String keyId, final List<Value> values) {
         final List<Dimension> dimensions = lockDimensions(values.stream()
                 .flatMap(value -> value.getDimensions().keySet().stream())
                 .collect(toSet()));

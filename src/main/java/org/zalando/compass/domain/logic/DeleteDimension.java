@@ -1,41 +1,31 @@
 package org.zalando.compass.domain.logic;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.zalando.compass.domain.NotFoundException;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.DimensionLock;
 import org.zalando.compass.domain.model.DimensionRevision;
 import org.zalando.compass.domain.model.Revision;
-import org.zalando.compass.domain.persistence.DimensionRepository;
-import org.zalando.compass.domain.persistence.DimensionRevisionRepository;
-import org.zalando.compass.domain.persistence.NotFoundException;
+import org.zalando.compass.domain.repository.DimensionRepository;
+import org.zalando.compass.domain.repository.DimensionRevisionRepository;
 
 import javax.annotation.Nullable;
 
-import static org.zalando.compass.domain.logic.BadArgumentException.checkArgument;
-import static org.zalando.compass.domain.persistence.model.enums.RevisionType.DELETE;
+import static org.zalando.compass.domain.BadArgumentException.checkArgument;
+import static org.zalando.compass.infrastructure.database.model.enums.RevisionType.DELETE;
 
 @Slf4j
 @Component
+@AllArgsConstructor(onConstructor = @__(@Autowired))
 class DeleteDimension {
 
     private final Locking locking;
     private final DimensionRepository repository;
     private final RevisionService revisionService;
     private final DimensionRevisionRepository revisionRepository;
-
-    @Autowired
-    DeleteDimension(
-            final Locking locking,
-            final DimensionRepository repository,
-            final RevisionService revisionService,
-            final DimensionRevisionRepository revisionRepository) {
-        this.locking = locking;
-        this.repository = repository;
-        this.revisionService = revisionService;
-        this.revisionRepository = revisionRepository;
-    }
 
     void delete(final String id, @Nullable final String comment) {
         final DimensionLock lock = locking.lockDimension(id);

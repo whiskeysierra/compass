@@ -1,0 +1,27 @@
+package org.zalando.compass.domain.repository;
+
+import org.zalando.compass.domain.model.Dimension;
+import org.zalando.compass.library.pagination.Pagination;
+
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+public interface DimensionRepository {
+    void create(Dimension dimension);
+
+    List<Dimension> lockAll(Set<String> dimensions);
+
+    List<Dimension> findAll(Set<String> dimensions);
+
+    List<Dimension> findAll(@Nullable String term, Pagination<String> query);
+
+    Optional<Dimension> find(String id);
+
+    Optional<Dimension> lock(String id);
+
+    void update(Dimension dimension);
+
+    void delete(Dimension dimension);
+}

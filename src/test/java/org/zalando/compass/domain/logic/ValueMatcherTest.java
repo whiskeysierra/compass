@@ -10,7 +10,6 @@ import org.zalando.compass.domain.logic.relation.LessThanOrEqual;
 import org.zalando.compass.domain.logic.relation.PrefixMatch;
 import org.zalando.compass.domain.logic.relation.RegularExpression;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +20,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.zalando.compass.library.Schema.stringSchema;
 
+// TODO should test without concrete relation implementations!
 public class ValueMatcherTest {
     
     private final RichDimension after = new RichDimension("after", stringSchema(), new GreaterThanOrEqual(), "");

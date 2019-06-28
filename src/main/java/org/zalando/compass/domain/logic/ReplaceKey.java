@@ -1,25 +1,29 @@
 package org.zalando.compass.domain.logic;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.zalando.compass.domain.EntityAlreadyExistsException;
+import org.zalando.compass.domain.ValidationService;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.KeyLock;
 import org.zalando.compass.domain.model.KeyRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.domain.persistence.KeyRepository;
-import org.zalando.compass.domain.persistence.KeyRevisionRepository;
+import org.zalando.compass.domain.repository.KeyRepository;
+import org.zalando.compass.domain.repository.KeyRevisionRepository;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-import static org.zalando.compass.domain.persistence.model.enums.RevisionType.CREATE;
-import static org.zalando.compass.domain.persistence.model.enums.RevisionType.UPDATE;
-import static org.zalando.compass.library.Changed.changed;
+import static org.zalando.compass.domain.logic.Changed.changed;
+import static org.zalando.compass.infrastructure.database.model.enums.RevisionType.CREATE;
+import static org.zalando.compass.infrastructure.database.model.enums.RevisionType.UPDATE;
 
 @Slf4j
 @Component
+@AllArgsConstructor(onConstructor = @__(@Autowired))
 class ReplaceKey {
 
     private final Locking locking;
@@ -27,20 +31,6 @@ class ReplaceKey {
     private final KeyRepository repository;
     private final RevisionService revisionService;
     private final KeyRevisionRepository revisionRepository;
-
-    @Autowired
-    ReplaceKey(
-            final Locking locking,
-            final ValidationService validator,
-            final KeyRepository repository,
-            final RevisionService revisionService,
-            final KeyRevisionRepository revisionRepository) {
-        this.locking = locking;
-        this.validator = validator;
-        this.repository = repository;
-        this.revisionService = revisionService;
-        this.revisionRepository = revisionRepository;
-    }
 
     /**
      *

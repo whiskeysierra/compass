@@ -28,10 +28,6 @@ server:
       - application/*+json
   use-forward-headers: true
 
-twintip:
-  mapping: /api
-  yaml: "classpath:api/api.yaml"
-
 management:
   server:
     add-application-context-header: false

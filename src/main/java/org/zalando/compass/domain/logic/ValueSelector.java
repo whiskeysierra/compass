@@ -3,10 +3,13 @@ package org.zalando.compass.domain.logic;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableMap;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.zalando.compass.domain.RelationService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Dimensional;
-import org.zalando.compass.domain.persistence.DimensionRepository;
+import org.zalando.compass.domain.repository.DimensionRepository;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -22,21 +25,17 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
+// TODO package private + interface?
 @Service
-class ValueSelector {
+@AllArgsConstructor(onConstructor = @__(@Autowired))
+public class ValueSelector {
 
+    // TODO wrong dependencies?
     private final DimensionRepository dimensionRepository;
     private final RelationService relationService;
     private final ValueMatcher matcher;
 
-    ValueSelector(final DimensionRepository dimensionRepository, final RelationService relationService,
-            final ValueMatcher matcher) {
-        this.dimensionRepository = dimensionRepository;
-        this.relationService = relationService;
-        this.matcher = matcher;
-    }
-
-    <V extends Dimensional> List<V> select(final List<V> rawValues, final Map<String, JsonNode> rawFilter) {
+    public <V extends Dimensional> List<V> select(final List<V> rawValues, final Map<String, JsonNode> rawFilter) {
         final Map<String, RichDimension> map = findDimensions(rawValues, rawFilter);
 
         final BiMap<V, Map<RichDimension, JsonNode>> values = wrap(rawValues, map::get);

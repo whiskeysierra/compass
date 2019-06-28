@@ -16,6 +16,7 @@ import static java.util.Comparator.comparing;
 import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.nullsFirst;
 
+@SuppressWarnings("UnstableApiUsage")
 final class NaturalOrderJsonComparator implements Comparator<JsonNode> {
 
     private NaturalOrderJsonComparator() {
@@ -85,7 +86,7 @@ final class NaturalOrderJsonComparator implements Comparator<JsonNode> {
         throw new UnsupportedOperationException();
     }
 
-    public static Comparator<JsonNode> comparingJson() {
+    static Comparator<JsonNode> comparingJson() {
         return nullsFirst(new NaturalOrderJsonComparator());
     }
 
