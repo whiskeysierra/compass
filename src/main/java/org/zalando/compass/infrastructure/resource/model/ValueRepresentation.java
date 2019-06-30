@@ -15,7 +15,7 @@ import static lombok.AccessLevel.PRIVATE;
 @AllArgsConstructor
 public final class ValueRepresentation {
 
-    @Wither
+    @Wither // TODO empty, non-null map as default value would be preferable
     ImmutableMap<String, JsonNode> dimensions;
     JsonNode value;
 

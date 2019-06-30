@@ -7,12 +7,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.zalando.compass.domain.model.Dimension;
-import org.zalando.compass.domain.model.DimensionRevision;
+import org.zalando.compass.domain.model.revision.DimensionRevision;
 import org.zalando.compass.domain.model.Key;
-import org.zalando.compass.domain.model.KeyRevision;
+import org.zalando.compass.domain.model.revision.KeyRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.domain.model.ValueRevision;
+import org.zalando.compass.domain.model.revision.ValueRevision;
 
 import java.util.Arrays;
 

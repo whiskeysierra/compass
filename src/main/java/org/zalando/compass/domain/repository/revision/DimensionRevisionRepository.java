@@ -1,7 +1,7 @@
-package org.zalando.compass.domain.repository;
+package org.zalando.compass.domain.repository.revision;
 
 import org.zalando.compass.domain.model.Dimension;
-import org.zalando.compass.domain.model.DimensionRevision;
+import org.zalando.compass.domain.model.revision.DimensionRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.library.pagination.Pagination;
 

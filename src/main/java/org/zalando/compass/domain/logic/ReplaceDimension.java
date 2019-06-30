@@ -3,26 +3,24 @@ package org.zalando.compass.domain.logic;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.BadArgumentException;
 import org.zalando.compass.domain.EntityAlreadyExistsException;
 import org.zalando.compass.domain.NotFoundException;
 import org.zalando.compass.domain.RelationService;
 import org.zalando.compass.domain.ValidationService;
+import org.zalando.compass.domain.event.DimensionCreated;
+import org.zalando.compass.domain.event.DimensionReplaced;
 import org.zalando.compass.domain.model.Dimension;
-import org.zalando.compass.domain.model.DimensionLock;
-import org.zalando.compass.domain.model.DimensionRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.repository.DimensionRepository;
-import org.zalando.compass.domain.repository.DimensionRevisionRepository;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
 import static org.zalando.compass.domain.logic.Changed.changed;
-import static org.zalando.compass.infrastructure.database.model.enums.RevisionType.CREATE;
-import static org.zalando.compass.infrastructure.database.model.enums.RevisionType.UPDATE;
 
 @Slf4j
 @Component
@@ -34,7 +32,9 @@ class ReplaceDimension {
     private final ValidationService validator;
     private final DimensionRepository repository;
     private final RevisionService revisionService;
-    private final DimensionRevisionRepository revisionRepository;
+
+    // TODO how can we be spring independent?
+    private final ApplicationEventPublisher publisher;
 
     /**
      *
@@ -50,8 +50,9 @@ class ReplaceDimension {
         final Revision revision = revisionService.create(comment);
 
         if (current == null) {
-            create(dimension, revision);
+            create(dimension);
 
+            publisher.publishEvent(new DimensionReplaced(null, dimension, revision));
             return true;
         } else {
             if (changed(Dimension::getSchema, current, dimension)) {
@@ -65,11 +66,7 @@ class ReplaceDimension {
             repository.update(dimension);
             log.info("Updated dimension [{}]", dimension);
 
-            final Revision update = revision.withType(UPDATE);
-            final DimensionRevision dimensionRevision = dimension.toRevision(update);
-            revisionRepository.create(dimensionRevision);
-            log.info("Created dimension revision [{}]", dimensionRevision);
-
+            publisher.publishEvent(new DimensionReplaced(current, dimension, revision));
             return false;
         }
     }
@@ -81,21 +78,17 @@ class ReplaceDimension {
         final Revision revision = revisionService.create(comment);
 
         if (current == null) {
-            create(dimension, revision);
+            create(dimension);
+            publisher.publishEvent(new DimensionCreated(dimension, revision));
         } else {
             throw new EntityAlreadyExistsException("Dimension " + dimension.getId() + " already exists");
         }
     }
 
-    private void create(final Dimension dimension, final Revision revision) {
+    private void create(final Dimension dimension) {
         validateRelation(dimension);
-
         repository.create(dimension);
         log.info("Created dimension [{}]", dimension);
-
-        final DimensionRevision dimensionRevision = dimension.toRevision(revision.withType(CREATE));
-        revisionRepository.create(dimensionRevision);
-        log.info("Created dimension revision [{}]", dimensionRevision);
     }
 
     private void validateRelation(final Dimension dimension) {

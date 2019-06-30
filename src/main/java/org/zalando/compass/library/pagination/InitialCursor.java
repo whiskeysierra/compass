@@ -24,12 +24,12 @@ final class InitialCursor<P, Q> implements Cursor<P, Q> {
     }
 
     @Override
-    public Cursor<P, Q> next(P pivot) {
+    public Cursor<P, Q> next(final P pivot) {
         return new ForwardCursor<>(pivot, query, limit);
     }
 
     @Override
-    public Cursor<P, Q> previous(P pivot) {
+    public Cursor<P, Q> previous(final P pivot) {
         return new BackwardCursor<>(pivot, query, limit);
     }
 

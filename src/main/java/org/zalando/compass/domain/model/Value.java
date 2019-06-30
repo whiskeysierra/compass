@@ -3,6 +3,7 @@ package org.zalando.compass.domain.model;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
 import lombok.experimental.Wither;
+import org.zalando.compass.domain.model.revision.ValueRevision;
 
 @lombok.Value
 public class Value implements Dimensional {

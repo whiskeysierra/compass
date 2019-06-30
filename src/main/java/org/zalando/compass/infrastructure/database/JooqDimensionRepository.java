@@ -10,6 +10,7 @@ import org.jooq.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Dimension;
+import org.zalando.compass.domain.repository.DimensionGuard;
 import org.zalando.compass.domain.repository.DimensionRepository;
 import org.zalando.compass.library.pagination.Pagination;
 
@@ -24,7 +25,7 @@ import static org.zalando.compass.infrastructure.database.model.Tables.DIMENSION
 
 @Repository
 @AllArgsConstructor(onConstructor = @__(@Autowired))
-class JooqDimensionRepository implements DimensionRepository {
+class JooqDimensionRepository implements DimensionRepository, DimensionGuard {
 
     private final DSLContext db;
 

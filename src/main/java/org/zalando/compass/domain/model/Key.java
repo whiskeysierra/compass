@@ -2,6 +2,7 @@ package org.zalando.compass.domain.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.experimental.Wither;
+import org.zalando.compass.domain.model.revision.KeyRevision;
 
 @lombok.Value
 public final class Key {

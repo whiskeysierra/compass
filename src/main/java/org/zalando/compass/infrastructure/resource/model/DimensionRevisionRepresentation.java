@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
-import org.zalando.compass.domain.model.DimensionRevision;
+import org.zalando.compass.domain.model.revision.DimensionRevision;
 
 import static lombok.AccessLevel.PRIVATE;
 

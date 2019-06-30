@@ -13,6 +13,7 @@ import java.time.OffsetDateTime;
 @Getter
 public final class Revisioned<T> {
 
+    // TODO isn't this too low-level?
     Long revision;
     OffsetDateTime timestamp;
     T entity;

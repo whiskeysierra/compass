@@ -1,7 +1,7 @@
 package org.zalando.compass.domain;
 
 import org.zalando.compass.domain.model.Key;
-import org.zalando.compass.domain.model.KeyRevision;
+import org.zalando.compass.domain.model.revision.KeyRevision;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.library.pagination.PageResult;

@@ -7,9 +7,9 @@ import org.jooq.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Dimension;
-import org.zalando.compass.domain.model.DimensionRevision;
+import org.zalando.compass.domain.model.revision.DimensionRevision;
 import org.zalando.compass.domain.model.Revision;
-import org.zalando.compass.domain.repository.DimensionRevisionRepository;
+import org.zalando.compass.domain.repository.revision.DimensionRevisionRepository;
 import org.zalando.compass.infrastructure.database.model.enums.RevisionType;
 import org.zalando.compass.library.pagination.Pagination;
 

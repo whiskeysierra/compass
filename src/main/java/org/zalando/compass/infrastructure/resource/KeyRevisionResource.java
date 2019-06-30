@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.KeyRevisionService;
 import org.zalando.compass.domain.model.Key;
-import org.zalando.compass.domain.model.KeyRevision;
+import org.zalando.compass.domain.model.revision.KeyRevision;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.library.pagination.Cursor;

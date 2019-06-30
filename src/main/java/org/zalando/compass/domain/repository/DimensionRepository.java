@@ -9,9 +9,8 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface DimensionRepository {
-    void create(Dimension dimension);
 
-    List<Dimension> lockAll(Set<String> dimensions);
+    void create(Dimension dimension);
 
     List<Dimension> findAll(Set<String> dimensions);
 
@@ -19,9 +18,8 @@ public interface DimensionRepository {
 
     Optional<Dimension> find(String id);
 
-    Optional<Dimension> lock(String id);
-
     void update(Dimension dimension);
 
     void delete(Dimension dimension);
+
 }

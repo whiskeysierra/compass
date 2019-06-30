@@ -1,37 +1,35 @@
 package org.zalando.compass.domain.logic;
 
-import com.google.common.base.Equivalence;
-import com.google.common.base.Equivalence.Wrapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.MapDifference;
+import com.google.common.collect.MapDifference.ValueDifference;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.EntityAlreadyExistsException;
 import org.zalando.compass.domain.ValidationService;
+import org.zalando.compass.domain.event.ValueCreated;
+import org.zalando.compass.domain.event.ValueDeleted;
+import org.zalando.compass.domain.event.ValueReplaced;
 import org.zalando.compass.domain.model.Dimension;
+import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.domain.model.ValueLock;
-import org.zalando.compass.domain.model.ValueRevision;
 import org.zalando.compass.domain.model.ValuesLock;
 import org.zalando.compass.domain.repository.ValueRepository;
-import org.zalando.compass.domain.repository.ValueRevisionRepository;
-import org.zalando.compass.infrastructure.database.model.enums.RevisionType;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
-import static com.google.common.collect.Sets.difference;
-import static com.google.common.collect.Sets.intersection;
+import static com.google.common.collect.Maps.difference;
+import static com.google.common.collect.Maps.uniqueIndex;
 import static com.google.common.collect.Streams.mapWithIndex;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-import static org.zalando.compass.infrastructure.database.model.enums.RevisionType.CREATE;
-import static org.zalando.compass.infrastructure.database.model.enums.RevisionType.DELETE;
-import static org.zalando.compass.infrastructure.database.model.enums.RevisionType.UPDATE;
 
 @Slf4j
 @Component
@@ -42,10 +40,11 @@ class ReplaceValue {
     private final ValidationService validator;
     private final ValueRepository repository;
     private final RevisionService revisionService;
-    private final ValueRevisionRepository revisionRepository;
+    private final ApplicationEventPublisher publisher;
 
-    boolean replace(final String key, final Value value, @Nullable final String comment) {
-        final ValueLock lock = lock(key, value);
+    boolean replace(final String keyId, final Value value, @Nullable final String comment) {
+        final ValueLock lock = lock(keyId, value);
+        final Key key = lock.getKey();
         @Nullable final Value current = lock.getValue();
 
         final Revision rev = revisionService.create(comment);
@@ -54,13 +53,15 @@ class ReplaceValue {
             create(key, value, rev);
             return true;
         } else {
-            update(key, value.withIndex(current.getIndex()), rev);
+            update(key, current, value.withIndex(current.getIndex()), rev);
             return false;
         }
     }
 
-    void create(final String key, final Value value, @Nullable final String comment) {
-        final ValueLock lock = lock(key, value);
+    void create(final String keyId, final Value value, @Nullable final String comment) {
+        final ValueLock lock = lock(keyId, value);
+
+        final Key key = lock.getKey();
         @Nullable final Value current = lock.getValue();
 
         final Revision rev = revisionService.create(comment);
@@ -73,26 +74,28 @@ class ReplaceValue {
                     .collect(joining(", "));
 
             throw new EntityAlreadyExistsException(
-                    "Value for key " + key + " and dimensions [" + dimensions + "] already exists");
+                    "Value for key " + keyId + " and dimensions [" + dimensions + "] already exists");
         }
     }
 
-    boolean replace(final String key, final List<Value> values, @Nullable final String comment) {
-        log.info("Replacing values of key [{}]", key);
+    boolean replace(final String keyId, final List<Value> values, @Nullable final String comment) {
+        log.info("Replacing values of key [{}]", keyId);
 
-        final ValuesLock lock = lock(key, values);
+        final ValuesLock lock = lock(keyId, values);
 
+        final Key key = lock.getKey();
         final List<Value> before = lock.getValues();
         final List<Value> after = preserveIndex(values);
 
         return replace(key, before, after, comment);
     }
 
-    boolean create(final String key, final List<Value> values, @Nullable final String comment) {
-        log.info("Creating values of key [{}]", key);
+    boolean create(final String keyId, final List<Value> values, @Nullable final String comment) {
+        log.info("Creating values of key [{}]", keyId);
 
-        final ValuesLock lock = lock(key, values);
+        final ValuesLock lock = lock(keyId, values);
 
+        final Key key = lock.getKey();
         final List<Value> before = lock.getValues();
         final List<Value> after = preserveIndex(values);
 
@@ -121,22 +124,24 @@ class ReplaceValue {
         return lock;
     }
 
-    private boolean replace(final String key, final List<Value> left, final List<Value> right,
+    private boolean replace(final Key key, final List<Value> before, final List<Value> after,
             @Nullable final String comment) {
-        final Set<Wrapper<Value>> before = wrap(left);
-        final Set<Wrapper<Value>> after = wrap(right);
 
-        final Collection<Value> creates = unwrap(difference(after, before));
-        final Collection<Value> updates = unwrap(intersection(after, before));
-        final Collection<Value> deletes = unwrap(difference(before, after));
+        final MapDifference<ImmutableMap<String, JsonNode>, Value> difference = difference(
+                uniqueIndex(before, Value::getDimensions),
+                uniqueIndex(after, Value::getDimensions));
+
+        final Collection<Value> creates = difference.entriesOnlyOnRight().values();
+        final Collection<ValueDifference<Value>> updates = difference.entriesDiffering().values();
+        final Collection<Value> deletes = difference.entriesOnlyOnLeft().values();
 
         final Revision revision = revisionService.create(comment);
 
         creates.forEach(value ->
             create(key, value, revision));
 
-        updates.forEach(value ->
-            update(key, value, revision));
+        updates.forEach(pair ->
+            update(key, pair.leftValue(), pair.rightValue(), revision));
 
         deletes.forEach(value ->
             delete(key, value, revision));
@@ -144,41 +149,27 @@ class ReplaceValue {
         return !creates.isEmpty();
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     private static List<Value> preserveIndex(final List<Value> values) {
         return mapWithIndex(values.stream(), Value::withIndex).collect(toList());
     }
 
-    private static Set<Wrapper<Value>> wrap(final Collection<Value> values) {
-        final Equivalence<Value> equivalence = Equivalence.equals().onResultOf(Value::getDimensions);
-        return values.stream().map(equivalence::wrap).collect(toSet());
+    private void create(final Key key, final Value value, final Revision rev) {
+        final Value created = repository.create(key.getId(), value);
+        log.info("Created value for key [{}]: [{}]", key.getId(), created);
+        publisher.publishEvent(new ValueCreated(key, created, rev));
     }
 
-    private static <T> Collection<T> unwrap(final Collection<Wrapper<T>> wraps) {
-        return wraps.stream().map(Equivalence.Wrapper::get).collect(toList());
+    private void update(final Key key, final Value before, final Value after, final Revision rev) {
+        repository.update(key.getId(), after);
+        log.info("Updated value for key [{}]: [{}]", key.getId(), after);
+        publisher.publishEvent(new ValueReplaced(key, before, after, rev));
     }
 
-    private void create(final String key, final Value value, final Revision rev) {
-        final Value created = repository.create(key, value);
-        log.info("Created value for key [{}]: [{}]", key, created);
-        createRevision(key, created, rev, CREATE);
-    }
-
-    private void update(final String key, final Value value, final Revision rev) {
-        repository.update(key, value);
-        log.info("Updated value for key [{}]: [{}]", key, value);
-        createRevision(key, value, rev, UPDATE);
-    }
-
-    private void delete(final String key, final Value value, final Revision rev) {
-        repository.delete(key, value.getDimensions());
-        log.info("Deleted value for key [{}]: [{}]", key, value);
-        createRevision(key, value, rev, DELETE);
-    }
-
-    private void createRevision(final String key, final Value value, final Revision revision, final RevisionType type) {
-        final ValueRevision valueRevision = value.toRevision(revision.withType(type));
-        revisionRepository.create(key, valueRevision);
-        log.info("Created value revision [{}]", valueRevision);
+    private void delete(final Key key, final Value value, final Revision rev) {
+        repository.delete(key.getId(), value.getDimensions());
+        log.info("Deleted value for key [{}]: [{}]", key.getId(), value);
+        publisher.publishEvent(new ValueDeleted(key, value, rev));
     }
 
 }

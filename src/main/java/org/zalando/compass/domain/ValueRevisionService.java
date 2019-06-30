@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.domain.model.ValueRevision;
+import org.zalando.compass.domain.model.revision.ValueRevision;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
 

@@ -3,19 +3,17 @@ package org.zalando.compass.domain.logic;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.domain.NotFoundException;
+import org.zalando.compass.domain.event.DimensionDeleted;
 import org.zalando.compass.domain.model.Dimension;
-import org.zalando.compass.domain.model.DimensionLock;
-import org.zalando.compass.domain.model.DimensionRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.repository.DimensionRepository;
-import org.zalando.compass.domain.repository.DimensionRevisionRepository;
 
 import javax.annotation.Nullable;
 
 import static org.zalando.compass.domain.BadArgumentException.checkArgument;
-import static org.zalando.compass.infrastructure.database.model.enums.RevisionType.DELETE;
 
 @Slf4j
 @Component
@@ -25,7 +23,7 @@ class DeleteDimension {
     private final Locking locking;
     private final DimensionRepository repository;
     private final RevisionService revisionService;
-    private final DimensionRevisionRepository revisionRepository;
+    private final ApplicationEventPublisher publisher;
 
     void delete(final String id, @Nullable final String comment) {
         final DimensionLock lock = locking.lockDimension(id);
@@ -41,10 +39,8 @@ class DeleteDimension {
         repository.delete(dimension);
         log.info("Deleted dimension [{}]", id);
 
-        final Revision rev = revisionService.create(comment).withType(DELETE);
-        final DimensionRevision revision = dimension.toRevision(rev);
-        revisionRepository.create(revision);
-        log.info("Created dimension revision [{}]", revision);
+        final Revision revision = revisionService.create(comment);
+        publisher.publishEvent(new DimensionDeleted(dimension, revision));
     }
 
 }

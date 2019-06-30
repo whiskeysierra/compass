@@ -9,6 +9,7 @@ import org.jooq.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Key;
+import org.zalando.compass.domain.repository.KeyGuard;
 import org.zalando.compass.domain.repository.KeyRepository;
 import org.zalando.compass.library.pagination.Pagination;
 
@@ -21,7 +22,7 @@ import static org.zalando.compass.infrastructure.database.model.Tables.KEY;
 
 @Repository
 @AllArgsConstructor(onConstructor = @__(@Autowired))
-class JooqKeyRepository implements KeyRepository {
+class JooqKeyRepository implements KeyRepository, KeyGuard {
 
     private final DSLContext db;
 

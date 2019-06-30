@@ -1,8 +1,8 @@
-package org.zalando.compass.domain.repository;
+package org.zalando.compass.domain.repository.revision;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.zalando.compass.domain.model.Revision;
-import org.zalando.compass.domain.model.ValueRevision;
+import org.zalando.compass.domain.model.revision.ValueRevision;
 import org.zalando.compass.library.pagination.Pagination;
 
 import java.util.List;

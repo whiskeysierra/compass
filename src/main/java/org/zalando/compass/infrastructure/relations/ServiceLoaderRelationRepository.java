@@ -29,7 +29,7 @@ class ServiceLoaderRelationRepository implements RelationRepository {
     }
 
     @Override
-    public Optional<Relation> find(String id) {
+    public Optional<Relation> find(final String id) {
         return Optional.ofNullable(map.get(id));
     }
 }

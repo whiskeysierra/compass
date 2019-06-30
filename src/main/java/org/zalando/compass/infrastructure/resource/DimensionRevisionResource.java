@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.domain.DimensionRevisionService;
 import org.zalando.compass.domain.model.Dimension;
-import org.zalando.compass.domain.model.DimensionRevision;
+import org.zalando.compass.domain.model.revision.DimensionRevision;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.library.pagination.Cursor;
