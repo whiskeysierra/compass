@@ -104,6 +104,7 @@ class ValueResource {
         return ResponseEntity
                 .status(created ? CREATED : OK)
                 .location(canonicalUrl(key, value))
+                // TODO etag?!
                 .body(ValueRepresentation.valueOf(value));
     }
 

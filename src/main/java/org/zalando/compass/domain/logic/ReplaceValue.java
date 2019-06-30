@@ -127,13 +127,13 @@ class ReplaceValue {
     private boolean replace(final Key key, final List<Value> before, final List<Value> after,
             @Nullable final String comment) {
 
-        final MapDifference<ImmutableMap<String, JsonNode>, Value> difference = difference(
+        final MapDifference<ImmutableMap<String, JsonNode>, Value> diff = difference(
                 uniqueIndex(before, Value::getDimensions),
                 uniqueIndex(after, Value::getDimensions));
 
-        final Collection<Value> creates = difference.entriesOnlyOnRight().values();
-        final Collection<ValueDifference<Value>> updates = difference.entriesDiffering().values();
-        final Collection<Value> deletes = difference.entriesOnlyOnLeft().values();
+        final Collection<Value> creates = diff.entriesOnlyOnRight().values();
+        final Collection<ValueDifference<Value>> updates = diff.entriesDiffering().values();
+        final Collection<Value> deletes = diff.entriesOnlyOnLeft().values();
 
         final Revision revision = revisionService.create(comment);
 

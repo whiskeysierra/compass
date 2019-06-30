@@ -2,10 +2,11 @@ package org.zalando.compass.infrastructure.resource;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ResponseEntity.BodyBuilder;
+import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Revisioned;
 
+import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
-import java.util.Optional;
 import java.util.function.Function;
 
 final class Conditional {
@@ -22,10 +23,15 @@ final class Conditional {
     static <T> BodyBuilder builder(final Revisioned<T> revisioned) {
         final BodyBuilder builder = ResponseEntity.ok();
 
-        Optional.ofNullable(revisioned.getRevision()).map(Conditional::eTag).ifPresent(builder::eTag);
-        Optional.ofNullable(revisioned.getTimestamp()).map(Conditional::lastModified).ifPresent(builder::lastModified);
+        @Nullable final Revision revision = revisioned.getRevision();
 
-        return builder;
+        if (revision == null) {
+            return builder;
+        }
+
+        return builder
+                .eTag(eTag(revision.getId()))
+                .lastModified(lastModified(revision.getTimestamp()));
     }
 
     private static String eTag(final Long revision) {
