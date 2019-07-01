@@ -1,7 +1,6 @@
 package org.zalando.compass.library;
 
 import org.junit.Test;
-import org.zalando.compass.infrastructure.ClockConfiguration;
 
 import java.time.Clock;
 import java.time.ZoneOffset;

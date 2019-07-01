@@ -9,17 +9,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.tracer.aspectj.Traced;
 
-import static org.zalando.compass.infrastructure.database.model.Sequences.REVISION_ID_SEQ;
-import static org.zalando.compass.infrastructure.database.model.Sequences.VALUE_ID_SEQ;
-import static org.zalando.compass.infrastructure.database.model.Sequences.VALUE_INDEX_SEQ;
-import static org.zalando.compass.infrastructure.database.model.Tables.DIMENSION;
-import static org.zalando.compass.infrastructure.database.model.Tables.DIMENSION_REVISION;
-import static org.zalando.compass.infrastructure.database.model.Tables.KEY;
-import static org.zalando.compass.infrastructure.database.model.Tables.KEY_REVISION;
-import static org.zalando.compass.infrastructure.database.model.Tables.REVISION;
-import static org.zalando.compass.infrastructure.database.model.Tables.VALUE;
-import static org.zalando.compass.infrastructure.database.model.Tables.VALUE_DIMENSION_REVISION;
-import static org.zalando.compass.infrastructure.database.model.Tables.VALUE_REVISION;
+import static org.zalando.compass.core.infrastructure.database.model.Sequences.REVISION_ID_SEQ;
+import static org.zalando.compass.core.infrastructure.database.model.Sequences.VALUE_ID_SEQ;
+import static org.zalando.compass.core.infrastructure.database.model.Sequences.VALUE_INDEX_SEQ;
+import static org.zalando.compass.core.infrastructure.database.model.Tables.DIMENSION;
+import static org.zalando.compass.core.infrastructure.database.model.Tables.DIMENSION_REVISION;
+import static org.zalando.compass.core.infrastructure.database.model.Tables.KEY;
+import static org.zalando.compass.core.infrastructure.database.model.Tables.KEY_REVISION;
+import static org.zalando.compass.core.infrastructure.database.model.Tables.REVISION;
+import static org.zalando.compass.core.infrastructure.database.model.Tables.VALUE;
+import static org.zalando.compass.core.infrastructure.database.model.Tables.VALUE_DIMENSION_REVISION;
+import static org.zalando.compass.core.infrastructure.database.model.Tables.VALUE_REVISION;
 
 @Component
 public class Reset {

@@ -557,7 +557,7 @@
                             <forcedTypes>
                                 <forcedType>
                                     <userType>com.fasterxml.jackson.databind.JsonNode</userType>
-                                    <binding>org.zalando.compass.infrastructure.database.PostgresJsonbBinding</binding>
+                                    <binding>org.zalando.compass.core.infrastructure.database.PostgresJsonbBinding</binding>
                                     <types>JSONB</types>
                                 </forcedType>
                             </forcedTypes>
@@ -580,7 +580,7 @@
                             </matchers>
                         </strategy>
                         <target>
-                            <packageName>org.zalando.compass.infrastructure.database.model</packageName>
+                            <packageName>org.zalando.compass.core.infrastructure.database.model</packageName>
                             <directory>target/generated-sources/jooq</directory>
                         </target>
                     </generator>

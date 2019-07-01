@@ -6,13 +6,13 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.zalando.compass.domain.model.Dimension;
-import org.zalando.compass.domain.model.revision.DimensionRevision;
-import org.zalando.compass.domain.model.Key;
-import org.zalando.compass.domain.model.revision.KeyRevision;
-import org.zalando.compass.domain.model.Revision;
-import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.domain.model.revision.ValueRevision;
+import org.zalando.compass.kernel.domain.model.Dimension;
+import org.zalando.compass.revision.domain.model.DimensionRevision;
+import org.zalando.compass.kernel.domain.model.Key;
+import org.zalando.compass.revision.domain.model.KeyRevision;
+import org.zalando.compass.kernel.domain.model.Revision;
+import org.zalando.compass.kernel.domain.model.Value;
+import org.zalando.compass.revision.domain.model.ValueRevision;
 
 import java.util.Arrays;
 

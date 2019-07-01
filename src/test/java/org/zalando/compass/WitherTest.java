@@ -5,8 +5,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
-import org.zalando.compass.domain.model.Revision;
-import org.zalando.compass.domain.model.Value;
+import org.zalando.compass.kernel.domain.model.Revision;
+import org.zalando.compass.kernel.domain.model.Value;
 
 import java.util.Arrays;
 import java.util.function.BiFunction;

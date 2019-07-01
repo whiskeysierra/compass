@@ -3,6 +3,7 @@ package org.zalando.compass.domain.model;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.zalando.compass.kernel.domain.model.Relation;
 
 import static java.util.ServiceLoader.load;
 import static java.util.stream.Collectors.toList;

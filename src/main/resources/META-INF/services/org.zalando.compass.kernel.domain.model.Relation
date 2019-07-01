@@ -1,0 +1,7 @@
+org.zalando.compass.core.domain.model.relation.Equality
+org.zalando.compass.core.domain.model.relation.GreaterThan
+org.zalando.compass.core.domain.model.relation.GreaterThanOrEqual
+org.zalando.compass.core.domain.model.relation.LessThan
+org.zalando.compass.core.domain.model.relation.LessThanOrEqual
+org.zalando.compass.core.domain.model.relation.RegularExpression
+org.zalando.compass.core.domain.model.relation.PrefixMatch
