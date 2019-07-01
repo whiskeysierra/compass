@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.zalando.compass.domain.KeyRevisionService;
+import org.zalando.compass.domain.api.KeyRevisionService;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.revision.KeyRevision;
 import org.zalando.compass.domain.model.PageRevision;

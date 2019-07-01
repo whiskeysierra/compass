@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.revision.ValueRevision;
-import org.zalando.compass.domain.repository.revision.ValueRevisionRepository;
+import org.zalando.compass.domain.spi.repository.revision.ValueRevisionRepository;
 import org.zalando.compass.infrastructure.database.model.enums.RevisionType;
 import org.zalando.compass.infrastructure.database.model.tables.records.ValueDimensionRevisionRecord;
 import org.zalando.compass.infrastructure.database.model.tables.records.ValueRevisionRecord;

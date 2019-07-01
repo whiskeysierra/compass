@@ -5,12 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
-import org.zalando.compass.domain.NotFoundException;
-import org.zalando.compass.domain.event.KeyDeleted;
+import org.zalando.compass.domain.api.NotFoundException;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.domain.repository.KeyRepository;
+import org.zalando.compass.domain.model.event.KeyDeleted;
+import org.zalando.compass.domain.spi.repository.KeyRepository;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -22,14 +22,14 @@ import static org.zalando.compass.infrastructure.database.model.enums.RevisionTy
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 class DeleteKey {
 
-    private final Locking locking;
+    private final KeyLocking locking;
     private final KeyRepository keyRepository;
     private final RevisionService revisionService;
     private final DeleteValue deleteValue;
     private final ApplicationEventPublisher publisher;
 
     void delete(final String id, @Nullable final String comment) {
-        final KeyLock lock = locking.lockKey(id);
+        final KeyLock lock = locking.lock(id);
 
         @Nullable final Key key = lock.getKey();
         final List<Value> values = lock.getValues();
@@ -51,7 +51,7 @@ class DeleteKey {
     }
 
     private void deleteKey(final Key key, final Revision revision) {
-        keyRepository.delete(key.getId());
+        keyRepository.delete(key);
         log.info("Deleted key [{}]", key.getId());
 
         publisher.publishEvent(new KeyDeleted(key, revision));

@@ -3,12 +3,12 @@ package org.zalando.compass.domain.logic;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.zalando.compass.domain.DimensionRevisionService;
-import org.zalando.compass.domain.NotFoundException;
+import org.zalando.compass.domain.api.DimensionRevisionService;
+import org.zalando.compass.domain.api.NotFoundException;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Revisioned;
-import org.zalando.compass.domain.repository.DimensionRepository;
+import org.zalando.compass.domain.spi.repository.DimensionRepository;
 import org.zalando.compass.library.pagination.Cursor;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
@@ -38,9 +38,11 @@ class ReadDimension {
         return Revisioned.create(dimension, revision);
     }
 
+    @Nullable //since it should be eventually consistent
     private Revision readLatestRevision(final String id) {
         final Pagination<Long> pagination = Cursor.<Long, Void>initial().with(null, 1).paginate();
-        return revisionService.readRevisions(id, pagination).getHead();
+        final PageResult<Revision> revisions = revisionService.readRevisions(id, pagination);
+        return revisions.getElements().isEmpty() ? null : revisions.getHead();
     }
 
 }

@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.collect.ImmutableList;
 import org.junit.Test;
-import org.zalando.compass.domain.logic.relation.Equality;
-import org.zalando.compass.domain.logic.relation.GreaterThanOrEqual;
-import org.zalando.compass.domain.logic.relation.LessThanOrEqual;
-import org.zalando.compass.domain.logic.relation.PrefixMatch;
-import org.zalando.compass.domain.logic.relation.RegularExpression;
+import org.zalando.compass.domain.model.relation.Equality;
+import org.zalando.compass.domain.model.relation.GreaterThanOrEqual;
+import org.zalando.compass.domain.model.relation.LessThanOrEqual;
+import org.zalando.compass.domain.model.relation.PrefixMatch;
+import org.zalando.compass.domain.model.relation.RegularExpression;
 
 import java.util.List;
 import java.util.Map;

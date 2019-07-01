@@ -9,17 +9,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
-import org.zalando.compass.domain.EntityAlreadyExistsException;
-import org.zalando.compass.domain.ValidationService;
-import org.zalando.compass.domain.event.ValueCreated;
-import org.zalando.compass.domain.event.ValueDeleted;
-import org.zalando.compass.domain.event.ValueReplaced;
+import org.zalando.compass.domain.api.EntityAlreadyExistsException;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.ValuesLock;
-import org.zalando.compass.domain.repository.ValueRepository;
+import org.zalando.compass.domain.model.event.ValueCreated;
+import org.zalando.compass.domain.model.event.ValueDeleted;
+import org.zalando.compass.domain.model.event.ValueReplaced;
+import org.zalando.compass.domain.spi.repository.ValueRepository;
+import org.zalando.compass.domain.spi.validation.ValidationService;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -36,7 +36,7 @@ import static java.util.stream.Collectors.toList;
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 class ReplaceValue {
 
-    private final Locking locking;
+    private final ValueLocking locking;
     private final ValidationService validator;
     private final ValueRepository repository;
     private final RevisionService revisionService;
@@ -107,7 +107,7 @@ class ReplaceValue {
     }
 
     private ValueLock lock(final String key, final Value value) {
-        final ValueLock lock = locking.lockValue(key, value.getDimensions());
+        final ValueLock lock = locking.lock(key, value.getDimensions());
 
         validator.check(lock.getDimensions(), value);
         validator.check(lock.getKey(), value);
@@ -116,7 +116,7 @@ class ReplaceValue {
     }
 
     private ValuesLock lock(final String key, final List<Value> values) {
-        final ValuesLock lock = locking.lockValues(key, values);
+        final ValuesLock lock = locking.lock(key, values);
 
         validator.check(lock.getDimensions(), values);
         validator.check(lock.getKey(), values);

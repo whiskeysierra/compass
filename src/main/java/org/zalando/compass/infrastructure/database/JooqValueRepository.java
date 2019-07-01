@@ -12,9 +12,9 @@ import org.jooq.SelectSeekStep2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.domain.repository.ValueCriteria;
-import org.zalando.compass.domain.repository.ValueGuard;
-import org.zalando.compass.domain.repository.ValueRepository;
+import org.zalando.compass.domain.spi.repository.ValueCriteria;
+import org.zalando.compass.domain.spi.repository.lock.ValueLockRepository;
+import org.zalando.compass.domain.spi.repository.ValueRepository;
 import org.zalando.compass.infrastructure.database.model.tables.records.ValueDimensionRecord;
 import org.zalando.compass.infrastructure.database.model.tables.records.ValueRecord;
 
@@ -38,7 +38,7 @@ import static org.zalando.compass.infrastructure.database.Tables.table;
 
 @Repository
 @AllArgsConstructor(onConstructor = @__(@Autowired))
-class JooqValueRepository implements ValueRepository, ValueGuard {
+class JooqValueRepository implements ValueRepository, ValueLockRepository {
 
     private final DSLContext db;
 

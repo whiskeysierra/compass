@@ -5,17 +5,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
-import org.zalando.compass.domain.BadArgumentException;
-import org.zalando.compass.domain.EntityAlreadyExistsException;
-import org.zalando.compass.domain.NotFoundException;
-import org.zalando.compass.domain.RelationService;
-import org.zalando.compass.domain.ValidationService;
-import org.zalando.compass.domain.event.DimensionCreated;
-import org.zalando.compass.domain.event.DimensionReplaced;
+import org.zalando.compass.domain.api.BadArgumentException;
+import org.zalando.compass.domain.api.EntityAlreadyExistsException;
+import org.zalando.compass.domain.api.NotFoundException;
+import org.zalando.compass.domain.api.RelationService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.domain.repository.DimensionRepository;
+import org.zalando.compass.domain.model.event.DimensionCreated;
+import org.zalando.compass.domain.model.event.DimensionReplaced;
+import org.zalando.compass.domain.spi.repository.DimensionRepository;
+import org.zalando.compass.domain.spi.validation.ValidationService;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -27,7 +27,7 @@ import static org.zalando.compass.domain.logic.Changed.changed;
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 class ReplaceDimension {
 
-    private final Locking locking;
+    private final DimensionLocking locking;
     private final RelationService relationService;
     private final ValidationService validator;
     private final DimensionRepository repository;
@@ -43,7 +43,7 @@ class ReplaceDimension {
      * @return true if dimension was created, false if an existing one was updated
      */
     boolean replace(final Dimension dimension, @Nullable final String comment) {
-        final DimensionLock lock = locking.lockDimension(dimension.getId());
+        final DimensionLock lock = locking.lock(dimension.getId());
         @Nullable final Dimension current = lock.getDimension();
         final List<Value> values = lock.getValues();
 
@@ -72,7 +72,7 @@ class ReplaceDimension {
     }
 
     void create(final Dimension dimension, @Nullable final String comment) {
-        final DimensionLock lock = locking.lockDimension(dimension.getId());
+        final DimensionLock lock = locking.lock(dimension.getId());
         @Nullable final Dimension current = lock.getDimension();
 
         final Revision revision = revisionService.create(comment);

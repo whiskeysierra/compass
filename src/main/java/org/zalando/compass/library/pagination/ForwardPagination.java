@@ -1,6 +1,7 @@
 package org.zalando.compass.library.pagination;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.SelectForUpdateStep;
@@ -11,6 +12,7 @@ import java.util.List;
 
 import static org.jooq.impl.DSL.val;
 
+@Getter
 @AllArgsConstructor
 final class ForwardPagination<P> implements Pagination<P> {
 

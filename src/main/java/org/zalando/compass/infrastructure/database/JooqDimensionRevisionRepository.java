@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.revision.DimensionRevision;
 import org.zalando.compass.domain.model.Revision;
-import org.zalando.compass.domain.repository.revision.DimensionRevisionRepository;
+import org.zalando.compass.domain.spi.repository.revision.DimensionRevisionRepository;
 import org.zalando.compass.infrastructure.database.model.enums.RevisionType;
 import org.zalando.compass.library.pagination.Pagination;
 
@@ -60,6 +60,7 @@ class JooqDimensionRevisionRepository implements DimensionRevisionRepository {
                 .where(exists(selectOne()
                         .from(DIMENSION_REVISION)
                         .where(DIMENSION_REVISION.REVISION.eq(REVISION.ID))
+                        // TODO needed?
                         .and(trueCondition()))), REVISION.ID, SortOrder.DESC)
                 .fetch().map(this::mapRevisionWithoutType);
     }

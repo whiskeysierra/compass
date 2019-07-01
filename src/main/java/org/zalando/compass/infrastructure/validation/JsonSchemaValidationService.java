@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.zalando.compass.domain.ValidationService;
+import org.zalando.compass.domain.spi.validation.ValidationService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Value;

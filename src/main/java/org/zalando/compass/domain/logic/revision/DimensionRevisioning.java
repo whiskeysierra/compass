@@ -5,13 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import org.zalando.compass.domain.event.DimensionCreated;
-import org.zalando.compass.domain.event.DimensionDeleted;
-import org.zalando.compass.domain.event.DimensionReplaced;
+import org.zalando.compass.domain.model.event.DimensionCreated;
+import org.zalando.compass.domain.model.event.DimensionDeleted;
+import org.zalando.compass.domain.model.event.DimensionReplaced;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.revision.DimensionRevision;
 import org.zalando.compass.domain.model.Revision;
-import org.zalando.compass.domain.repository.revision.DimensionRevisionRepository;
+import org.zalando.compass.domain.spi.repository.revision.DimensionRevisionRepository;
 import org.zalando.compass.infrastructure.database.model.enums.RevisionType;
 
 import javax.annotation.Nullable;

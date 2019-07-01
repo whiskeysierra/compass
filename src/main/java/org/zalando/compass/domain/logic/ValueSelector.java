@@ -6,10 +6,10 @@ import com.google.common.collect.ImmutableMap;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.zalando.compass.domain.RelationService;
+import org.zalando.compass.domain.api.RelationService;
 import org.zalando.compass.domain.model.Dimension;
 import org.zalando.compass.domain.model.Dimensional;
-import org.zalando.compass.domain.repository.DimensionRepository;
+import org.zalando.compass.domain.spi.repository.DimensionRepository;
 
 import javax.annotation.Nullable;
 import java.util.List;

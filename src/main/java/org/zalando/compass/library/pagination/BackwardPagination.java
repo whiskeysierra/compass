@@ -2,6 +2,7 @@ package org.zalando.compass.library.pagination;
 
 import com.google.common.collect.ImmutableMap;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.SelectForUpdateStep;
@@ -16,6 +17,7 @@ import static org.jooq.SortOrder.ASC;
 import static org.jooq.SortOrder.DESC;
 import static org.jooq.impl.DSL.val;
 
+@Getter
 @AllArgsConstructor
 final class BackwardPagination<P> implements Pagination<P> {
 

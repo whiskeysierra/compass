@@ -9,8 +9,8 @@ import org.jooq.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Key;
-import org.zalando.compass.domain.repository.KeyGuard;
-import org.zalando.compass.domain.repository.KeyRepository;
+import org.zalando.compass.domain.spi.repository.lock.KeyLockRepository;
+import org.zalando.compass.domain.spi.repository.KeyRepository;
 import org.zalando.compass.library.pagination.Pagination;
 
 import javax.annotation.Nullable;
@@ -22,7 +22,7 @@ import static org.zalando.compass.infrastructure.database.model.Tables.KEY;
 
 @Repository
 @AllArgsConstructor(onConstructor = @__(@Autowired))
-class JooqKeyRepository implements KeyRepository, KeyGuard {
+class JooqKeyRepository implements KeyRepository, KeyLockRepository {
 
     private final DSLContext db;
 
@@ -80,9 +80,9 @@ class JooqKeyRepository implements KeyRepository, KeyGuard {
     }
 
     @Override
-    public void delete(final String key) {
+    public void delete(final Key key) {
         db.deleteFrom(KEY)
-                .where(KEY.ID.eq(key))
+                .where(KEY.ID.eq(key.getId()))
                 .execute();
     }
 

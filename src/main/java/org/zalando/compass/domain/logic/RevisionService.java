@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.zalando.compass.domain.model.Revision;
-import org.zalando.compass.domain.repository.RevisionRepository;
+import org.zalando.compass.domain.spi.repository.RevisionRepository;
 
 import javax.annotation.Nullable;
 import java.security.Principal;

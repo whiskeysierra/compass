@@ -5,14 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import org.zalando.compass.domain.event.ValueCreated;
-import org.zalando.compass.domain.event.ValueDeleted;
-import org.zalando.compass.domain.event.ValueReplaced;
+import org.zalando.compass.domain.model.event.ValueCreated;
+import org.zalando.compass.domain.model.event.ValueDeleted;
+import org.zalando.compass.domain.model.event.ValueReplaced;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
 import org.zalando.compass.domain.model.revision.ValueRevision;
-import org.zalando.compass.domain.repository.revision.ValueRevisionRepository;
+import org.zalando.compass.domain.spi.repository.revision.ValueRevisionRepository;
 import org.zalando.compass.infrastructure.database.model.enums.RevisionType;
 
 import javax.annotation.Nullable;

@@ -5,14 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
-import org.zalando.compass.domain.EntityAlreadyExistsException;
-import org.zalando.compass.domain.ValidationService;
-import org.zalando.compass.domain.event.KeyCreated;
-import org.zalando.compass.domain.event.KeyReplaced;
+import org.zalando.compass.domain.api.EntityAlreadyExistsException;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.domain.repository.KeyRepository;
+import org.zalando.compass.domain.model.event.KeyCreated;
+import org.zalando.compass.domain.model.event.KeyReplaced;
+import org.zalando.compass.domain.spi.repository.KeyRepository;
+import org.zalando.compass.domain.spi.validation.ValidationService;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -24,7 +24,7 @@ import static org.zalando.compass.domain.logic.Changed.changed;
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 class ReplaceKey {
 
-    private final Locking locking;
+    private final KeyLocking locking;
     private final ValidationService validator;
     private final KeyRepository repository;
     private final RevisionService revisionService;
@@ -39,7 +39,7 @@ class ReplaceKey {
      * @return true if key was created, false if an existing one was updated
      */
     boolean replace(final Key key, @Nullable final String comment) {
-        final KeyLock lock = locking.lockKey(key.getId());
+        final KeyLock lock = locking.lock(key.getId());
         @Nullable final Key current = lock.getKey();
         final List<Value> values = lock.getValues();
 
@@ -64,7 +64,7 @@ class ReplaceKey {
     }
 
     void create(final Key key, @Nullable final String comment) {
-        final KeyLock lock = locking.lockKey(key.getId());
+        final KeyLock lock = locking.lock(key.getId());
         @Nullable final Key current = lock.getKey();
 
         final Revision revision = revisionService.create(comment);

@@ -1,6 +1,7 @@
 package org.zalando.compass.library.pagination;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.SelectForUpdateStep;
@@ -9,10 +10,16 @@ import org.jooq.SortOrder;
 
 import java.util.List;
 
+@Getter
 @AllArgsConstructor
 final class InitialPagination<P> implements Pagination<P> {
 
     private final int limit;
+
+    @Override
+    public P getPivot() {
+        return null;
+    }
 
     @Override
     public Pagination<P> increment() {

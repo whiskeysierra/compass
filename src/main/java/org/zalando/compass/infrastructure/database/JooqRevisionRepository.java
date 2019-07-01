@@ -6,7 +6,7 @@ import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Revision;
-import org.zalando.compass.domain.repository.RevisionRepository;
+import org.zalando.compass.domain.spi.repository.RevisionRepository;
 
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;

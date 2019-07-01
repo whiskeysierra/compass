@@ -2,10 +2,12 @@ package org.zalando.compass.library.pagination;
 
 import javax.annotation.Nullable;
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
 import static java.util.function.Function.identity;
 
 public interface PageResult<T> {
@@ -48,6 +50,10 @@ public interface PageResult<T> {
                 hasPrevious() ? linker.apply(cursor.previous(id.apply(getHead()))) : null,
                 getElements().stream().map(mapper).collect(Collectors.toList())
         );
+    }
+
+    static <T> PageResult<T> empty() {
+        return create(emptyList(), false, false);
     }
 
     static <T> PageResult<T> create(final List<T> elements, final boolean next, final boolean previous) {

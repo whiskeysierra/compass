@@ -4,14 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.zalando.compass.domain.NotFoundException;
-import org.zalando.compass.domain.ValueRevisionService;
+import org.zalando.compass.domain.api.NotFoundException;
+import org.zalando.compass.domain.api.ValueRevisionService;
 import org.zalando.compass.domain.model.PageRevision;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Revisioned;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.domain.repository.KeyRepository;
-import org.zalando.compass.domain.repository.ValueRepository;
+import org.zalando.compass.domain.spi.repository.KeyRepository;
+import org.zalando.compass.domain.spi.repository.ValueRepository;
 import org.zalando.compass.library.pagination.Cursor;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
@@ -19,7 +19,7 @@ import org.zalando.compass.library.pagination.Pagination;
 import java.util.List;
 import java.util.Map;
 
-import static org.zalando.compass.domain.repository.ValueCriteria.byKey;
+import static org.zalando.compass.domain.spi.repository.ValueCriteria.byKey;
 
 @Component
 @AllArgsConstructor(onConstructor = @__(@Autowired))

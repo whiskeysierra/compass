@@ -6,12 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
-import org.zalando.compass.domain.NotFoundException;
-import org.zalando.compass.domain.event.ValueDeleted;
+import org.zalando.compass.domain.api.NotFoundException;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.Revision;
 import org.zalando.compass.domain.model.Value;
-import org.zalando.compass.domain.repository.ValueRepository;
+import org.zalando.compass.domain.model.event.ValueDeleted;
+import org.zalando.compass.domain.spi.repository.ValueRepository;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -23,13 +23,13 @@ import static org.zalando.compass.infrastructure.database.model.enums.RevisionTy
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 class DeleteValue {
 
-    private final Locking locking;
+    private final ValueLocking locking;
     private final ValueRepository repository;
     private final RevisionService revisionService;
     private final ApplicationEventPublisher publisher;
 
     void delete(final String keyId, final Map<String, JsonNode> filter, @Nullable final String comment) {
-        final ValueLock lock = locking.lockValue(keyId, filter);
+        final ValueLock lock = locking.lock(keyId, filter);
 
         final Key key = lock.getKey();
         final Value value = lock.getValue();

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.zalando.compass.domain.model.Key;
 import org.zalando.compass.domain.model.revision.KeyRevision;
 import org.zalando.compass.domain.model.Revision;
-import org.zalando.compass.domain.repository.revision.KeyRevisionRepository;
+import org.zalando.compass.domain.spi.repository.revision.KeyRevisionRepository;
 import org.zalando.compass.infrastructure.database.model.enums.RevisionType;
 import org.zalando.compass.library.pagination.Pagination;
 
@@ -57,6 +57,7 @@ class JooqKeyRevisionRepository implements KeyRevisionRepository {
                 .where(exists(selectOne()
                         .from(KEY_REVISION)
                         .where(KEY_REVISION.REVISION.eq(REVISION.ID))
+                        // TODO needed?
                         .and(trueCondition()))), REVISION.ID, SortOrder.DESC)
                 .fetch().map(this::mapRevisionWithoutType);
     }
