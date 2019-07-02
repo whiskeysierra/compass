@@ -5,15 +5,15 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.core.domain.api.NotFoundException;
+import org.zalando.compass.revision.domain.api.RevisionService;
 import org.zalando.compass.core.domain.logic.ValueSelector;
 import org.zalando.compass.kernel.domain.model.PageRevision;
 import org.zalando.compass.kernel.domain.model.Revision;
 import org.zalando.compass.kernel.domain.model.Value;
-import org.zalando.compass.revision.domain.model.ValueRevision;
-import org.zalando.compass.core.domain.spi.repository.RevisionRepository;
-import org.zalando.compass.revision.domain.spi.repository.ValueRevisionRepository;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
+import org.zalando.compass.revision.domain.model.ValueRevision;
+import org.zalando.compass.revision.domain.spi.repository.ValueRevisionRepository;
 
 import java.util.List;
 import java.util.Map;
@@ -25,7 +25,7 @@ import static java.util.stream.Collectors.toList;
 class ReadValueRevision {
 
     private final ValueRevisionRepository repository;
-    private final RevisionRepository revisionRepository;
+    private final RevisionService service;
     private final ValueSelector selector;
 
     public PageResult<Revision> readPageRevisions(final String key, final Pagination<Long> query) {
@@ -37,8 +37,7 @@ class ReadValueRevision {
     }
 
     public PageRevision<Value> readPageAt(final String key, final Map<String, JsonNode> filter, final long revisionId) {
-        final Revision revision = revisionRepository.read(revisionId)
-                .orElseThrow(NotFoundException::new)
+        final Revision revision = service.read(revisionId)
                 .withTypeUpdate();
 
         final List<Value> values = repository.findPage(key, revisionId)

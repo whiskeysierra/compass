@@ -20,8 +20,6 @@ import org.zalando.compass.kernel.domain.model.Dimension;
 import org.zalando.compass.kernel.domain.model.Revisioned;
 import org.zalando.compass.library.pagination.Cursor;
 import org.zalando.compass.library.pagination.PageResult;
-import org.zalando.compass.core.infrastructure.http.model.DimensionCollectionRepresentation;
-import org.zalando.compass.core.infrastructure.http.model.DimensionRepresentation;
 import org.zalando.fauxpas.ThrowingUnaryOperator;
 
 import javax.annotation.Nullable;
@@ -37,7 +35,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.PATCH;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
-import static org.zalando.compass.core.infrastructure.http.Linking.link;
+import static org.zalando.compass.library.Linking.link;
 import static org.zalando.compass.core.infrastructure.http.MediaTypes.JSON_MERGE_PATCH_VALUE;
 import static org.zalando.compass.core.infrastructure.http.MediaTypes.JSON_PATCH_VALUE;
 

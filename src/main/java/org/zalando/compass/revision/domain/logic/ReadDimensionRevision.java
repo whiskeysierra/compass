@@ -4,14 +4,14 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.core.domain.api.NotFoundException;
+import org.zalando.compass.revision.domain.api.RevisionService;
 import org.zalando.compass.kernel.domain.model.Dimension;
-import org.zalando.compass.revision.domain.model.DimensionRevision;
 import org.zalando.compass.kernel.domain.model.PageRevision;
 import org.zalando.compass.kernel.domain.model.Revision;
-import org.zalando.compass.revision.domain.spi.repository.DimensionRevisionRepository;
-import org.zalando.compass.core.domain.spi.repository.RevisionRepository;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
+import org.zalando.compass.revision.domain.model.DimensionRevision;
+import org.zalando.compass.revision.domain.spi.repository.DimensionRevisionRepository;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ import static java.util.stream.Collectors.toList;
 class ReadDimensionRevision {
 
     private final DimensionRevisionRepository repository;
-    private final RevisionRepository revisionRepository;
+    private final RevisionService service;
 
     PageResult<Revision> readPageRevisions(final Pagination<Long> query) {
         final List<Revision> revisions = repository.findPageRevisions(query.increment()).stream()
@@ -33,9 +33,7 @@ class ReadDimensionRevision {
     }
 
     PageRevision<Dimension> readPageAt(final long revisionId, final Pagination<String> query) {
-        final Revision revision = revisionRepository.read(revisionId)
-                .orElseThrow(NotFoundException::new)
-                .withTypeUpdate();
+        final Revision revision = service.read(revisionId).withTypeUpdate();
 
         final List<Dimension> dimensions = repository.findPage(revisionId, query.increment());
         final PageResult<Dimension> page = query.paginate(dimensions);

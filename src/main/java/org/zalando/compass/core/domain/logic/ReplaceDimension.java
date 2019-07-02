@@ -9,13 +9,12 @@ import org.zalando.compass.core.domain.api.BadArgumentException;
 import org.zalando.compass.core.domain.api.EntityAlreadyExistsException;
 import org.zalando.compass.core.domain.api.NotFoundException;
 import org.zalando.compass.core.domain.api.RelationService;
+import org.zalando.compass.core.domain.spi.repository.DimensionRepository;
+import org.zalando.compass.core.domain.spi.validation.ValidationService;
 import org.zalando.compass.kernel.domain.model.Dimension;
-import org.zalando.compass.kernel.domain.model.Revision;
 import org.zalando.compass.kernel.domain.model.Value;
 import org.zalando.compass.kernel.domain.model.event.DimensionCreated;
 import org.zalando.compass.kernel.domain.model.event.DimensionReplaced;
-import org.zalando.compass.core.domain.spi.repository.DimensionRepository;
-import org.zalando.compass.core.domain.spi.validation.ValidationService;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -31,8 +30,6 @@ class ReplaceDimension {
     private final RelationService relationService;
     private final ValidationService validator;
     private final DimensionRepository repository;
-    private final RevisionService revisionService;
-
     // TODO how can we be spring independent?
     private final ApplicationEventPublisher publisher;
 
@@ -47,12 +44,10 @@ class ReplaceDimension {
         @Nullable final Dimension current = lock.getDimension();
         final List<Value> values = lock.getValues();
 
-        final Revision revision = revisionService.create(comment);
-
         if (current == null) {
             create(dimension);
 
-            publisher.publishEvent(new DimensionReplaced(null, dimension, revision));
+            publisher.publishEvent(new DimensionReplaced(null, dimension, comment));
             return true;
         } else {
             if (changed(Dimension::getSchema, current, dimension)) {
@@ -66,7 +61,7 @@ class ReplaceDimension {
             repository.update(dimension);
             log.info("Updated dimension [{}]", dimension);
 
-            publisher.publishEvent(new DimensionReplaced(current, dimension, revision));
+            publisher.publishEvent(new DimensionReplaced(current, dimension, comment));
             return false;
         }
     }
@@ -75,11 +70,9 @@ class ReplaceDimension {
         final DimensionLock lock = locking.lock(dimension.getId());
         @Nullable final Dimension current = lock.getDimension();
 
-        final Revision revision = revisionService.create(comment);
-
         if (current == null) {
             create(dimension);
-            publisher.publishEvent(new DimensionCreated(dimension, revision));
+            publisher.publishEvent(new DimensionCreated(dimension, comment));
         } else {
             throw new EntityAlreadyExistsException("Dimension " + dimension.getId() + " already exists");
         }

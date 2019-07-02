@@ -16,30 +16,30 @@ import org.zalando.compass.library.pagination.Pagination;
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 class DefaultDimensionRevisionService implements DimensionRevisionService {
 
-    private final ReadDimensionRevision readRevision;
+    private final ReadDimensionRevision read;
 
     @Transactional(readOnly = true)
     @Override
     public PageResult<Revision> readPageRevisions(final Pagination<Long> query) {
-        return readRevision.readPageRevisions(query);
+        return read.readPageRevisions(query);
     }
 
     @Transactional(readOnly = true)
     @Override
     public PageRevision<Dimension> readPageAt(final long revision, final Pagination<String> query) {
-        return readRevision.readPageAt(revision, query);
+        return read.readPageAt(revision, query);
     }
 
     @Transactional(readOnly = true)
     @Override
     public PageResult<Revision> readRevisions(final String id, final Pagination<Long> query) {
-        return readRevision.readRevisions(id, query);
+        return read.readRevisions(id, query);
     }
 
     @Transactional(readOnly = true)
     @Override
     public DimensionRevision readAt(final String id, final long revision) {
-        return readRevision.readAt(id, revision);
+        return read.readAt(id, revision);
     }
 
 }

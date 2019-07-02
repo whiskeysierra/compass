@@ -7,7 +7,8 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 
 public interface RevisionRepository {
-    long create(OffsetDateTime timestamp, String user, @Nullable String comment);
 
+    long create(OffsetDateTime timestamp, String user, @Nullable String comment);
     Optional<Revision> read(long id);
+
 }

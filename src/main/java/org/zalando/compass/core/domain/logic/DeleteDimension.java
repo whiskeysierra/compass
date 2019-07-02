@@ -6,10 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.core.domain.api.NotFoundException;
-import org.zalando.compass.kernel.domain.model.Dimension;
-import org.zalando.compass.kernel.domain.model.Revision;
-import org.zalando.compass.kernel.domain.model.event.DimensionDeleted;
 import org.zalando.compass.core.domain.spi.repository.DimensionRepository;
+import org.zalando.compass.kernel.domain.model.Dimension;
+import org.zalando.compass.kernel.domain.model.event.DimensionDeleted;
 
 import javax.annotation.Nullable;
 
@@ -22,7 +21,6 @@ class DeleteDimension {
 
     private final DimensionLocking locking;
     private final DimensionRepository repository;
-    private final RevisionService revisionService;
     private final ApplicationEventPublisher publisher;
 
     void delete(final String id, @Nullable final String comment) {
@@ -39,8 +37,7 @@ class DeleteDimension {
         repository.delete(dimension);
         log.info("Deleted dimension [{}]", id);
 
-        final Revision revision = revisionService.create(comment);
-        publisher.publishEvent(new DimensionDeleted(dimension, revision));
+        publisher.publishEvent(new DimensionDeleted(dimension, comment));
     }
 
 }

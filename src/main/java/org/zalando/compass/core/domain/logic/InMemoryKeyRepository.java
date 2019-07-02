@@ -14,8 +14,7 @@ import java.util.concurrent.ConcurrentMap;
 import static java.util.Locale.ROOT;
 import static java.util.stream.Collectors.toList;
 
-// TODO find a good way to a) hide this and b) make it available
-public final class InMemoryKeyRepository implements KeyRepository, KeyLockRepository {
+final class InMemoryKeyRepository implements KeyRepository, KeyLockRepository {
 
     private final ConcurrentMap<String, Key> keys = new ConcurrentHashMap<>();
 

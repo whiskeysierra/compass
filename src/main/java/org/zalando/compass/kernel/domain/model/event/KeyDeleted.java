@@ -1,11 +1,13 @@
 package org.zalando.compass.kernel.domain.model.event;
 
-import lombok.Value;
 import org.zalando.compass.kernel.domain.model.Key;
-import org.zalando.compass.kernel.domain.model.Revision;
+import org.zalando.compass.kernel.domain.model.Value;
 
-@Value
+import java.util.List;
+
+@lombok.Value
 public final class KeyDeleted {
     Key key;
-    Revision revision;
+    List<Value> values;
+    String comment;
 }

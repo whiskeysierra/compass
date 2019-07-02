@@ -9,5 +9,5 @@ public class ValueReplaced {
     Key key;
     Value before;
     Value after;
-    Revision revision;
+    String comment;
 }

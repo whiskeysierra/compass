@@ -18,7 +18,7 @@ import java.util.function.Function;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 
-public final class InMemoryValueRepository implements ValueRepository, ValueLockRepository {
+final class InMemoryValueRepository implements ValueRepository, ValueLockRepository {
 
     private final ConcurrentMap<String, List<Value>> values = new ConcurrentHashMap<>();
 

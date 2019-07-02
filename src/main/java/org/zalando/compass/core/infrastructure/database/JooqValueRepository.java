@@ -33,8 +33,8 @@ import static org.jooq.impl.DSL.select;
 import static org.jooq.impl.DSL.selectOne;
 import static org.zalando.compass.core.infrastructure.database.model.Tables.VALUE;
 import static org.zalando.compass.core.infrastructure.database.model.Tables.VALUE_DIMENSION;
-import static org.zalando.compass.core.infrastructure.database.Tables.leftOuterJoin;
-import static org.zalando.compass.core.infrastructure.database.Tables.table;
+import static org.zalando.compass.library.Tables.leftOuterJoin;
+import static org.zalando.compass.library.Tables.table;
 
 @Repository
 @AllArgsConstructor(onConstructor = @__(@Autowired))

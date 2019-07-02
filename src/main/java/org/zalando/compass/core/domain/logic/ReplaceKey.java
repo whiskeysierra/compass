@@ -6,13 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.core.domain.api.EntityAlreadyExistsException;
+import org.zalando.compass.core.domain.spi.repository.KeyRepository;
+import org.zalando.compass.core.domain.spi.validation.ValidationService;
 import org.zalando.compass.kernel.domain.model.Key;
-import org.zalando.compass.kernel.domain.model.Revision;
 import org.zalando.compass.kernel.domain.model.Value;
 import org.zalando.compass.kernel.domain.model.event.KeyCreated;
 import org.zalando.compass.kernel.domain.model.event.KeyReplaced;
-import org.zalando.compass.core.domain.spi.repository.KeyRepository;
-import org.zalando.compass.core.domain.spi.validation.ValidationService;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -27,8 +26,6 @@ class ReplaceKey {
     private final KeyLocking locking;
     private final ValidationService validator;
     private final KeyRepository repository;
-    private final RevisionService revisionService;
-
     // TODO how can we be spring independent?
     private final ApplicationEventPublisher publisher;
 
@@ -43,12 +40,10 @@ class ReplaceKey {
         @Nullable final Key current = lock.getKey();
         final List<Value> values = lock.getValues();
 
-        final Revision revision = revisionService.create(comment);
-
         if (current == null) {
             create(key);
 
-            publisher.publishEvent(new KeyReplaced(null, key, revision));
+            publisher.publishEvent(new KeyReplaced(null, key, comment));
             return true;
         } else {
             if (changed(Key::getSchema, current, key)) {
@@ -58,7 +53,7 @@ class ReplaceKey {
             repository.update(key);
             log.info("Updated key [{}]", key);
 
-            publisher.publishEvent(new KeyReplaced(current, key, revision));
+            publisher.publishEvent(new KeyReplaced(current, key, comment));
             return false;
         }
     }
@@ -67,11 +62,9 @@ class ReplaceKey {
         final KeyLock lock = locking.lock(key.getId());
         @Nullable final Key current = lock.getKey();
 
-        final Revision revision = revisionService.create(comment);
-
         if (current == null) {
             create(key);
-            publisher.publishEvent(new KeyCreated(key, revision));
+            publisher.publishEvent(new KeyCreated(key, comment));
         } else {
             throw new EntityAlreadyExistsException("Key " + key.getId() + " already exists");
         }

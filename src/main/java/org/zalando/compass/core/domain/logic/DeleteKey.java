@@ -6,16 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.core.domain.api.NotFoundException;
+import org.zalando.compass.core.domain.spi.repository.KeyRepository;
 import org.zalando.compass.kernel.domain.model.Key;
-import org.zalando.compass.kernel.domain.model.Revision;
 import org.zalando.compass.kernel.domain.model.Value;
 import org.zalando.compass.kernel.domain.model.event.KeyDeleted;
-import org.zalando.compass.core.domain.spi.repository.KeyRepository;
 
 import javax.annotation.Nullable;
 import java.util.List;
-
-import static org.zalando.compass.core.infrastructure.database.model.enums.RevisionType.DELETE;
 
 @Slf4j
 @Component
@@ -24,7 +21,6 @@ class DeleteKey {
 
     private final KeyLocking locking;
     private final KeyRepository keyRepository;
-    private final RevisionService revisionService;
     private final DeleteValue deleteValue;
     private final ApplicationEventPublisher publisher;
 
@@ -38,23 +34,20 @@ class DeleteKey {
             throw new NotFoundException();
         }
 
-        final Revision revision = revisionService.create(comment);
+        deleteValues(key, values);
+        deleteKey(key);
 
-        deleteValues(key, values, revision);
-        deleteKey(key, revision);
+        publisher.publishEvent(new KeyDeleted(key, values, comment));
     }
 
-    private void deleteValues(final Key key, final List<Value> values, final Revision revision) {
+    private void deleteValues(final Key key, final List<Value> values) {
         values.forEach(value ->
-                // TODO there should be a better way to share this
-                deleteValue.delete(key, value, revision.withType(DELETE)));
+                deleteValue.delete(key, value));
     }
 
-    private void deleteKey(final Key key, final Revision revision) {
+    private void deleteKey(final Key key) {
         keyRepository.delete(key);
         log.info("Deleted key [{}]", key.getId());
-
-        publisher.publishEvent(new KeyDeleted(key, revision));
     }
 
 }

@@ -26,8 +26,8 @@ public final class DimensionServiceTest {
     private final DimensionRevisionService dimensionRevisionService = mock(DimensionRevisionService.class);
     private final ApplicationEventPublisher publisher = mock(ApplicationEventPublisher.class);
 
-    private final DimensionService unit = new LogicModule().dimensionService(
-            validator, dimensionRevisionService, publisher);
+    private final DimensionService unit = new LogicModule()
+            .dimensionService(validator, dimensionRevisionService, publisher);
 
     @Before
     public void setUp() {

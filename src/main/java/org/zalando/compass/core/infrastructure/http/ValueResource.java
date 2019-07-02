@@ -21,8 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.core.domain.api.ValueService;
 import org.zalando.compass.kernel.domain.model.Revisioned;
 import org.zalando.compass.kernel.domain.model.Value;
-import org.zalando.compass.core.infrastructure.http.model.ValueCollectionRepresentation;
-import org.zalando.compass.core.infrastructure.http.model.ValueRepresentation;
 import org.zalando.compass.library.Querying;
 import org.zalando.fauxpas.ThrowingUnaryOperator;
 
@@ -46,7 +44,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.PATCH;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
-import static org.zalando.compass.core.infrastructure.http.Linking.link;
+import static org.zalando.compass.library.Linking.link;
 import static org.zalando.compass.core.infrastructure.http.MediaTypes.JSON_MERGE_PATCH_VALUE;
 import static org.zalando.compass.core.infrastructure.http.MediaTypes.JSON_PATCH_VALUE;
 
