@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import org.zalando.compass.core.infrastructure.database.model.enums.RevisionType;
-import org.zalando.compass.kernel.domain.model.Revision;
+import org.zalando.compass.core.domain.model.Revision;
 
 import javax.annotation.Nullable;
 import java.net.URI;

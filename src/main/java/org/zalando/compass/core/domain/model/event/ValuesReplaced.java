@@ -1,8 +1,8 @@
-package org.zalando.compass.kernel.domain.model.event;
+package org.zalando.compass.core.domain.model.event;
 
 import com.google.common.collect.MapDifference.ValueDifference;
-import org.zalando.compass.kernel.domain.model.Key;
-import org.zalando.compass.kernel.domain.model.Value;
+import org.zalando.compass.core.domain.model.Key;
+import org.zalando.compass.core.domain.model.Value;
 
 import java.util.Collection;
 

@@ -1,4 +1,4 @@
 @ParametersAreNonnullByDefault
-package org.zalando.compass.kernel.domain.model;
+package org.zalando.compass.core.domain.model;
 
 import javax.annotation.ParametersAreNonnullByDefault;

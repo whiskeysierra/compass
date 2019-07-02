@@ -1,6 +1,6 @@
 package org.zalando.compass.core.domain.spi.repository;
 
-import org.zalando.compass.kernel.domain.model.Key;
+import org.zalando.compass.core.domain.model.Key;
 import org.zalando.compass.library.pagination.Pagination;
 
 import javax.annotation.Nullable;

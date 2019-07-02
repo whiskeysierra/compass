@@ -12,18 +12,24 @@ import org.jooq.Record;
 import org.jooq.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.zalando.compass.kernel.domain.model.Revision;
-import org.zalando.compass.revision.domain.model.ValueRevision;
-import org.zalando.compass.revision.domain.spi.repository.ValueRevisionRepository;
+import org.zalando.compass.core.domain.api.NotFoundException;
+import org.zalando.compass.core.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.Revision;
+import org.zalando.compass.core.domain.spi.repository.DimensionRepository;
 import org.zalando.compass.core.infrastructure.database.model.enums.RevisionType;
 import org.zalando.compass.core.infrastructure.database.model.tables.records.ValueDimensionRevisionRecord;
 import org.zalando.compass.core.infrastructure.database.model.tables.records.ValueRevisionRecord;
 import org.zalando.compass.library.pagination.Pagination;
+import org.zalando.compass.revision.domain.model.ValueRevision;
+import org.zalando.compass.revision.domain.model.ValueRevisions;
+import org.zalando.compass.revision.domain.spi.repository.ValueRevisionRepository;
 
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.time.ZoneOffset.UTC;
+import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 import static org.jooq.impl.DSL.arrayAgg;
 import static org.jooq.impl.DSL.exists;
@@ -38,6 +44,7 @@ import static org.jooq.impl.DSL.val;
 import static org.zalando.compass.core.infrastructure.database.model.Tables.REVISION;
 import static org.zalando.compass.core.infrastructure.database.model.Tables.VALUE_DIMENSION_REVISION;
 import static org.zalando.compass.core.infrastructure.database.model.Tables.VALUE_REVISION;
+import static org.zalando.compass.library.Maps.transform;
 import static org.zalando.compass.library.Tables.leftOuterJoin;
 import static org.zalando.compass.library.Tables.table;
 
@@ -49,6 +56,7 @@ class JooqValueRevisionRepository implements ValueRevisionRepository {
             VALUE_REVISION.as("self");
 
     private final DSLContext db;
+    private final DimensionRepository repository;
 
     @Override
     public void create(final String key, final ValueRevision value) {
@@ -77,7 +85,7 @@ class JooqValueRevisionRepository implements ValueRevisionRepository {
                                 VALUE_DIMENSION_REVISION.DIMENSION_VALUE)
                         .values(val(id),
                                 val(value.getRevision().getId()),
-                                val(dimension.getKey()),
+                                val(dimension.getKey().getId()),
                                 val(dimension.getValue(), JsonNode.class)))
                 .collect(toList());
 
@@ -96,16 +104,16 @@ class JooqValueRevisionRepository implements ValueRevisionRepository {
     }
 
     @Override
-    public List<ValueRevision> findPage(final String key, final long revisionId) {
+    public ValueRevisions findPage(final String key, final long revisionId) {
         return find(key, revisionId, VALUE_REVISION.REVISION_TYPE.ne(RevisionType.DELETE));
     }
 
     @Override
-    public List<ValueRevision> findValueRevisions(final String key, final long revisionId) {
+    public ValueRevisions findValueRevisions(final String key, final long revisionId) {
         return find(key, revisionId, trueCondition());
     }
 
-    private List<ValueRevision> find(final String key, final long revisionId, final Condition condition) {
+    private ValueRevisions find(final String key, final long revisionId, final Condition condition) {
         final Map<Record, List<ValueDimensionRevisionRecord>> map = db
                 .select(VALUE_REVISION.fields())
                 .select(REVISION.fields())
@@ -138,12 +146,12 @@ class JooqValueRevisionRepository implements ValueRevisionRepository {
                             ValueDimensionRevisionRecord::getDimensionValue);
 
                     return new ValueRevision(
-                            dimensions,
+                            transform(dimensions, id -> repository.find(id).orElseThrow(NotFoundException::new)),
                             value.getIndex(),
                             revision,
                             value.getValue());
                 })
-                .collect(toList());
+                .collect(collectingAndThen(toImmutableList(), ValueRevisions::new));
     }
 
     private <T> Field<T> dimensionsOf(final org.zalando.compass.core.infrastructure.database.model.tables.ValueRevision ref) {
@@ -155,7 +163,7 @@ class JooqValueRevisionRepository implements ValueRevisionRepository {
     }
 
     @Override
-    public List<Revision> findRevisions(final String key, final Map<String, JsonNode> dimensions,
+    public List<Revision> findRevisions(final String key, final Map<Dimension, JsonNode> dimensions,
             final Pagination<Long> query) {
 
         return query.seek(db.select(REVISION.fields())
@@ -167,7 +175,7 @@ class JooqValueRevisionRepository implements ValueRevisionRepository {
                 .fetch(this::mapRevisionWithType);
     }
 
-    private Condition exactMatch(final Map<String, JsonNode> dimensions) {
+    private Condition exactMatch(final Map<Dimension, JsonNode> dimensions) {
         // TODO handle null query in cursor cleanly!
         if (dimensions == null || dimensions.isEmpty()) {
             return notExists(selectOne()
@@ -176,7 +184,7 @@ class JooqValueRevisionRepository implements ValueRevisionRepository {
                     .and(VALUE_DIMENSION_REVISION.VALUE_REVISION.eq(VALUE_REVISION.REVISION)));
         } else {
             return notExists(selectOne()
-                    .from(table(dimensions, String.class, JsonNode.class)
+                    .from(table(transform(dimensions, Dimension::getId), String.class, JsonNode.class)
                             .as("expected", "dimension_id", "dimension_value"))
                     .fullOuterJoin(
                             select(VALUE_DIMENSION_REVISION.DIMENSION_ID, VALUE_DIMENSION_REVISION.DIMENSION_VALUE)

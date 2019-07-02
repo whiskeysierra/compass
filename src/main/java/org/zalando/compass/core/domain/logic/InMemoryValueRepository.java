@@ -1,7 +1,10 @@
 package org.zalando.compass.core.domain.logic;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.zalando.compass.kernel.domain.model.Value;
+import com.google.common.collect.ImmutableList;
+import org.zalando.compass.core.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.Value;
+import org.zalando.compass.core.domain.model.Values;
 import org.zalando.compass.core.domain.spi.repository.ValueCriteria;
 import org.zalando.compass.core.domain.spi.repository.ValueRepository;
 import org.zalando.compass.core.domain.spi.repository.lock.ValueLockRepository;
@@ -15,8 +18,9 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.collectingAndThen;
 
 final class InMemoryValueRepository implements ValueRepository, ValueLockRepository {
 
@@ -32,9 +36,9 @@ final class InMemoryValueRepository implements ValueRepository, ValueLockReposit
     }
 
     @Override
-    public List<Value> findAll(final ValueCriteria criteria) {
+    public Values findAll(final ValueCriteria criteria) {
         if (criteria.getKey() != null) {
-            return values.getOrDefault(criteria.getKey(), emptyList());
+            return new Values(ImmutableList.copyOf(values.getOrDefault(criteria.getKey(), emptyList())));
         }
 
         if (criteria.getDimension() != null) {
@@ -42,10 +46,10 @@ final class InMemoryValueRepository implements ValueRepository, ValueLockReposit
                     .map(Collection::stream)
                     .flatMap(Function.identity())
                     .filter(v -> v.getDimensions().containsKey(criteria.getDimension()))
-                    .collect(toList());
+                    .collect(collectingAndThen(toImmutableList(), Values::new));
         }
 
-        return emptyList();
+        return new Values();
     }
 
     @Override
@@ -57,18 +61,18 @@ final class InMemoryValueRepository implements ValueRepository, ValueLockReposit
     }
 
     @Override
-    public void delete(final String key, final Map<String, JsonNode> dimensions) {
+    public void delete(final String key, final Map<Dimension, JsonNode> dimensions) {
         values.getOrDefault(key, emptyList())
                 .removeIf(value -> value.getDimensions().equals(dimensions));
     }
 
     @Override
-    public List<Value> lockAll(final ValueCriteria criteria) {
+    public Values lockAll(final ValueCriteria criteria) {
         return findAll(criteria);
     }
 
     @Override
-    public Optional<Value> lock(final String key, final Map<String, JsonNode> dimensions) {
+    public Optional<Value> lock(final String key, final Map<Dimension, JsonNode> dimensions) {
         return values.getOrDefault(key, emptyList()).stream()
                 .filter(value -> value.getDimensions().equals(dimensions))
                 .findFirst();

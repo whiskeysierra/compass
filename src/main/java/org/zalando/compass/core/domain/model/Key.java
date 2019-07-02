@@ -1,4 +1,4 @@
-package org.zalando.compass.kernel.domain.model;
+package org.zalando.compass.core.domain.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.experimental.Wither;
@@ -14,6 +14,11 @@ public final class Key {
 
     public KeyRevision toRevision(final Revision revision) {
         return new KeyRevision(id, revision, schema, description);
+    }
+
+    @Override
+    public String toString() {
+        return id;
     }
 
 }

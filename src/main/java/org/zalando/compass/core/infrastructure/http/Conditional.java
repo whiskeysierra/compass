@@ -2,8 +2,8 @@ package org.zalando.compass.core.infrastructure.http;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ResponseEntity.BodyBuilder;
-import org.zalando.compass.kernel.domain.model.Revision;
-import org.zalando.compass.kernel.domain.model.Revisioned;
+import org.zalando.compass.core.domain.model.Revision;
+import org.zalando.compass.core.domain.model.Revisioned;
 
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;

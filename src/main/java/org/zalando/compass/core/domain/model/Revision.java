@@ -1,4 +1,4 @@
-package org.zalando.compass.kernel.domain.model;
+package org.zalando.compass.core.domain.model;
 
 import lombok.experimental.Wither;
 import org.zalando.compass.core.infrastructure.database.model.enums.RevisionType;

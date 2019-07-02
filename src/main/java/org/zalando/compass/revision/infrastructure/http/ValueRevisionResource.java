@@ -8,17 +8,17 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.zalando.compass.library.Querying;
-import org.zalando.compass.revision.domain.api.ValueRevisionService;
-import org.zalando.compass.kernel.domain.model.PageRevision;
-import org.zalando.compass.kernel.domain.model.Revision;
-import org.zalando.compass.kernel.domain.model.Value;
-import org.zalando.compass.revision.domain.model.ValueRevision;
-import org.zalando.compass.library.pagination.Cursor;
-import org.zalando.compass.library.pagination.PageResult;
+import org.zalando.compass.core.domain.api.DimensionService;
+import org.zalando.compass.core.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.PageRevision;
+import org.zalando.compass.core.domain.model.Revision;
 import org.zalando.compass.core.infrastructure.http.RevisionCollectionRepresentation;
 import org.zalando.compass.core.infrastructure.http.RevisionRepresentation;
-import org.zalando.compass.core.infrastructure.http.ValueRepresentation;
+import org.zalando.compass.library.Querying;
+import org.zalando.compass.library.pagination.Cursor;
+import org.zalando.compass.library.pagination.PageResult;
+import org.zalando.compass.revision.domain.api.ValueRevisionService;
+import org.zalando.compass.revision.domain.model.ValueRevision;
 
 import java.util.Map;
 
@@ -28,6 +28,7 @@ import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.zalando.compass.library.Linking.link;
+import static org.zalando.compass.library.Maps.transform;
 import static org.zalando.compass.revision.infrastructure.http.RevisionPaging.paginate;
 
 @RestController
@@ -36,6 +37,7 @@ class ValueRevisionResource {
 
     private final Querying querying;
     private final ValueRevisionService service;
+    private final DimensionService dimensionService;
 
     @RequestMapping(method = GET, path = "/keys/{key}/values/revisions")
     public ResponseEntity<RevisionCollectionRepresentation> getValuesRevisions(
@@ -56,14 +58,14 @@ class ValueRevisionResource {
             @PathVariable final String key,
             @PathVariable final long revision, 
             @RequestParam final Map<String, String> query) {
-        
-        final Map<String, JsonNode> filter = querying.read(query);
-        final PageRevision<Value> page = service.readPageAt(key, filter, revision);
+
+        final Map<Dimension, JsonNode> filter = transform(querying.read(query), dimensionService::readOnly);
+        final PageRevision<ValueRevision> page = service.readPageAt(key, filter, revision);
 
         return ResponseEntity.ok(new ValueCollectionRevisionRepresentation(
                 RevisionRepresentation.valueOf(page.getRevision()),
                 page.getElements().stream()
-                        .map(ValueRepresentation::valueOf)
+                        .map(ValueRevisionRepresentation::valueOf)
                         .collect(toList())));
     }
 
@@ -77,9 +79,10 @@ class ValueRevisionResource {
         final Map<String, JsonNode> filter = querying.read(queryParams);
 
         final Cursor<Long, Map<String, JsonNode>> cursor = original.with(filter, limit);
-        // TODO remove filter parameter!
-        final PageResult<Revision> page = service.readRevisions(key, cursor.getQuery(), cursor.paginate());
-        final Map<String, String> normalized = querying.write(cursor.getQuery());
+        // TODO query dimensions in bulk
+        final Map<Dimension, JsonNode> query = cursor.getQuery() ==  null ? null : transform(cursor.getQuery(), dimensionService::readOnly);
+        final PageResult<Revision> page = service.readRevisions(key, query, cursor.paginate());
+        final Map<String, String> normalized = querying.write(query);
 
         return paginate(page, cursor,
                 c -> link(methodOn(ValueRevisionResource.class).getValueRevisions(key, emptyMap(), null, c)),
@@ -92,7 +95,7 @@ class ValueRevisionResource {
             @PathVariable final long revision,
             @RequestParam final Map<String, String> query) {
         
-        final Map<String, JsonNode> filter = querying.read(query);
+        final Map<Dimension, JsonNode> filter = transform(querying.read(query), dimensionService::readOnly);
         final ValueRevision value = service.readAt(key, filter, revision);
         return ResponseEntity.ok(ValueRevisionRepresentation.valueOf(value));
     }

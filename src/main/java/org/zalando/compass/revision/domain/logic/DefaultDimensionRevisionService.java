@@ -5,10 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.revision.domain.api.DimensionRevisionService;
-import org.zalando.compass.kernel.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.Dimension;
 import org.zalando.compass.revision.domain.model.DimensionRevision;
-import org.zalando.compass.kernel.domain.model.PageRevision;
-import org.zalando.compass.kernel.domain.model.Revision;
+import org.zalando.compass.core.domain.model.PageRevision;
+import org.zalando.compass.core.domain.model.Revision;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
 

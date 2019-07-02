@@ -13,7 +13,9 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.zalando.compass.library.Querying;
+import org.zalando.compass.core.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.relation.Equality;
+import org.zalando.compass.core.domain.model.relation.GreaterThanOrEqual;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
@@ -27,6 +29,8 @@ import static java.util.Collections.singletonMap;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.zalando.compass.library.JsonConfiguration.jacksonObjectMapper;
+import static org.zalando.compass.library.Schema.schema;
+import static org.zalando.compass.library.Schema.stringSchema;
 
 public final class QueryingTest {
 
@@ -34,10 +38,6 @@ public final class QueryingTest {
     public final ExpectedException exception = ExpectedException.none();
 
     private final Querying unit = new Querying(jacksonObjectMapper());
-
-    public QueryingTest() throws NoSuchMethodException {
-        // needed because QueryService constructor throws (doesn't really, but the compiler doesn't know that)
-    }
 
     @Test
     public void shouldReadEmpty() {
@@ -131,7 +131,10 @@ public final class QueryingTest {
 
     @Test
     public void shouldWrite() {
-        assertThat(unit.write(map("after", text("2017-07-12T21:24:47Z"), "versions", new ArrayNode(instance).add(1).add(2))),
+        final Dimension after = new Dimension("after", stringSchema(), new GreaterThanOrEqual(), "");
+        final Dimension versions = new Dimension("versions", schema("array"), new Equality(), "");
+
+        assertThat(unit.write(map(after, text("2017-07-12T21:24:47Z"), versions, new ArrayNode(instance).add(1).add(2))),
                 is(map("after", "2017-07-12T21:24:47Z", "versions", "[1,2]")));
     }
 

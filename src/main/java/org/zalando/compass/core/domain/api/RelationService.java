@@ -1,6 +1,6 @@
 package org.zalando.compass.core.domain.api;
 
-import org.zalando.compass.kernel.domain.model.Relation;
+import org.zalando.compass.core.domain.model.Relation;
 
 import java.util.List;
 

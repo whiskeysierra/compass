@@ -5,9 +5,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.zalando.compass.core.domain.spi.validation.ValidationService;
-import org.zalando.compass.kernel.domain.model.Dimension;
-import org.zalando.compass.kernel.domain.model.Key;
-import org.zalando.compass.kernel.domain.model.Value;
+import org.zalando.compass.core.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.Key;
+import org.zalando.compass.core.domain.model.Value;
 import org.zalando.problem.violations.ConstraintViolationProblem;
 import org.zalando.problem.violations.Violation;
 
@@ -54,7 +54,7 @@ class JsonSchemaValidationService implements ValidationService {
     }
 
     private List<Violation> validate(final Dimension dimension, final Value value) {
-        @Nullable final JsonNode node = value.getDimensions().get(dimension.getId());
+        @Nullable final JsonNode node = value.getDimensions().get(dimension);
 
         if (node == null) {
             return emptyList();

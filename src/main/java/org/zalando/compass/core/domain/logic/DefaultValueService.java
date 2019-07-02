@@ -7,8 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.core.domain.api.EntityAlreadyExistsException;
 import org.zalando.compass.core.domain.api.ValueService;
-import org.zalando.compass.kernel.domain.model.Revisioned;
-import org.zalando.compass.kernel.domain.model.Value;
+import org.zalando.compass.core.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.Revisioned;
+import org.zalando.compass.core.domain.model.Value;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -50,25 +51,25 @@ class DefaultValueService implements ValueService {
 
     @Transactional(readOnly = true)
     @Override
-    public Revisioned<List<Value>> readPage(final String key, final Map<String, JsonNode> filter) {
+    public Revisioned<List<Value>> readPage(final String key, final Map<Dimension, JsonNode> filter) {
         return read.readPage(key, filter);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Revisioned<Value> read(final String key, final Map<String, JsonNode> filter) {
+    public Revisioned<Value> read(final String key, final Map<Dimension, JsonNode> filter) {
         return read.read(key, filter);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Value readOnly(final String key, final Map<String, JsonNode> filter) {
+    public Value readOnly(final String key, final Map<Dimension, JsonNode> filter) {
         return read.readOnly(key, filter);
     }
 
     @Transactional // TODO isolation?!
     @Override
-    public void delete(final String key, final Map<String, JsonNode> filter, @Nullable final String comment) {
+    public void delete(final String key, final Map<Dimension, JsonNode> filter, @Nullable final String comment) {
         delete.delete(key, filter, comment);
     }
 

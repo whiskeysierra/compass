@@ -16,6 +16,6 @@ import static lombok.AccessLevel.PRIVATE;
 final class ValueCollectionRevisionRepresentation {
 
     RevisionRepresentation revision;
-    List<ValueRepresentation> values;
+    List<ValueRevisionRepresentation> values;
 
 }

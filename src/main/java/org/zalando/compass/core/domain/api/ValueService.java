@@ -1,13 +1,15 @@
 package org.zalando.compass.core.domain.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.zalando.compass.kernel.domain.model.Revisioned;
-import org.zalando.compass.kernel.domain.model.Value;
+import org.zalando.compass.core.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.Revisioned;
+import org.zalando.compass.core.domain.model.Value;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
+// TODO should take Key instead of String
 public interface ValueService {
 
     boolean replace(String key, List<Value> values, @Nullable String comment);
@@ -18,12 +20,13 @@ public interface ValueService {
 
     void create(String key, Value value, @Nullable String comment) throws EntityAlreadyExistsException;
 
-    Revisioned<List<Value>> readPage(String key, Map<String, JsonNode> filter);
+    // TODO should return Revisioned<Values>
+    Revisioned<List<Value>> readPage(String key, Map<Dimension, JsonNode> filter);
 
-    Revisioned<Value> read(String key, Map<String, JsonNode> filter);
+    Revisioned<Value> read(String key, Map<Dimension, JsonNode> filter);
 
-    Value readOnly(String key, Map<String, JsonNode> filter);
+    Value readOnly(String key, Map<Dimension, JsonNode> filter);
 
-    void delete(String key, Map<String, JsonNode> filter, @Nullable String comment);
+    void delete(String key, Map<Dimension, JsonNode> filter, @Nullable String comment);
 
 }

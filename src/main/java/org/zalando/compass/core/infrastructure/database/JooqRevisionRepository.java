@@ -5,7 +5,7 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.zalando.compass.kernel.domain.model.Revision;
+import org.zalando.compass.core.domain.model.Revision;
 import org.zalando.compass.core.domain.spi.repository.RevisionRepository;
 
 import javax.annotation.Nullable;

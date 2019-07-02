@@ -1,10 +1,9 @@
-package org.zalando.compass.kernel.domain.model;
+package org.zalando.compass.core.domain.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.Delegate;
 import lombok.experimental.FieldDefaults;
-import org.zalando.compass.kernel.domain.model.Revision;
 import org.zalando.compass.library.pagination.PageResult;
 
 import static lombok.AccessLevel.PRIVATE;

@@ -119,12 +119,9 @@ Feature: Value update
     Given "PUT /keys/tax-rate" responds "201 Created" when requested with:
       | /schema/type | /description |
       | "number"     | ".."         |
-    When "PUT /keys/tax-rate/value?country=DE" when requested with:
+    When "PUT /keys/tax-rate/value?country=DE" responds "400 Bad Request" when requested with:
       | /value |
       | 0.19   |
-    Then "404 Not Found" was responded with:
-      | /detail                 |
-      | "Dimensions: [country]" |
 
   Scenario: Values and dimensions should support unions and null
     Given "PUT /dimensions/country" responds "201 Created" when requested with:

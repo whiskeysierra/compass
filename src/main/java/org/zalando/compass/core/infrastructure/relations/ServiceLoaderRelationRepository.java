@@ -3,7 +3,7 @@ package org.zalando.compass.core.infrastructure.relations;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.springframework.stereotype.Component;
-import org.zalando.compass.kernel.domain.model.Relation;
+import org.zalando.compass.core.domain.model.Relation;
 import org.zalando.compass.core.domain.spi.repository.RelationRepository;
 
 import java.util.List;

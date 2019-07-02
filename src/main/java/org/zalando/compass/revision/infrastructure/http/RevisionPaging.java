@@ -2,7 +2,7 @@ package org.zalando.compass.revision.infrastructure.http;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.springframework.http.ResponseEntity;
-import org.zalando.compass.kernel.domain.model.Revision;
+import org.zalando.compass.core.domain.model.Revision;
 import org.zalando.compass.library.pagination.Cursor;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.core.infrastructure.http.RevisionCollectionRepresentation;

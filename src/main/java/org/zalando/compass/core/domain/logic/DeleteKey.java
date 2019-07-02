@@ -7,9 +7,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.core.domain.api.NotFoundException;
 import org.zalando.compass.core.domain.spi.repository.KeyRepository;
-import org.zalando.compass.kernel.domain.model.Key;
-import org.zalando.compass.kernel.domain.model.Value;
-import org.zalando.compass.kernel.domain.model.event.KeyDeleted;
+import org.zalando.compass.core.domain.model.Key;
+import org.zalando.compass.core.domain.model.Value;
+import org.zalando.compass.core.domain.model.event.KeyDeleted;
 
 import javax.annotation.Nullable;
 import java.util.List;

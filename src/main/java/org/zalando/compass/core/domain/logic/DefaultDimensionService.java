@@ -5,8 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.compass.core.domain.api.DimensionService;
-import org.zalando.compass.kernel.domain.model.Dimension;
-import org.zalando.compass.kernel.domain.model.Revisioned;
+import org.zalando.compass.core.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.Revisioned;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
 
@@ -54,8 +54,8 @@ class DefaultDimensionService implements DimensionService {
 
     @Transactional // TODO isolation?!
     @Override
-    public void delete(final String id, @Nullable final String comment) {
-        delete.delete(id, comment);
+    public void delete(final Dimension dimension, @Nullable final String comment) {
+        delete.delete(dimension, comment);
     }
 
 }

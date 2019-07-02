@@ -10,14 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.core.domain.api.EntityAlreadyExistsException;
+import org.zalando.compass.core.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.Key;
+import org.zalando.compass.core.domain.model.Value;
+import org.zalando.compass.core.domain.model.event.ValueCreated;
+import org.zalando.compass.core.domain.model.event.ValueReplaced;
+import org.zalando.compass.core.domain.model.event.ValuesReplaced;
 import org.zalando.compass.core.domain.spi.repository.ValueRepository;
 import org.zalando.compass.core.domain.spi.validation.ValidationService;
-import org.zalando.compass.kernel.domain.model.Dimension;
-import org.zalando.compass.kernel.domain.model.Key;
-import org.zalando.compass.kernel.domain.model.Value;
-import org.zalando.compass.kernel.domain.model.event.ValueCreated;
-import org.zalando.compass.kernel.domain.model.event.ValueReplaced;
-import org.zalando.compass.kernel.domain.model.event.ValuesReplaced;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -124,7 +124,7 @@ class ReplaceValue {
     private boolean replace(final Key key, final List<Value> before, final List<Value> after,
             @Nullable final String comment) {
 
-        final MapDifference<ImmutableMap<String, JsonNode>, Value> diff = difference(
+        final MapDifference<ImmutableMap<Dimension, JsonNode>, Value> diff = difference(
                 uniqueIndex(before, Value::getDimensions),
                 uniqueIndex(after, Value::getDimensions));
 

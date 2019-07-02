@@ -50,7 +50,7 @@ Feature: Delete a value
     And "PUT /keys/tax-rate/values" responds "201 Created" when requested with an array at "/values":
       | /dimensions/before          | /value |
       | "2007-01-01T00:00:00+02:00" | 0.16   |
-    And "GET /keys/tax-rate/values?after=2006-12-31T23:59:59+01:00" responds "200 OK"
+    And "GET /keys/tax-rate/values?after=2006-12-31T23:59:59+01:00" responds "404 Not Found"
     When "DELETE /keys/tax-rate/value?after=2006-12-31T23:59:59+01:00" responds "404 Not Found"
 
   Scenario: Delete value with unknown dimension should fail

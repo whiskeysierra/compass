@@ -3,6 +3,7 @@ package org.zalando.compass.core.domain.api;
 public final class NotFoundException extends RuntimeException {
 
     public NotFoundException() {
+
     }
 
     public NotFoundException(final String message) {

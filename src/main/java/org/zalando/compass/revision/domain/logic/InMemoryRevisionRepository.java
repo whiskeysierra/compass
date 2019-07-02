@@ -1,6 +1,6 @@
 package org.zalando.compass.revision.domain.logic;
 
-import org.zalando.compass.kernel.domain.model.Revision;
+import org.zalando.compass.core.domain.model.Revision;
 import org.zalando.compass.core.domain.spi.repository.RevisionRepository;
 
 import javax.annotation.Nullable;

@@ -1,4 +1,4 @@
-package org.zalando.compass.kernel.domain.model;
+package org.zalando.compass.core.domain.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

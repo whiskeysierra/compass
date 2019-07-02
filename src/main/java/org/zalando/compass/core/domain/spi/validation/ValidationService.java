@@ -1,8 +1,8 @@
 package org.zalando.compass.core.domain.spi.validation;
 
-import org.zalando.compass.kernel.domain.model.Dimension;
-import org.zalando.compass.kernel.domain.model.Key;
-import org.zalando.compass.kernel.domain.model.Value;
+import org.zalando.compass.core.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.Key;
+import org.zalando.compass.core.domain.model.Value;
 
 import java.util.Collection;
 

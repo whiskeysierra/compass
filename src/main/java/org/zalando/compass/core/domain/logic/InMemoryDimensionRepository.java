@@ -1,19 +1,19 @@
 package org.zalando.compass.core.domain.logic;
 
-import org.zalando.compass.kernel.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.Dimension;
 import org.zalando.compass.core.domain.spi.repository.DimensionRepository;
 import org.zalando.compass.core.domain.spi.repository.lock.DimensionLockRepository;
 import org.zalando.compass.library.pagination.Pagination;
 
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Locale.ROOT;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 final class InMemoryDimensionRepository implements DimensionRepository, DimensionLockRepository {
 
@@ -25,21 +25,21 @@ final class InMemoryDimensionRepository implements DimensionRepository, Dimensio
     }
 
     @Override
-    public List<Dimension> findAll(final Set<String> dimensions) {
+    public Set<Dimension> findAll(final Set<String> dimensions) {
         return dimensions.stream()
                 .map(this::find)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(toList());
+                .collect(toImmutableSet());
     }
 
     @Override
-    public List<Dimension> findAll(@Nullable final String term, final Pagination<String> query) {
+    public Set<Dimension> findAll(@Nullable final String term, final Pagination<String> query) {
         return dimensions.values().stream()
                 .filter(dimension -> term == null || (
                         dimension.getId().toLowerCase(ROOT).contains(term.toLowerCase(ROOT)) ||
                         dimension.getDescription().toLowerCase(ROOT).contains(term.toLowerCase(ROOT))))
-                .collect(toList());
+                .collect(toImmutableSet());
     }
 
     @Override
@@ -57,13 +57,14 @@ final class InMemoryDimensionRepository implements DimensionRepository, Dimensio
         dimensions.remove(dimension.getId());
     }
 
+    // TODO do we need return values for lock methods?
     @Override
-    public List<Dimension> lockAll(final Set<String> dimensions) {
-        return findAll(dimensions);
+    public Set<Dimension> lockAll(final Set<Dimension> dimensions) {
+        return findAll(dimensions.stream().map(Dimension::getId).collect(toSet()));
     }
 
     @Override
-    public Optional<Dimension> lock(final String id) {
-        return find(id);
+    public Optional<Dimension> lock(final Dimension dimension) {
+        return find(dimension.getId());
     }
 }

@@ -1,7 +1,7 @@
 package org.zalando.compass.core.domain.api;
 
-import org.zalando.compass.kernel.domain.model.Dimension;
-import org.zalando.compass.kernel.domain.model.Revisioned;
+import org.zalando.compass.core.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.Revisioned;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
 
@@ -19,6 +19,6 @@ public interface DimensionService {
 
     Dimension readOnly(String id);
 
-    void delete(String id, @Nullable String comment);
+    void delete(Dimension dimension, @Nullable String comment);
 
 }

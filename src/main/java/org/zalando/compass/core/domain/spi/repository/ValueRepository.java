@@ -1,19 +1,20 @@
 package org.zalando.compass.core.domain.spi.repository;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.zalando.compass.kernel.domain.model.Value;
+import org.zalando.compass.core.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.Value;
+import org.zalando.compass.core.domain.model.Values;
 
-import java.util.List;
 import java.util.Map;
 
 public interface ValueRepository {
 
     Value create(String key, Value value);
 
-    List<Value> findAll(ValueCriteria criteria);
+    Values findAll(ValueCriteria criteria);
 
     void update(String key, Value value);
 
-    void delete(String key, Map<String, JsonNode> dimensions);
+    void delete(String key, Map<Dimension, JsonNode> dimensions);
 
 }

@@ -1,10 +1,10 @@
-package org.zalando.compass.kernel.domain.model;
+package org.zalando.compass.core.domain.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
 
 public interface Dimensional {
 
-    ImmutableMap<String, JsonNode> getDimensions();
+    ImmutableMap<Dimension, JsonNode> getDimensions();
 
 }

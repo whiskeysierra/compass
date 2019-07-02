@@ -1,20 +1,19 @@
 package org.zalando.compass.revision.infrastructure.event;
 
-import com.google.common.collect.MapDifference;
 import com.google.common.collect.MapDifference.ValueDifference;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import org.zalando.compass.kernel.domain.model.event.ValuesReplaced;
+import org.zalando.compass.core.domain.model.event.ValuesReplaced;
 import org.zalando.compass.revision.domain.api.RevisionService;
-import org.zalando.compass.kernel.domain.model.event.ValueCreated;
-import org.zalando.compass.kernel.domain.model.event.ValueDeleted;
-import org.zalando.compass.kernel.domain.model.event.ValueReplaced;
-import org.zalando.compass.kernel.domain.model.Key;
-import org.zalando.compass.kernel.domain.model.Revision;
-import org.zalando.compass.kernel.domain.model.Value;
+import org.zalando.compass.core.domain.model.event.ValueCreated;
+import org.zalando.compass.core.domain.model.event.ValueDeleted;
+import org.zalando.compass.core.domain.model.event.ValueReplaced;
+import org.zalando.compass.core.domain.model.Key;
+import org.zalando.compass.core.domain.model.Revision;
+import org.zalando.compass.core.domain.model.Value;
 import org.zalando.compass.revision.domain.model.ValueRevision;
 import org.zalando.compass.revision.domain.spi.repository.ValueRevisionRepository;
 import org.zalando.compass.core.infrastructure.database.model.enums.RevisionType;

@@ -6,9 +6,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.core.domain.api.NotFoundException;
-import org.zalando.compass.kernel.domain.model.Dimension;
-import org.zalando.compass.kernel.domain.model.Key;
-import org.zalando.compass.kernel.domain.model.Value;
+import org.zalando.compass.core.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.Key;
+import org.zalando.compass.core.domain.model.Value;
 import org.zalando.compass.core.domain.spi.repository.lock.DimensionLockRepository;
 import org.zalando.compass.core.domain.spi.repository.lock.KeyLockRepository;
 import org.zalando.compass.core.domain.spi.repository.lock.ValueLockRepository;
@@ -43,8 +43,8 @@ class ValueLocking {
     private final KeyLockRepository keyLockRepository;
     private final ValueLockRepository valueLockRepository;
 
-    ValueLock lock(final String keyId, final Map<String, JsonNode> filter) {
-        final List<Dimension> dimensions = lockDimensions(filter.keySet());
+    ValueLock lock(final String keyId, final Map<Dimension, JsonNode> filter) {
+        final Set<Dimension> dimensions = lockDimensions(filter.keySet());
         final Key key = keyLockRepository.lock(keyId).orElseThrow(NotFoundException::new);
         @Nullable final Value current = valueLockRepository.lock(keyId, filter).orElse(null);
 
@@ -52,21 +52,18 @@ class ValueLocking {
     }
 
     ValuesLock lock(final String keyId, final List<Value> values) {
-        final List<Dimension> dimensions = lockDimensions(values.stream()
+        final Set<Dimension> dimensions = lockDimensions(values.stream()
                 .flatMap(value -> value.getDimensions().keySet().stream())
                 .collect(toSet()));
         final Key key = keyLockRepository.lock(keyId).orElseThrow(NotFoundException::new);
-        final List<Value> current = valueLockRepository.lockAll(byKey(keyId));
+        final List<Value> current = valueLockRepository.lockAll(byKey(keyId)).getValues();
 
         return new ValuesLock(dimensions, key, current);
     }
 
-    private List<Dimension> lockDimensions(final Set<String> identifiers) {
-        final List<Dimension> dimensions = dimensionLockRepository.lockAll(identifiers);
-
-        final Set<String> difference = Sets.difference(identifiers, dimensions.stream()
-                .map(Dimension::getId)
-                .collect(toSet()));
+    private Set<Dimension> lockDimensions(final Set<Dimension> identifiers) {
+        final Set<Dimension> dimensions = dimensionLockRepository.lockAll(identifiers);
+        final Set<Dimension> difference = Sets.difference(identifiers, dimensions);
 
         exists(difference.isEmpty(), "Dimensions: %s", difference);
 

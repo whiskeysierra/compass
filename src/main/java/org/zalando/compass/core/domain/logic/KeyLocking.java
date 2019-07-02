@@ -3,8 +3,8 @@ package org.zalando.compass.core.domain.logic;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.zalando.compass.kernel.domain.model.Key;
-import org.zalando.compass.kernel.domain.model.Value;
+import org.zalando.compass.core.domain.model.Key;
+import org.zalando.compass.core.domain.model.Value;
 import org.zalando.compass.core.domain.spi.repository.lock.KeyLockRepository;
 import org.zalando.compass.core.domain.spi.repository.lock.ValueLockRepository;
 
@@ -35,7 +35,7 @@ class KeyLocking {
 
     KeyLock lock(final String id) {
         @Nullable final Key current = keyLockRepository.lock(id).orElse(null);
-        final List<Value> values = valueLockRepository.lockAll(byKey(id));
+        final List<Value> values = valueLockRepository.lockAll(byKey(id)).getValues();
 
         return new KeyLock(current, values);
     }

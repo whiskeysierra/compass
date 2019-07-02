@@ -1,5 +1,6 @@
 package org.zalando.compass.core.infrastructure.database;
 
+import com.google.common.collect.ImmutableSet;
 import lombok.AllArgsConstructor;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -9,17 +10,19 @@ import org.jooq.SelectSeekStep1;
 import org.jooq.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.zalando.compass.kernel.domain.model.Dimension;
-import org.zalando.compass.core.domain.spi.repository.lock.DimensionLockRepository;
+import org.zalando.compass.core.domain.api.NotFoundException;
+import org.zalando.compass.core.domain.model.Dimension;
 import org.zalando.compass.core.domain.spi.repository.DimensionRepository;
+import org.zalando.compass.core.domain.spi.repository.RelationRepository;
+import org.zalando.compass.core.domain.spi.repository.lock.DimensionLockRepository;
 import org.zalando.compass.library.pagination.Pagination;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.util.stream.Collectors.toSet;
 import static org.jooq.impl.DSL.trueCondition;
 import static org.zalando.compass.core.infrastructure.database.model.Tables.DIMENSION;
 
@@ -28,37 +31,41 @@ import static org.zalando.compass.core.infrastructure.database.model.Tables.DIME
 class JooqDimensionRepository implements DimensionRepository, DimensionLockRepository {
 
     private final DSLContext db;
+    private final RelationRepository repository;
 
     @Override
     public void create(final Dimension dimension) {
         db.insertInto(DIMENSION)
                 .columns(DIMENSION.ID, DIMENSION.SCHEMA, DIMENSION.RELATION, DIMENSION.DESCRIPTION)
-                .values(dimension.getId(), dimension.getSchema(), dimension.getRelation(),
+                .values(dimension.getId(), dimension.getSchema(), dimension.getRelation().getId(),
                         dimension.getDescription())
                 .execute();
     }
 
     @Override
-    public List<Dimension> lockAll(final Set<String> dimensions) {
+    public Set<Dimension> lockAll(final Set<Dimension> dimensions) {
         if (dimensions.isEmpty()) {
-            return Collections.emptyList();
+            return Collections.emptySet();
         }
 
-        return doFindAll(dimensions)
+        // TODO can we get rid of this?
+        return ImmutableSet.copyOf(doFindAll(dimensions.stream().map(Dimension::getId).collect(toSet()))
                 .forUpdate()
-                .fetchInto(Dimension.class);
+                .fetch(this::map));
     }
 
     @Override
-    public List<Dimension> findAll(final Set<String> dimensions) {
+    public Set<Dimension> findAll(final Set<String> dimensions) {
         if (dimensions.isEmpty()) {
-            return Collections.emptyList();
+            return Collections.emptySet();
         }
 
-        return doFindAll(dimensions)
-                .fetchInto(Dimension.class);
+        // TODO can we get rid of this?
+        return ImmutableSet.copyOf(doFindAll(dimensions)
+                .fetch(this::map));
     }
 
+    // TODO this won't fetch the relation properly
     private SelectSeekStep1<Record, String> doFindAll(final Set<String> dimensions) {
         return db.select(DIMENSION.fields())
                 .from(DIMENSION)
@@ -67,11 +74,12 @@ class JooqDimensionRepository implements DimensionRepository, DimensionLockRepos
     }
 
     @Override
-    public List<Dimension> findAll(@Nullable final String term, final Pagination<String> query) {
-        return query.seek(db.select(DIMENSION.fields())
+    public Set<Dimension> findAll(@Nullable final String term, final Pagination<String> query) {
+        // TODO can we get rid of this?
+        return ImmutableSet.copyOf(query.seek(db.select(DIMENSION.fields())
                 .from(DIMENSION)
                 .where(toCondition(term)), DIMENSION.ID, SortOrder.ASC)
-                .fetchInto(Dimension.class);
+                .fetch(this::map));
     }
 
     private Condition toCondition(@Nullable final String term) {
@@ -86,14 +94,23 @@ class JooqDimensionRepository implements DimensionRepository, DimensionLockRepos
     @Override
     public Optional<Dimension> find(final String id) {
         return doFind(id)
-                .fetchOptionalInto(Dimension.class);
+                .fetchOptional(this::map);
     }
 
     @Override
-    public Optional<Dimension> lock(final String id) {
-        return doFind(id)
+    public Optional<Dimension> lock(final Dimension dimension) {
+        return doFind(dimension.getId())
                 .forUpdate()
-                .fetchOptionalInto(Dimension.class);
+                .fetchOptional(this::map);
+    }
+
+    private Dimension map(final Record record) {
+        return new Dimension(
+                record.get(DIMENSION.ID),
+                record.get(DIMENSION.SCHEMA),
+                repository.find(record.get(DIMENSION.RELATION)).orElseThrow(NotFoundException::new),
+                record.get(DIMENSION.DESCRIPTION)
+        );
     }
 
     private SelectConditionStep<Record> doFind(final String id) {
@@ -106,7 +123,7 @@ class JooqDimensionRepository implements DimensionRepository, DimensionLockRepos
     public void update(final Dimension dimension) {
         db.update(DIMENSION)
                 .set(DIMENSION.SCHEMA, dimension.getSchema())
-                .set(DIMENSION.RELATION, dimension.getRelation())
+                .set(DIMENSION.RELATION, dimension.getRelation().getId())
                 .set(DIMENSION.DESCRIPTION, dimension.getDescription())
                 .where(DIMENSION.ID.eq(dimension.getId()))
                 .execute();

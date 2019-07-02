@@ -7,7 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.zalando.compass.core.domain.api.NotFoundException;
 import org.zalando.compass.revision.domain.api.RevisionService;
-import org.zalando.compass.kernel.domain.model.Revision;
+import org.zalando.compass.core.domain.model.Revision;
 import org.zalando.compass.core.domain.spi.repository.RevisionRepository;
 
 import javax.annotation.Nullable;

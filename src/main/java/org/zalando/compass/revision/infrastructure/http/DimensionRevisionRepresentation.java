@@ -25,7 +25,7 @@ final class DimensionRevisionRepresentation {
                 dimension.getId(),
                 RevisionRepresentation.valueOf(dimension.getRevision()),
                 dimension.getSchema(),
-                dimension.getRelation(),
+                dimension.getRelation().getId(),
                 dimension.getDescription()
         );
     }

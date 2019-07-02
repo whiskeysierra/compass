@@ -6,9 +6,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.Wither;
-import org.zalando.compass.kernel.domain.model.Value;
+import org.zalando.compass.core.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.Value;
 
 import static lombok.AccessLevel.PRIVATE;
+import static org.zalando.compass.library.Maps.transform;
 
 @FieldDefaults(makeFinal = true, level = PRIVATE)
 @Getter
@@ -20,11 +22,7 @@ public final class ValueRepresentation {
     JsonNode value;
 
     public static ValueRepresentation valueOf(final Value value) {
-        return new ValueRepresentation(value.getDimensions(), value.getValue());
-    }
-
-    Value toValue(final long index) {
-        return new Value(dimensions, index, value);
+        return new ValueRepresentation(transform(value.getDimensions(), Dimension::getId), value.getValue());
     }
 
 }

@@ -1,10 +1,12 @@
 package org.zalando.compass.revision.domain.logic;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.zalando.compass.kernel.domain.model.Revision;
-import org.zalando.compass.revision.domain.model.ValueRevision;
-import org.zalando.compass.revision.domain.spi.repository.ValueRevisionRepository;
+import org.zalando.compass.core.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.Revision;
 import org.zalando.compass.library.pagination.Pagination;
+import org.zalando.compass.revision.domain.model.ValueRevision;
+import org.zalando.compass.revision.domain.model.ValueRevisions;
+import org.zalando.compass.revision.domain.spi.repository.ValueRevisionRepository;
 
 import java.util.List;
 import java.util.Map;
@@ -14,8 +16,10 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparingLong;
+import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 import static org.zalando.compass.core.infrastructure.database.model.enums.RevisionType.DELETE;
 
@@ -40,16 +44,16 @@ final class InMemoryValueRevisionRepository implements ValueRevisionRepository {
     }
 
     @Override
-    public List<ValueRevision> findPage(final String key, final long revisionId) {
+    public ValueRevisions findPage(final String key, final long revisionId) {
         return find(r -> r.getRevision().getType() != DELETE);
     }
 
     @Override
-    public List<ValueRevision> findValueRevisions(final String key, final long revisionId) {
+    public ValueRevisions findValueRevisions(final String key, final long revisionId) {
         return find(r -> true);
     }
 
-    private List<ValueRevision> find(final Predicate<ValueRevision> predicate) {
+    private ValueRevisions find(final Predicate<ValueRevision> predicate) {
         return revisions.values().stream()
                 .map(revisions -> revisions.stream()
                         .max(comparingLong(r -> r.getRevision().getId()))
@@ -57,11 +61,11 @@ final class InMemoryValueRevisionRepository implements ValueRevisionRepository {
                         .orElse(null))
                 .filter(Objects::nonNull)
                 .sorted(comparingLong(r -> r.getRevision().getId()))
-                .collect(toList());
+                .collect(collectingAndThen(toImmutableList(), ValueRevisions::new));
     }
 
     @Override
-    public List<Revision> findRevisions(final String key, final Map<String, JsonNode> dimensions, final Pagination<Long> query) {
+    public List<Revision> findRevisions(final String key, final Map<Dimension, JsonNode> dimensions, final Pagination<Long> query) {
         return revisions.getOrDefault(key, emptyList()).stream()
                 .map(ValueRevision::getRevision)
                 // TODO sort order and comparison dependant on pagination direction

@@ -9,7 +9,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.zalando.fauxpas.ThrowingFunction;
+import org.zalando.compass.core.domain.model.Dimension;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -18,6 +18,7 @@ import java.util.Map;
 
 import static com.google.common.base.CharMatcher.whitespace;
 import static com.google.common.collect.Maps.transformValues;
+import static org.zalando.compass.library.Maps.transform;
 import static org.zalando.fauxpas.FauxPas.throwingFunction;
 
 @Component
@@ -77,13 +78,13 @@ public class Querying {
         }
     }
 
-    public ImmutableSortedMap<String, String> write(@Nullable final Map<String, JsonNode> filter) {
+    public ImmutableSortedMap<String, String> write(@Nullable final Map<Dimension, JsonNode> filter) {
         if (filter == null) {
             return ImmutableSortedMap.of();
         }
 
-        final ThrowingFunction<JsonNode, String, JsonProcessingException> toText = this::toText;
-        return ImmutableSortedMap.copyOf(transformValues(filter, throwingFunction(toText)::apply));
+        return ImmutableSortedMap.copyOf(transform(filter,
+                Dimension::getId, throwingFunction(this::toText)));
     }
 
     private String toText(final JsonNode node) throws JsonProcessingException {

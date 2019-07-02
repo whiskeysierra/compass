@@ -15,9 +15,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.zalando.compass.core.domain.api.BadArgumentException;
 import org.zalando.compass.core.domain.api.DimensionService;
-import org.zalando.compass.kernel.domain.model.Dimension;
-import org.zalando.compass.kernel.domain.model.Revisioned;
+import org.zalando.compass.core.domain.api.NotFoundException;
+import org.zalando.compass.core.domain.api.RelationService;
+import org.zalando.compass.core.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.Relation;
+import org.zalando.compass.core.domain.model.Revisioned;
 import org.zalando.compass.library.pagination.Cursor;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.fauxpas.ThrowingUnaryOperator;
@@ -35,9 +39,9 @@ import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.PATCH;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
-import static org.zalando.compass.library.Linking.link;
 import static org.zalando.compass.core.infrastructure.http.MediaTypes.JSON_MERGE_PATCH_VALUE;
 import static org.zalando.compass.core.infrastructure.http.MediaTypes.JSON_PATCH_VALUE;
+import static org.zalando.compass.library.Linking.link;
 
 @RestController
 @AllArgsConstructor(onConstructor = @__(@Autowired))
@@ -45,15 +49,24 @@ class DimensionResource {
 
     private final ObjectMapper mapper;
     private final DimensionService service;
+    private final RelationService relationService;
 
     @RequestMapping(method = PUT, path = "/dimensions/{id}")
     public ResponseEntity<DimensionRepresentation> createOrReplace(
             @PathVariable final String id,
             @Nullable @RequestHeader(name = IF_NONE_MATCH, required = false) final String ifNoneMatch,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
-            @RequestBody final Dimension body) {
+            @RequestBody final DimensionRepresentation body) {
 
-        final Dimension dimension = body.withId(id);
+        final Relation relation;
+
+        try {
+            relation = relationService.read(body.getRelation());
+        } catch (final NotFoundException e) {
+            throw new BadArgumentException(e);
+        }
+
+        final Dimension dimension = new Dimension(id, body.getSchema(), relation, body.getDescription());
 
         final boolean created = createOrReplace(dimension, comment, ifNoneMatch);
         final DimensionRepresentation representation = DimensionRepresentation.valueOf(dimension);
@@ -116,11 +129,11 @@ class DimensionResource {
 
     private ResponseEntity<DimensionRepresentation> patch(final String id, final @Nullable String comment,
             final ThrowingUnaryOperator<JsonNode, JsonPatchException> patch) throws IOException, JsonPatchException {
-        final Dimension before = service.readOnly(id);
+        final DimensionRepresentation before = DimensionRepresentation.valueOf(service.readOnly(id));
         final JsonNode node = mapper.valueToTree(before);
 
         final JsonNode patched = patch.tryApply(node);
-        final Dimension after = mapper.treeToValue(patched, Dimension.class);
+        final DimensionRepresentation after = mapper.treeToValue(patched, DimensionRepresentation.class);
 
         return createOrReplace(id, null, comment, after);
     }
@@ -129,7 +142,8 @@ class DimensionResource {
     @ResponseStatus(NO_CONTENT)
     public void delete(@PathVariable final String id,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment) {
-        service.delete(id, comment);
+        final Dimension dimension = service.readOnly(id);
+        service.delete(dimension, comment);
     }
 
 }

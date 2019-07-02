@@ -1,6 +1,6 @@
 package org.zalando.compass.core.domain.spi.repository;
 
-import org.zalando.compass.kernel.domain.model.Revision;
+import org.zalando.compass.core.domain.model.Revision;
 
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;

@@ -1,7 +1,7 @@
-package org.zalando.compass.kernel.domain.model.event;
+package org.zalando.compass.core.domain.model.event;
 
 import lombok.Value;
-import org.zalando.compass.kernel.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.Dimension;
 
 @Value
 public final class DimensionDeleted {

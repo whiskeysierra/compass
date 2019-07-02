@@ -3,8 +3,8 @@ package org.zalando.compass.core.domain.logic;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.zalando.compass.kernel.domain.model.Dimension;
-import org.zalando.compass.kernel.domain.model.Value;
+import org.zalando.compass.core.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.Value;
 import org.zalando.compass.core.domain.spi.repository.lock.DimensionLockRepository;
 import org.zalando.compass.core.domain.spi.repository.lock.ValueLockRepository;
 
@@ -33,9 +33,9 @@ class DimensionLocking {
     private final DimensionLockRepository dimensionLockRepository;
     private final ValueLockRepository valueLockRepository;
 
-    DimensionLock lock(final String id) {
-        @Nullable final Dimension current = dimensionLockRepository.lock(id).orElse(null);
-        final List<Value> values = valueLockRepository.lockAll(byDimension(id));
+    DimensionLock lock(final Dimension dimension) {
+        @Nullable final Dimension current = dimensionLockRepository.lock(dimension).orElse(null);
+        final List<Value> values = valueLockRepository.lockAll(byDimension(dimension)).getValues();
 
         return new DimensionLock(current, values);
     }

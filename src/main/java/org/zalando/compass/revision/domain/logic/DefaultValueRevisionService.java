@@ -5,10 +5,11 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.zalando.compass.core.domain.model.Dimension;
 import org.zalando.compass.revision.domain.api.ValueRevisionService;
-import org.zalando.compass.kernel.domain.model.PageRevision;
-import org.zalando.compass.kernel.domain.model.Revision;
-import org.zalando.compass.kernel.domain.model.Value;
+import org.zalando.compass.core.domain.model.PageRevision;
+import org.zalando.compass.core.domain.model.Revision;
+import org.zalando.compass.core.domain.model.Value;
 import org.zalando.compass.revision.domain.model.ValueRevision;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
@@ -29,20 +30,20 @@ class DefaultValueRevisionService implements ValueRevisionService {
 
     @Transactional(readOnly = true)
     @Override
-    public PageRevision<Value> readPageAt(final String key, final Map<String, JsonNode> filter, final long revision) {
+    public PageRevision<ValueRevision> readPageAt(final String key, final Map<Dimension, JsonNode> filter, final long revision) {
         return readRevision.readPageAt(key, filter, revision);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public PageResult<Revision> readRevisions(final String key, final Map<String, JsonNode> dimensions,
+    public PageResult<Revision> readRevisions(final String key, final Map<Dimension, JsonNode> dimensions,
             final Pagination<Long> query) {
         return readRevision.readRevisions(key, dimensions, query);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public ValueRevision readAt(final String key, final Map<String, JsonNode> dimensions, final long revision) {
+    public ValueRevision readAt(final String key, final Map<Dimension, JsonNode> dimensions, final long revision) {
         return readRevision.readAt(key, dimensions, revision);
     }
 

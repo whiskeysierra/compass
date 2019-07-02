@@ -6,9 +6,11 @@ import org.jooq.Record;
 import org.jooq.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.zalando.compass.kernel.domain.model.Dimension;
+import org.zalando.compass.core.domain.api.NotFoundException;
+import org.zalando.compass.core.domain.model.Dimension;
+import org.zalando.compass.core.domain.spi.repository.RelationRepository;
 import org.zalando.compass.revision.domain.model.DimensionRevision;
-import org.zalando.compass.kernel.domain.model.Revision;
+import org.zalando.compass.core.domain.model.Revision;
 import org.zalando.compass.revision.domain.spi.repository.DimensionRevisionRepository;
 import org.zalando.compass.core.infrastructure.database.model.enums.RevisionType;
 import org.zalando.compass.library.pagination.Pagination;
@@ -34,6 +36,7 @@ class JooqDimensionRevisionRepository implements DimensionRevisionRepository {
             DIMENSION_REVISION.as("self");
 
     private final DSLContext db;
+    private final RelationRepository repository;
 
     @Override
     public void create(final DimensionRevision dimension) {
@@ -48,7 +51,7 @@ class JooqDimensionRevisionRepository implements DimensionRevisionRepository {
                         dimension.getRevision().getId(),
                         dimension.getRevision().getType(),
                         dimension.getSchema(),
-                        dimension.getRelation(),
+                        dimension.getRelation().getId(),
                         dimension.getDescription())
                 .execute();
     }
@@ -78,7 +81,16 @@ class JooqDimensionRevisionRepository implements DimensionRevisionRepository {
                         .from(SELF)
                         .where(SELF.ID.eq(DIMENSION_REVISION.ID))
                         .and(SELF.REVISION.le(revisionId)))), DIMENSION_REVISION.ID, SortOrder.ASC)
-                .fetchInto(Dimension.class);
+                .fetch(this::map);
+    }
+
+    private Dimension map(final Record record) {
+        return new Dimension(
+                record.get(DIMENSION_REVISION.ID),
+                record.get(DIMENSION_REVISION.SCHEMA),
+                repository.find(record.get(DIMENSION_REVISION.RELATION)).orElseThrow(NotFoundException::new),
+                record.get(DIMENSION_REVISION.DESCRIPTION)
+        );
     }
 
     @Override
@@ -108,7 +120,8 @@ class JooqDimensionRevisionRepository implements DimensionRevisionRepository {
                 record.get(DIMENSION_REVISION.ID),
                 mapRevisionWithType(record),
                 record.get(DIMENSION_REVISION.SCHEMA),
-                record.get(DIMENSION_REVISION.RELATION),
+                // TODO delegate in a cleaner way
+                repository.find(record.get(DIMENSION_REVISION.RELATION)).orElseThrow(NotFoundException::new),
                 record.get(DIMENSION_REVISION.DESCRIPTION)
         );
     }

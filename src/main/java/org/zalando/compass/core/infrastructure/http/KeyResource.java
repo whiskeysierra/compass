@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.zalando.compass.core.domain.api.KeyService;
-import org.zalando.compass.kernel.domain.model.Key;
-import org.zalando.compass.kernel.domain.model.Revisioned;
+import org.zalando.compass.core.domain.model.Key;
+import org.zalando.compass.core.domain.model.Revisioned;
 import org.zalando.compass.library.pagination.Cursor;
 import org.zalando.compass.library.pagination.PageResult;
 
@@ -35,9 +35,9 @@ import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.PATCH;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
-import static org.zalando.compass.library.Linking.link;
 import static org.zalando.compass.core.infrastructure.http.MediaTypes.JSON_MERGE_PATCH_VALUE;
 import static org.zalando.compass.core.infrastructure.http.MediaTypes.JSON_PATCH_VALUE;
+import static org.zalando.compass.library.Linking.link;
 
 @RestController
 @AllArgsConstructor(onConstructor = @__(@Autowired))
@@ -51,6 +51,7 @@ class KeyResource {
             @PathVariable final String id,
             @Nullable @RequestHeader(name = IF_NONE_MATCH, required = false) final String ifNoneMatch,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
+            // TODO this should be KeyRepresentation
             @RequestBody final Key body) {
 
         final Key key = body.withId(id);
@@ -105,6 +106,7 @@ class KeyResource {
         final ObjectNode node = mapper.valueToTree(before);
 
         final JsonNode patched = patch.apply(node);
+        // TODO don't use domain model for patching
         final Key after = mapper.treeToValue(patched, Key.class);
 
         return createOrReplace(id, null, comment, after);

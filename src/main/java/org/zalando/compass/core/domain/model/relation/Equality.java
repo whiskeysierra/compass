@@ -1,7 +1,7 @@
 package org.zalando.compass.core.domain.model.relation;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.zalando.compass.kernel.domain.model.Relation;
+import org.zalando.compass.core.domain.model.Relation;
 
 public final class Equality implements Relation {
 

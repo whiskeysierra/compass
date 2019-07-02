@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Function;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
-import org.zalando.compass.kernel.domain.model.Relation;
+import org.zalando.compass.core.domain.model.Relation;
 
 import java.util.regex.Pattern;
 

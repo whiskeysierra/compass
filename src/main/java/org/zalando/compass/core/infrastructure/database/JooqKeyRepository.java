@@ -8,7 +8,7 @@ import org.jooq.SelectConditionStep;
 import org.jooq.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.zalando.compass.kernel.domain.model.Key;
+import org.zalando.compass.core.domain.model.Key;
 import org.zalando.compass.core.domain.spi.repository.lock.KeyLockRepository;
 import org.zalando.compass.core.domain.spi.repository.KeyRepository;
 import org.zalando.compass.library.pagination.Pagination;

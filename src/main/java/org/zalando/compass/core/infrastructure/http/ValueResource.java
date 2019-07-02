@@ -18,9 +18,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.zalando.compass.core.domain.api.BadArgumentException;
+import org.zalando.compass.core.domain.api.DimensionService;
+import org.zalando.compass.core.domain.api.NotFoundException;
 import org.zalando.compass.core.domain.api.ValueService;
-import org.zalando.compass.kernel.domain.model.Revisioned;
-import org.zalando.compass.kernel.domain.model.Value;
+import org.zalando.compass.core.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.Revisioned;
+import org.zalando.compass.core.domain.model.Value;
 import org.zalando.compass.library.Querying;
 import org.zalando.fauxpas.ThrowingUnaryOperator;
 
@@ -44,9 +48,10 @@ import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.PATCH;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
-import static org.zalando.compass.library.Linking.link;
 import static org.zalando.compass.core.infrastructure.http.MediaTypes.JSON_MERGE_PATCH_VALUE;
 import static org.zalando.compass.core.infrastructure.http.MediaTypes.JSON_PATCH_VALUE;
+import static org.zalando.compass.library.Linking.link;
+import static org.zalando.compass.library.Maps.transform;
 
 @RestController
 @AllArgsConstructor(onConstructor = @__(@Autowired))
@@ -55,7 +60,9 @@ class ValueResource {
     private final Querying querying;
     private final ObjectMapper mapper;
     private final ValueService service;
+    private final DimensionService dimensionService;
 
+    @SuppressWarnings("UnstableApiUsage")
     @RequestMapping(method = PUT, path = "/keys/{key}/values")
     public ResponseEntity<ValueCollectionRepresentation> replaceAll(
             @PathVariable final String key,
@@ -67,13 +74,17 @@ class ValueResource {
 
         final Stream<ValueRepresentation> withDimensions = representations.stream()
                 .map(value -> value.withDimensions(firstNonNull(value.getDimensions(), ImmutableMap.of())));
-        final List<Value> values = mapWithIndex(withDimensions, ValueRepresentation::toValue).collect(toList());
+        final List<Value> values = mapWithIndex(withDimensions, this::toValue).collect(toList());
 
         final boolean created = createOrReplace(key, values, comment, ifNoneMatch);
 
         // TODO share logic via private method
         return ResponseEntity.status(created ? CREATED : OK)
                 .body(readAll(key, emptyMap()).getBody());
+    }
+
+    private Value toValue(final ValueRepresentation value, final long index) {
+        return new Value(transform(value.getDimensions(), dimensionService::readOnly), index, value.getValue());
     }
 
     private boolean createOrReplace(final String key, final List<Value> values, @Nullable final String comment,
@@ -93,10 +104,18 @@ class ValueResource {
             @RequestParam final Map<String, String> query,
             @Nullable @RequestHeader(name = IF_NONE_MATCH, required = false) final String ifNoneMatch,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
-            @RequestBody final Value body) {
+            @RequestBody final ValueRepresentation body) {
 
-        final ImmutableMap<String, JsonNode> dimensions = querying.read(query);
-        final Value value = body.withDimensions(dimensions);
+        final ImmutableMap<Dimension, JsonNode> dimensions;
+
+        try {
+            dimensions = transform(querying.read(query),
+                    dimensionService::readOnly);
+        } catch (final NotFoundException e) {
+            throw new BadArgumentException(e);
+        }
+
+        final Value value = new Value(dimensions, null, body.getValue());
 
         final boolean created = createOrReplace(key, value, comment, ifNoneMatch);
 
@@ -121,7 +140,7 @@ class ValueResource {
     public ResponseEntity<ValueCollectionRepresentation> readAll(@PathVariable final String key,
             @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = querying.read(query);
-        final Revisioned<List<Value>> revisioned = service.readPage(key, filter);
+        final Revisioned<List<Value>> revisioned = service.readPage(key, transform(filter, dimensionService::readOnly));
 
         return Conditional.build(revisioned, page ->
                 new ValueCollectionRepresentation(page.stream()
@@ -132,7 +151,7 @@ class ValueResource {
     public ResponseEntity<ValueRepresentation> read(@PathVariable final String key,
             @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = querying.read(query);
-        final Revisioned<Value> revisioned = service.read(key, filter);
+        final Revisioned<Value> revisioned = service.read(key, transform(filter, dimensionService::readOnly));
         final Value value = revisioned.getEntity();
 
         return Conditional.builder(revisioned)
@@ -178,11 +197,12 @@ class ValueResource {
             final ThrowingUnaryOperator<JsonNode, JsonPatchException> patch) throws IOException, JsonPatchException {
         final Map<String, JsonNode> filter = querying.read(query);
 
-        final Value before = service.readOnly(key, filter);
+        final ValueRepresentation before = ValueRepresentation.valueOf(
+                service.readOnly(key, transform(filter, dimensionService::readOnly)));
         final JsonNode node = mapper.valueToTree(before);
 
         final JsonNode patched = patch.tryApply(node);
-        final Value after = mapper.treeToValue(patched, Value.class);
+        final ValueRepresentation after = mapper.treeToValue(patched, ValueRepresentation.class);
 
         return createOrReplace(key, query, null, comment, after);
     }
@@ -192,7 +212,7 @@ class ValueResource {
     public void delete(@PathVariable final String key, @RequestParam final Map<String, String> query,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment) {
         final Map<String, JsonNode> filter = querying.read(query);
-        service.delete(key, filter, comment);
+        service.delete(key, transform(filter, dimensionService::readOnly), comment);
     }
 
     private URI canonicalUrl(final String key, final Value value) {

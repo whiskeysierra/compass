@@ -1,6 +1,6 @@
 package org.zalando.compass.core.domain.logic;
 
-import org.zalando.compass.kernel.domain.model.Key;
+import org.zalando.compass.core.domain.model.Key;
 import org.zalando.compass.core.domain.spi.repository.KeyRepository;
 import org.zalando.compass.core.domain.spi.repository.lock.KeyLockRepository;
 import org.zalando.compass.library.pagination.Pagination;

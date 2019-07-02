@@ -7,10 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.core.domain.api.NotFoundException;
+import org.zalando.compass.core.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.Key;
+import org.zalando.compass.core.domain.model.Value;
+import org.zalando.compass.core.domain.model.event.ValueDeleted;
 import org.zalando.compass.core.domain.spi.repository.ValueRepository;
-import org.zalando.compass.kernel.domain.model.Key;
-import org.zalando.compass.kernel.domain.model.Value;
-import org.zalando.compass.kernel.domain.model.event.ValueDeleted;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -24,7 +25,7 @@ class DeleteValue {
     private final ValueRepository repository;
     private final ApplicationEventPublisher publisher;
 
-    void delete(final String keyId, final Map<String, JsonNode> filter, @Nullable final String comment) {
+    void delete(final String keyId, final Map<Dimension, JsonNode> filter, @Nullable final String comment) {
         final ValueLock lock = locking.lock(keyId, filter);
 
         final Key key = lock.getKey();
