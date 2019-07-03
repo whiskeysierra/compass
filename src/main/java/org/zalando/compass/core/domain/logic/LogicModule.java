@@ -1,7 +1,7 @@
 package org.zalando.compass.core.domain.logic;
 
-import org.springframework.context.ApplicationEventPublisher;
 import org.zalando.compass.core.domain.api.DimensionService;
+import org.zalando.compass.core.domain.spi.event.EventPublisher;
 import org.zalando.compass.core.domain.spi.repository.DimensionRepository;
 import org.zalando.compass.core.domain.spi.repository.lock.DimensionLockRepository;
 import org.zalando.compass.core.domain.spi.repository.lock.ValueLockRepository;
@@ -13,7 +13,7 @@ final class LogicModule {
     public DimensionService dimensionService(
             final ValidationService validator,
             final DimensionRevisionService dimensionRevisionService,
-            final ApplicationEventPublisher publisher) {
+            final EventPublisher publisher) {
 
         final InMemoryDimensionRepository repository = new InMemoryDimensionRepository();
 
@@ -32,7 +32,7 @@ final class LogicModule {
             final DimensionLockRepository dimensionLockRepository,
             final ValueLockRepository valueLockRepository,
             final DimensionRevisionService dimensionRevisionService,
-            final ApplicationEventPublisher publisher) {
+            final EventPublisher publisher) {
 
         final DimensionLocking locking = new DimensionLocking(dimensionLockRepository, valueLockRepository);
 

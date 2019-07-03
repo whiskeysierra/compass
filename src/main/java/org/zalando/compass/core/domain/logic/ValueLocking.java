@@ -56,7 +56,7 @@ class ValueLocking {
                 .flatMap(value -> value.getDimensions().keySet().stream())
                 .collect(toSet()));
         final Key key = keyLockRepository.lock(keyId).orElseThrow(NotFoundException::new);
-        final List<Value> current = valueLockRepository.lockAll(byKey(keyId)).getValues();
+        final List<Value> current = valueLockRepository.lockAll(byKey(keyId));
 
         return new ValuesLock(dimensions, key, current);
     }

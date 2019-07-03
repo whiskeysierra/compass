@@ -7,7 +7,6 @@ import com.google.common.collect.MapDifference.ValueDifference;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.core.domain.api.EntityAlreadyExistsException;
 import org.zalando.compass.core.domain.model.Dimension;
@@ -16,6 +15,7 @@ import org.zalando.compass.core.domain.model.Value;
 import org.zalando.compass.core.domain.model.event.ValueCreated;
 import org.zalando.compass.core.domain.model.event.ValueReplaced;
 import org.zalando.compass.core.domain.model.event.ValuesReplaced;
+import org.zalando.compass.core.domain.spi.event.EventPublisher;
 import org.zalando.compass.core.domain.spi.repository.ValueRepository;
 import org.zalando.compass.core.domain.spi.validation.ValidationService;
 
@@ -37,7 +37,7 @@ class ReplaceValue {
     private final ValueLocking locking;
     private final ValidationService validator;
     private final ValueRepository repository;
-    private final ApplicationEventPublisher publisher;
+    private final EventPublisher publisher;
 
     boolean replace(final String keyId, final Value value, @Nullable final String comment) {
         final ValueLock lock = lock(keyId, value);
@@ -46,12 +46,12 @@ class ReplaceValue {
 
         if (before == null) {
             final Value created = create(key, value);
-            publisher.publishEvent(new ValueCreated(key, created, comment));
+            publisher.publish(new ValueCreated(key, created, comment));
             return true;
         } else {
             final Value after = value.withIndex(before.getIndex());
             update(key, after);
-            publisher.publishEvent(new ValueReplaced(key, before, after, comment));
+            publisher.publish(new ValueReplaced(key, before, after, comment));
             return false;
         }
     }
@@ -64,7 +64,7 @@ class ReplaceValue {
 
         if (current == null) {
             final Value created = create(key, value);
-            publisher.publishEvent(new ValueCreated(key, created, comment));
+            publisher.publish(new ValueCreated(key, created, comment));
         } else {
             final String dimensions = lock.getDimensions().stream()
                     .map(Dimension::getId)
@@ -142,7 +142,7 @@ class ReplaceValue {
         deletes.forEach(value ->
             delete(key, value));
 
-        publisher.publishEvent(new ValuesReplaced(key, created, updates, deletes, comment));
+        publisher.publish(new ValuesReplaced(key, created, updates, deletes, comment));
 
         return !creates.isEmpty();
     }

@@ -2,12 +2,12 @@ package org.zalando.compass.core.domain.logic;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.context.ApplicationEventPublisher;
 import org.zalando.compass.core.domain.api.DimensionService;
 import org.zalando.compass.core.domain.api.NotFoundException;
 import org.zalando.compass.core.domain.model.Dimension;
 import org.zalando.compass.core.domain.model.Revisioned;
 import org.zalando.compass.core.domain.model.relation.Equality;
+import org.zalando.compass.core.domain.spi.event.EventPublisher;
 import org.zalando.compass.core.domain.spi.validation.ValidationService;
 import org.zalando.compass.library.pagination.Cursor;
 import org.zalando.compass.library.pagination.PageResult;
@@ -23,10 +23,11 @@ import static org.mockito.Mockito.when;
 
 public final class DimensionServiceTest {
 
-    public static final Equality EQ = new Equality();
+    private static final Equality EQ = new Equality();
+
     private final ValidationService validator = mock(ValidationService.class);
     private final DimensionRevisionService dimensionRevisionService = mock(DimensionRevisionService.class);
-    private final ApplicationEventPublisher publisher = mock(ApplicationEventPublisher.class);
+    private final EventPublisher publisher = mock(EventPublisher.class);
 
     private final DimensionService unit = new LogicModule()
             .dimensionService(validator, dimensionRevisionService, publisher);

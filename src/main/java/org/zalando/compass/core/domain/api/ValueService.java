@@ -20,7 +20,6 @@ public interface ValueService {
 
     void create(String key, Value value, @Nullable String comment) throws EntityAlreadyExistsException;
 
-    // TODO should return Revisioned<Values>
     Revisioned<List<Value>> readPage(String key, Map<Dimension, JsonNode> filter);
 
     Revisioned<Value> read(String key, Map<Dimension, JsonNode> filter);

@@ -7,7 +7,7 @@ import org.zalando.compass.core.domain.model.Value;
 import java.util.Collection;
 
 @lombok.Value
-public final class ValuesReplaced {
+public final class ValuesReplaced implements Event {
     Key key;
     Collection<Value> creates;
     Collection<ValueDifference<Value>> updates;

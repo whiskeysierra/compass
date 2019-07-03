@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.core.domain.api.KeyService;
-import org.zalando.compass.core.domain.api.NotFoundException;
 import org.zalando.compass.core.domain.model.Dimension;
 import org.zalando.compass.core.domain.model.PageRevision;
 import org.zalando.compass.core.domain.model.Revision;
@@ -19,7 +18,6 @@ import org.zalando.compass.library.pagination.Pagination;
 import org.zalando.compass.revision.domain.api.ValueRevisionService;
 import org.zalando.compass.revision.domain.model.ValueRevision;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -50,15 +48,15 @@ class ReadValue {
     private List<Value> readAllOnly(final String key, final Map<Dimension, JsonNode> filter) {
         final Values values = valueRepository.findAll(byKey(key));
 
-        if (values.getValues().isEmpty()) {
+        if (values.isEmpty()) {
             // the fact that we can delay this check (foreign key constraint) should not be known to this layer...
             keyService.readOnly(key);
-            return values.getValues();
+            return values;
         }
 
         if (filter.isEmpty()) {
             // special case, just for reading many values
-            return values.getValues();
+            return values;
         }
 
         return values.select(filter);

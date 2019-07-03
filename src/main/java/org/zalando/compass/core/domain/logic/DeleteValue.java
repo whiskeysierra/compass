@@ -4,13 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.core.domain.api.NotFoundException;
 import org.zalando.compass.core.domain.model.Dimension;
 import org.zalando.compass.core.domain.model.Key;
 import org.zalando.compass.core.domain.model.Value;
 import org.zalando.compass.core.domain.model.event.ValueDeleted;
+import org.zalando.compass.core.domain.spi.event.EventPublisher;
 import org.zalando.compass.core.domain.spi.repository.ValueRepository;
 
 import javax.annotation.Nullable;
@@ -23,7 +23,7 @@ class DeleteValue {
 
     private final ValueLocking locking;
     private final ValueRepository repository;
-    private final ApplicationEventPublisher publisher;
+    private final EventPublisher publisher;
 
     void delete(final String keyId, final Map<Dimension, JsonNode> filter, @Nullable final String comment) {
         final ValueLock lock = locking.lock(keyId, filter);
@@ -37,7 +37,7 @@ class DeleteValue {
 
         delete(key, value);
 
-        publisher.publishEvent(new ValueDeleted(key, value, comment));
+        publisher.publish(new ValueDeleted(key, value, comment));
     }
 
     void delete(final Key key, final Value value) {

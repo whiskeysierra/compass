@@ -35,7 +35,7 @@ class KeyLocking {
 
     KeyLock lock(final String id) {
         @Nullable final Key current = keyLockRepository.lock(id).orElse(null);
-        final List<Value> values = valueLockRepository.lockAll(byKey(id)).getValues();
+        final List<Value> values = valueLockRepository.lockAll(byKey(id));
 
         return new KeyLock(current, values);
     }

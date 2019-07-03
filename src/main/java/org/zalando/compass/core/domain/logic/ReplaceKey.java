@@ -3,15 +3,15 @@ package org.zalando.compass.core.domain.logic;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.core.domain.api.EntityAlreadyExistsException;
-import org.zalando.compass.core.domain.spi.repository.KeyRepository;
-import org.zalando.compass.core.domain.spi.validation.ValidationService;
 import org.zalando.compass.core.domain.model.Key;
 import org.zalando.compass.core.domain.model.Value;
 import org.zalando.compass.core.domain.model.event.KeyCreated;
 import org.zalando.compass.core.domain.model.event.KeyReplaced;
+import org.zalando.compass.core.domain.spi.event.EventPublisher;
+import org.zalando.compass.core.domain.spi.repository.KeyRepository;
+import org.zalando.compass.core.domain.spi.validation.ValidationService;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -26,8 +26,7 @@ class ReplaceKey {
     private final KeyLocking locking;
     private final ValidationService validator;
     private final KeyRepository repository;
-    // TODO how can we be spring independent?
-    private final ApplicationEventPublisher publisher;
+    private final EventPublisher publisher;
 
     /**
      *
@@ -43,7 +42,7 @@ class ReplaceKey {
         if (current == null) {
             create(key);
 
-            publisher.publishEvent(new KeyReplaced(null, key, comment));
+            publisher.publish(new KeyReplaced(null, key, comment));
             return true;
         } else {
             if (changed(Key::getSchema, current, key)) {
@@ -53,7 +52,7 @@ class ReplaceKey {
             repository.update(key);
             log.info("Updated key [{}]", key);
 
-            publisher.publishEvent(new KeyReplaced(current, key, comment));
+            publisher.publish(new KeyReplaced(current, key, comment));
             return false;
         }
     }
@@ -64,7 +63,7 @@ class ReplaceKey {
 
         if (current == null) {
             create(key);
-            publisher.publishEvent(new KeyCreated(key, comment));
+            publisher.publish(new KeyCreated(key, comment));
         } else {
             throw new EntityAlreadyExistsException("Key " + key.getId() + " already exists");
         }

@@ -35,7 +35,7 @@ class DimensionLocking {
 
     DimensionLock lock(final Dimension dimension) {
         @Nullable final Dimension current = dimensionLockRepository.lock(dimension).orElse(null);
-        final List<Value> values = valueLockRepository.lockAll(byDimension(dimension)).getValues();
+        final List<Value> values = valueLockRepository.lockAll(byDimension(dimension));
 
         return new DimensionLock(current, values);
     }

@@ -3,10 +3,10 @@ package org.zalando.compass.core.domain.logic;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.core.domain.model.Dimension;
 import org.zalando.compass.core.domain.model.event.DimensionDeleted;
+import org.zalando.compass.core.domain.spi.event.EventPublisher;
 import org.zalando.compass.core.domain.spi.repository.DimensionRepository;
 
 import javax.annotation.Nullable;
@@ -20,7 +20,7 @@ class DeleteDimension {
 
     private final DimensionLocking locking;
     private final DimensionRepository repository;
-    private final ApplicationEventPublisher publisher;
+    private final EventPublisher publisher;
 
     void delete(final Dimension dimension, @Nullable final String comment) {
         final DimensionLock lock = locking.lock(dimension);
@@ -30,7 +30,7 @@ class DeleteDimension {
         repository.delete(dimension);
         log.info("Deleted dimension [{}]", dimension);
 
-        publisher.publishEvent(new DimensionDeleted(dimension, comment));
+        publisher.publish(new DimensionDeleted(dimension, comment));
     }
 
 }
