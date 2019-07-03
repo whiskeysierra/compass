@@ -2,7 +2,6 @@ package org.zalando.compass.core.domain.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.experimental.Wither;
-import org.zalando.compass.revision.domain.model.KeyRevision;
 
 @lombok.Value
 public final class Key {
@@ -11,10 +10,6 @@ public final class Key {
     String id;
     JsonNode schema;
     String description;
-
-    public KeyRevision toRevision(final Revision revision) {
-        return new KeyRevision(id, revision, schema, description);
-    }
 
     @Override
     public String toString() {

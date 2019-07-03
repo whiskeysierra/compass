@@ -54,10 +54,10 @@ final class InMemoryValueRepository implements ValueRepository, ValueLockReposit
 
     @Override
     public void update(final String key, final Value value) {
-        lock(key, value.getDimensions()).ifPresent(present -> {
-            final List<Value> values = this.values.getOrDefault(key, emptyList());
-            values.set(values.indexOf(present), value);
-        });
+        lock(key, value.getDimensions()).ifPresent(present ->
+                values.computeIfAbsent(key, unused -> new CopyOnWriteArrayList<>())
+                        // TODO index is optional!
+                        .set(value.getIndex().intValue(), value));
     }
 
     @Override

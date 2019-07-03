@@ -34,7 +34,6 @@ public final class DimensionServiceTest {
 
     @Before
     public void setUp() {
-        // TODO this should be two things: an SPI of the core module and an API of the revision module
         when(dimensionRevisionService.readRevisions(any(), any())).thenReturn(PageResult.empty());
     }
 

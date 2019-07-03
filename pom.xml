@@ -18,9 +18,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>1.8</java.version>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
         <start-class>org.zalando.compass.Application</start-class>
         <spring-boot.version>2.1.6.RELEASE</spring-boot.version>
         <spring-security.version>5.1.5.RELEASE</spring-security.version>
@@ -444,6 +441,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <skip>true</skip>
                     <failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
                     <suppressionFiles>
                         <suppressionFile>cve-suppressions.xml</suppressionFile>
@@ -605,6 +603,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
+                    <release>11</release>
                     <showWarnings>true</showWarnings>
                     <compilerArgs>
                         <arg>-Xlint:all,-processing,-serial</arg>

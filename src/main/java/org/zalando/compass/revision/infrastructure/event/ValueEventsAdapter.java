@@ -6,21 +6,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import org.zalando.compass.core.domain.model.event.ValuesReplaced;
-import org.zalando.compass.revision.domain.api.RevisionService;
+import org.zalando.compass.core.domain.model.Key;
+import org.zalando.compass.core.domain.model.Revision;
+import org.zalando.compass.core.domain.model.Revisioned;
+import org.zalando.compass.core.domain.model.Value;
+import org.zalando.compass.core.domain.model.event.KeyDeleted;
 import org.zalando.compass.core.domain.model.event.ValueCreated;
 import org.zalando.compass.core.domain.model.event.ValueDeleted;
 import org.zalando.compass.core.domain.model.event.ValueReplaced;
-import org.zalando.compass.core.domain.model.Key;
-import org.zalando.compass.core.domain.model.Revision;
-import org.zalando.compass.core.domain.model.Value;
+import org.zalando.compass.core.domain.model.event.ValuesReplaced;
+import org.zalando.compass.core.infrastructure.database.model.enums.RevisionType;
+import org.zalando.compass.revision.domain.api.RevisionService;
 import org.zalando.compass.revision.domain.model.ValueRevision;
 import org.zalando.compass.revision.domain.spi.repository.ValueRevisionRepository;
-import org.zalando.compass.core.infrastructure.database.model.enums.RevisionType;
 
 import javax.annotation.Nullable;
-
 import java.util.Collection;
+import java.util.List;
 
 import static org.zalando.compass.core.infrastructure.database.model.enums.RevisionType.CREATE;
 import static org.zalando.compass.core.infrastructure.database.model.enums.RevisionType.DELETE;
@@ -76,6 +78,14 @@ class ValueEventsAdapter {
                 createRevision(key, value, revision, DELETE));
     }
 
+    public void onKeyDeleted(final Revision revision, final KeyDeleted event) {
+        final Key key = event.getKey();
+        final List<Value> values = event.getValues();
+
+        values.forEach(value ->
+                createRevision(key, value, revision, DELETE));
+    }
+
     @EventListener
     public void onValueDeleted(final ValueDeleted event) {
         final Key key = event.getKey();
@@ -86,7 +96,12 @@ class ValueEventsAdapter {
     }
 
     private void createRevision(final Key key, final Value value, final Revision revision, final RevisionType type) {
-        final ValueRevision valueRevision = value.toRevision(revision.withType(type));
+        final ValueRevision valueRevision = new ValueRevision(
+                value.getDimensions(),
+                value.getIndex(),
+                revision.withType(type),
+                value.getValue()
+        );
         repository.create(key.getId(), valueRevision);
         log.info("Created value revision [{}]", valueRevision);
     }

@@ -29,6 +29,7 @@ class DimensionEventsAdapter {
     private final RevisionService service;
     private final DimensionRevisionRepository repository;
 
+    // TODO move!
     @EventListener
     public void onDimensionCreated(final DimensionCreated event) {
         final Dimension dimension = event.getDimension();
@@ -60,7 +61,13 @@ class DimensionEventsAdapter {
     }
 
     private void createRevision(final Dimension dimension, final Revision revision, final RevisionType update) {
-        final DimensionRevision dimensionRevision = dimension.toRevision(revision.withType(update));
+        final DimensionRevision dimensionRevision = new DimensionRevision(
+                dimension.getId(),
+                revision.withType(update),
+                dimension.getSchema(),
+                dimension.getRelation(),
+                dimension.getDescription()
+        );
         repository.create(dimensionRevision);
         log.info("Created dimension revision [{}]", dimensionRevision);
     }

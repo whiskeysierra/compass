@@ -13,6 +13,7 @@ public class Value implements Dimensional {
     @Wither
     ImmutableMap<Dimension, JsonNode> dimensions;
 
+    // TODO is this actually needed within the domain model?
     @Wither
     Long index;
 
@@ -20,10 +21,6 @@ public class Value implements Dimensional {
 
     public Value(final ImmutableMap<Dimension, JsonNode> dimensions, final JsonNode value) {
         this(dimensions, null, value);
-    }
-
-    public ValueRevision toRevision(final Revision revision) {
-        return new ValueRevision(dimensions, index, revision, value);
     }
 
 }
