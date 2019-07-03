@@ -9,6 +9,7 @@ import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
 import org.zalando.compass.revision.domain.model.ValueRevision;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
 public interface ValueRevisionService {
@@ -17,7 +18,7 @@ public interface ValueRevisionService {
     PageRevision<ValueRevision> readPageAt(String key, Map<Dimension, JsonNode> filter, long revision);
 
     // TODO make clear that dimensions have to match 100%
-    PageResult<Revision> readRevisions(String key, Map<Dimension, JsonNode> dimensions, Pagination<Long> query);
+    PageResult<Revision> readRevisions(String key, @Nullable Map<Dimension, JsonNode> dimensions, Pagination<Long> query);
 
     // TODO make clear that dimensions have to match 100%
     ValueRevision readAt(String key, Map<Dimension, JsonNode> dimensions, long revision);

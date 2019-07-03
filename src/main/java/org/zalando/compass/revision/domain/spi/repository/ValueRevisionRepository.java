@@ -7,6 +7,7 @@ import org.zalando.compass.revision.domain.model.ValueRevision;
 import org.zalando.compass.library.pagination.Pagination;
 import org.zalando.compass.revision.domain.model.ValueRevisions;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,6 @@ public interface ValueRevisionRepository {
 
     ValueRevisions findValueRevisions(String key, long revisionId);
 
-    List<Revision> findRevisions(String key, Map<Dimension, JsonNode> dimensions,
+    List<Revision> findRevisions(String key, @Nullable Map<Dimension, JsonNode> dimensions,
             Pagination<Long> query);
 }

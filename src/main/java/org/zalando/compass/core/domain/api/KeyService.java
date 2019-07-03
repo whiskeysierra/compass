@@ -19,6 +19,6 @@ public interface KeyService {
 
     Key readOnly(String id);
 
-    void delete(String id, @Nullable String comment);
+    void delete(Key key, @Nullable String comment);
 
 }

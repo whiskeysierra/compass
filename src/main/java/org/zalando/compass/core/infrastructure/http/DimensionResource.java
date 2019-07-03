@@ -94,13 +94,12 @@ class DimensionResource {
             @RequestParam(name = "cursor", required = false, defaultValue = "") final Cursor<String, String> original) {
 
         final Cursor<String, String> cursor = original.with(q, limit);
-        // TODO get rid of q parameter
-        final PageResult<Dimension> page = service.readPage(q, cursor.paginate());
+        final PageResult<Dimension> page = service.readPage(cursor.getQuery(), cursor.paginate());
 
-        return ResponseEntity.ok(
-                page.render(DimensionCollectionRepresentation::new, cursor, Dimension::getId,
-                        c -> link(methodOn(DimensionResource.class).getAll(null, null, c)),
-                        DimensionRepresentation::valueOf));
+        return ResponseEntity.ok(page.render(DimensionCollectionRepresentation::new,
+                cursor, Dimension::getId,
+                c -> link(methodOn(DimensionResource.class).getAll(null, null, c)),
+                DimensionRepresentation::valueOf));
     }
 
     @RequestMapping(method = GET, path = "/dimensions/{id}")
@@ -135,6 +134,7 @@ class DimensionResource {
         final JsonNode patched = patch.tryApply(node);
         final DimensionRepresentation after = mapper.treeToValue(patched, DimensionRepresentation.class);
 
+        // TODO shouldn't we delegate to a private method here?
         return createOrReplace(id, null, comment, after);
     }
 

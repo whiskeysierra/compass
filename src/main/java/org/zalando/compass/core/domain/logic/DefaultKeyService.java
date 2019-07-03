@@ -55,8 +55,8 @@ class DefaultKeyService implements KeyService {
 
     @Transactional // TODO isolation?!
     @Override
-    public void delete(final String id, @Nullable final String comment) {
-        delete.delete(id, comment);
+    public void delete(final Key key, @Nullable final String comment) {
+        delete.delete(key, comment);
     }
 
 }

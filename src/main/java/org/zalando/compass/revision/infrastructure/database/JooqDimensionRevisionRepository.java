@@ -3,17 +3,18 @@ package org.zalando.compass.revision.infrastructure.database;
 import lombok.AllArgsConstructor;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.SelectConditionStep;
 import org.jooq.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.core.domain.api.NotFoundException;
 import org.zalando.compass.core.domain.model.Dimension;
-import org.zalando.compass.core.domain.spi.repository.RelationRepository;
-import org.zalando.compass.revision.domain.model.DimensionRevision;
 import org.zalando.compass.core.domain.model.Revision;
-import org.zalando.compass.revision.domain.spi.repository.DimensionRevisionRepository;
+import org.zalando.compass.core.domain.spi.repository.RelationRepository;
 import org.zalando.compass.core.infrastructure.database.model.enums.RevisionType;
 import org.zalando.compass.library.pagination.Pagination;
+import org.zalando.compass.revision.domain.model.DimensionRevision;
+import org.zalando.compass.revision.domain.spi.repository.DimensionRevisionRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +25,6 @@ import static org.jooq.impl.DSL.exists;
 import static org.jooq.impl.DSL.max;
 import static org.jooq.impl.DSL.select;
 import static org.jooq.impl.DSL.selectOne;
-import static org.jooq.impl.DSL.trueCondition;
 import static org.zalando.compass.core.infrastructure.database.model.Tables.DIMENSION_REVISION;
 import static org.zalando.compass.core.infrastructure.database.model.Tables.REVISION;
 
@@ -58,13 +58,13 @@ class JooqDimensionRevisionRepository implements DimensionRevisionRepository {
 
     @Override
     public List<Revision> findPageRevisions(final Pagination<Long> query) {
-        return query.seek(db.select(REVISION.fields())
+        final SelectConditionStep<Record> where = db.select(REVISION.fields())
                 .from(REVISION)
                 .where(exists(selectOne()
                         .from(DIMENSION_REVISION)
-                        .where(DIMENSION_REVISION.REVISION.eq(REVISION.ID))
-                        // TODO needed?
-                        .and(trueCondition()))), REVISION.ID, SortOrder.DESC)
+                        .where(DIMENSION_REVISION.REVISION.eq(REVISION.ID))));
+
+        return query.seek(where, REVISION.ID, SortOrder.DESC)
                 .fetch().map(this::mapRevisionWithoutType);
     }
 

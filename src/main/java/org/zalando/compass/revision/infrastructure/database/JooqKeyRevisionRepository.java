@@ -3,6 +3,7 @@ package org.zalando.compass.revision.infrastructure.database;
 import lombok.AllArgsConstructor;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.SelectConditionStep;
 import org.jooq.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -52,13 +53,13 @@ class JooqKeyRevisionRepository implements KeyRevisionRepository {
 
     @Override
     public List<Revision> findPageRevisions(final Pagination<Long> query) {
-        return query.seek(db.select(REVISION.fields())
+        final SelectConditionStep<Record> where = db.select(REVISION.fields())
                 .from(REVISION)
                 .where(exists(selectOne()
                         .from(KEY_REVISION)
-                        .where(KEY_REVISION.REVISION.eq(REVISION.ID))
-                        // TODO needed?
-                        .and(trueCondition()))), REVISION.ID, SortOrder.DESC)
+                        .where(KEY_REVISION.REVISION.eq(REVISION.ID))));
+
+        return query.seek(where, REVISION.ID, SortOrder.DESC)
                 .fetch().map(this::mapRevisionWithoutType);
     }
 

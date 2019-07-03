@@ -8,6 +8,7 @@ import org.zalando.compass.revision.domain.model.ValueRevision;
 import org.zalando.compass.revision.domain.model.ValueRevisions;
 import org.zalando.compass.revision.domain.spi.repository.ValueRevisionRepository;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -65,7 +66,9 @@ final class InMemoryValueRevisionRepository implements ValueRevisionRepository {
     }
 
     @Override
-    public List<Revision> findRevisions(final String key, final Map<Dimension, JsonNode> dimensions, final Pagination<Long> query) {
+    public List<Revision> findRevisions(final String key, @Nullable final Map<Dimension, JsonNode> dimensions,
+            final Pagination<Long> query) {
+
         return revisions.getOrDefault(key, emptyList()).stream()
                 .map(ValueRevision::getRevision)
                 // TODO sort order and comparison dependant on pagination direction

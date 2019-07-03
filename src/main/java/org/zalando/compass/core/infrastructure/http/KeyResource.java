@@ -21,6 +21,7 @@ import org.zalando.compass.core.domain.model.Key;
 import org.zalando.compass.core.domain.model.Revisioned;
 import org.zalando.compass.library.pagination.Cursor;
 import org.zalando.compass.library.pagination.PageResult;
+import org.zalando.fauxpas.ThrowingUnaryOperator;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -51,10 +52,9 @@ class KeyResource {
             @PathVariable final String id,
             @Nullable @RequestHeader(name = IF_NONE_MATCH, required = false) final String ifNoneMatch,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
-            // TODO this should be KeyRepresentation
-            @RequestBody final Key body) {
+            @RequestBody final KeyRepresentation body) {
 
-        final Key key = body.withId(id);
+        final Key key = new Key(id, body.getSchema(), body.getDescription());
 
         final boolean created = createOrReplace(key, comment, ifNoneMatch);
         final KeyRepresentation representation = KeyRepresentation.valueOf(key);
@@ -82,8 +82,7 @@ class KeyResource {
             @RequestParam(name = "cursor", required = false, defaultValue = "") final Cursor<String, String> original) {
 
         final Cursor<String, String> cursor = original.with(q, limit);
-        // TODO get rid of q parameter
-        final PageResult<Key> page = service.readPage(q, cursor.paginate());
+        final PageResult<Key> page = service.readPage(cursor.getQuery(), cursor.paginate());
 
         return ResponseEntity.ok(page.render(KeyCollectionRepresentation::new,
                 cursor, Key::getId,
@@ -98,31 +97,32 @@ class KeyResource {
     }
 
     @RequestMapping(method = PATCH, path = "/keys/{id}", consumes = {APPLICATION_JSON_VALUE, JSON_MERGE_PATCH_VALUE})
-    public ResponseEntity<KeyRepresentation> update(@PathVariable final String id,
+    public ResponseEntity<KeyRepresentation> update(
+            @PathVariable final String id,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final JsonMergePatch patch) throws IOException, JsonPatchException {
 
-        final Key before = service.readOnly(id);
-        final ObjectNode node = mapper.valueToTree(before);
-
-        final JsonNode patched = patch.apply(node);
-        // TODO don't use domain model for patching
-        final Key after = mapper.treeToValue(patched, Key.class);
-
-        return createOrReplace(id, null, comment, after);
+        return patch(id, comment, patch::apply);
     }
 
     @RequestMapping(method = PATCH, path = "/keys/{id}", consumes = JSON_PATCH_VALUE)
-    public ResponseEntity<KeyRepresentation> update(@PathVariable final String id,
+    public ResponseEntity<KeyRepresentation> update(
+            @PathVariable final String id,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final JsonPatch patch) throws IOException, JsonPatchException {
 
-        final Key before = service.readOnly(id);
+        return patch(id, comment, patch::apply);
+    }
+
+    private ResponseEntity<KeyRepresentation> patch(final String id, final @Nullable String comment,
+            final ThrowingUnaryOperator<JsonNode, JsonPatchException> patch) throws IOException, JsonPatchException {
+        final KeyRepresentation before = KeyRepresentation.valueOf(service.readOnly(id));
         final JsonNode node = mapper.valueToTree(before);
 
-        final JsonNode patched = patch.apply(node);
-        final Key after = mapper.treeToValue(patched, Key.class);
+        final JsonNode patched = patch.tryApply(node);
+        final KeyRepresentation after = mapper.treeToValue(patched, KeyRepresentation.class);
 
+        // TODO shouldn't we delegate to a private method here?
         return createOrReplace(id, null, comment, after);
     }
 
@@ -130,7 +130,8 @@ class KeyResource {
     @ResponseStatus(NO_CONTENT)
     public void delete(@PathVariable final String id,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment) {
-        service.delete(id, comment);
+        final Key key = service.readOnly(id);
+        service.delete(key, comment);
     }
 
 }

@@ -14,6 +14,7 @@ import org.zalando.compass.revision.domain.model.ValueRevision;
 import org.zalando.compass.revision.domain.model.ValueRevisions;
 import org.zalando.compass.revision.domain.spi.repository.ValueRevisionRepository;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +49,7 @@ class ReadValueRevision {
         return new PageRevision<>(revision, PageResult.create(values.select(filter), false, false));
     }
 
-    public PageResult<Revision> readRevisions(final String key, final Map<Dimension, JsonNode> dimensions,
+    public PageResult<Revision> readRevisions(final String key, @Nullable final Map<Dimension, JsonNode> dimensions,
             final Pagination<Long> query) {
         final List<Revision> revisions = repository.findRevisions(key, dimensions, query.increment());
         return query.paginate(revisions);

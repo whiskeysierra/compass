@@ -14,6 +14,7 @@ import org.zalando.compass.revision.domain.model.ValueRevision;
 import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
 @Service
@@ -36,7 +37,7 @@ class DefaultValueRevisionService implements ValueRevisionService {
 
     @Transactional(readOnly = true)
     @Override
-    public PageResult<Revision> readRevisions(final String key, final Map<Dimension, JsonNode> dimensions,
+    public PageResult<Revision> readRevisions(final String key, @Nullable final Map<Dimension, JsonNode> dimensions,
             final Pagination<Long> query) {
         return readRevision.readRevisions(key, dimensions, query);
     }

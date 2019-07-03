@@ -24,6 +24,7 @@ import org.zalando.compass.revision.domain.model.ValueRevision;
 import org.zalando.compass.revision.domain.model.ValueRevisions;
 import org.zalando.compass.revision.domain.spi.repository.ValueRevisionRepository;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
@@ -163,7 +164,7 @@ class JooqValueRevisionRepository implements ValueRevisionRepository {
     }
 
     @Override
-    public List<Revision> findRevisions(final String key, final Map<Dimension, JsonNode> dimensions,
+    public List<Revision> findRevisions(final String key, @Nullable final Map<Dimension, JsonNode> dimensions,
             final Pagination<Long> query) {
 
         return query.seek(db.select(REVISION.fields())
@@ -175,8 +176,7 @@ class JooqValueRevisionRepository implements ValueRevisionRepository {
                 .fetch(this::mapRevisionWithType);
     }
 
-    private Condition exactMatch(final Map<Dimension, JsonNode> dimensions) {
-        // TODO handle null query in cursor cleanly!
+    private Condition exactMatch(@Nullable final Map<Dimension, JsonNode> dimensions) {
         if (dimensions == null || dimensions.isEmpty()) {
             return notExists(selectOne()
                     .from(VALUE_DIMENSION_REVISION)

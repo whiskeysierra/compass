@@ -20,6 +20,7 @@ import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.revision.domain.api.ValueRevisionService;
 import org.zalando.compass.revision.domain.model.ValueRevision;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
 import static com.google.common.collect.ImmutableMap.of;
@@ -80,7 +81,8 @@ class ValueRevisionResource {
 
         final Cursor<Long, Map<String, JsonNode>> cursor = original.with(filter, limit);
         // TODO query dimensions in bulk
-        final Map<Dimension, JsonNode> query = cursor.getQuery() ==  null ? null : transform(cursor.getQuery(), dimensionService::readOnly);
+        @Nullable final var query = cursor.getQuery() ==  null ? null :
+                transform(cursor.getQuery(), dimensionService::readOnly);
         final PageResult<Revision> page = service.readRevisions(key, query, cursor.paginate());
         final Map<String, String> normalized = querying.write(query);
 

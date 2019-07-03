@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.zalando.compass.core.domain.api.NotFoundException;
 import org.zalando.compass.core.domain.model.Key;
 import org.zalando.compass.core.domain.model.Value;
 import org.zalando.compass.core.domain.model.event.KeyDeleted;
@@ -24,15 +23,9 @@ class DeleteKey {
     private final DeleteValue deleteValue;
     private final EventPublisher publisher;
 
-    void delete(final String id, @Nullable final String comment) {
-        final KeyLock lock = locking.lock(id);
-
-        @Nullable final Key key = lock.getKey();
+    void delete(final Key key, @Nullable final String comment) {
+        final KeyLock lock = locking.lock(key.getId());
         final List<Value> values = lock.getValues();
-
-        if (key == null) {
-            throw new NotFoundException();
-        }
 
         deleteValues(key, values);
         deleteKey(key);

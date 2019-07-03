@@ -5,7 +5,6 @@ import org.junit.Test;
 import org.zalando.compass.core.domain.api.DimensionService;
 import org.zalando.compass.core.domain.api.NotFoundException;
 import org.zalando.compass.core.domain.model.Dimension;
-import org.zalando.compass.core.domain.model.Revisioned;
 import org.zalando.compass.core.domain.model.relation.Equality;
 import org.zalando.compass.core.domain.spi.event.EventPublisher;
 import org.zalando.compass.core.domain.spi.validation.ValidationService;
@@ -41,15 +40,15 @@ public final class DimensionServiceTest {
     public void shouldCreate() {
         unit.create(new Dimension("country", null, EQ, "ISO-3166-1 alpha-2"), "Added new country dimension");
 
-        final Revisioned<Dimension> revisioned = unit.read("country");
-        final Dimension dimension = revisioned.getEntity();
+        final var revisioned = unit.read("country");
+        final var dimension = revisioned.getEntity();
 
         assertThat(dimension.getRelation(), is(EQ));
     }
 
     @Test
     public void shouldDelete() {
-        final Dimension country = new Dimension("country", null, EQ, "ISO-3166-1 alpha-2");
+        final var country = new Dimension("country", null, EQ, "ISO-3166-1 alpha-2");
         unit.create(country, "Added new country dimension");
         unit.delete(country, "Removed country dimension");
 
@@ -59,13 +58,13 @@ public final class DimensionServiceTest {
 
     @Test
     public void shouldReadPage() {
-        final Dimension country = new Dimension("country", null, EQ, "ISO-3166-1 alpha-2");
-        final Dimension postalCode = new Dimension("postal-code", null, EQ, "Postal code");
+        final var country = new Dimension("country", null, EQ, "ISO-3166-1 alpha-2");
+        final var postalCode = new Dimension("postal-code", null, EQ, "Postal code");
 
         unit.create(country, "Added new country dimension");
         unit.create(postalCode, "Added new postal code dimension");
 
-        final PageResult<Dimension> result = unit.readPage("", Cursor.<String, Void>initial().with(10).paginate());
+        final var result = unit.readPage("", Cursor.<String, Void>initial().with(10).paginate());
 
         assertThat(result.getElements(), hasSize(2));
         assertThat(result.getHead(), is(country));
@@ -74,11 +73,11 @@ public final class DimensionServiceTest {
 
     @Test
     public void shouldReadPageWithQuery() {
-        final Dimension postalCode = new Dimension("postal-code", null, EQ, "Postal code");
+        final var postalCode = new Dimension("postal-code", null, EQ, "Postal code");
         unit.create(new Dimension("country", null, EQ, "ISO-3166-1 alpha-2"), "Added new country dimension");
         unit.create(postalCode, "Added new postal code dimension");
 
-        final PageResult<Dimension> result = unit.readPage("post", Cursor.<String, Void>initial().with(10).paginate());
+        final var result = unit.readPage("post", Cursor.<String, Void>initial().with(10).paginate());
 
         assertThat(result.getElements(), hasSize(1));
         assertThat(result.getHead(), is(postalCode));
