@@ -8,6 +8,9 @@ import org.zalando.compass.library.pagination.PageResult;
 import org.zalando.compass.library.pagination.Pagination;
 
 public interface DimensionRevisionService {
+
+    void create(DimensionRevision revision);
+
     PageResult<Revision> readPageRevisions(Pagination<Long> query);
 
     PageRevision<Dimension> readPageAt(long revision, Pagination<String> query);
@@ -15,4 +18,5 @@ public interface DimensionRevisionService {
     PageResult<Revision> readRevisions(String id, Pagination<Long> query);
 
     DimensionRevision readAt(String id, long revision);
+
 }

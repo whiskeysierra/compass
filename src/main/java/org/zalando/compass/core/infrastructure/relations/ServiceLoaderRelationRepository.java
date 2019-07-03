@@ -15,11 +15,8 @@ import static java.util.Comparator.comparing;
 import static java.util.ServiceLoader.load;
 import static java.util.function.Function.identity;
 
-// TODO wrong package?!
-// TODO find better package name
-// TODO allow test usage without making it public
 @Component
-public class ServiceLoaderRelationRepository implements RelationRepository {
+class ServiceLoaderRelationRepository implements RelationRepository {
 
     private final ImmutableList<Relation> list = sortedCopyOf(comparing(Relation::getId), load(Relation.class));
 

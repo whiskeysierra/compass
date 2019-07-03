@@ -8,11 +8,11 @@ import org.jooq.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.zalando.compass.core.domain.model.Key;
-import org.zalando.compass.revision.domain.model.KeyRevision;
 import org.zalando.compass.core.domain.model.Revision;
-import org.zalando.compass.revision.domain.spi.repository.KeyRevisionRepository;
 import org.zalando.compass.core.infrastructure.database.model.enums.RevisionType;
 import org.zalando.compass.library.pagination.Pagination;
+import org.zalando.compass.revision.domain.model.KeyRevision;
+import org.zalando.compass.revision.domain.spi.repository.KeyRevisionRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +23,6 @@ import static org.jooq.impl.DSL.exists;
 import static org.jooq.impl.DSL.max;
 import static org.jooq.impl.DSL.select;
 import static org.jooq.impl.DSL.selectOne;
-import static org.jooq.impl.DSL.trueCondition;
 import static org.zalando.compass.core.infrastructure.database.model.Tables.KEY_REVISION;
 import static org.zalando.compass.core.infrastructure.database.model.Tables.REVISION;
 

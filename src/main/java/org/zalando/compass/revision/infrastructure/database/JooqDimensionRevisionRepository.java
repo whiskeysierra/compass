@@ -7,10 +7,9 @@ import org.jooq.SelectConditionStep;
 import org.jooq.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.zalando.compass.core.domain.api.NotFoundException;
+import org.zalando.compass.core.domain.api.RelationService;
 import org.zalando.compass.core.domain.model.Dimension;
 import org.zalando.compass.core.domain.model.Revision;
-import org.zalando.compass.core.domain.spi.repository.RelationRepository;
 import org.zalando.compass.core.infrastructure.database.model.enums.RevisionType;
 import org.zalando.compass.library.pagination.Pagination;
 import org.zalando.compass.revision.domain.model.DimensionRevision;
@@ -36,7 +35,7 @@ class JooqDimensionRevisionRepository implements DimensionRevisionRepository {
             DIMENSION_REVISION.as("self");
 
     private final DSLContext db;
-    private final RelationRepository repository;
+    private final RelationService service;
 
     @Override
     public void create(final DimensionRevision dimension) {
@@ -88,7 +87,7 @@ class JooqDimensionRevisionRepository implements DimensionRevisionRepository {
         return new Dimension(
                 record.get(DIMENSION_REVISION.ID),
                 record.get(DIMENSION_REVISION.SCHEMA),
-                repository.find(record.get(DIMENSION_REVISION.RELATION)).orElseThrow(NotFoundException::new),
+                service.read(record.get(DIMENSION_REVISION.RELATION)),
                 record.get(DIMENSION_REVISION.DESCRIPTION)
         );
     }
@@ -120,8 +119,7 @@ class JooqDimensionRevisionRepository implements DimensionRevisionRepository {
                 record.get(DIMENSION_REVISION.ID),
                 mapRevisionWithType(record),
                 record.get(DIMENSION_REVISION.SCHEMA),
-                // TODO delegate in a cleaner way
-                repository.find(record.get(DIMENSION_REVISION.RELATION)).orElseThrow(NotFoundException::new),
+                service.read(record.get(DIMENSION_REVISION.RELATION)),
                 record.get(DIMENSION_REVISION.DESCRIPTION)
         );
     }

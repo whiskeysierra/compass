@@ -9,10 +9,10 @@ import org.zalando.compass.core.domain.model.event.DimensionCreated;
 import org.zalando.compass.core.domain.model.event.DimensionDeleted;
 import org.zalando.compass.core.domain.model.event.DimensionReplaced;
 import org.zalando.compass.core.domain.model.Dimension;
+import org.zalando.compass.revision.domain.api.DimensionRevisionService;
 import org.zalando.compass.revision.domain.api.RevisionService;
 import org.zalando.compass.revision.domain.model.DimensionRevision;
 import org.zalando.compass.core.domain.model.Revision;
-import org.zalando.compass.revision.domain.spi.repository.DimensionRevisionRepository;
 import org.zalando.compass.core.infrastructure.database.model.enums.RevisionType;
 
 import javax.annotation.Nullable;
@@ -26,21 +26,20 @@ import static org.zalando.compass.core.infrastructure.database.model.enums.Revis
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 class DimensionEventsAdapter {
 
-    private final RevisionService service;
-    private final DimensionRevisionRepository repository;
+    private final RevisionService revisionService;
+    private final DimensionRevisionService dimensionRevisionService;
 
-    // TODO move!
     @EventListener
     public void onDimensionCreated(final DimensionCreated event) {
         final Dimension dimension = event.getDimension();
-        final Revision revision = service.create(event.getComment());
+        final Revision revision = revisionService.create(event.getComment());
 
         createRevision(dimension, revision, CREATE);
     }
 
     @EventListener
     public void onDimensionReplaced(final DimensionReplaced event) {
-        final Revision revision = service.create(event.getComment());
+        final Revision revision = revisionService.create(event.getComment());
 
         @Nullable final Dimension before = event.getBefore();
         final Dimension after = event.getAfter();
@@ -54,7 +53,7 @@ class DimensionEventsAdapter {
 
     @EventListener
     public void ondDimensionDeleted(final DimensionDeleted event) {
-        final Revision revision = service.create(event.getComment());
+        final Revision revision = revisionService.create(event.getComment());
         final Dimension dimension = event.getDimension();
 
         createRevision(dimension, revision, DELETE);
@@ -68,7 +67,7 @@ class DimensionEventsAdapter {
                 dimension.getRelation(),
                 dimension.getDescription()
         );
-        repository.create(dimensionRevision);
+        dimensionRevisionService.create(dimensionRevision);
         log.info("Created dimension revision [{}]", dimensionRevision);
     }
 

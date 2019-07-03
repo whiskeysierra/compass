@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DimensionRevisionRepository {
-    void create(DimensionRevision dimension);
+
+    void create(DimensionRevision revision);
 
     List<Revision> findPageRevisions(Pagination<Long> query);
 
@@ -18,4 +19,5 @@ public interface DimensionRevisionRepository {
     List<Revision> findRevisions(String id, Pagination<Long> query);
 
     Optional<DimensionRevision> find(String id, long revision);
+
 }

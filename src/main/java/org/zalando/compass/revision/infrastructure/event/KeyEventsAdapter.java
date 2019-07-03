@@ -5,15 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import org.zalando.compass.core.domain.model.Revisioned;
 import org.zalando.compass.core.domain.model.event.KeyCreated;
 import org.zalando.compass.core.domain.model.event.KeyDeleted;
 import org.zalando.compass.core.domain.model.event.KeyReplaced;
 import org.zalando.compass.core.domain.model.Key;
+import org.zalando.compass.revision.domain.api.KeyRevisionService;
 import org.zalando.compass.revision.domain.api.RevisionService;
 import org.zalando.compass.revision.domain.model.KeyRevision;
 import org.zalando.compass.core.domain.model.Revision;
-import org.zalando.compass.revision.domain.spi.repository.KeyRevisionRepository;
 import org.zalando.compass.core.infrastructure.database.model.enums.RevisionType;
 
 import javax.annotation.Nullable;
@@ -27,21 +26,21 @@ import static org.zalando.compass.core.infrastructure.database.model.enums.Revis
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 class KeyEventsAdapter {
 
-    private final RevisionService service;
-    private final KeyRevisionRepository repository;
+    private final RevisionService revisionService;
+    private final KeyRevisionService keyRevisionService;
     private final ValueEventsAdapter adapter;
 
     @EventListener
     public void onKeyCreated(final KeyCreated event) {
         final Key key = event.getKey();
-        final Revision revision = service.create(event.getComment());
+        final Revision revision = revisionService.create(event.getComment());
 
         createRevision(key, revision, CREATE);
     }
 
     @EventListener
     public void onKeyReplaced(final KeyReplaced event) {
-        final Revision revision = service.create(event.getComment());
+        final Revision revision = revisionService.create(event.getComment());
 
         @Nullable final Key before = event.getBefore();
         final Key after = event.getAfter();
@@ -55,7 +54,7 @@ class KeyEventsAdapter {
 
     @EventListener
     public void onKeyDeleted(final KeyDeleted event) {
-        final Revision revision = service.create(event.getComment());
+        final Revision revision = revisionService.create(event.getComment());
         final Key key = event.getKey();
 
         // TODO find a better way to delegate/share that
@@ -70,7 +69,7 @@ class KeyEventsAdapter {
                 key.getSchema(),
                 key.getDescription()
         );
-        repository.create(keyRevision);
+        keyRevisionService.create(keyRevision);
         log.info("Created key revision [{}]", keyRevision);
     }
 

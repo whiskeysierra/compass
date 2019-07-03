@@ -8,7 +8,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.zalando.compass.core.domain.model.Key;
 import org.zalando.compass.core.domain.model.Revision;
-import org.zalando.compass.core.domain.model.Revisioned;
 import org.zalando.compass.core.domain.model.Value;
 import org.zalando.compass.core.domain.model.event.KeyDeleted;
 import org.zalando.compass.core.domain.model.event.ValueCreated;
@@ -17,8 +16,8 @@ import org.zalando.compass.core.domain.model.event.ValueReplaced;
 import org.zalando.compass.core.domain.model.event.ValuesReplaced;
 import org.zalando.compass.core.infrastructure.database.model.enums.RevisionType;
 import org.zalando.compass.revision.domain.api.RevisionService;
+import org.zalando.compass.revision.domain.api.ValueRevisionService;
 import org.zalando.compass.revision.domain.model.ValueRevision;
-import org.zalando.compass.revision.domain.spi.repository.ValueRevisionRepository;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -33,15 +32,14 @@ import static org.zalando.compass.core.infrastructure.database.model.enums.Revis
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 class ValueEventsAdapter {
 
-    private final RevisionService service;
-    // TODO should be service, not repository!
-    private final ValueRevisionRepository repository;
+    private final RevisionService revisionService;
+    private final ValueRevisionService valueRevisionService;
 
     @EventListener
     public void onValueCreated(final ValueCreated event) {
         final Key key = event.getKey();
         final Value value = event.getValue();
-        final Revision revision = service.create(event.getComment());
+        final Revision revision = revisionService.create(event.getComment());
 
         createRevision(key, value, revision, CREATE);
     }
@@ -51,7 +49,7 @@ class ValueEventsAdapter {
         final Key key = event.getKey();
         @Nullable final Value before = event.getBefore();
         final Value after = event.getAfter();
-        final Revision revision = service.create(event.getComment());
+        final Revision revision = revisionService.create(event.getComment());
 
         if (before == null) {
             createRevision(key, after, revision, CREATE);
@@ -66,7 +64,7 @@ class ValueEventsAdapter {
         final Collection<Value> creates = event.getCreates();
         final Collection<ValueDifference<Value>> updates = event.getUpdates();
         final Collection<Value> deletes = event.getDeletes();
-        final Revision revision = service.create(event.getComment());
+        final Revision revision = revisionService.create(event.getComment());
 
         creates.forEach(value ->
                 createRevision(key, value, revision, CREATE));
@@ -78,7 +76,8 @@ class ValueEventsAdapter {
                 createRevision(key, value, revision, DELETE));
     }
 
-    public void onKeyDeleted(final Revision revision, final KeyDeleted event) {
+    // TOOD there needs to be a cleaner way
+    void onKeyDeleted(final Revision revision, final KeyDeleted event) {
         final Key key = event.getKey();
         final List<Value> values = event.getValues();
 
@@ -90,7 +89,7 @@ class ValueEventsAdapter {
     public void onValueDeleted(final ValueDeleted event) {
         final Key key = event.getKey();
         final Value value = event.getValue();
-        final Revision revision = service.create(event.getComment());
+        final Revision revision = revisionService.create(event.getComment());
 
         createRevision(key, value, revision, DELETE);
     }
@@ -102,7 +101,7 @@ class ValueEventsAdapter {
                 revision.withType(type),
                 value.getValue()
         );
-        repository.create(key.getId(), valueRevision);
+        valueRevisionService.create(key, valueRevision);
         log.info("Created value revision [{}]", valueRevision);
     }
 

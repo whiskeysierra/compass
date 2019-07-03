@@ -12,10 +12,10 @@ import org.jooq.Record;
 import org.jooq.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.zalando.compass.core.domain.api.NotFoundException;
+import org.zalando.compass.core.domain.api.DimensionService;
 import org.zalando.compass.core.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.Key;
 import org.zalando.compass.core.domain.model.Revision;
-import org.zalando.compass.core.domain.spi.repository.DimensionRepository;
 import org.zalando.compass.core.infrastructure.database.model.enums.RevisionType;
 import org.zalando.compass.core.infrastructure.database.model.tables.records.ValueDimensionRevisionRecord;
 import org.zalando.compass.core.infrastructure.database.model.tables.records.ValueRevisionRecord;
@@ -57,10 +57,10 @@ class JooqValueRevisionRepository implements ValueRevisionRepository {
             VALUE_REVISION.as("self");
 
     private final DSLContext db;
-    private final DimensionRepository repository;
+    private final DimensionService service;
 
     @Override
-    public void create(final String key, final ValueRevision value) {
+    public void create(final Key key, final ValueRevision value) {
         final long id = db.insertInto(VALUE_REVISION)
                 .columns(
                         VALUE_REVISION.REVISION,
@@ -71,7 +71,7 @@ class JooqValueRevisionRepository implements ValueRevisionRepository {
                 .values(
                         val(value.getRevision().getId()),
                         val(value.getRevision().getType()),
-                        val(key),
+                        val(key.getId()),
                         val(value.getIndex()),
                         val(value.getValue(), JsonNode.class))
                 .returning(VALUE_REVISION.ID)
@@ -147,7 +147,7 @@ class JooqValueRevisionRepository implements ValueRevisionRepository {
                             ValueDimensionRevisionRecord::getDimensionValue);
 
                     return new ValueRevision(
-                            transform(dimensions, id -> repository.find(id).orElseThrow(NotFoundException::new)),
+                            transform(dimensions, service::readOnly),
                             value.getIndex(),
                             revision,
                             value.getValue());

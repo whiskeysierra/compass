@@ -2,6 +2,7 @@ package org.zalando.compass.revision.domain.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.zalando.compass.core.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.Key;
 import org.zalando.compass.core.domain.model.PageRevision;
 import org.zalando.compass.core.domain.model.Revision;
 import org.zalando.compass.core.domain.model.Value;
@@ -13,6 +14,9 @@ import javax.annotation.Nullable;
 import java.util.Map;
 
 public interface ValueRevisionService {
+
+    void create(Key key, ValueRevision revision);
+
     PageResult<Revision> readPageRevisions(String key, Pagination<Long> query);
 
     PageRevision<ValueRevision> readPageAt(String key, Map<Dimension, JsonNode> filter, long revision);
@@ -22,4 +26,5 @@ public interface ValueRevisionService {
 
     // TODO make clear that dimensions have to match 100%
     ValueRevision readAt(String key, Map<Dimension, JsonNode> dimensions, long revision);
+
 }

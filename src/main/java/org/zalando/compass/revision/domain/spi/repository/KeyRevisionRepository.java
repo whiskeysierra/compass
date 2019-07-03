@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface KeyRevisionRepository {
-    void create(KeyRevision key);
+    void create(KeyRevision revision);
 
     List<Revision> findPageRevisions(Pagination<Long> query);
 

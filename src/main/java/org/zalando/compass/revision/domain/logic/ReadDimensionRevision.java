@@ -17,6 +17,7 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
+// TODO those shouldn't be spring beans!
 @Component
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 class ReadDimensionRevision {

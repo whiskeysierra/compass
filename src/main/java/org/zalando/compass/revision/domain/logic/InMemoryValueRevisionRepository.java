@@ -2,6 +2,7 @@ package org.zalando.compass.revision.domain.logic;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.zalando.compass.core.domain.model.Dimension;
+import org.zalando.compass.core.domain.model.Key;
 import org.zalando.compass.core.domain.model.Revision;
 import org.zalando.compass.library.pagination.Pagination;
 import org.zalando.compass.revision.domain.model.ValueRevision;
@@ -26,11 +27,12 @@ import static org.zalando.compass.core.infrastructure.database.model.enums.Revis
 
 final class InMemoryValueRevisionRepository implements ValueRevisionRepository {
 
+    // TODO should this be by Key (remember to change equals/hashCode then to only check id)
     private final ConcurrentMap<String, List<ValueRevision>> revisions = new ConcurrentHashMap<>();
 
     @Override
-    public void create(final String key, final ValueRevision value) {
-        revisions.computeIfAbsent(key, unused -> new CopyOnWriteArrayList<>()).add(value);
+    public void create(final Key key, final ValueRevision value) {
+        revisions.computeIfAbsent(key.getId(), unused -> new CopyOnWriteArrayList<>()).add(value);
     }
 
     @Override

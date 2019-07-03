@@ -40,7 +40,8 @@ final class LogicModule {
                 locking,
                 validator,
                 repository,
-                publisher);
+                publisher
+        );
 
         final ReadDimension read = new ReadDimension(
                 repository,
