@@ -46,7 +46,7 @@ class ReplaceValue {
 
         if (before == null) {
             final Value created = create(key, value);
-            publisher.publish(new ValueCreated(key, created, comment));
+            publisher.publish(new ValueReplaced(key, null, created, comment));
             return true;
         } else {
             final Value after = value.withIndex(before.getIndex());

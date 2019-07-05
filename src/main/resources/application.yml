@@ -13,7 +13,6 @@ spring:
     password: postgres
     hikari:
       transaction-isolation: TRANSACTION_READ_COMMITTED
-      auto-commit: false
   flyway:
     schemas:
       - compass

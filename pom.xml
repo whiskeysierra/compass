@@ -72,6 +72,11 @@
             <version>1.18.8</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>one.util</groupId>
+            <artifactId>streamex</artifactId>
+            <version>0.6.8</version>
+        </dependency>
         <!-- Spring Boot-->
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -6,6 +6,7 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.zalando.compass.core.domain.model.Dimension;
 import org.zalando.compass.core.domain.model.Key;
 import org.zalando.compass.core.domain.model.Revision;
 import org.zalando.compass.core.domain.model.Value;
@@ -27,6 +28,7 @@ public final class EqualsTest<T> {
     @Parameterized.Parameters(name= "{0}")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][] {
+                {Dimension.class},
                 {DimensionRevision.class},
                 {Key.class},
                 {KeyRevision.class},
