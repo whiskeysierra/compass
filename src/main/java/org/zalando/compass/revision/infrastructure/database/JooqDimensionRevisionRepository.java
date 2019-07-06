@@ -57,7 +57,7 @@ class JooqDimensionRevisionRepository implements DimensionRevisionRepository {
 
     @Override
     public List<Revision> findPageRevisions(final Pagination<Long> query) {
-        final SelectConditionStep<Record> where = db.select(REVISION.fields())
+        final var where = db.select(REVISION.fields())
                 .from(REVISION)
                 .where(exists(selectOne()
                         .from(DIMENSION_REVISION)

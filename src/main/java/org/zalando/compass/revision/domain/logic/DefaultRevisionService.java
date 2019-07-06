@@ -27,14 +27,14 @@ public class DefaultRevisionService implements RevisionService {
     // TODO we shouldn't rely on the request context here
     @Override
     public Revision create(@Nullable final String comment) {
-        final OffsetDateTime timestamp = OffsetDateTime.now(clock);
+        final var timestamp = OffsetDateTime.now(clock);
 
-        final String user = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
+        final var user = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
                 .map(Principal::getName).orElse("anonymous");
 
-        final long id = repository.create(timestamp, user, comment);
+        final var id = repository.create(timestamp, user, comment);
 
-        final Revision revision = new Revision(id, timestamp, null, user, comment);
+        final var revision = new Revision(id, timestamp, null, user, comment);
         log.info("Created revision [{}].", revision);
         return revision;
     }

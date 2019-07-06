@@ -44,25 +44,25 @@ class ValueLocking {
     private final ValueLockRepository valueLockRepository;
 
     ValueLock lock(final String keyId, final Map<Dimension, JsonNode> filter) {
-        final Set<Dimension> dimensions = lockDimensions(filter.keySet());
-        final Key key = keyLockRepository.lock(keyId).orElseThrow(NotFoundException::new);
-        @Nullable final Value current = valueLockRepository.lock(keyId, filter).orElse(null);
+        final var dimensions = lockDimensions(filter.keySet());
+        final var key = keyLockRepository.lock(keyId).orElseThrow(NotFoundException::new);
+        @Nullable final var current = valueLockRepository.lock(keyId, filter).orElse(null);
 
         return new ValueLock(dimensions, key, current);
     }
 
     ValuesLock lock(final String keyId, final List<Value> values) {
-        final Set<Dimension> dimensions = lockDimensions(values.stream()
+        final var dimensions = lockDimensions(values.stream()
                 .flatMap(value -> value.getDimensions().keySet().stream())
                 .collect(toSet()));
-        final Key key = keyLockRepository.lock(keyId).orElseThrow(NotFoundException::new);
+        final var key = keyLockRepository.lock(keyId).orElseThrow(NotFoundException::new);
         final List<Value> current = valueLockRepository.lockAll(byKey(keyId));
 
         return new ValuesLock(dimensions, key, current);
     }
 
     private Set<Dimension> lockDimensions(final Set<Dimension> identifiers) {
-        final Set<Dimension> dimensions = dimensionLockRepository.lockAll(identifiers);
+        final var dimensions = dimensionLockRepository.lockAll(identifiers);
         final Set<Dimension> difference = Sets.difference(identifiers, dimensions);
 
         exists(difference.isEmpty(), "Dimensions: %s", difference);

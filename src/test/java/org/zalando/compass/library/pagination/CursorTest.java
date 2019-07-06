@@ -8,7 +8,7 @@ public class CursorTest {
 
     @Test
     public void shouldParseFromEmptyString() {
-        final Cursor<String, Void> actual = Cursor.valueOf("", String.class);
+        final var actual = Cursor.valueOf("", String.class);
         final Cursor<String, Void> expected = Cursor.initial();
 
         assertEquals(expected, actual);
@@ -44,7 +44,7 @@ public class CursorTest {
 
     @Test
     public void shouldParseBackwardCursor() {
-        final Cursor<Long, Void> actual = Cursor.valueOf("eyJkIjoiPCIsInAiOjMsImwiOjI1fQ", Long.class);
+        final var actual = Cursor.valueOf("eyJkIjoiPCIsInAiOjMsImwiOjI1fQ", Long.class);
         final Cursor<Long, Void> expected = new BackwardCursor<>(3L, null, 25);
 
         assertEquals(expected, actual);
@@ -52,7 +52,7 @@ public class CursorTest {
 
     @Test
     public void shouldParseForwardCursor() {
-        final Cursor<Long, Void> actual = Cursor.valueOf("eyJkIjoiPiIsInAiOjQsImwiOjI1fQ", Long.class);
+        final var actual = Cursor.valueOf("eyJkIjoiPiIsInAiOjQsImwiOjI1fQ", Long.class);
         final Cursor<Long, Void> expected = new ForwardCursor<>(4L, null, 25);
 
         assertEquals(expected, actual);
@@ -60,7 +60,7 @@ public class CursorTest {
 
     @Test
     public void shouldParseBackwardCursorWithQuery() {
-        final Cursor<Long, String> actual = Cursor.valueOf("eyJkIjoiPCIsInAiOjMsInEiOiJ0ZXN0IiwibCI6MjV9", Long.class, String.class);
+        final var actual = Cursor.valueOf("eyJkIjoiPCIsInAiOjMsInEiOiJ0ZXN0IiwibCI6MjV9", Long.class, String.class);
         final Cursor<Long, String> expected = new BackwardCursor<>(3L, "test", 25);
 
         assertEquals(expected, actual);
@@ -68,7 +68,7 @@ public class CursorTest {
 
     @Test
     public void shouldParseForwardCursorWithQuery() {
-        final Cursor<Long, String> actual = Cursor.valueOf("eyJkIjoiPiIsInAiOjQsInEiOiJ0ZXN0IiwibCI6MjV9", Long.class, String.class);
+        final var actual = Cursor.valueOf("eyJkIjoiPiIsInAiOjQsInEiOiJ0ZXN0IiwibCI6MjV9", Long.class, String.class);
         final Cursor<Long, String> expected = new ForwardCursor<>(4L, "test", 25);
 
         assertEquals(expected, actual);

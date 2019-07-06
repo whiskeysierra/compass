@@ -26,10 +26,10 @@ class DeleteValue {
     private final EventPublisher publisher;
 
     void delete(final String keyId, final Map<Dimension, JsonNode> filter, @Nullable final String comment) {
-        final ValueLock lock = locking.lock(keyId, filter);
+        final var lock = locking.lock(keyId, filter);
 
-        final Key key = lock.getKey();
-        final Value value = lock.getValue();
+        final var key = lock.getKey();
+        final var value = lock.getValue();
 
         if (value == null) {
             throw new NotFoundException();

@@ -26,7 +26,7 @@ class ReadDimension {
     private final DimensionRevisionService revisionService;
 
     PageResult<Dimension> readPage(@Nullable final String term, final Pagination<String> query) {
-        final Set<Dimension> dimensions = repository.findAll(term, query.increment());
+        final var dimensions = repository.findAll(term, query.increment());
         return query.paginate(ImmutableList.copyOf(dimensions));
     }
 
@@ -35,15 +35,15 @@ class ReadDimension {
     }
 
     Revisioned<Dimension> read(final String id) {
-        final Dimension dimension = readOnly(id);
-        final Revision revision = readLatestRevision(id);
+        final var dimension = readOnly(id);
+        final var revision = readLatestRevision(id);
         return Revisioned.create(dimension, revision);
     }
 
     @Nullable //since it should be eventually consistent
     private Revision readLatestRevision(final String id) {
-        final Pagination<Long> pagination = Cursor.<Long, Void>initial().with(null, 1).paginate();
-        final PageResult<Revision> revisions = revisionService.readRevisions(id, pagination);
+        final var pagination = Cursor.<Long, Void>initial().with(null, 1).paginate();
+        final var revisions = revisionService.readRevisions(id, pagination);
         return revisions.getElements().isEmpty() ? null : revisions.getHead();
     }
 

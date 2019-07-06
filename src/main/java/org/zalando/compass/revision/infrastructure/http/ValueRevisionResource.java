@@ -46,8 +46,8 @@ class ValueRevisionResource {
             @RequestParam(required = false, defaultValue = "25") final Integer limit,
             @RequestParam(name = "cursor", required = false, defaultValue = "") final Cursor<Long, Void> original) {
 
-        final Cursor<Long, Void> cursor = original.with(null, limit);
-        final PageResult<Revision> page = service.readPageRevisions(key, cursor.paginate());
+        final var cursor = original.with(null, limit);
+        final var page = service.readPageRevisions(key, cursor.paginate());
 
         return paginate(page, cursor,
                 c -> link(methodOn(ValueRevisionResource.class).getValuesRevisions(key, null, c)),
@@ -61,7 +61,7 @@ class ValueRevisionResource {
             @RequestParam final Map<String, String> query) {
 
         final Map<Dimension, JsonNode> filter = transform(querying.read(query), dimensionService::readOnly);
-        final PageRevision<ValueRevision> page = service.readPageAt(key, filter, revision);
+        final var page = service.readPageAt(key, filter, revision);
 
         return ResponseEntity.ok(new ValueCollectionRevisionRepresentation(
                 RevisionRepresentation.valueOf(page.getRevision()),
@@ -79,11 +79,11 @@ class ValueRevisionResource {
 
         final Map<String, JsonNode> filter = querying.read(queryParams);
 
-        final Cursor<Long, Map<String, JsonNode>> cursor = original.with(filter, limit);
+        final var cursor = original.with(filter, limit);
         // TODO query dimensions in bulk
         @Nullable final var query = cursor.getQuery() ==  null ? null :
                 transform(cursor.getQuery(), dimensionService::readOnly);
-        final PageResult<Revision> page = service.readRevisions(key, query, cursor.paginate());
+        final var page = service.readRevisions(key, query, cursor.paginate());
         final Map<String, String> normalized = querying.write(query);
 
         return paginate(page, cursor,
@@ -98,7 +98,7 @@ class ValueRevisionResource {
             @RequestParam final Map<String, String> query) {
         
         final Map<Dimension, JsonNode> filter = transform(querying.read(query), dimensionService::readOnly);
-        final ValueRevision value = service.readAt(key, filter, revision);
+        final var value = service.readAt(key, filter, revision);
         return ResponseEntity.ok(ValueRevisionRepresentation.valueOf(value));
     }
 

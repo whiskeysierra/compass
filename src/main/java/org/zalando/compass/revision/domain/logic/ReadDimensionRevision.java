@@ -26,7 +26,7 @@ class ReadDimensionRevision {
     private final RevisionService service;
 
     PageResult<Revision> readPageRevisions(final Pagination<Long> query) {
-        final List<Revision> revisions = repository.findPageRevisions(query.increment()).stream()
+        final var revisions = repository.findPageRevisions(query.increment()).stream()
                 .map(Revision::withTypeUpdate)
                 .collect(toList());
 
@@ -34,16 +34,16 @@ class ReadDimensionRevision {
     }
 
     PageRevision<Dimension> readPageAt(final long revisionId, final Pagination<String> query) {
-        final Revision revision = service.read(revisionId).withTypeUpdate();
+        final var revision = service.read(revisionId).withTypeUpdate();
 
-        final List<Dimension> dimensions = repository.findPage(revisionId, query.increment());
-        final PageResult<Dimension> page = query.paginate(dimensions);
+        final var dimensions = repository.findPage(revisionId, query.increment());
+        final var page = query.paginate(dimensions);
 
         return new PageRevision<>(revision, page);
     }
 
     PageResult<Revision> readRevisions(final String id, final Pagination<Long> query) {
-        final List<Revision> revisions = repository.findRevisions(id, query.increment());
+        final var revisions = repository.findRevisions(id, query.increment());
         // TODO shouldn't this be done by the repository?!
         return query.paginate(revisions);
     }

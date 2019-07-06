@@ -76,7 +76,7 @@ public final class NaturalOrderJsonComparatorTest {
     }
 
     private void testNumbers(final int left, final int right, final Matcher<Integer> matcher) {
-        for (final List<JsonNode> nodes : cartesianProduct(numbers(left), numbers(right))) {
+        for (final var nodes : cartesianProduct(numbers(left), numbers(right))) {
             test(nodes.get(0), nodes.get(1), matcher);
         }
     }

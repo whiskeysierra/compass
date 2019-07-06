@@ -25,7 +25,7 @@ public class JsonConfiguration {
     @Bean
     @Primary
     public static ObjectMapper jacksonObjectMapper() {
-        final ObjectMapper mapper = new ObjectMapper();
+        final var mapper = new ObjectMapper();
 
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);

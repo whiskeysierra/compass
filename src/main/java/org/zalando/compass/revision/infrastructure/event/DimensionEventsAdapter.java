@@ -31,18 +31,18 @@ class DimensionEventsAdapter {
 
     @EventListener
     public void onDimensionCreated(final DimensionCreated event) {
-        final Dimension dimension = event.getDimension();
-        final Revision revision = revisionService.create(event.getComment());
+        final var dimension = event.getDimension();
+        final var revision = revisionService.create(event.getComment());
 
         createRevision(dimension, revision, CREATE);
     }
 
     @EventListener
     public void onDimensionReplaced(final DimensionReplaced event) {
-        final Revision revision = revisionService.create(event.getComment());
+        final var revision = revisionService.create(event.getComment());
 
-        @Nullable final Dimension before = event.getBefore();
-        final Dimension after = event.getAfter();
+        @Nullable final var before = event.getBefore();
+        final var after = event.getAfter();
 
         if (before == null) {
             createRevision(after, revision, CREATE);
@@ -53,14 +53,14 @@ class DimensionEventsAdapter {
 
     @EventListener
     public void ondDimensionDeleted(final DimensionDeleted event) {
-        final Revision revision = revisionService.create(event.getComment());
-        final Dimension dimension = event.getDimension();
+        final var revision = revisionService.create(event.getComment());
+        final var dimension = event.getDimension();
 
         createRevision(dimension, revision, DELETE);
     }
 
     private void createRevision(final Dimension dimension, final Revision revision, final RevisionType update) {
-        final DimensionRevision dimensionRevision = new DimensionRevision(
+        final var dimensionRevision = new DimensionRevision(
                 dimension.getId(),
                 revision.withType(update),
                 dimension.getSchema(),

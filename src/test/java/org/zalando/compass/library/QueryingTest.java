@@ -131,8 +131,8 @@ public final class QueryingTest {
 
     @Test
     public void shouldWrite() {
-        final Dimension after = new Dimension("after", stringSchema(), new GreaterThanOrEqual(), "");
-        final Dimension versions = new Dimension("versions", schema("array"), new Equality(), "");
+        final var after = new Dimension("after", stringSchema(), new GreaterThanOrEqual(), "");
+        final var versions = new Dimension("versions", schema("array"), new Equality(), "");
 
         assertThat(unit.write(map(after, text("2017-07-12T21:24:47Z"), versions, new ArrayNode(instance).add(1).add(2))),
                 is(map("after", "2017-07-12T21:24:47Z", "versions", "[1,2]")));

@@ -66,10 +66,10 @@ class DimensionResource {
             throw new BadArgumentException(e);
         }
 
-        final Dimension dimension = new Dimension(id, body.getSchema(), relation, body.getDescription());
+        final var dimension = new Dimension(id, body.getSchema(), relation, body.getDescription());
 
-        final boolean created = createOrReplace(dimension, comment, ifNoneMatch);
-        final DimensionRepresentation representation = DimensionRepresentation.valueOf(dimension);
+        final var created = createOrReplace(dimension, comment, ifNoneMatch);
+        final var representation = DimensionRepresentation.valueOf(dimension);
 
         return ResponseEntity
                 .status(created ? CREATED : OK)
@@ -93,8 +93,8 @@ class DimensionResource {
             @RequestParam(required = false, defaultValue = "25") final Integer limit,
             @RequestParam(name = "cursor", required = false, defaultValue = "") final Cursor<String, String> original) {
 
-        final Cursor<String, String> cursor = original.with(q, limit);
-        final PageResult<Dimension> page = service.readPage(cursor.getQuery(), cursor.paginate());
+        final var cursor = original.with(q, limit);
+        final var page = service.readPage(cursor.getQuery(), cursor.paginate());
 
         return ResponseEntity.ok(page.render(DimensionCollectionRepresentation::new,
                 cursor, Dimension::getId,
@@ -104,7 +104,7 @@ class DimensionResource {
 
     @RequestMapping(method = GET, path = "/dimensions/{id}")
     public ResponseEntity<DimensionRepresentation> get(@PathVariable final String id) {
-        final Revisioned<Dimension> revisioned = service.read(id);
+        final var revisioned = service.read(id);
         return Conditional.build(revisioned, DimensionRepresentation::valueOf);
     }
 
@@ -128,11 +128,11 @@ class DimensionResource {
 
     private ResponseEntity<DimensionRepresentation> patch(final String id, final @Nullable String comment,
             final ThrowingUnaryOperator<JsonNode, JsonPatchException> patch) throws IOException, JsonPatchException {
-        final DimensionRepresentation before = DimensionRepresentation.valueOf(service.readOnly(id));
-        final JsonNode node = mapper.valueToTree(before);
+        final var before = DimensionRepresentation.valueOf(service.readOnly(id));
+        final var node = mapper.valueToTree(before);
 
-        final JsonNode patched = patch.tryApply(node);
-        final DimensionRepresentation after = mapper.treeToValue(patched, DimensionRepresentation.class);
+        final var patched = patch.tryApply(node);
+        final var after = mapper.treeToValue(patched, DimensionRepresentation.class);
 
         // TODO shouldn't we delegate to a private method here?
         return createOrReplace(id, null, comment, after);
@@ -142,7 +142,7 @@ class DimensionResource {
     @ResponseStatus(NO_CONTENT)
     public void delete(@PathVariable final String id,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment) {
-        final Dimension dimension = service.readOnly(id);
+        final var dimension = service.readOnly(id);
         service.delete(dimension, comment);
     }
 

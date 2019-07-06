@@ -25,7 +25,7 @@ final class RevisionPaging {
             final ThrowingFunction<Cursor<Long, Q>, URI, IOException> pageLinker,
             final ThrowingFunction<Revision, URI, IOException> itemLinker) {
 
-        final RevisionCollectionRepresentation representation = page.render(
+        final var representation = page.render(
                 RevisionCollectionRepresentation::new,
                 cursor,
                 Revision::getId,

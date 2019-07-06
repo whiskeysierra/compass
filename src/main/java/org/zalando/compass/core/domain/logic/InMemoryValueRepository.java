@@ -28,8 +28,8 @@ final class InMemoryValueRepository implements ValueRepository, ValueLockReposit
 
     @Override
     public Value create(final String key, final Value value) {
-        final List<Value> list = this.values.computeIfAbsent(key, unused -> new CopyOnWriteArrayList<>());
-        final int index = list.size();
+        final var list = this.values.computeIfAbsent(key, unused -> new CopyOnWriteArrayList<>());
+        final var index = list.size();
         list.add(value);
 
         return value.withIndex((long) index);

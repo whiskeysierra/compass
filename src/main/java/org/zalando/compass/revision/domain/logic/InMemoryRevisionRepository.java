@@ -17,7 +17,7 @@ final class InMemoryRevisionRepository implements RevisionRepository {
 
     @Override
     public long create(final OffsetDateTime timestamp, final String user, @Nullable final String comment) {
-        final long id = sequence.incrementAndGet();
+        final var id = sequence.incrementAndGet();
         revisions.put(id, new Revision(id, timestamp, null, user, comment));
         return id;
     }

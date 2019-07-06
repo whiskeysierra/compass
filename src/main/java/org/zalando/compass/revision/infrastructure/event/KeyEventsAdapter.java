@@ -32,18 +32,18 @@ class KeyEventsAdapter {
 
     @EventListener
     public void onKeyCreated(final KeyCreated event) {
-        final Key key = event.getKey();
-        final Revision revision = revisionService.create(event.getComment());
+        final var key = event.getKey();
+        final var revision = revisionService.create(event.getComment());
 
         createRevision(key, revision, CREATE);
     }
 
     @EventListener
     public void onKeyReplaced(final KeyReplaced event) {
-        final Revision revision = revisionService.create(event.getComment());
+        final var revision = revisionService.create(event.getComment());
 
-        @Nullable final Key before = event.getBefore();
-        final Key after = event.getAfter();
+        @Nullable final var before = event.getBefore();
+        final var after = event.getAfter();
 
         if (before == null) {
             createRevision(after, revision, CREATE);
@@ -54,8 +54,8 @@ class KeyEventsAdapter {
 
     @EventListener
     public void onKeyDeleted(final KeyDeleted event) {
-        final Revision revision = revisionService.create(event.getComment());
-        final Key key = event.getKey();
+        final var revision = revisionService.create(event.getComment());
+        final var key = event.getKey();
 
         // TODO find a better way to delegate/share that
         adapter.onKeyDeleted(revision, event);
@@ -63,7 +63,7 @@ class KeyEventsAdapter {
     }
 
     private void createRevision(final Key key, final Revision revision, final RevisionType update) {
-        final KeyRevision keyRevision = new KeyRevision(
+        final var keyRevision = new KeyRevision(
                 key.getId(),
                 revision.withType(update),
                 key.getSchema(),

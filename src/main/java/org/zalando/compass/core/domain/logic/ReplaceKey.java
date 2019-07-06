@@ -35,9 +35,9 @@ class ReplaceKey {
      * @return true if key was created, false if an existing one was updated
      */
     boolean replace(final Key key, @Nullable final String comment) {
-        final KeyLock lock = locking.lock(key.getId());
-        @Nullable final Key current = lock.getKey();
-        final List<Value> values = lock.getValues();
+        final var lock = locking.lock(key.getId());
+        @Nullable final var current = lock.getKey();
+        final var values = lock.getValues();
 
         if (current == null) {
             create(key);
@@ -58,8 +58,8 @@ class ReplaceKey {
     }
 
     void create(final Key key, @Nullable final String comment) {
-        final KeyLock lock = locking.lock(key.getId());
-        @Nullable final Key current = lock.getKey();
+        final var lock = locking.lock(key.getId());
+        @Nullable final var current = lock.getKey();
 
         if (current == null) {
             create(key);

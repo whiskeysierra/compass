@@ -35,9 +35,9 @@ class ReplaceDimension {
      * @return true if dimension was created, false if an existing one was updated
      */
     boolean replace(final Dimension dimension, @Nullable final String comment) {
-        final DimensionLock lock = locking.lock(dimension);
-        @Nullable final Dimension current = lock.getDimension();
-        final List<Value> values = lock.getValues();
+        final var lock = locking.lock(dimension);
+        @Nullable final var current = lock.getDimension();
+        final var values = lock.getValues();
 
         if (current == null) {
             create(dimension);
@@ -58,8 +58,8 @@ class ReplaceDimension {
     }
 
     void create(final Dimension dimension, @Nullable final String comment) {
-        final DimensionLock lock = locking.lock(dimension);
-        @Nullable final Dimension current = lock.getDimension();
+        final var lock = locking.lock(dimension);
+        @Nullable final var current = lock.getDimension();
 
         if (current == null) {
             create(dimension);

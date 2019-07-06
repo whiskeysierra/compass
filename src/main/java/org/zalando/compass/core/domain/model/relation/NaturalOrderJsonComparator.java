@@ -36,7 +36,7 @@ final class NaturalOrderJsonComparator implements Comparator<JsonNode> {
     }
 
     private void checkSupportedType(final JsonNode node) {
-        final JsonNodeType type = node.getNodeType();
+        final var type = node.getNodeType();
 
         switch (type) {
             case BINARY:
@@ -62,10 +62,10 @@ final class NaturalOrderJsonComparator implements Comparator<JsonNode> {
     }
 
     private int compareFieldsRecursively(final JsonNode left, final JsonNode right) {
-        final Collection<String> leftFieldNames = sortedFieldNames(left);
-        final Collection<String> rightFieldNames = sortedFieldNames(right);
+        final var leftFieldNames = sortedFieldNames(left);
+        final var rightFieldNames = sortedFieldNames(right);
 
-        final ComparisonChain start = ComparisonChain.start()
+        final var start = ComparisonChain.start()
                 .compare(leftFieldNames, rightFieldNames, lexicographical(String::compareTo));
 
         return leftFieldNames.stream()

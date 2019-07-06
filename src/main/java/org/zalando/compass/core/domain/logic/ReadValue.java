@@ -32,21 +32,21 @@ class ReadValue {
     private final ValueRevisionService revisionService;
 
     Revisioned<List<Value>> readPage(final String key, final Map<Dimension, JsonNode> filter) {
-        final List<Value> values = readAllOnly(key, filter);
+        final var values = readAllOnly(key, filter);
 
-        final PageResult<Revision> revisions = revisionService.readPageRevisions(key,
+        final var revisions = revisionService.readPageRevisions(key,
                 Cursor.<Long, Void>initial().with(null, 1).paginate());
 
         if (revisions.getElements().isEmpty()) {
             return Revisioned.create(values, null);
         }
 
-        final PageRevision<ValueRevision> revision = revisionService.readPageAt(key, filter, revisions.getHead().getId());
+        final var revision = revisionService.readPageAt(key, filter, revisions.getHead().getId());
         return Revisioned.create(values, revision.getRevision());
     }
 
     private List<Value> readAllOnly(final String key, final Map<Dimension, JsonNode> filter) {
-        final Values values = valueRepository.findAll(byKey(key));
+        final var values = valueRepository.findAll(byKey(key));
 
         if (values.isEmpty()) {
             // the fact that we can delay this check (foreign key constraint) should not be known to this layer...
@@ -67,15 +67,15 @@ class ReadValue {
     }
 
     Revisioned<Value> read(final String key, final Map<Dimension, JsonNode> filter) {
-        final Value value = readOnly(key, filter);
-        final Revision revision = readLatestRevision(key, filter);
+        final var value = readOnly(key, filter);
+        final var revision = readLatestRevision(key, filter);
         return Revisioned.create(value, revision);
     }
 
     // TODO this is rather inefficient
     private Revision readLatestRevision(final String key, final Map<Dimension, JsonNode> dimensions) {
-        final Pagination<Long> pagination = Cursor.<Long, Void>initial().with(null, 1).paginate();
-        final Revision revision = revisionService.readPageRevisions(key, pagination).getHead();
+        final var pagination = Cursor.<Long, Void>initial().with(null, 1).paginate();
+        final var revision = revisionService.readPageRevisions(key, pagination).getHead();
         return revisionService.readAt(key, dimensions, revision.getId()).getRevision();
     }
 

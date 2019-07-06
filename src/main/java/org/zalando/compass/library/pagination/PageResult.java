@@ -21,7 +21,7 @@ public interface PageResult<T> {
     }
 
     default T getTail() {
-        final List<T> elements = getElements();
+        final var elements = getElements();
         return elements.get(elements.size() - 1);
     }
 

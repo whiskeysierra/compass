@@ -28,7 +28,7 @@ class ReadValueRevision {
     private final RevisionService service;
 
     public PageResult<Revision> readPageRevisions(final String key, final Pagination<Long> query) {
-        final List<Revision> revisions = repository.findPageRevisions(key, query.increment()).stream()
+        final var revisions = repository.findPageRevisions(key, query.increment()).stream()
                 .map(Revision::withTypeUpdate)
                 .collect(toList());
 
@@ -36,10 +36,10 @@ class ReadValueRevision {
     }
 
     public PageRevision<ValueRevision> readPageAt(final String key, final Map<Dimension, JsonNode> filter, final long revisionId) {
-        final Revision revision = service.read(revisionId)
+        final var revision = service.read(revisionId)
                 .withTypeUpdate();
 
-        final ValueRevisions values = repository.findPage(key, revisionId);
+        final var values = repository.findPage(key, revisionId);
 
         if (filter.isEmpty()) {
             // special case, just for reading many values
@@ -51,7 +51,7 @@ class ReadValueRevision {
 
     public PageResult<Revision> readRevisions(final String key, @Nullable final Map<Dimension, JsonNode> dimensions,
             final Pagination<Long> query) {
-        final List<Revision> revisions = repository.findRevisions(key, dimensions, query.increment());
+        final var revisions = repository.findRevisions(key, dimensions, query.increment());
         return query.paginate(revisions);
     }
 

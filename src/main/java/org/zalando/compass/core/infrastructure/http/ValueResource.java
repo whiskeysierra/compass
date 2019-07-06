@@ -70,13 +70,13 @@ class ValueResource {
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final ValueCollectionRepresentation representation) {
 
-        final List<ValueRepresentation> representations = representation.getValues();
+        final var representations = representation.getValues();
 
-        final Stream<ValueRepresentation> withDimensions = representations.stream()
+        final var withDimensions = representations.stream()
                 .map(value -> value.withDimensions(firstNonNull(value.getDimensions(), ImmutableMap.of())));
-        final List<Value> values = mapWithIndex(withDimensions, this::toValue).collect(toList());
+        final var values = mapWithIndex(withDimensions, this::toValue).collect(toList());
 
-        final boolean created = createOrReplace(key, values, comment, ifNoneMatch);
+        final var created = createOrReplace(key, values, comment, ifNoneMatch);
 
         // TODO share logic via private method
         return ResponseEntity.status(created ? CREATED : OK)
@@ -115,9 +115,9 @@ class ValueResource {
             throw new BadArgumentException(e);
         }
 
-        final Value value = new Value(dimensions, null, body.getValue());
+        final var value = new Value(dimensions, null, body.getValue());
 
-        final boolean created = createOrReplace(key, value, comment, ifNoneMatch);
+        final var created = createOrReplace(key, value, comment, ifNoneMatch);
 
         return ResponseEntity
                 .status(created ? CREATED : OK)
@@ -140,7 +140,7 @@ class ValueResource {
     public ResponseEntity<ValueCollectionRepresentation> readAll(@PathVariable final String key,
             @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = querying.read(query);
-        final Revisioned<List<Value>> revisioned = service.readPage(key, transform(filter, dimensionService::readOnly));
+        final var revisioned = service.readPage(key, transform(filter, dimensionService::readOnly));
 
         return Conditional.build(revisioned, page ->
                 new ValueCollectionRepresentation(page.stream()
@@ -151,8 +151,8 @@ class ValueResource {
     public ResponseEntity<ValueRepresentation> read(@PathVariable final String key,
             @RequestParam final Map<String, String> query) {
         final Map<String, JsonNode> filter = querying.read(query);
-        final Revisioned<Value> revisioned = service.read(key, transform(filter, dimensionService::readOnly));
-        final Value value = revisioned.getEntity();
+        final var revisioned = service.read(key, transform(filter, dimensionService::readOnly));
+        final var value = revisioned.getEntity();
 
         return Conditional.builder(revisioned)
                 .header(HttpHeaders.CONTENT_LOCATION, canonicalUrl(key, value).toASCIIString())
@@ -165,11 +165,11 @@ class ValueResource {
             @RequestBody final JsonPatch patch) throws IOException, JsonPatchException {
 
         // TODO share logic via private method
-        final ValueCollectionRepresentation before = readAll(key, emptyMap()).getBody();
-        final JsonNode node = mapper.valueToTree(before);
+        final var before = readAll(key, emptyMap()).getBody();
+        final var node = mapper.valueToTree(before);
 
-        final JsonNode patched = patch.apply(node);
-        final ValueCollectionRepresentation after = mapper.treeToValue(patched, ValueCollectionRepresentation.class);
+        final var patched = patch.apply(node);
+        final var after = mapper.treeToValue(patched, ValueCollectionRepresentation.class);
 
         return replaceAll(key, null, comment, after);
     }
@@ -197,12 +197,12 @@ class ValueResource {
             final ThrowingUnaryOperator<JsonNode, JsonPatchException> patch) throws IOException, JsonPatchException {
         final Map<String, JsonNode> filter = querying.read(query);
 
-        final ValueRepresentation before = ValueRepresentation.valueOf(
+        final var before = ValueRepresentation.valueOf(
                 service.readOnly(key, transform(filter, dimensionService::readOnly)));
-        final JsonNode node = mapper.valueToTree(before);
+        final var node = mapper.valueToTree(before);
 
-        final JsonNode patched = patch.tryApply(node);
-        final ValueRepresentation after = mapper.treeToValue(patched, ValueRepresentation.class);
+        final var patched = patch.tryApply(node);
+        final var after = mapper.treeToValue(patched, ValueRepresentation.class);
 
         return createOrReplace(key, query, null, comment, after);
     }

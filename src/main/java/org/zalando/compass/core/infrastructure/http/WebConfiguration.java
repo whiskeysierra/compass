@@ -57,7 +57,7 @@ class WebConfiguration implements WebMvcConfigurer {
 
     @Bean
     public MappingJackson2HttpMessageConverter jsonConverter(final ObjectMapper mapper) {
-        final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
+        final var converter = new MappingJackson2HttpMessageConverter(mapper);
         converter.setDefaultCharset(null);
         return converter;
     }

@@ -115,7 +115,7 @@ class JooqValueRevisionRepository implements ValueRevisionRepository {
     }
 
     private ValueRevisions find(final String key, final long revisionId, final Condition condition) {
-        final Map<Record, List<ValueDimensionRevisionRecord>> map = db
+        final var map = db
                 .select(VALUE_REVISION.fields())
                 .select(REVISION.fields())
                 .select(VALUE_DIMENSION_REVISION.fields())
@@ -138,10 +138,10 @@ class JooqValueRevisionRepository implements ValueRevisionRepository {
 
         return map.entrySet().stream()
                 .map(entry -> {
-                    final ValueRevisionRecord value = entry.getKey().into(ValueRevisionRecord.class);
-                    final Revision revision = mapRevisionWithType(entry.getKey());
+                    final var value = entry.getKey().into(ValueRevisionRecord.class);
+                    final var revision = mapRevisionWithType(entry.getKey());
 
-                    final ImmutableMap<String, JsonNode> dimensions = leftOuterJoin(
+                    final var dimensions = leftOuterJoin(
                             entry.getValue(),
                             ValueDimensionRevisionRecord::getDimensionId,
                             ValueDimensionRevisionRecord::getDimensionValue);

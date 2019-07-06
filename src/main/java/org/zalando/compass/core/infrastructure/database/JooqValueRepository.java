@@ -67,7 +67,7 @@ class JooqValueRepository implements ValueRepository, ValueLockRepository {
                     .fetchOne();
         }
 
-        final Long id = record.getId();
+        final var id = record.getId();
 
         final List<Query> queries = value.getDimensions().entrySet().stream()
                 .map(e -> db.insertInto(VALUE_DIMENSION)
@@ -142,8 +142,8 @@ class JooqValueRepository implements ValueRepository, ValueLockRepository {
     }
 
     private Value map(final Entry<ValueRecord, List<ValueDimensionRecord>> entry) {
-        final ValueRecord row = entry.getKey();
-        final ImmutableMap<String, JsonNode> dimensions = leftOuterJoin(entry.getValue(),
+        final var row = entry.getKey();
+        final var dimensions = leftOuterJoin(entry.getValue(),
                 ValueDimensionRecord::getDimensionId,
                 ValueDimensionRecord::getDimensionValue);
 

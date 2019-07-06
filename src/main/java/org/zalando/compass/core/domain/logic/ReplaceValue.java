@@ -40,16 +40,16 @@ class ReplaceValue {
     private final EventPublisher publisher;
 
     boolean replace(final String keyId, final Value value, @Nullable final String comment) {
-        final ValueLock lock = lock(keyId, value);
-        final Key key = lock.getKey();
-        @Nullable final Value before = lock.getValue();
+        final var lock = lock(keyId, value);
+        final var key = lock.getKey();
+        @Nullable final var before = lock.getValue();
 
         if (before == null) {
-            final Value created = create(key, value);
+            final var created = create(key, value);
             publisher.publish(new ValueReplaced(key, null, created, comment));
             return true;
         } else {
-            final Value after = value.withIndex(before.getIndex());
+            final var after = value.withIndex(before.getIndex());
             update(key, after);
             publisher.publish(new ValueReplaced(key, before, after, comment));
             return false;
@@ -57,16 +57,16 @@ class ReplaceValue {
     }
 
     void create(final String keyId, final Value value, @Nullable final String comment) {
-        final ValueLock lock = lock(keyId, value);
+        final var lock = lock(keyId, value);
 
-        final Key key = lock.getKey();
-        @Nullable final Value current = lock.getValue();
+        final var key = lock.getKey();
+        @Nullable final var current = lock.getValue();
 
         if (current == null) {
-            final Value created = create(key, value);
+            final var created = create(key, value);
             publisher.publish(new ValueCreated(key, created, comment));
         } else {
-            final String dimensions = lock.getDimensions().stream()
+            final var dimensions = lock.getDimensions().stream()
                     .map(Dimension::getId)
                     .collect(joining(", "));
 
@@ -78,11 +78,11 @@ class ReplaceValue {
     boolean replace(final String keyId, final List<Value> values, @Nullable final String comment) {
         log.info("Replacing values of key [{}]", keyId);
 
-        final ValuesLock lock = lock(keyId, values);
+        final var lock = lock(keyId, values);
 
-        final Key key = lock.getKey();
-        final List<Value> before = lock.getValues();
-        final List<Value> after = preserveIndex(values);
+        final var key = lock.getKey();
+        final var before = lock.getValues();
+        final var after = preserveIndex(values);
 
         return replace(key, before, after, comment);
     }
@@ -90,11 +90,11 @@ class ReplaceValue {
     boolean create(final String keyId, final List<Value> values, @Nullable final String comment) {
         log.info("Creating values of key [{}]", keyId);
 
-        final ValuesLock lock = lock(keyId, values);
+        final var lock = lock(keyId, values);
 
-        final Key key = lock.getKey();
-        final List<Value> before = lock.getValues();
-        final List<Value> after = preserveIndex(values);
+        final var key = lock.getKey();
+        final var before = lock.getValues();
+        final var after = preserveIndex(values);
 
         if (before.isEmpty()) {
             return replace(key, before, after, comment);
@@ -104,7 +104,7 @@ class ReplaceValue {
     }
 
     private ValueLock lock(final String key, final Value value) {
-        final ValueLock lock = locking.lock(key, value.getDimensions());
+        final var lock = locking.lock(key, value.getDimensions());
 
         validator.check(lock.getDimensions(), value);
         validator.check(lock.getKey(), value);
@@ -113,7 +113,7 @@ class ReplaceValue {
     }
 
     private ValuesLock lock(final String key, final List<Value> values) {
-        final ValuesLock lock = locking.lock(key, values);
+        final var lock = locking.lock(key, values);
 
         validator.check(lock.getDimensions(), values);
         validator.check(lock.getKey(), values);
@@ -124,13 +124,13 @@ class ReplaceValue {
     private boolean replace(final Key key, final List<Value> before, final List<Value> after,
             @Nullable final String comment) {
 
-        final MapDifference<ImmutableMap<Dimension, JsonNode>, Value> diff = difference(
+        final var diff = difference(
                 uniqueIndex(before, Value::getDimensions),
                 uniqueIndex(after, Value::getDimensions));
 
-        final Collection<Value> creates = diff.entriesOnlyOnRight().values();
-        final Collection<ValueDifference<Value>> updates = diff.entriesDiffering().values();
-        final Collection<Value> deletes = diff.entriesOnlyOnLeft().values();
+        final var creates = diff.entriesOnlyOnRight().values();
+        final var updates = diff.entriesDiffering().values();
+        final var deletes = diff.entriesOnlyOnLeft().values();
 
         final Collection<Value> created = creates.stream()
                 .map(value -> create(key, value))
@@ -153,7 +153,7 @@ class ReplaceValue {
     }
 
     private Value create(final Key key, final Value value) {
-        final Value created = repository.create(key.getId(), value);
+        final var created = repository.create(key.getId(), value);
         log.info("Created value for key [{}]: [{}]", key.getId(), created);
         return created;
     }

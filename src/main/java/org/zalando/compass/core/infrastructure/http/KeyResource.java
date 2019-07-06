@@ -54,10 +54,10 @@ class KeyResource {
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment,
             @RequestBody final KeyRepresentation body) {
 
-        final Key key = new Key(id, body.getSchema(), body.getDescription());
+        final var key = new Key(id, body.getSchema(), body.getDescription());
 
-        final boolean created = createOrReplace(key, comment, ifNoneMatch);
-        final KeyRepresentation representation = KeyRepresentation.valueOf(key);
+        final var created = createOrReplace(key, comment, ifNoneMatch);
+        final var representation = KeyRepresentation.valueOf(key);
 
         return ResponseEntity
                 .status(created ? CREATED : OK)
@@ -81,8 +81,8 @@ class KeyResource {
             @RequestParam(required = false, defaultValue = "25") final Integer limit,
             @RequestParam(name = "cursor", required = false, defaultValue = "") final Cursor<String, String> original) {
 
-        final Cursor<String, String> cursor = original.with(q, limit);
-        final PageResult<Key> page = service.readPage(cursor.getQuery(), cursor.paginate());
+        final var cursor = original.with(q, limit);
+        final var page = service.readPage(cursor.getQuery(), cursor.paginate());
 
         return ResponseEntity.ok(page.render(KeyCollectionRepresentation::new,
                 cursor, Key::getId,
@@ -92,7 +92,7 @@ class KeyResource {
 
     @RequestMapping(method = GET, path = "/keys/{id}")
     public ResponseEntity<KeyRepresentation> get(@PathVariable final String id) {
-        final Revisioned<Key> revisioned = service.read(id);
+        final var revisioned = service.read(id);
         return Conditional.build(revisioned, KeyRepresentation::valueOf);
     }
 
@@ -116,11 +116,11 @@ class KeyResource {
 
     private ResponseEntity<KeyRepresentation> patch(final String id, final @Nullable String comment,
             final ThrowingUnaryOperator<JsonNode, JsonPatchException> patch) throws IOException, JsonPatchException {
-        final KeyRepresentation before = KeyRepresentation.valueOf(service.readOnly(id));
-        final JsonNode node = mapper.valueToTree(before);
+        final var before = KeyRepresentation.valueOf(service.readOnly(id));
+        final var node = mapper.valueToTree(before);
 
-        final JsonNode patched = patch.tryApply(node);
-        final KeyRepresentation after = mapper.treeToValue(patched, KeyRepresentation.class);
+        final var patched = patch.tryApply(node);
+        final var after = mapper.treeToValue(patched, KeyRepresentation.class);
 
         // TODO shouldn't we delegate to a private method here?
         return createOrReplace(id, null, comment, after);
@@ -130,7 +130,7 @@ class KeyResource {
     @ResponseStatus(NO_CONTENT)
     public void delete(@PathVariable final String id,
             @Nullable @RequestHeader(name = "Comment", required = false) final String comment) {
-        final Key key = service.readOnly(id);
+        final var key = service.readOnly(id);
         service.delete(key, comment);
     }
 

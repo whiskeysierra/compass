@@ -34,7 +34,7 @@ public final class JsonMutator {
             return withAt(pointer, value);
         }
 
-        final JsonNode node = original.deepCopy();
+        final var node = original.deepCopy();
 
         if (value.isMissingNode()) {
             return node;
@@ -44,20 +44,20 @@ public final class JsonMutator {
             return value.deepCopy();
         }
 
-        final JsonNode parent = createAncestors(node, pointer);
+        final var parent = createAncestors(node, pointer);
         set(parent, pointer.last(), value);
         return node;
     }
 
     private static JsonNode createAncestors(final JsonNode node, final JsonPointer pointer) {
-        final JsonPointer head = pointer.head();
+        final var head = pointer.head();
 
-        final boolean parentIsAbsent = node.at(head).isMissingNode();
+        final var parentIsAbsent = node.at(head).isMissingNode();
 
         if (parentIsAbsent) {
-            final JsonNode grandParent = createAncestors(node, head);
-            final JsonPointer me = pointer.last();
-            final JsonNode parent = createParentOf(me);
+            final var grandParent = createAncestors(node, head);
+            final var me = pointer.last();
+            final var parent = createParentOf(me);
 
             set(grandParent, head.last(), parent);
         }
@@ -71,8 +71,8 @@ public final class JsonMutator {
 
     private static void set(final JsonNode node, final JsonPointer pointer, final JsonNode value) {
         if (pointer.mayMatchElement()) {
-            final ArrayNode array = ArrayNode.class.cast(node);
-            final int index = pointer.getMatchingIndex();
+            final var array = ArrayNode.class.cast(node);
+            final var index = pointer.getMatchingIndex();
             if (array.has(index)) {
                 array.set(index, value);
             } else if (index > array.size()) {

@@ -55,8 +55,8 @@ public class TableMapper {
 
     private ThrowingBiFunction<JsonNode, String, JsonNode, IOException> withCell(final Map<String, String> row) {
         return (node, header) -> {
-            final String cell = row.get(header);
-            final JsonNode value = cell.isEmpty() ? MissingNode.getInstance() : mapper.readTree(cell);
+            final var cell = row.get(header);
+            final var value = cell.isEmpty() ? MissingNode.getInstance() : mapper.readTree(cell);
 
             // treats header as JSON Pointer
             return withAt(node, header, value);

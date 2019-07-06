@@ -29,8 +29,8 @@ public final class RevisionModule {
             final DimensionRevisionRepository repository,
             final RevisionService service) {
 
-        final CreateDimensionRevision create = new CreateDimensionRevision(repository);
-        final ReadDimensionRevision read = new ReadDimensionRevision(repository, service);
+        final var create = new CreateDimensionRevision(repository);
+        final var read = new ReadDimensionRevision(repository, service);
 
         return new DefaultDimensionRevisionService(create, read);
     }
@@ -43,8 +43,8 @@ public final class RevisionModule {
             final KeyRevisionRepository repository,
             final RevisionService service) {
 
-        final CreateKeyRevision create = new CreateKeyRevision(repository);
-        final ReadKeyRevision read = new ReadKeyRevision(repository, service);
+        final var create = new CreateKeyRevision(repository);
+        final var read = new ReadKeyRevision(repository, service);
 
         return new DefaultKeyRevisionService(create, read);
     }
@@ -57,8 +57,8 @@ public final class RevisionModule {
             final ValueRevisionRepository repository,
             final RevisionService service) {
 
-        final CreateValueRevision create = new CreateValueRevision(repository);
-        final ReadValueRevision read = new ReadValueRevision(repository, service);
+        final var create = new CreateValueRevision(repository);
+        final var read = new ReadValueRevision(repository, service);
 
         return new DefaultValueRevisionService(create, read);
     }

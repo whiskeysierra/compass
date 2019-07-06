@@ -40,7 +40,7 @@ public final class Tables {
             final Function<? super T, ? extends V> valueFunction) {
 
         if (result.size() == 1) {
-            final T record = result.get(0);
+            final var record = result.get(0);
 
             // empty left join
             if (keyFunction.apply(record) == null) {

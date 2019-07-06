@@ -24,8 +24,8 @@ class DeleteKey {
     private final EventPublisher publisher;
 
     void delete(final Key key, @Nullable final String comment) {
-        final KeyLock lock = locking.lock(key.getId());
-        final List<Value> values = lock.getValues();
+        final var lock = locking.lock(key.getId());
+        final var values = lock.getValues();
 
         deleteValues(key, values);
         deleteKey(key);

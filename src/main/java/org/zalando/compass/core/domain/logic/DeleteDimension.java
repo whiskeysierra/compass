@@ -23,7 +23,7 @@ class DeleteDimension {
     private final EventPublisher publisher;
 
     void delete(final Dimension dimension, @Nullable final String comment) {
-        final DimensionLock lock = locking.lock(dimension);
+        final var lock = locking.lock(dimension);
 
         checkArgument(lock.getValues().isEmpty(), "Dimension [%s] is still in use", dimension);
 

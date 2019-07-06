@@ -24,7 +24,7 @@ class ReadKey {
     private final KeyRevisionService revisionService;
 
     PageResult<Key> readPage(@Nullable final String term, final Pagination<String> query) {
-        final List<Key> keys = repository.findAll(term, query.increment());
+        final var keys = repository.findAll(term, query.increment());
         return query.paginate(keys);
     }
 
@@ -33,14 +33,14 @@ class ReadKey {
     }
 
     Revisioned<Key> read(final String id) {
-        final Key key = readOnly(id);
-        final Revision revision = readLatestRevision(id);
+        final var key = readOnly(id);
+        final var revision = readLatestRevision(id);
         return Revisioned.create(key, revision);
     }
 
     private Revision readLatestRevision(final String id) {
         // TODO don't use pagination for this, we're fetching one to much
-        final Pagination<Long> pagination = Cursor.<Long, Void>initial().with(null, 1).paginate();
+        final var pagination = Cursor.<Long, Void>initial().with(null, 1).paginate();
         return revisionService.readRevisions(id, pagination).getHead();
     }
 

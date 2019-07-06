@@ -116,7 +116,7 @@ public class ValuesTest {
 
     @Test
     public void shouldMatchWithUnknownDimensions() {
-        final Dimension foo = new Dimension("foo", stringSchema(), new Equality(), "");
+        final var foo = new Dimension("foo", stringSchema(), new Equality(), "");
         assertThat(values.select(of(foo, text("bar"))), is(singletonList(new Value(of(), text("")))));
     }
 
@@ -127,7 +127,7 @@ public class ValuesTest {
 
     @Test
     public void shouldMatchWithPartiallyUnknownDimensions() {
-        final Dimension foo = new Dimension("foo", stringSchema(), new Equality(), "");
+        final var foo = new Dimension("foo", stringSchema(), new Equality(), "");
         assertThat(values.select(of(country, text("DE"), foo, text("bar"))), is(asList(
                 new Value(of(country, text("DE")), text("")),
                 new Value(of(), text("")))));

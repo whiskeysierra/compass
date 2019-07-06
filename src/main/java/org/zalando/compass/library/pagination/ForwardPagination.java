@@ -40,7 +40,7 @@ final class ForwardPagination<P> implements Pagination<P> {
     }
 
     private <T> PageResult<T> getPageResult(final List<T> elements) {
-        final int size = elements.size();
+        final var size = elements.size();
 
         if (size > limit) {
             return createIfNotEmpty(elements.subList(0, limit), true);

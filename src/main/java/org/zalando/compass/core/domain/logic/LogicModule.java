@@ -19,7 +19,7 @@ final class LogicModule {
             final DimensionRevisionService dimensionRevisionService,
             final EventPublisher publisher) {
 
-        final InMemoryDimensionRepository repository = new InMemoryDimensionRepository();
+        final var repository = new InMemoryDimensionRepository();
 
         return dimensionService(
                 validator,
@@ -38,21 +38,21 @@ final class LogicModule {
             final DimensionRevisionService dimensionRevisionService,
             final EventPublisher publisher) {
 
-        final DimensionLocking locking = new DimensionLocking(lockRepository, valueLockRepository);
+        final var locking = new DimensionLocking(lockRepository, valueLockRepository);
 
-        final ReplaceDimension replace = new ReplaceDimension(
+        final var replace = new ReplaceDimension(
                 locking,
                 validator,
                 repository,
                 publisher
         );
 
-        final ReadDimension read = new ReadDimension(
+        final var read = new ReadDimension(
                 repository,
                 dimensionRevisionService
         );
 
-        final DeleteDimension delete = new DeleteDimension(
+        final var delete = new DeleteDimension(
                 locking,
                 repository,
                 publisher
@@ -69,26 +69,28 @@ final class LogicModule {
             final KeyRevisionService keyRevisionService,
             final EventPublisher publisher) {
 
-        final KeyLocking locking = new KeyLocking(lockRepository, valueLockRepository);
+        final var locking = new KeyLocking(lockRepository, valueLockRepository);
 
-        final ReplaceKey replace = new ReplaceKey(
+        final var replace = new ReplaceKey(
                 locking,
                 validator,
                 repository,
                 publisher
         );
 
-        final ReadKey read = new ReadKey(
+        final var read = new ReadKey(
                 repository,
                 keyRevisionService
         );
 
-        final DeleteKey delete = new DeleteKey(
+        final var delete = new DeleteKey(
                 locking,
                 repository,
-                new DeleteValue(),
+                null, // TODO
                 publisher
         );
+
+        return new DefaultKeyService(replace, read, delete);
     }
 
 }

@@ -37,19 +37,19 @@ class ValueEventsAdapter {
 
     @EventListener
     public void onValueCreated(final ValueCreated event) {
-        final Key key = event.getKey();
-        final Value value = event.getValue();
-        final Revision revision = revisionService.create(event.getComment());
+        final var key = event.getKey();
+        final var value = event.getValue();
+        final var revision = revisionService.create(event.getComment());
 
         createRevision(key, value, revision, CREATE);
     }
 
     @EventListener
     public void onValueReplaced(final ValueReplaced event) {
-        final Key key = event.getKey();
-        @Nullable final Value before = event.getBefore();
-        final Value after = event.getAfter();
-        final Revision revision = revisionService.create(event.getComment());
+        final var key = event.getKey();
+        @Nullable final var before = event.getBefore();
+        final var after = event.getAfter();
+        final var revision = revisionService.create(event.getComment());
 
         if (before == null) {
             createRevision(key, after, revision, CREATE);
@@ -60,11 +60,11 @@ class ValueEventsAdapter {
 
     @EventListener
     public void onValuesReplaced(final ValuesReplaced event) {
-        final Key key = event.getKey();
-        final Collection<Value> creates = event.getCreates();
-        final Collection<ValueDifference<Value>> updates = event.getUpdates();
-        final Collection<Value> deletes = event.getDeletes();
-        final Revision revision = revisionService.create(event.getComment());
+        final var key = event.getKey();
+        final var creates = event.getCreates();
+        final var updates = event.getUpdates();
+        final var deletes = event.getDeletes();
+        final var revision = revisionService.create(event.getComment());
 
         creates.forEach(value ->
                 createRevision(key, value, revision, CREATE));
@@ -78,8 +78,8 @@ class ValueEventsAdapter {
 
     // TOOD there needs to be a cleaner way
     void onKeyDeleted(final Revision revision, final KeyDeleted event) {
-        final Key key = event.getKey();
-        final List<Value> values = event.getValues();
+        final var key = event.getKey();
+        final var values = event.getValues();
 
         values.forEach(value ->
                 createRevision(key, value, revision, DELETE));
@@ -87,15 +87,15 @@ class ValueEventsAdapter {
 
     @EventListener
     public void onValueDeleted(final ValueDeleted event) {
-        final Key key = event.getKey();
-        final Value value = event.getValue();
-        final Revision revision = revisionService.create(event.getComment());
+        final var key = event.getKey();
+        final var value = event.getValue();
+        final var revision = revisionService.create(event.getComment());
 
         createRevision(key, value, revision, DELETE);
     }
 
     private void createRevision(final Key key, final Value value, final Revision revision, final RevisionType type) {
-        final ValueRevision valueRevision = new ValueRevision(
+        final var valueRevision = new ValueRevision(
                 value.getDimensions(),
                 value.getIndex(),
                 revision.withType(type),

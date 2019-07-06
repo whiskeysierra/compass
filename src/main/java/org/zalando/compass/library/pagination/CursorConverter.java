@@ -26,8 +26,8 @@ final class CursorConverter implements GenericConverter {
             return null;
         }
 
-        final TypeToken<?> pivot = TypeToken.of(targetType.getResolvableType().getGeneric(0).getType());
-        final TypeToken<?> query = TypeToken.of(targetType.getResolvableType().getGeneric(1).getType());
+        final var pivot = TypeToken.of(targetType.getResolvableType().getGeneric(0).getType());
+        final var query = TypeToken.of(targetType.getResolvableType().getGeneric(1).getType());
 
         return Cursor.valueOf(source.toString(), pivot, query);
     }

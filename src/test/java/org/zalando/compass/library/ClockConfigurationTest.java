@@ -12,7 +12,7 @@ public class ClockConfigurationTest {
 
     @Test
     public void shouldUseSystemClock() {
-        final Clock clock = new ClockConfiguration().clock();
+        final var clock = new ClockConfiguration().clock();
         assertThat(clock.getZone(), is(ZoneOffset.UTC));
     }
 

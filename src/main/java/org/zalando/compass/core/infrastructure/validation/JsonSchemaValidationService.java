@@ -4,10 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.zalando.compass.core.domain.spi.validation.ValidationService;
 import org.zalando.compass.core.domain.model.Dimension;
 import org.zalando.compass.core.domain.model.Key;
 import org.zalando.compass.core.domain.model.Value;
+import org.zalando.compass.core.domain.spi.validation.ValidationService;
+import org.zalando.compass.library.Maps;
 import org.zalando.problem.violations.ConstraintViolationProblem;
 import org.zalando.problem.violations.Violation;
 
@@ -54,13 +55,14 @@ class JsonSchemaValidationService implements ValidationService {
     }
 
     private List<Violation> validate(final Dimension dimension, final Value value) {
-        @Nullable final JsonNode node = value.getDimensions().get(dimension);
+        final var dimensions = Maps.transform(value.getDimensions(), Dimension::getId);
+        @Nullable final var node = dimensions.get(dimension.getId());
 
         if (node == null) {
             return emptyList();
         }
 
-        final JsonNode schema = dimension.getSchema();
+        final var schema = dimension.getSchema();
         return validator.validate(schema, node);
     }
 
@@ -77,8 +79,8 @@ class JsonSchemaValidationService implements ValidationService {
     }
 
     private List<Violation> validate(final Key key, final Value value) {
-        final JsonNode schema = key.getSchema();
-        final JsonNode node = value.getValue();
+        final var schema = key.getSchema();
+        final var node = value.getValue();
         return validator.validate(schema, node);
     }
 

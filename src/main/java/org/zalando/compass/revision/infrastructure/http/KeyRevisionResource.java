@@ -34,9 +34,9 @@ class KeyRevisionResource {
             @RequestParam(required = false, defaultValue = "25") final Integer limit,
             @RequestParam(name = "cursor", required = false, defaultValue = "") final Cursor<Long, Void> original) {
 
-        final Cursor<Long, Void> cursor = original.with(null, limit);
+        final var cursor = original.with(null, limit);
 
-        final PageResult<Revision> page = service.readPageRevisions(cursor.paginate());
+        final var page = service.readPageRevisions(cursor.paginate());
 
         return paginate(page, cursor,
                 c -> link(methodOn(KeyRevisionResource.class).getRevisions(null, c)),
@@ -49,10 +49,10 @@ class KeyRevisionResource {
             @RequestParam(required = false, defaultValue = "25") final Integer limit,
             @RequestParam(name = "cursor", required = false, defaultValue = "") final Cursor<String, Void> original) {
 
-        final Cursor<String, Void> cursor = original.with(null, limit);
+        final var cursor = original.with(null, limit);
 
-        final PageRevision<Key> page = service.readPageAt(revision, cursor.paginate());
-        final RevisionRepresentation representation = RevisionRepresentation.valueOf(page.getRevision());
+        final var page = service.readPageAt(revision, cursor.paginate());
+        final var representation = RevisionRepresentation.valueOf(page.getRevision());
 
         return ResponseEntity.ok(page.render(
                 (next, prev, elements) ->
@@ -69,8 +69,8 @@ class KeyRevisionResource {
             @RequestParam(required = false, defaultValue = "25") final Integer limit,
             @RequestParam(name = "cursor", required = false, defaultValue = "") final Cursor<Long, Void> original) {
 
-        final Cursor<Long, Void> cursor = original.with(null, limit);
-        final PageResult<Revision> page = service.readRevisions(id, cursor.paginate());
+        final var cursor = original.with(null, limit);
+        final var page = service.readRevisions(id, cursor.paginate());
 
         return paginate(page, cursor,
                 c -> link(methodOn(KeyRevisionResource.class).getRevisions(id, null, c)),
@@ -82,7 +82,7 @@ class KeyRevisionResource {
             @PathVariable final String id,
             @PathVariable final long revision) {
         
-        final KeyRevision key = service.readAt(id, revision);
+        final var key = service.readAt(id, revision);
         return ResponseEntity.ok(KeyRevisionRepresentation.valueOf(key));
     }
 

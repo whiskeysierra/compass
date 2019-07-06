@@ -21,9 +21,9 @@ final class Conditional {
     }
 
     static <T> BodyBuilder builder(final Revisioned<T> revisioned) {
-        final BodyBuilder builder = ResponseEntity.ok();
+        final var builder = ResponseEntity.ok();
 
-        @Nullable final Revision revision = revisioned.getRevision();
+        @Nullable final var revision = revisioned.getRevision();
 
         if (revision == null) {
             return builder;

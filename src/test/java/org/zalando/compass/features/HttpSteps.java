@@ -65,13 +65,13 @@ public class HttpSteps {
     public void responds(final HttpMethod method, final String uri, @Nullable final String headerName,
             @Nullable final String headerValue, final int statusCode, final String reasonPhrase) {
 
-        final Requester requester = http.execute(method, uri);
+        final var requester = http.execute(method, uri);
 
         if (headerName != null && headerValue != null) {
             requester.header(headerName, headerValue);
         }
 
-        final ResponseEntity<JsonNode> response = requestAsync(requester, null).join();
+        final var response = requestAsync(requester, null).join();
         verifyStatus(response, statusCode, reasonPhrase);
     }
 
@@ -79,10 +79,10 @@ public class HttpSteps {
     public void respondsWithHeaders(final HttpMethod method, final String uri, final int statusCode,
             final String reasonPhrase, final Datatable expected) {
 
-        final ResponseEntity<JsonNode> response = requestAsync(method, uri).join();
+        final var response = requestAsync(method, uri).join();
         verifyStatus(response, statusCode, reasonPhrase);
 
-        final Datatable actual = render(response.getHeaders(), expected);
+        final var actual = render(response.getHeaders(), expected);
         assertThat(actual, matchesTable(expected));
     }
 
@@ -91,22 +91,22 @@ public class HttpSteps {
             final String reasonPhrase, @Nullable final String path, final Datatable expected)
             throws IOException {
 
-        final ResponseEntity<JsonNode> response = requestAsync(method, uri).join();
+        final var response = requestAsync(method, uri).join();
         verifyStatus(response, statusCode, reasonPhrase);
 
-        final Datatable actual = render(response, path, expected);
+        final var actual = render(response, path, expected);
         assertThat(actual, matchesTable(expected));
     }
 
     @Then("^\"([A-Z]+) ([^ ]*)\" responds \"(\\d+) ([^\"]+)\" with an empty array(?: at \"(.+)\")?$")
     public void respondsWithAnEmptyArrayAt(final HttpMethod method, final String uri,
             final int statusCode, final String reasonPhrase, @Nullable final String path) {
-        final ResponseEntity<JsonNode> response = requestAsync(method, uri).join();
+        final var response = requestAsync(method, uri).join();
 
         verifyStatus(response, statusCode, reasonPhrase);
 
-        final JsonNode body = response.getBody();
-        final JsonNode array = resolve(body, path);
+        final var body = response.getBody();
+        final var array = resolve(body, path);
 
         assertThat(array, is(not(instanceOf(MissingNode.class))));
         assertThat(array.size(), is(0));
@@ -134,9 +134,9 @@ public class HttpSteps {
             @Nullable final String path,
             @Nullable final String contentType, final Datatable table) throws IOException {
 
-        final JsonNode body = produceBody(type, path, table);
+        final var body = produceBody(type, path, table);
 
-        final Requester requester = http.execute(method, uri);
+        final var requester = http.execute(method, uri);
 
         if (headerName != null && headerValue != null) {
             requester.header(headerName, headerValue);
@@ -146,20 +146,20 @@ public class HttpSteps {
             requester.contentType(parseMediaType(contentType));
         }
 
-        final CompletableFuture<ResponseEntity<JsonNode>> future = requestAsync(requester, body);
+        final var future = requestAsync(requester, body);
 
         if (responds == null) {
             lastResponse = future;
         } else {
-            final ResponseEntity<JsonNode> response = future.join();
+            final var response = future.join();
             verifyStatus(response, Integer.parseInt(statusCode), reasonPhrase);
         }
     }
 
     private JsonNode produceBody(@Nullable final String type, @Nullable final String path, final Datatable table) throws IOException {
-        final List<JsonNode> nodes = mapper.map(table);
+        final var nodes = mapper.map(table);
 
-        final JsonNode array = "array".equals(type) ?
+        final var array = "array".equals(type) ?
                 new ArrayNode(instance).addAll(nodes) :
                 getOnlyElement(nodes);
 
@@ -174,10 +174,10 @@ public class HttpSteps {
     public void wasRespondedWithAnArrayAt(final int statusCode, final String reasonPhrase,
             @Nullable final String path, final Datatable expected) throws IOException {
 
-        final ResponseEntity<JsonNode> response = lastResponse.join();
+        final var response = lastResponse.join();
         verifyStatus(response, statusCode, reasonPhrase);
 
-        final Datatable actual = render(response, path, expected);
+        final var actual = render(response, path, expected);
         assertThat(actual, matchesTable(expected));
     }
 
@@ -185,10 +185,10 @@ public class HttpSteps {
     public void wasReturnedWithHeaders(final int statusCode, final String reasonPhrase,
             final Datatable expected) {
 
-        final ResponseEntity<JsonNode> response = lastResponse.join();
+        final var response = lastResponse.join();
         verifyStatus(response, statusCode, reasonPhrase);
 
-        final Datatable actual = render(response.getHeaders(), expected);
+        final var actual = render(response.getHeaders(), expected);
         assertThat(actual, matchesTable(expected));
     }
 
@@ -200,7 +200,7 @@ public class HttpSteps {
     @CheckReturnValue
     private CompletableFuture<ResponseEntity<JsonNode>> requestAsync(final Requester requester, final Object body) {
         final Capture<ResponseEntity<JsonNode>> capture = Capture.empty();
-        final Route route = call(responseEntityOf(JsonNode.class), capture);
+        final var route = call(responseEntityOf(JsonNode.class), capture);
 
         return requester
                 .body(body)
@@ -220,16 +220,16 @@ public class HttpSteps {
     }
 
     private Datatable render(final HttpHeaders headers, final Datatable expected) {
-        final List<Map<String, String>> rows = singletonList(headers.toSingleValueMap());
+        final var rows = singletonList(headers.toSingleValueMap());
         return Datatable.fromMaps(rows, expected.getHeader());
     }
 
     private Datatable render(final ResponseEntity<JsonNode> response, @Nullable final String path,
             final Datatable expected) throws IOException {
-        final JsonNode body = response.getBody();
-        final JsonNode node = resolve(body, path);
+        final var body = response.getBody();
+        final var node = resolve(body, path);
 
-        final List<JsonNode> nodes = node.isArray() ? ImmutableList.copyOf(node) : singletonList(node);
+        final var nodes = node.isArray() ? ImmutableList.copyOf(node) : singletonList(node);
         return mapper.map(nodes, expected.getHeader());
     }
 

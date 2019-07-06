@@ -54,7 +54,7 @@ final class BackwardPagination<P> implements Pagination<P> {
     }
 
     private <T> PageResult<T> getPageResult(final List<T> elements) {
-        final int size = elements.size();
+        final var size = elements.size();
 
         if (size > limit) {
             return createIfNotEmpty(elements.subList(1, size), true);

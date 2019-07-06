@@ -5,6 +5,5 @@ MAINTAINER willi.schoenborn@zalando.de
 EXPOSE 8080
 
 COPY target/application.jar /
-COPY target/scm-source.json /scm-source.json
 
 CMD java $(java-dynamic-memory-opts 70) -XX:-OmitStackTraceInFastThrow -jar /application.jar

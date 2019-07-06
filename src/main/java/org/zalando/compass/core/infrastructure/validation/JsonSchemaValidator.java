@@ -27,7 +27,7 @@ class JsonSchemaValidator {
 
     @SneakyThrows
     private List<Violation> validate(final JsonSchema schema, final JsonNode node) {
-        final ProcessingReport report = schema.validate(node);
+        final var report = schema.validate(node);
 
         return stream(report.spliterator(), false)
                 .sorted(comparing(ProcessingMessage::getMessage))
