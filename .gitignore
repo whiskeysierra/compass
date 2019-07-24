@@ -1,3 +1,7 @@
+### Clojure ###
+.cpcache
+.lein-failures
+
 ### IntelliJ ###
 *.iml
 .idea/
