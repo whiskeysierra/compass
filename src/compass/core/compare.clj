@@ -69,6 +69,7 @@
 
 (defmethod compare-to :mixed [left right]
   ; based on JSON type names (in order): array, boolean, number, object, string
+  ; TODO nil doesn't belong here
   (let [comparators (map compare-pred [nil? vector? boolean? number? map? string?])]
     ; compare in reverse because we need true before false
     (compare-chain comparators right left)))

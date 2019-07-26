@@ -3,45 +3,45 @@
             [clojure.string :refer [starts-with?]]))
 
 (defprotocol Relation
-  (evaluate [_ left right]))
+  (evaluate [_ configured requested]))
 
 (defrecord ^{:private true} LessThan [id title description]
   Relation
-  (evaluate [_ left right]
-    (less-than? left right)))
+  (evaluate [_ configured requested]
+    (less-than? requested configured)))
 
 (defrecord ^{:private true} LessThanOrEqual [id title description]
   Relation
-  (evaluate [_ left right]
-    (less-than-or-equal? left right)))
+  (evaluate [_ configured requested]
+    (less-than-or-equal? requested configured)))
 
 (defrecord ^{:private true} Equality [id title description]
   Relation
-  (evaluate [_ left right]
-    (equal? left right)))
+  (evaluate [_ configured requested]
+    (equal? configured requested)))
 
 (defrecord ^{:private true} GreaterThanOrEqual [id title description]
   Relation
-  (evaluate [_ left right]
-    (greater-than-or-equal? left right)))
+  (evaluate [_ configured requested]
+    (greater-than-or-equal? requested configured)))
 
 (defrecord ^{:private true} GreaterThan [id title description]
   Relation
-  (evaluate [_ left right]
-    (greater-than? left right)))
+  (evaluate [_ configured requested]
+    (greater-than? requested configured)))
 
 (defrecord ^{:private true} PrefixMatch [id title description]
   Relation
-  (evaluate [_ left right]
-    (starts-with? (str right) (str left))))
+  (evaluate [_ configured requested]
+    (starts-with? (str requested) (str configured))))
 
 ; TODO potential memory leak!
 (def ^{:private true} re-compile (memoize re-pattern))
 
 (defrecord ^{:private true} RegularExpression [id title description]
   Relation
-  (evaluate [_ left right]
-    (re-matches (re-compile left) right)))
+  (evaluate [_ configured requested]
+    (re-matches (re-compile configured) requested)))
 
 (defmulti rel identity)
 
