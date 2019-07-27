@@ -9,7 +9,7 @@
              {1 {:b #{1} :c #{2}} 2 {:a #{1 2}}}))))
   (testing "Intersection"
     (is (= (map-join {:a 1 :b 2 :c 3} {:b 2 :c 4 :d 4})
-           {:b #{2} :c #{3 4}})))
+           {:b [2] :c [3 4]})))
   (testing "Difference"
     (is (= (map-difference {} {})
            {:only-on-left {}

@@ -1,6 +1,5 @@
 (ns compass.core.maps
-  (:require [clojure.core :as core]
-            [flatland.ordered.set :refer [ordered-set]]))
+  (:require [clojure.core :as core]))
 
 (defn map-kv [f map]
   (into {} (core/map f map)))
@@ -25,7 +24,7 @@
   [left right]
   (let [left-inner-join  (select-keys left (keys right))
         right-inner-join (select-keys right (keys left))]
-    (merge-with ordered-set left-inner-join right-inner-join)))
+    (merge-with #(distinct %&) left-inner-join right-inner-join)))
 
 (defn map-difference
   "Compares two maps, returning a map with:
