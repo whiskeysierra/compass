@@ -15,10 +15,10 @@ cache:
 before_script:
   - sudo /etc/init.d/postgresql stop
 
-script: ./mvnw clean verify
+script: ./mvnw clean verify --no-transfer-progress
 
 after_success:
-  - ./mvnw coveralls:report
+  - ./mvnw coveralls:report --no-transfer-progress
 
 notifications:
   email:
