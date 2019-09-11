@@ -24,7 +24,7 @@
         <jackson.version>2.9.9</jackson.version>
         <jooq.version>3.11.12</jooq.version>
         <logbook.version>1.13.0</logbook.version>
-        <postgres.version>42.2.6</postgres.version>
+        <postgres.version>42.2.7</postgres.version>
         <problem.version>0.23.0</problem.version>
         <riptide.version>2.11.0</riptide.version>
         <stups-oauth2.version>1.0.15-GH-44</stups-oauth2.version>
