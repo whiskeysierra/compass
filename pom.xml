@@ -511,7 +511,7 @@
             <plugin>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
-                <version>6.0.3</version>
+                <version>6.0.6</version>
                 <configuration>
                     <url>jdbc:postgresql://localhost:2345/postgres</url>
                     <user>postgres</user>
