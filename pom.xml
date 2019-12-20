@@ -19,7 +19,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <start-class>org.zalando.compass.Application</start-class>
-        <spring-boot.version>2.1.8.RELEASE</spring-boot.version>
+        <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
         <spring-security.version>5.1.6.RELEASE</spring-security.version>
         <jackson.version>2.9.9</jackson.version>
         <jooq.version>3.11.12</jooq.version>
